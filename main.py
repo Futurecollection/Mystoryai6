@@ -1,33 +1,37 @@
 import os
 import replicate
 import requests
-import openai
+
+# <-- NEW LIBRARY SYNTAX
+from openai import OpenAI
 
 from flask import Flask, request, render_template_string, send_file
 
 app = Flask(__name__)
 
-# ========== 1) SET CREDENTIALS & GLOBALS ==========
-# Replicate API token stored as a Replit secret
+# ========== 1) SET UP CLIENTS & GLOBALS ==========
+
+# Replicate config
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 replicate.client.api_token = REPLICATE_API_TOKEN
 
-# OpenAI API key stored as a Replit secret
+# OpenAI config (new library style)
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-openai.api_key = OPENAI_API_KEY
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Where we'll store the downloaded image
 GENERATED_IMAGE_PATH = "output.jpg"
 
-# ========== 2) HTML TEMPLATE WITH TWO STEPS ==========
+# ========== 2) HTML TEMPLATE ==========
+
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Meta-Prompt Image Generator</title>
+    <title>Meta-Prompt Image Generator (Flux + GPT-4o-mini)</title>
   </head>
   <body>
-    <h1>Meta-Prompt Image Generator (Flux + GPT-4o-mini)</h1>
+    <h1>Meta-Prompt Image Generator</h1>
 
     <!-- Step 1: Gather user attributes to build an image prompt with GPT-4o-mini -->
     <form method="POST">
@@ -53,7 +57,6 @@ HTML_TEMPLATE = """
       <button type="submit" name="generate_prompt" value="true">Generate Prompt</button>
     </form>
 
-    <!-- Step 2: Show recommended prompt, let user edit and generate the final image -->
     {% if recommended_prompt %}
       <hr>
       <h2>Step 2: Review / Edit Prompt</h2>
@@ -61,7 +64,7 @@ HTML_TEMPLATE = """
         <label for="final_prompt">LLM-Generated Prompt:</label><br>
         <textarea id="final_prompt" name="final_prompt" rows="5" cols="60">{{ recommended_prompt }}</textarea><br><br>
 
-        <!-- carry the user attribute fields forward in hidden fields if needed -->
+        <!-- Hidden fields so we don't lose the user's initial form inputs -->
         <input type="hidden" name="age" value="{{ age }}">
         <input type="hidden" name="gender" value="{{ gender }}">
         <input type="hidden" name="ethnicity" value="{{ ethnicity }}">
@@ -69,7 +72,7 @@ HTML_TEMPLATE = """
         <input type="hidden" name="outfit" value="{{ outfit }}">
         <input type="hidden" name="background" value="{{ background }}">
 
-        <!-- Optional extra model settings -->
+        <!-- You can also expose more model controls if you like, e.g. aspect ratio -->
         <label for="aspect_ratio">Aspect Ratio:</label>
         <select id="aspect_ratio" name="aspect_ratio">
           <option value="1:1" selected>1:1</option>
@@ -91,42 +94,54 @@ HTML_TEMPLATE = """
 </html>
 """
 
-# ========== 3) HELPER: CALL GPT-4o-mini ==========
-def call_llm(age, gender, ethnicity, body_build, outfit, background):
-    """
-    Calls GPT-4o-mini to create a descriptive prompt from user attributes.
-    """
-    system_prompt = "You are a helpful AI that creates descriptive image prompts from user attributes."
-    user_content = f"""
-The user wants an image with these attributes:
-- Age: {age}
-- Gender: {gender}
-- Ethnicity: {ethnicity}
-- Body Build: {body_build}
-- Outfit/Style: {outfit}
-- Background/Activity: {background}
+# ========== 3) HELPER: CALL GPT-4o-mini (NEW CLIENT STYLE) ==========
 
-Please return a single text prompt describing an image suitable for an AI image generator.
-Keep it short and succinct, but descriptive.
-"""
+def generate_prompt(age, gender, ethnicity, body_build, outfit, background):
+    """
+    Calls GPT-4o-mini using the new openai client syntax:
+    from openai import OpenAI
+    client.chat.completions.create(...)
+    """
+    system_message = {
+        "role": "developer",  # or "system" in older style
+        "content": (
+            "You are a helpful AI that creates descriptive image prompts "
+            "from user attributes."
+        ),
+    }
+    user_message = {
+        "role": "user",
+        "content": (
+            f"The user wants an image with these attributes:\n"
+            f"- Age: {age}\n"
+            f"- Gender: {gender}\n"
+            f"- Ethnicity: {ethnicity}\n"
+            f"- Body Build: {body_build}\n"
+            f"- Outfit/Style: {outfit}\n"
+            f"- Background/Activity: {background}\n\n"
+            "Please return a single text prompt describing an image suitable "
+            "for an AI image generator. Keep it short but descriptive."
+        ),
+    }
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4o-mini",  # <--- using GPT-4o-mini
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content},
-        ],
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[system_message, user_message],
         temperature=0.7,
     )
-    return response["choices"][0]["message"]["content"].strip()
+
+    # The new client typically returns a structured response
+    # e.g. completion.choices[0].message["content"]
+    return response.choices[0].message["content"].strip()
 
 # ========== 4) FLASK ROUTE ==========
+
 @app.route("/", methods=["GET", "POST"])
 def meta_prompt_generator():
     image_generated = False
     recommended_prompt = None
 
-    # Retrieve user attributes (if any)
+    # Retrieve user attributes
     age = request.form.get("age", "")
     gender = request.form.get("gender", "")
     ethnicity = request.form.get("ethnicity", "")
@@ -136,14 +151,14 @@ def meta_prompt_generator():
 
     # Step 1: Generate recommended prompt from GPT-4o-mini
     if request.method == "POST" and "generate_prompt" in request.form:
-        recommended_prompt = call_llm(age, gender, ethnicity, body_build, outfit, background)
+        recommended_prompt = generate_prompt(age, gender, ethnicity, body_build, outfit, background)
 
-    # Step 2: User finalizes prompt and we generate the image using replicate
+    # Step 2: The user finalizes the prompt and we generate the image
     if request.method == "POST" and "generate_image" in request.form:
         final_prompt = request.form.get("final_prompt", "")
         aspect_ratio = request.form.get("aspect_ratio", "1:1")
 
-        # Construct replicate input
+        # Build the replicate input
         replicate_input = {
             "prompt": final_prompt,
             "aspect_ratio": aspect_ratio,
@@ -155,15 +170,14 @@ def meta_prompt_generator():
             input=replicate_input
         )
 
-        # Download the generated image to output.jpg
+        # Download the returned image
         r = requests.get(output_url)
         with open(GENERATED_IMAGE_PATH, "wb") as f:
             f.write(r.content)
 
         image_generated = True
-        recommended_prompt = final_prompt  # So we can still see it in the text field if you want
+        recommended_prompt = final_prompt  # So the user sees it if we re-render
 
-    # Render the template with the relevant variables
     return render_template_string(
         HTML_TEMPLATE,
         recommended_prompt=recommended_prompt,
@@ -176,11 +190,11 @@ def meta_prompt_generator():
         background=background,
     )
 
-# A simple route to serve the generated image
+# Serve the last-generated image
 @app.route("/view_image")
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
-# For Replit, run on 0.0.0.0:8080
+# For Replit
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
