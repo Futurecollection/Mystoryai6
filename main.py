@@ -132,7 +132,7 @@ def generate_prompt(age, gender, ethnicity, body_build, outfit, background):
 
     # The new client typically returns a structured response
     # e.g. completion.choices[0].message["content"]
-    return response.choices[0].message["content"].strip()
+    return response.choices[0].message.content.strip()
 
 # ========== 4) FLASK ROUTE ==========
 
