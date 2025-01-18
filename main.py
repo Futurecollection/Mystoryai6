@@ -7,7 +7,7 @@ import random
 from openai import OpenAI
 
 from flask import (
-    Flask, request, render_template_string,
+    Flask, request, render_template,
     session, redirect, url_for, send_file
 )
 from flask_session import Session
@@ -89,7 +89,7 @@ BASE_LAYOUT = """
 
 # -- Home Page --
 HOME_PAGE = """
-{% extends "base" %}
+{% extends "base.html" %}
 {% block content %}
   <h1 class="mb-4">Romance Roleplay Demo (Server-Side Session)</h1>
   <p>Welcome! This app uses GPT-4o-mini for story + prompts, Flux for images, and server-side sessions so we can handle long stories without cookie issues.</p>
@@ -99,7 +99,7 @@ HOME_PAGE = """
 
 # -- Personalization Page --
 PERSONALIZE_PAGE = """
-{% extends "base" %}
+{% extends "base.html" %}
 {% block content %}
   <h1>Personalize Your Adventure</h1>
   <form method="POST" class="row g-3">
@@ -202,7 +202,7 @@ PERSONALIZE_PAGE = """
 
 # -- NPC Image Page --
 NPC_IMAGE_PAGE = """
-{% extends "base" %}
+{% extends "base.html" %}
 {% block content %}
   <h1>NPC Portrait Prompt</h1>
   <p>Below is an auto-generated single-sentence portrait prompt focusing on the NPC.</p>
@@ -230,7 +230,7 @@ NPC_IMAGE_PAGE = """
 
 # -- Story Page --
 STORY_PAGE = """
-{% extends "base" %}
+{% extends "base.html" %}
 {% block content %}
   <h1>Current Scene</h1>
   <div class="border p-3 mb-3 bg-light" style="white-space: pre-line;">{{ scene_text }}</div>
@@ -489,7 +489,7 @@ def full_story_text():
 
 @app.route("/")
 def home():
-    return render_template_string(TEMPLATES["base"] + TEMPLATES["home"], title="Home")
+    return render_template("base.html", "home.html", title="Home")
 
 @app.route("/restart")
 def restart():
@@ -533,8 +533,8 @@ def personalize():
 
         return redirect(url_for("npc_image"))
     else:
-        return render_template_string(
-            TEMPLATES["base"] + TEMPLATES["personalize"],
+        return render_template(
+            "base.html", "personalize.html",
             title="Personalize",
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
@@ -548,8 +548,8 @@ def npc_image():
     if request.method == "GET":
         prompt = gpt_npc_portrait_prompt()
         session["npc_image_prompt"] = prompt
-        return render_template_string(
-            TEMPLATES["base"] + TEMPLATES["npc_image"],
+        return render_template(
+            "base.html", "npc_image.html",
             title="NPC Portrait",
             npc_image_prompt=prompt,
             npc_image_url=None,
@@ -567,8 +567,8 @@ def npc_image():
             image_url = generate_flux_image(prompt, seed=seed_used)
             _save_image(image_url)
             session["last_image_seed"] = seed_used
-            return render_template_string(
-                TEMPLATES["base"] + TEMPLATES["npc_image"],
+            return render_template(
+                "base.html", "npc_image.html",
                 title="NPC Portrait",
                 npc_image_prompt=prompt,
                 npc_image_url=image_url,
@@ -583,8 +583,8 @@ def npc_image():
             image_url = generate_flux_image(prompt, seed=seed_used)
             _save_image(image_url)
             session["last_image_seed"] = seed_used
-            return render_template_string(
-                TEMPLATES["base"] + TEMPLATES["npc_image"],
+            return render_template(
+                "base.html", "npc_image.html",
                 title="NPC Portrait",
                 npc_image_prompt=prompt,
                 npc_image_url=image_url,
@@ -596,8 +596,8 @@ def npc_image():
             image_url = generate_flux_image(prompt, seed=seed_used)
             _save_image(image_url)
             session["last_image_seed"] = seed_used
-            return render_template_string(
-                TEMPLATES["base"] + TEMPLATES["npc_image"],
+            return render_template(
+                "base.html", "npc_image.html",
                 title="NPC Portrait",
                 npc_image_prompt=prompt,
                 npc_image_url=image_url,
@@ -631,8 +631,8 @@ def story():
         fh = full_story_text()
         scene_image_prompt = gpt_scene_image_prompt(fh)
 
-        return render_template_string(
-            TEMPLATES["base"] + TEMPLATES["story"],
+        return render_template(
+            "base.html", "story.html",
             title="Story",
             scene_text=scene_text,
             suggested_actions=suggested_actions,
@@ -682,8 +682,8 @@ def story():
             _save_image(image_url)
             session["last_scene_prompt"] = scene_image_prompt
             session["last_image_seed"] = seed_used
-            return render_template_string(
-                TEMPLATES["base"] + TEMPLATES["story"],
+            return render_template(
+                "base.html", "story.html",
                 title="Story",
                 scene_text=scene_text,
                 suggested_actions=suggested_actions,
@@ -701,8 +701,8 @@ def story():
             image_url = generate_flux_image(prompt, seed=seed_used)
             _save_image(image_url)
             session["last_image_seed"] = seed_used
-            return render_template_string(
-                TEMPLATES["base"] + TEMPLATES["story"],
+            return render_template(
+                "base.html", "story.html",
                 title="Story",
                 scene_text=scene_text,
                 suggested_actions=suggested_actions,
@@ -718,8 +718,8 @@ def story():
             image_url = generate_flux_image(prompt, seed=seed_used)
             _save_image(image_url)
             session["last_image_seed"] = seed_used
-            return render_template_string(
-                TEMPLATES["base"] + TEMPLATES["story"],
+            return render_template(
+                "base.html", "story.html",
                 title="Story",
                 scene_text=scene_text,
                 suggested_actions=suggested_actions,

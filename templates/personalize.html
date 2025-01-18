@@ -1,0 +1,100 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Personalize Your Adventure</h1>
+  <form method="POST" class="row g-3">
+    <div class="col-md-6">
+      <h3>Your Info</h3>
+      <label class="form-label">Name</label>
+      <input type="text" class="form-control" name="user_name" placeholder="Your Name">
+
+      <label class="form-label mt-2">Age</label>
+      <input type="text" class="form-control" name="user_age" placeholder="Your Age">
+
+      <label class="form-label mt-2">Personality</label>
+      <select class="form-select" name="user_personality">
+        <option value="">--Select--</option>
+        {% for opt in personality_options %}
+          <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label mt-1">Or custom:</label>
+      <input type="text" class="form-control" name="user_personality_custom" placeholder="Type custom">
+
+      <label class="form-label mt-2">Background</label>
+      <textarea class="form-control" name="user_background" rows="3"></textarea>
+    </div>
+
+    <div class="col-md-6">
+      <h3>NPC Info</h3>
+      <label class="form-label">Name</label>
+      <input type="text" class="form-control" name="npc_name" placeholder="NPC Name">
+
+      <label class="form-label mt-2">Age</label>
+      <input type="text" class="form-control" name="npc_age" placeholder="NPC Age">
+
+      <label class="form-label mt-2">Ethnicity</label>
+      <select class="form-select" name="npc_ethnicity">
+        <option value="">--Select--</option>
+        {% for opt in ethnicity_options %}
+          <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label mt-1">Or custom:</label>
+      <input type="text" class="form-control" name="npc_ethnicity_custom" placeholder="Type custom">
+
+      <label class="form-label mt-2">Body Type</label>
+      <select class="form-select" name="npc_body_type">
+        <option value="">--Select--</option>
+        {% for opt in body_type_options %}
+          <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label mt-1">Or custom:</label>
+      <input type="text" class="form-control" name="npc_body_type_custom" placeholder="Type custom">
+
+      <label class="form-label mt-2">Hair Color</label>
+      <select class="form-select" name="npc_hair_color">
+        <option value="">--Select--</option>
+        {% for opt in hair_color_options %}
+          <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label mt-1">Or custom:</label>
+      <input type="text" class="form-control" name="npc_hair_color_custom" placeholder="Type custom">
+
+      <label class="form-label mt-2">Personality</label>
+      <input type="text" class="form-control" name="npc_personality" placeholder="e.g. confident, witty">
+
+      <label class="form-label mt-2">Backstory</label>
+      <textarea class="form-control" name="npc_backstory" rows="3"></textarea>
+    </div>
+
+    <div class="col-12 mt-4">
+      <h3>Environment Details</h3>
+      <label class="form-label">Location / Setting</label>
+      <select class="form-select" name="environment">
+        <option value="">--Select--</option>
+        {% for opt in environment_options %}
+          <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label mt-1">Or custom:</label>
+      <input type="text" class="form-control" name="environment_custom" placeholder="Type custom">
+    </div>
+
+    <div class="col-12 mt-4">
+      <h3>Image Generation Settings</h3>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="use_single_seed" value="yes" id="flexCheckDefault">
+        <label class="form-check-label" for="flexCheckDefault">
+          Use the same seed for all images
+        </label>
+      </div>
+    </div>
+
+    <div class="col-12 mt-4">
+      <button type="submit" name="save_personalization" value="true" class="btn btn-primary">Save Personalization</button>
+    </div>
+  </form>
+{% endblock %}

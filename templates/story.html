@@ -1,0 +1,52 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Current Scene</h1>
+  <div class="border p-3 mb-3 bg-light" style="white-space: pre-line;">{{ scene_text }}</div>
+
+  <h3>What happens next?</h3>
+  {% if suggested_actions %}
+    <div class="mb-3">
+      <p>Suggested Actions:</p>
+      {% for action in suggested_actions %}
+        <form method="POST" style="display:inline;">
+          <input type="hidden" name="choice_gpt" value="{{ action }}">
+          <button type="submit" name="action_choice" value="true" class="btn btn-outline-primary me-2">{{ action }}</button>
+        </form>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" class="mb-4">
+    <label class="form-label">Or enter your own action</label>
+    <input type="text" class="form-control mb-2" name="user_action" placeholder="Your custom move...">
+    <button type="submit" name="action_custom" value="true" class="btn btn-success">Submit Custom Action</button>
+  </form>
+
+  <hr>
+  <h3>Scene Image Prompt (Focus on NPC)</h3>
+  <p>Edit before generating image:</p>
+  <form method="POST">
+    <textarea name="scene_image_prompt" rows="3" class="form-control">{{ scene_image_prompt }}</textarea>
+    <div class="mt-3">
+      <button type="submit" name="generate_scene_image" value="true" class="btn btn-primary me-2">Generate Scene Image</button>
+    </div>
+  </form>
+
+  {% if scene_image_generated %}
+    <hr>
+    <h4>Generated Scene Image</h4>
+    <img src="/view_image" alt="Scene Image" style="max-width: 60%;"><br>
+    <p>Seed: {{ seed_used }}</p>
+    <form method="POST">
+      <button type="submit" name="regen_scene_same_seed" value="true" class="btn btn-secondary me-2">Regenerate (Same Seed)</button>
+      <button type="submit" name="regen_scene_new_seed" value="true" class="btn btn-warning">Regenerate (New Seed)</button>
+    </form>
+  {% endif %}
+
+  <hr>
+  <form method="POST" style="display:inline;">
+    <button type="submit" name="go_back" value="true" class="btn btn-outline-danger me-2">Back</button>
+  </form>
+  <a href="/restart" class="btn btn-outline-secondary">Restart Entire Story</a>
+{% endblock %}
