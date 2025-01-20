@@ -229,6 +229,36 @@ def parse_suggestions_user(gpt_text: str):
             suggestions.append(val)
     return suggestions
 
+def gpt_npc_portrait_prompt():
+    """Generate initial NPC portrait prompt based on personalization."""
+    system_message = {
+        "role": "developer",
+        "content": "Generate a single detailed portrait prompt for an NPC character. Include only physical appearance."
+    }
+    
+    user_message = {
+        "role": "user",
+        "content": f"""
+        Character Details:
+        - Gender: {session.get('npc_gender', '')}
+        - Age: {session.get('npc_age', '')}
+        - Ethnicity: {session.get('npc_ethnicity', '')}
+        - Body Type: {session.get('npc_body_type', '')}
+        - Hair Color: {session.get('npc_hair_color', '')}
+        - Hair Style: {session.get('npc_hair_style', '')}
+        - Clothing: {session.get('npc_clothing', '')}
+        
+        Return a single detailed portrait prompt.
+        """
+    }
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[system_message, user_message],
+        temperature=0.7
+    )
+    return response.choices[0].message.content.strip()
+
 def gpt_scene_image_prompt(full_history):
     system_message = {
         "role": "developer",
