@@ -11,7 +11,7 @@ from flask import (
 from flask_session import Session
 
 ############################################################################
-# A) Dropdown Lists
+# 1) DROPDOWN LISTS (Unchanged)
 ############################################################################
 
 USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Other"]
@@ -46,9 +46,8 @@ ENVIRONMENT_OPTIONS = [
   "Music Festival","Restaurant","Mountain Resort"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-  "First date","Accidental meeting","Haven't met yet",
-  "Happened to be in the same location","Group activity or event",
-  "Work-related encounter","Other"
+  "First date","Accidental meeting","Haven't met yet","Happened to be in the same location",
+  "Group activity or event","Work-related encounter","Other"
 ]
 ETHNICITY_OPTIONS = [
   "American (Black)","American (White)","American (Hispanic)","Russian","German","Nigerian","Brazilian","Chinese",
@@ -56,39 +55,52 @@ ETHNICITY_OPTIONS = [
 ]
 
 ############################################################################
-# B) Stage Data
+# 2) UPDATED STAGE DATA (Removing 'Intimate' & Setting Limits)
 ############################################################################
 
 STAGE_INFO = {
     1: {
         "label": "Strangers",
-        "desc": "Barely know each other; minimal personal info exchanged.",
-        "privileges": "Polite small talk"
+        "desc": (
+            "They've just met and know almost nothing about each other. Likely won't share personal info "
+            "or phone numbers. Conversation remains polite but cautious."
+        )
     },
     2: {
         "label": "Friendly Acquaintances",
-        "desc": "Comfortable talking about casual interests.",
-        "privileges": "Willing to share social media or short hangouts"
+        "desc": (
+            "They're comfortable with casual chatting, might exchange social media handles. "
+            "Still keep big personal boundaries. Not ready for deep personal topics."
+        )
     },
     3: {
         "label": "Comfortable",
-        "desc": "Sharing deeper personal stories, more trust established.",
-        "privileges": "Could plan casual dates or personal meetups"
+        "desc": (
+            "They trust each other enough to share personal stories or minor struggles. "
+            "They might plan casual dates and exchange phone numbers. "
+            "Not ready for big commitments like living together."
+        )
     },
     4: {
         "label": "Close",
-        "desc": "Emotional trust built, frequent contact.",
-        "privileges": "Potential romance or more intimate hangouts"
+        "desc": (
+            "Emotional trust built, frequent contact. They feel safe spending time alone together. "
+            "Could discuss future possibilities but not firmly making big life decisions yet."
+        )
     },
     5: {
         "label": "Serious Potential",
-        "desc": "On the verge of an official date/relationship.",
-        "privileges": "Openly flirty, can plan more intimate experiences"
+        "desc": (
+            "Deep connection, openly affectionate, discussing possible plans for the future. "
+            "They rely on each other for emotional support. Might consider living together soon."
+        )
     },
     6: {
-        "label": "In a Relationship",
-        "desc": "Officially a couple with strong affection and trust.",
-        "privileges": "Shared future plans, deep emotional support"
+        "label": "Committed Relationship",
+        "desc": (
+            "They see each other as life partners, with strong devotion and shared long-term goals. "
+            "Marriage or full partnership is openly on the table."
+        )
     }
 }
 
@@ -102,19 +114,16 @@ STAGE_REQUIREMENTS = {
 }
 
 ############################################################################
-# C) Flask + Session Config
+# 3) Flask & Session Config
 ############################################################################
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "YOUR_FLASK_SECRET"
-
-# We define the session type and directory to avoid KeyError
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
-# Ensure the session directory exists
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -126,30 +135,86 @@ replicate.client.api_token = REPLICATE_API_TOKEN
 GENERATED_IMAGE_PATH = "output.jpg"
 
 ############################################################################
-# D) GPT Helpers: interpret_npc_state & generate_story_snippet
+# 4) Build Personalization String
 ############################################################################
 
-def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_action):
+def build_personalization_string():
+    user_part = f"""
+    USER:
+      Name: {session.get('user_name','?')}
+      Age: {session.get('user_age','?')}
+      Personality: {session.get('user_personality','?')}
+      Background: {session.get('user_background','?')}
     """
-    LLM Call #1: NPC's private thoughts/feelings => debug only.
+
+    npc_part = f"""
+    NPC:
+      Name: {session.get('npc_name','?')}
+      Gender: {session.get('npc_gender','?')}
+      Age: {session.get('npc_age','?')}
+      Ethnicity: {session.get('npc_ethnicity','?')}
+      BodyType: {session.get('npc_body_type','?')}
+      HairColor: {session.get('npc_hair_color','?')}
+      HairStyle: {session.get('npc_hair_style','?')}
+      Clothing: {session.get('npc_clothing','?')}
+      Personality: {session.get('npc_personality','?')}
+      Occupation: {session.get('npc_occupation','?')}
+      CurrentSituation: {session.get('npc_current_situation','?')}
     """
+
+    env_part = f"""
+    ENVIRONMENT:
+      Location: {session.get('environment','?')}
+      EncounterContext: {session.get('encounter_context','?')}
+    """
+
+    return user_part + "\n" + npc_part + "\n" + env_part
+
+############################################################################
+# 5) interpret_npc_state (Now includes trust)
+############################################################################
+
+def interpret_npc_state(affection, trust, current_stage, last_user_action):
+    """
+    LLM call that returns a short paragraph plus lines:
+      AFFECT_CHANGE: float
+      TRUST_CHANGE: float
+      EMOTIONAL_STATE: ...
+      BEHAVIOUR: ...
+      NEXT_PLAN: ...
+    We incorporate both affection & trust in the system prompt.
+    """
+    personalization = build_personalization_string()
+
+    stage_label = STAGE_INFO[current_stage]["label"]
+    stage_desc = STAGE_INFO[current_stage]["desc"]
+
     system_message = {
         "role": "developer",
-        "content": (
-            "You are the NPC's internal mind. Summarize your hidden thoughts and feelings "
-            "based on numeric stats + last user action. Then decide if you do anything, "
-            "like approach or remain idle. Output ends with 'NEXT_PLAN: ...'."
-        )
+        "content": f"""
+        You are the NPC's internal mind.
+
+        {personalization}
+
+        Current Affection: {affection}
+        Current Trust: {trust}
+        Relationship Stage: {current_stage} ({stage_label})
+        {stage_desc}
+
+        The user just performed this action: {last_user_action}
+
+        1) Provide a short monologue on how the NPC internally feels.
+        2) Then produce lines:
+           AFFECT_CHANGE: -1.0..+1.0
+           TRUST_CHANGE: -1.0..+1.0  (0..10 scale, so a big negative might push trust close to 0)
+           EMOTIONAL_STATE: ...
+           BEHAVIOUR: ...
+           NEXT_PLAN: ...
+        """
     }
     user_message = {
         "role": "user",
-        "content": f"""
-        Stats:
-        affection={affection}, trust={trust}, npcMood={npc_mood}, stage={current_stage}
-        Last user action: {last_user_action}
-
-        Return a short monologue + 'NEXT_PLAN:' with your immediate plan (or 'no action').
-        """
+        "content": "Return your internal monologue plus those lines as described."
     }
 
     response = client.chat.completions.create(
@@ -159,11 +224,16 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     )
     return response.choices[0].message.content.strip()
 
-def generate_story_snippet(affection, trust, npc_mood, current_stage,
-                           last_user_action, npc_private_plan, full_history):
+############################################################################
+# 6) generate_story_snippet
+############################################################################
+
+def generate_story_snippet(affection, trust, current_stage, last_user_action, npc_private_plan, full_history):
     """
-    LLM Call #2: public user-facing snippet (3rd person from user's POV).
+    We incorporate both affection & trust in the context if needed.
+    The snippet remains from the user's POV, 3rd person.
     """
+    personalization = build_personalization_string()
     stage_label = STAGE_INFO[current_stage]["label"]
     stage_desc = STAGE_INFO[current_stage]["desc"]
 
@@ -171,21 +241,23 @@ def generate_story_snippet(affection, trust, npc_mood, current_stage,
         "role": "developer",
         "content": f"""
         You are a romance story narrator in third-person from the user's POV.
-        The NPC's hidden plan is: {npc_private_plan} (do not reveal internal thoughts).
-        The user sees only outward behavior, body language, speech. 
-        Relationship stage: {current_stage} ({stage_label}).
+
+        Relationship Stage: {current_stage} ({stage_label})
         {stage_desc}
 
-        End with: "What does the user do next?" (~200 words).
-        If NPC plan is 'no action', show minimal idle behavior.
+        The NPC's hidden plan is: {npc_private_plan} (do not reveal as internal monologue).
+        {personalization}
+
+        End with: 'What does the user do next?' (~200 words).
+        If plan='no action', show minimal or idle behavior.
         """
     }
     user_message = {
         "role": "user",
         "content": (
-            f"FULL_HISTORY:\n{full_history}\n"
-            f"Last user action: {last_user_action}\n"
-            "Generate the next snippet from the user's POV, reflect the NPC's plan outwardly."
+            f"FULL_HISTORY:\n{full_history}\n\n"
+            f"USER's LAST ACTION: {last_user_action}\n"
+            "Generate the next snippet from the user's POV."
         )
     }
 
@@ -197,58 +269,39 @@ def generate_story_snippet(affection, trust, npc_mood, current_stage,
     return response.choices[0].message.content.strip()
 
 ############################################################################
-# E) GPT for user actions & images
+# 7) GPT for NPC portrait
 ############################################################################
-
-def gpt_user_actions(story_snippet):
-    system_message = {
-        "role": "developer",
-        "content": "Provide 3 next user moves, each line '- SUGGESTION_USER:'."
-    }
-    user_message = {
-        "role": "user",
-        "content": (
-            f"STORY:\n{story_snippet}\n\n"
-            "Return 3 lines '- SUGGESTION_USER:' for possible user actions."
-        )
-    }
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[system_message, user_message],
-        temperature=0.7
-    )
-    return response.choices[0].message.content.strip()
-
-def parse_suggestions_user(gpt_text: str):
-    lines = gpt_text.split("\n")
-    suggestions = []
-    for line in lines:
-        if line.strip().startswith("- SUGGESTION_USER:"):
-            val = line.split(":", 1)[1].strip()
-            suggestions.append(val)
-    return suggestions
 
 def gpt_npc_portrait_prompt():
-    """Generate initial NPC portrait prompt based on personalization."""
+    """
+    Summarize the NPC's physical appearance in 1-2 lines
+    """
+    npc_gender = session.get("npc_gender","Female")
+    npc_age = session.get("npc_age","25")
+    npc_eth = session.get("npc_ethnicity","?")
+    npc_body = session.get("npc_body_type","?")
+    npc_hc = session.get("npc_hair_color","?")
+    npc_hs = session.get("npc_hair_style","?")
+    npc_cloth = session.get("npc_clothing","?")
+
     system_message = {
         "role": "developer",
-        "content": "Generate a single detailed portrait prompt for an NPC character. Include only physical appearance."
+        "content": (
+            "Return a single short portrait prompt describing the NPC physically. "
+            "No mention of user. 1-2 lines max."
+        )
     }
-    
     user_message = {
         "role": "user",
         "content": f"""
-        Character Details:
-        - Gender: {session.get('npc_gender', '')}
-        - Age: {session.get('npc_age', '')}
-        - Ethnicity: {session.get('npc_ethnicity', '')}
-        - Body Type: {session.get('npc_body_type', '')}
-        - Hair Color: {session.get('npc_hair_color', '')}
-        - Hair Style: {session.get('npc_hair_style', '')}
-        - Clothing: {session.get('npc_clothing', '')}
-        
-        Return a single detailed portrait prompt.
+        NPC:
+          Gender: {npc_gender}
+          Age: {npc_age}
+          Ethnicity: {npc_eth}
+          Body Type: {npc_body}
+          Hair Color: {npc_hc}
+          Hair Style: {npc_hs}
+          Clothing: {npc_cloth}
         """
     }
 
@@ -259,17 +312,28 @@ def gpt_npc_portrait_prompt():
     )
     return response.choices[0].message.content.strip()
 
+############################################################################
+# 8) gpt_scene_image_prompt
+############################################################################
+
 def gpt_scene_image_prompt(full_history):
+    """
+    Single-sentence iPhone portrait focusing on the NPC in the environment.
+    No user mention.
+    """
     system_message = {
         "role": "developer",
         "content": (
             "Generate a single-sentence iPhone portrait style prompt focusing on the NPC. "
-            "No user mention. Summarize environment if relevant."
+            "No mention of user. Summarize environment if relevant."
         )
     }
     user_message = {
         "role": "user",
-        "content": f"STORY CONTEXT:\n{full_history}\n\nReturn a single sentence describing the NPC for a portrait."
+        "content": (
+            f"STORY CONTEXT:\n{full_history}\n\n"
+            "Return a single sentence describing the NPC for a portrait."
+        )
     }
 
     response = client.chat.completions.create(
@@ -280,21 +344,21 @@ def gpt_scene_image_prompt(full_history):
     return response.choices[0].message.content.strip()
 
 ############################################################################
-# F) Stage Up/Down Logic
+# 9) Stage Up/Down
 ############################################################################
 
 def check_stage_up_down(new_aff):
     current_stage = session.get("currentStage", 1)
-    # if we drop below the requirement for current stage => revert
     req_for_stage = STAGE_REQUIREMENTS[current_stage]
     if new_aff < req_for_stage:
+        # revert stage
         new_stage = 1
         for s, needed in STAGE_REQUIREMENTS.items():
             if new_aff >= needed:
                 new_stage = max(new_stage, s)
         session["currentStage"] = new_stage
     else:
-        # possibly stage up
+        # maybe stage up
         while session["currentStage"] < 6:
             nxt = session["currentStage"] + 1
             if new_aff >= STAGE_REQUIREMENTS[nxt]:
@@ -303,7 +367,7 @@ def check_stage_up_down(new_aff):
                 break
 
 ############################################################################
-# G) Image Generation & Scene Stack
+# 10) Image Gen & Scene
 ############################################################################
 
 def generate_flux_image(prompt, seed=None):
@@ -359,60 +423,10 @@ def full_story_text():
     return "\n\n".join(lines)
 
 ############################################################################
-# H) Sentiment + Affection Utility
+# 11) Flask Routes
 ############################################################################
 
-def gpt_sentiment_analysis(text: str) -> float:
-    """
-    A separate LLM call for sentiment classification, returning float in [0..1].
-    """
-    system_message = {
-        "role": "developer",
-        "content": (
-            "You are a sentiment classifier. Read the user’s text and respond with a single decimal "
-            "value from 0.0 to 1.0, no extra text."
-        )
-    }
-    user_message = {
-        "role": "user",
-        "content": text
-    }
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[system_message, user_message],
-        temperature=0.0
-    )
-    raw = response.choices[0].message.content.strip()
-    try:
-        val = float(raw)
-    except ValueError:
-        val = 0.5
-    return max(0.0, min(val, 1.0))
-
-def adjust_affection(positivity: float) -> float:
-    """
-    Partial increments/decrements:
-    >=0.75 => +1
-    >=0.5  => +0.5
-    >=0.3  => 0
-    >=0.1  => -0.5
-    <0.1   => -1
-    """
-    if positivity >= 0.75:
-        return 1.0
-    elif positivity >= 0.5:
-        return 0.5
-    elif positivity >= 0.3:
-        return 0.0
-    elif positivity >= 0.1:
-        return -0.5
-    else:
-        return -1.0
-
-############################################################################
-# I) Flask Routes
-############################################################################
+app = Flask(__name__)
 
 @app.route("/")
 def home():
@@ -421,7 +435,6 @@ def home():
 @app.route("/restart")
 def restart():
     session.clear()
-    # ensure session file dir
     os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
     return redirect(url_for("personalize"))
 
@@ -460,12 +473,11 @@ def personalize():
         if use_single_seed:
             session["global_seed"] = random.randint(100000,999999)
 
-        # init hidden stats
+        # Initialize hidden stats
         session["affectionScore"] = 0.0
-        session["trustScore"] = 5.0
+        session["trustScore"] = 5.0  # We start trust at 5/10
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
-        # small random threshold
         session["nextStageThreshold"] = session["affectionScore"] + random.randint(2,4)
         session["npcPrivateThoughts"] = "(none)"
 
@@ -556,21 +568,17 @@ def npc_image():
 def start_story():
     session["scene_stack"] = []
 
-    # no user action initially
     intro = generate_story_snippet(
         affection=session["affectionScore"],
         trust=session["trustScore"],
-        npc_mood=session["npcMood"],
         current_stage=session["currentStage"],
         last_user_action="(none)",
         npc_private_plan="(none)",
         full_history=""
     )
 
-    user_actions_text = gpt_user_actions(intro)
-    user_suggestions = parse_suggestions_user(user_actions_text)
-
-    store_scene(intro, user_action="", user_suggestions=user_suggestions)
+    # We no longer do user_suggestions from GPT here. We'll rely on the user custom input only.
+    store_scene(intro, user_action="", user_suggestions=[])
     return redirect(url_for("story"))
 
 @app.route("/story", methods=["GET","POST"])
@@ -578,7 +586,6 @@ def story():
     if request.method == "GET":
         data = current_scene()
         scene_text = data["scene_text"]
-        user_suggestions = data["user_suggestions"]
         fh = full_story_text()
         scene_image_prompt = gpt_scene_image_prompt(fh)
 
@@ -586,19 +593,15 @@ def story():
         trust_score = session.get("trustScore", 5.0)
         npc_mood = session.get("npcMood", "Neutral")
         current_stage = session.get("currentStage", 1)
+        stage_label = STAGE_INFO[current_stage]["label"]
+        stage_desc = STAGE_INFO[current_stage]["desc"]
         next_threshold = session.get("nextStageThreshold", 999)
-        last_positivity = session.get("lastPositivity", None)
         npc_private_thoughts = session.get("npcPrivateThoughts", "")
-
-        stage_info = STAGE_INFO.get(current_stage, {})
-        stage_label = stage_info.get("label","Unknown")
-        stage_desc = stage_info.get("desc","N/A")
 
         return render_template(
             "story.html",
             title="Story",
             scene_text=scene_text,
-            user_suggestions=user_suggestions,
             scene_image_prompt=scene_image_prompt,
             scene_image_generated=False,
             seed_used=None,
@@ -609,97 +612,106 @@ def story():
             stage_label=stage_label,
             stage_desc=stage_desc,
             next_threshold=next_threshold,
-            last_positivity=last_positivity,
             npc_private_thoughts=npc_private_thoughts
         )
 
+    # POST
     if "go_back" in request.form:
         pop_scene()
         return redirect(url_for("story"))
 
     data = current_scene()
     scene_text = data["scene_text"]
-    user_suggestions = data["user_suggestions"]
     fh = full_story_text()
     scene_image_prompt = request.form.get("scene_image_prompt","")
     use_single_seed = session.get("use_single_seed", False)
 
-    def update_affection_and_stage(action_text: str):
-        positivity = gpt_sentiment_analysis(action_text)
-        session["lastPositivity"] = positivity
-        base_delta = adjust_affection(positivity)
+    def update_stats(affect_str, trust_str):
+        # parse the two lines
+        try:
+            affect_val = float(affect_str)
+        except ValueError:
+            affect_val = 0.0
+        try:
+            trust_val = float(trust_str)
+        except ValueError:
+            trust_val = 0.0
+
         old_aff = session["affectionScore"]
-        new_aff = old_aff + base_delta
+        new_aff = old_aff + affect_val
         session["affectionScore"] = new_aff
         check_stage_up_down(new_aff)
 
-    if "action_choice" in request.form:
-        chosen_action = request.form.get("choice_gpt","(none)")
-        update_affection_and_stage(chosen_action)
-
-        # Call #1: private NPC thoughts
-        npc_thoughts = interpret_npc_state(
-            affection=session["affectionScore"],
-            trust=session["trustScore"],
-            npc_mood=session["npcMood"],
-            current_stage=session["currentStage"],
-            last_user_action=chosen_action
-        )
-        session["npcPrivateThoughts"] = npc_thoughts
-        next_plan = "(none)"
-        for line in npc_thoughts.split("\n"):
-            if line.strip().startswith("NEXT_PLAN:"):
-                next_plan = line.split(":",1)[1].strip()
-
-        # Call #2: user-facing snippet
-        new_snippet = generate_story_snippet(
-            affection=session["affectionScore"],
-            trust=session["trustScore"],
-            npc_mood=session["npcMood"],
-            current_stage=session["currentStage"],
-            last_user_action=chosen_action,
-            npc_private_plan=next_plan,
-            full_history=fh
-        )
-
-        # new user actions
-        new_user_actions_text = gpt_user_actions(new_snippet)
-        new_user_suggestions = parse_suggestions_user(new_user_actions_text)
-
-        store_scene(new_snippet, user_action=chosen_action, user_suggestions=new_user_suggestions)
-        return redirect(url_for("story"))
+        # update trust
+        # clamp trust in [0..10]
+        old_trust = session["trustScore"]
+        new_trust = old_trust + trust_val
+        new_trust = max(0.0, min(10.0, new_trust))
+        session["trustScore"] = new_trust
 
     if "action_custom" in request.form:
-        custom_action = request.form.get("user_action","(none)")
-        update_affection_and_stage(custom_action)
+        custom_action = request.form.get("user_action","").strip()
+        if not custom_action:
+            # interpret as "(none)"
+            custom_action = "(none)"
 
+        # interpret npc state
         npc_thoughts = interpret_npc_state(
             affection=session["affectionScore"],
             trust=session["trustScore"],
-            npc_mood=session["npcMood"],
             current_stage=session["currentStage"],
             last_user_action=custom_action
         )
-        session["npcPrivateThoughts"] = npc_thoughts
-        next_plan = "(none)"
-        for line in npc_thoughts.split("\n"):
-            if line.strip().startswith("NEXT_PLAN:"):
-                next_plan = line.split(":",1)[1].strip()
 
+        # parse lines
+        lines = npc_thoughts.split("\n")
+        affect_change = "0.0"
+        trust_change = "0.0"
+        npc_mood = session.get("npcMood","Neutral")
+        npc_behaviour = ""
+        next_plan = "no action"
+        stripped_paragraph = []
+
+        for line in lines:
+            stripline = line.strip()
+            if stripline.startswith("AFFECT_CHANGE:"):
+                affect_change = stripline.split(":",1)[1].strip()
+            elif stripline.startswith("TRUST_CHANGE:"):
+                trust_change = stripline.split(":",1)[1].strip()
+            elif stripline.startswith("EMOTIONAL_STATE:"):
+                npc_mood = stripline.split(":",1)[1].strip()
+            elif stripline.startswith("BEHAVIOUR:"):
+                npc_behaviour = stripline.split(":",1)[1].strip()
+            elif stripline.startswith("NEXT_PLAN:"):
+                next_plan = stripline.split(":",1)[1].strip()
+            else:
+                stripped_paragraph.append(stripline)
+
+        # update affection & trust
+        update_stats(affect_change, trust_change)
+        session["npcMood"] = npc_mood
+
+        final_private_thoughts = (
+            "\n".join(stripped_paragraph)
+            + f"\n\nAFFECT_CHANGE: {affect_change}"
+            + f"\nTRUST_CHANGE: {trust_change}"
+            + f"\nEMOTIONAL_STATE: {npc_mood}"
+            + f"\nBEHAVIOUR: {npc_behaviour}"
+            + f"\nNEXT_PLAN: {next_plan}"
+        )
+        session["npcPrivateThoughts"] = final_private_thoughts
+
+        # generate new snippet
         new_snippet = generate_story_snippet(
             affection=session["affectionScore"],
             trust=session["trustScore"],
-            npc_mood=session["npcMood"],
             current_stage=session["currentStage"],
             last_user_action=custom_action,
             npc_private_plan=next_plan,
             full_history=fh
         )
 
-        new_user_actions_text = gpt_user_actions(new_snippet)
-        new_user_suggestions = parse_suggestions_user(new_user_actions_text)
-
-        store_scene(new_snippet, user_action=custom_action, user_suggestions=new_user_suggestions)
+        store_scene(new_snippet, user_action=custom_action, user_suggestions=[])
         return redirect(url_for("story"))
 
     if "generate_scene_image" in request.form:
@@ -713,16 +725,16 @@ def story():
             "story.html",
             title="Story",
             scene_text=scene_text,
-            user_suggestions=user_suggestions,
             scene_image_prompt=scene_image_prompt,
             scene_image_generated=True,
             seed_used=seed_used,
             affection_score=session.get("affectionScore",0),
-            trust_score=session.get("trustScore",5),
+            trust_score=session.get("trustScore",5.0),
             npc_mood=session.get("npcMood","Neutral"),
             current_stage=session.get("currentStage",1),
+            stage_label=STAGE_INFO[session.get("currentStage",1)]["label"],
+            stage_desc=STAGE_INFO[session.get("currentStage",1)]["desc"],
             next_threshold=session.get("nextStageThreshold",999),
-            last_positivity=session.get("lastPositivity",None),
             npc_private_thoughts=session.get("npcPrivateThoughts","")
         )
 
@@ -739,16 +751,16 @@ def story():
             "story.html",
             title="Story",
             scene_text=scene_text,
-            user_suggestions=user_suggestions,
             scene_image_prompt=prompt,
             scene_image_generated=True,
             seed_used=seed_used,
             affection_score=session.get("affectionScore",0),
-            trust_score=session.get("trustScore",5),
+            trust_score=session.get("trustScore",5.0),
             npc_mood=session.get("npcMood","Neutral"),
             current_stage=session.get("currentStage",1),
+            stage_label=STAGE_INFO[session.get("currentStage",1)]["label"],
+            stage_desc=STAGE_INFO[session.get("currentStage",1)]["desc"],
             next_threshold=session.get("nextStageThreshold",999),
-            last_positivity=session.get("lastPositivity",None),
             npc_private_thoughts=session.get("npcPrivateThoughts","")
         )
 
@@ -763,16 +775,16 @@ def story():
             "story.html",
             title="Story",
             scene_text=scene_text,
-            user_suggestions=user_suggestions,
             scene_image_prompt=prompt,
             scene_image_generated=True,
             seed_used=seed_used,
             affection_score=session.get("affectionScore",0),
-            trust_score=session.get("trustScore",5),
+            trust_score=session.get("trustScore",5.0),
             npc_mood=session.get("npcMood","Neutral"),
             current_stage=session.get("currentStage",1),
+            stage_label=STAGE_INFO[session.get("currentStage",1)]["label"],
+            stage_desc=STAGE_INFO[session.get("currentStage",1)]["desc"],
             next_threshold=session.get("nextStageThreshold",999),
-            last_positivity=session.get("lastPositivity",None),
             npc_private_thoughts=session.get("npcPrivateThoughts","")
         )
 

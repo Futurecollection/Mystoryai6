@@ -14,7 +14,7 @@
 {% if npc_image_url %}
   <hr>
   <h2>NPC Portrait</h2>
-  <img src="{{ url_for('view_image') }}" alt="NPC Image" style="max-width: 60%;">
+  <img src="{{ url_for('view_image') }}" alt="NPC Image" style="max-width:60%;">
   <p class="mt-2">Seed: {{ seed_used }}</p>
   <form method="POST">
     <button type="submit" name="regenerate_same_seed" value="true" class="btn btn-secondary me-2">
