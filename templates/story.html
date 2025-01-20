@@ -1,0 +1,44 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h1>Your Story</h1>
+
+<div class="story-section mb-4">
+  <h2>Current Scene</h2>
+  <div class="scene-text p-3 bg-light rounded">
+    {{ scene_text }}
+  </div>
+</div>
+
+<div class="stats-section mb-4">
+  <h3>Relationship Status</h3>
+  <p>Stage {{ current_stage }}: {{ stage_label }}</p>
+  <p>{{ stage_desc }}</p>
+  <ul class="list-unstyled">
+    <li>Affection: {{ affection_score }}</li>
+    <li>Trust: {{ trust_score }}</li>
+    <li>NPC Mood: {{ npc_mood }}</li>
+    <li>Next Stage At: {{ next_threshold }}</li>
+  </ul>
+</div>
+
+<div class="npc-thoughts mb-4">
+  <h3>NPC's Private Thoughts</h3>
+  <div class="thoughts-text p-3 bg-light rounded">
+    <pre>{{ npc_private_thoughts }}</pre>
+  </div>
+</div>
+
+<form method="POST" class="action-form">
+  <div class="mb-3">
+    <label for="user_action" class="form-label">What do you do?</label>
+    <textarea id="user_action" name="user_action" class="form-control" rows="3"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Take Action</button>
+  <button type="submit" name="go_back" value="true" class="btn btn-secondary">Go Back</button>
+</form>
+
+<div class="scene-image mt-4">
+  <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width:60%;">
+</div>
+{% endblock %}
