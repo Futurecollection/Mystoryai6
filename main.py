@@ -11,7 +11,7 @@ from flask import (
 from flask_session import Session
 
 ############################################################################
-# A) DROPDOWN LISTS
+# 1) DROPDOWN LISTS
 ############################################################################
 
 USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Other"]
@@ -55,34 +55,33 @@ ETHNICITY_OPTIONS = [
 ]
 
 ############################################################################
-# B) SIMPLE STAGE DATA (optional)
+# 2) STAGE DATA => [0,2,5,7,10,15]
 ############################################################################
 
 STAGE_INFO = {
-    1: {"label": "Strangers", "desc": "Barely know each other."},
-    2: {"label": "Friendly Acquaintances","desc":"Casual chatting, not deep."},
-    3: {"label": "Comfortable","desc":"Trusting, some personal stories."},
-    4: {"label": "Close","desc":"Frequent contact, emotional trust."},
-    5: {"label": "Serious Potential","desc":"Openly affectionate, deeper plans."},
-    6: {"label": "Committed Relationship","desc":"Life partners, strong devotion."}
+    1: {"label": "Strangers", "desc": "They barely know each other."},
+    2: {"label": "Casual Acquaintances", "desc": "Some superficial chatting, no real depth yet."},
+    3: {"label": "Comfortable", "desc": "Can share moderate personal info, plan small outings."},
+    4: {"label": "Close", "desc": "Frequent contact, emotional trust, safe time alone together."},
+    5: {"label": "Serious Potential", "desc": "Openly affectionate, discussing future possibilities."},
+    6: {"label": "Committed Relationship", "desc": "Life partners with strong devotion and shared long-term goals."}
 }
 
-# Requirements: 2,3,5,7,10
 STAGE_REQUIREMENTS = {
     1: 0,
     2: 2,
-    3: 3,
-    4: 5,
-    5: 7,
-    6: 10
+    3: 5,
+    4: 7,
+    5: 10,
+    6: 15
 }
 
 ############################################################################
-# C) Flask & Session Config
+# 3) Flask & Session Config (SECRET_KEY set first)
 ############################################################################
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "abc123supersecret"
+app.config["SECRET_KEY"] = "abc123supersecret"  # fix session usage
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
 app.config["SESSION_PERMANENT"] = False
@@ -99,161 +98,186 @@ replicate.client.api_token = REPLICATE_API_TOKEN
 GENERATED_IMAGE_PATH = "output.jpg"
 
 ############################################################################
-# D) build_npc_env_personalization (NPC only, no user)
+# 4) Build Personalization
 ############################################################################
 
-def build_npc_env_personalization():
-    npc_part = f"""
-    NPC:
-      Name: {session.get('npc_name','?')}
-      Gender: {session.get('npc_gender','?')}
-      Age: {session.get('npc_age','?')}
-      Ethnicity: {session.get('npc_ethnicity','?')}
-      BodyType: {session.get('npc_body_type','?')}
-      HairColor: {session.get('npc_hair_color','?')}
-      HairStyle: {session.get('npc_hair_style','?')}
-      Clothing: {session.get('npc_clothing','?')}
-      Personality: {session.get('npc_personality','?')}
-      Occupation: {session.get('npc_occupation','?')}
-      CurrentSituation: {session.get('npc_current_situation','?')}
+def build_personalization_string():
+    user_data = (
+        f"USER:\n"
+        f"  Name: {session.get('user_name','?')}\n"
+        f"  Age: {session.get('user_age','?')}\n"
+        f"  Personality: {session.get('user_personality','?')}\n"
+        f"  Background: {session.get('user_background','?')}\n"
+    )
+    npc_data = (
+        f"NPC:\n"
+        f"  Name: {session.get('npc_name','?')}\n"
+        f"  Gender: {session.get('npc_gender','?')}\n"
+        f"  Age: {session.get('npc_age','?')}\n"
+        f"  Ethnicity: {session.get('npc_ethnicity','?')}\n"
+        f"  BodyType: {session.get('npc_body_type','?')}\n"
+        f"  HairColor: {session.get('npc_hair_color','?')}\n"
+        f"  HairStyle: {session.get('npc_hair_style','?')}\n"
+        f"  Clothing: {session.get('npc_clothing','?')}\n"
+        f"  Personality: {session.get('npc_personality','?')}\n"
+        f"  Occupation: {session.get('npc_occupation','?')}\n"
+        f"  CurrentSituation: {session.get('npc_current_situation','?')}\n"
+    )
+    env_data = (
+        f"ENVIRONMENT:\n"
+        f"  Location: {session.get('environment','?')}\n"
+        f"  EncounterContext: {session.get('encounter_context','?')}\n"
+    )
+    return user_data + npc_data + env_data
+
+############################################################################
+# 5) interpret_npc_state => SPOKEN_DIALOGUE
+############################################################################
+
+def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_action):
+    stage_label = STAGE_INFO[current_stage]["label"]
+    stage_desc = STAGE_INFO[current_stage]["desc"]
+    personalization = build_personalization_string()
+
+    system_msg = f"""
+    You are the NPC's internal mind.
+    Relationship Stage={current_stage} ({stage_label})
+    {stage_desc}
+
+    Current Affection={affection}, Trust={trust}, npcMood={npc_mood}.
+    The user just performed: {last_user_action}.
+
+    Provide an internal monologue, then lines:
+      SPOKEN_DIALOGUE: (NPC's outward speech or empty)
+      AFFECT_CHANGE: -1..+1
+      TRUST_CHANGE: -1..+1
+      EMOTIONAL_STATE: ...
+      BEHAVIOUR: ...
+    (Do not speak for the user.)
     """
+    user_msg = f"PERSONALIZATION:\n{personalization}\nReturn your internal monologue + lines exactly."
 
-    env_part = f"""
-    ENVIRONMENT:
-      Location: {session.get('environment','?')}
-      EncounterContext: {session.get('encounter_context','?')}
-    """
-
-    return npc_part + "\n" + env_part
-
-############################################################################
-# E) Minimal Rolling NPC Memory
-############################################################################
-
-def get_npc_memory():
-    return session.get("npcMemory","(none)")
-
-def set_npc_memory(new_summary:str):
-    session["npcMemory"] = new_summary
-
-############################################################################
-# F) interpret_npc_state: single-turn internal mind
-############################################################################
-
-def interpret_npc_state(affection, trust, last_user_action):
-    """
-    LLM sees:
-      - Rolling NPC memory summary
-      - Affection & Trust
-      - NPC + environment data
-      - user action
-
-    Returns (internal monologue) + lines:
-      SPOKEN_DIALOGUE:
-      GESTURES:
-      AFFECT_CHANGE:
-      TRUST_CHANGE:
-      EMOTIONAL_STATE:
-      BEHAVIOUR:
-    """
-    npc_memory = get_npc_memory()
-    npc_env = build_npc_env_personalization()
-
-    system_message = {
-        "role": "system",
-        "content": f"""
-        You are the NPC's internal mind.
-        Rolling memory summary: {npc_memory}
-
-        {npc_env}
-
-        Current Affection: {affection}
-        Current Trust: {trust}
-
-        The user just performed: {last_user_action}.
-
-        Return:
-        1) Long internal monologue (debug only)
-        2) lines:
-           SPOKEN_DIALOGUE: (what NPC says out loud, or empty)
-           GESTURES: (body/facial expressions)
-           AFFECT_CHANGE: -1..+1
-           TRUST_CHANGE: -1..+1
-           EMOTIONAL_STATE:
-           BEHAVIOUR: (any extra outward behavior)
-        """
-    }
-    user_message = {
-        "role": "user",
-        "content": "Produce your internal thoughts + the lines exactly as specified."
-    }
-
-    response = client.chat.completions.create(
+    resp = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[system_message, user_message],
+        messages=[
+            {"role":"developer","content":system_msg},
+            {"role":"user","content":user_msg}
+        ],
         temperature=0.7
     )
-    return response.choices[0].message.content.strip()
+    return resp.choices[0].message.content.strip()
 
 ############################################################################
-# G) generate_single_turn_snippet: short scene from user POV
+# 6) generate_story_snippet => no user speech unless typed
 ############################################################################
 
-def generate_single_turn_snippet(user_action, spoken_dialogue, gestures):
+def generate_story_snippet(affection, trust, npc_mood, current_stage,
+                           last_user_action, spoken_dialogue, full_history,
+                           is_intro=False):
     """
-    Minimal 3rd-person snippet. 
-    No large memory. 
-    Just incorporate the user action + NPC speech/gestures.
+    'Never invent user speech or actions that weren't typed.'
     """
-    system_message = {
-        "role": "system",
-        "content": (
-            "You are a short, third-person narrator. "
-            "We have: userAction and npcSpeech/gestures. "
-            "Write a single-step scene (~1-3 lines). No additional expansions."
-        )
-    }
-    user_message = {
-        "role": "user",
-        "content": f"""
-        userAction: {user_action}
-        npcSpeech: {spoken_dialogue}
-        npcGestures: {gestures}
+    stage_label = STAGE_INFO[current_stage]["label"]
+    stage_desc = STAGE_INFO[current_stage]["desc"]
+    personalization = build_personalization_string()
 
-        Return a short scene from user’s POV, describing only this moment.
+    if is_intro:
+        sys_content = f"""
+        You are a romance story narrator, from the user's POV. 
+        This is an introductory scene focusing on environment, user, NPC meeting. ~200 words.
+        End with: "What does the user do next?"
+        The user is passive except for typed actions. 
+        Do not invent user speech beyond the user’s typed lines.
+        Relationship stage=1 (Strangers).
+        {personalization}
         """
-    }
+    else:
+        sys_content = f"""
+        You are a romance story narrator in third-person from the user's POV.
 
-    response = client.chat.completions.create(
+        Relationship Stage={current_stage} ({stage_label})
+        {stage_desc}
+
+        {personalization}
+
+        End with: "What does the user do next?" (~200 words).
+        If the NPC has no big action, show minimal idle from them.
+        Never invent user speech or actions that weren't typed. 
+        The user is passive except for typed actions.
+        """
+
+    user_content = (
+        f"FULL_HISTORY:\n{full_history}\n\n"
+        f"USER's LAST ACTION: {last_user_action}\n"
+        f"NPC SPOKEN_DIALOGUE: {spoken_dialogue}\n"
+        "Continue the snippet from the user's POV, referencing that spoken dialogue if relevant. "
+        "Again, do NOT invent any user speech or actions that weren't typed."
+    )
+
+    resp = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[system_message, user_message],
+        messages=[
+            {"role":"developer","content": sys_content},
+            {"role":"user","content": user_content}
+        ],
         temperature=0.7
     )
-    return response.choices[0].message.content.strip()
+    return resp.choices[0].message.content.strip()
 
 ############################################################################
-# H) Stage Up/Down
+# 7) scene image
+############################################################################
+
+def gpt_scene_image_prompt(full_history):
+    npc_age = session.get("npc_age","?")
+    npc_eth = session.get("npc_ethnicity","?")
+    env_loc = session.get("environment","?")
+    sys_content = f"""
+    Generate a single-sentence iPhone portrait style prompt focusing on the NPC (age={npc_age}, ethnicity={npc_eth}).
+    If environment={env_loc}, reference it. No user mention.
+    """
+    user_content = f"STORY CONTEXT:\n{full_history}\nOne line describing the NPC in environment."
+
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role":"developer","content":sys_content},
+            {"role":"user","content":user_content}
+        ],
+        temperature=0.7
+    )
+    return resp.choices[0].message.content.strip()
+
+############################################################################
+# 8) Stage Up/Down => nextStageThreshold
 ############################################################################
 
 def check_stage_up_down(new_aff):
-    current_stage = session.get("currentStage", 1)
-    req_for_stage = STAGE_REQUIREMENTS[current_stage]
-    if new_aff < req_for_stage:
+    cur_st = session.get("currentStage",1)
+    req = STAGE_REQUIREMENTS[cur_st]
+    if new_aff < req:
         new_stage = 1
         for s, needed in STAGE_REQUIREMENTS.items():
             if new_aff >= needed:
-                new_stage = max(new_stage, s)
+                new_stage = max(new_stage,s)
         session["currentStage"] = new_stage
     else:
-        while session["currentStage"] < 6:
-            nxt = session["currentStage"] + 1
-            if new_aff >= STAGE_REQUIREMENTS[nxt]:
+        while session["currentStage"]<6:
+            nxt = session["currentStage"]+1
+            if new_aff>=STAGE_REQUIREMENTS[nxt]:
                 session["currentStage"] = nxt
             else:
                 break
 
+    # compute next threshold
+    st = session["currentStage"]
+    if st<6:
+        session["nextStageThreshold"] = STAGE_REQUIREMENTS[st+1]
+    else:
+        session["nextStageThreshold"] = 999
+
 ############################################################################
-# I) Image Gen & Minimal
+# 9) Image Gen & Scene Stack
 ############################################################################
 
 def generate_flux_image(prompt, seed=None):
@@ -264,19 +288,44 @@ def generate_flux_image(prompt, seed=None):
     }
     if seed is not None:
         replicate_input["seed"] = seed
-    output_url = replicate.run("black-forest-labs/flux-1.1-pro-ultra", input=replicate_input)
-    return output_url
+    return replicate.run("black-forest-labs/flux-1.1-pro-ultra", input=replicate_input)
 
 def _save_image(url):
     r = requests.get(url)
-    with open(GENERATED_IMAGE_PATH, "wb") as f:
+    with open("output.jpg","wb") as f:
         f.write(r.content)
 
-############################################################################
-# J) Flask Routes
-############################################################################
+def store_scene(scene_text, user_action=""):
+    st = session.setdefault("scene_stack",[])
+    st.append({
+        "scene_text": scene_text,
+        "user_action": user_action
+    })
+    session["scene_stack"] = st
 
-app = Flask(__name__)
+def pop_scene():
+    st = session.get("scene_stack",[])
+    if len(st)>1:
+        st.pop()
+    session["scene_stack"] = st
+
+def current_scene():
+    st = session.get("scene_stack",[])
+    if st:
+        return st[-1]
+    return {"scene_text":"","user_action":""}
+
+def full_story_text():
+    lines=[]
+    for s in session.get("scene_stack",[]):
+        if s["user_action"]:
+            lines.append(f"User: {s['user_action']}")
+        lines.append(s["scene_text"])
+    return "\n\n".join(lines)
+
+############################################################################
+# 10) Flask Routes
+############################################################################
 
 @app.route("/")
 def home():
@@ -290,11 +339,11 @@ def restart():
 
 @app.route("/personalize", methods=["GET","POST"])
 def personalize():
-    if request.method == "POST" and "save_personalization" in request.form:
+    if request.method=="POST" and "save_personalization" in request.form:
         def merge_dropdown(dd_key, custom_key):
-            dd_val = request.form.get(dd_key, "").strip()
-            custom_val = request.form.get(custom_key, "").strip()
-            return custom_val if custom_val else dd_val
+            dd_val = request.form.get(dd_key,"").strip()
+            c_val = request.form.get(custom_key,"").strip()
+            return c_val if c_val else dd_val
 
         # user
         session["user_name"] = merge_dropdown("user_name","user_name_custom")
@@ -315,25 +364,23 @@ def personalize():
         session["npc_occupation"] = merge_dropdown("npc_occupation","npc_occupation_custom")
         session["npc_current_situation"] = merge_dropdown("npc_current_situation","npc_current_situation_custom")
 
-        # environment
         session["environment"] = merge_dropdown("environment","environment_custom")
         session["encounter_context"] = merge_dropdown("encounter_context","encounter_context_custom")
 
-        use_single_seed = (request.form.get("use_single_seed","") == "yes")
+        use_single_seed = (request.form.get("use_single_seed","")=="yes")
         session["use_single_seed"] = use_single_seed
         if use_single_seed:
             session["global_seed"] = random.randint(100000,999999)
 
-        # init hidden stats
+        # stats
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
+        session["npcPrivateThoughts"] = "(none)"
+        session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]  # from stage1 => next=2 =>2
 
-        # next stage threshold => stage 2 => 2 affection
-        session["npcMemory"] = "(none)"  # rolling summary blank
         return redirect(url_for("npc_image"))
-
     else:
         return render_template(
             "personalize.html",
@@ -357,21 +404,18 @@ def personalize():
 
 @app.route("/npc_image", methods=["GET","POST"])
 def npc_image():
-    if request.method == "GET":
-        # minimal portrait prompt
+    if request.method=="GET":
         prompt = (
-            f"A single short portrait of {session.get('npc_name','?')} wearing "
-            f"{session.get('npc_clothing','?')} with {session.get('npc_hair_color','?')} hair, {session.get('npc_hair_style','?')} style. "
-            f"Focus on her/his appearance. Photo-realistic style."
+            f"Portrait of {session.get('npc_name','?')}, age {session.get('npc_age','?')}, "
+            f"ethnicity {session.get('npc_ethnicity','?')} wearing {session.get('npc_clothing','?')}. "
+            "Photo-realistic style."
         )
         session["npc_image_prompt"] = prompt
-        return render_template(
-            "npc_image.html",
-            title="NPC Portrait",
-            npc_image_prompt=prompt,
-            npc_image_url=None,
-            seed_used=None
-        )
+        return render_template("npc_image.html",
+                               title="NPC Portrait",
+                               npc_image_prompt=prompt,
+                               npc_image_url=None,
+                               seed_used=None)
 
     prompt = request.form.get("npc_image_prompt","")
     session["npc_image_prompt"] = prompt
@@ -379,177 +423,163 @@ def npc_image():
 
     if "generate_npc_image" in request.form:
         seed_used = session["global_seed"] if use_single_seed else random.randint(100000,999999)
-        image_url = generate_flux_image(prompt, seed=seed_used)
-        _save_image(image_url)
+        url = generate_flux_image(prompt, seed=seed_used)
+        _save_image(url)
         session["last_image_seed"] = seed_used
-        return render_template(
-            "npc_image.html",
-            title="NPC Portrait",
-            npc_image_prompt=prompt,
-            npc_image_url=image_url,
-            seed_used=seed_used
-        )
+        return render_template("npc_image.html",
+                               title="NPC Portrait",
+                               npc_image_prompt=prompt,
+                               npc_image_url=url,
+                               seed_used=seed_used)
     if "regenerate_same_seed" in request.form:
-        seed_used = session.get("last_image_seed", None)
+        seed_used = session.get("last_image_seed",None)
         if not seed_used:
             seed_used = session["global_seed"] if use_single_seed else random.randint(100000,999999)
-        image_url = generate_flux_image(prompt, seed=seed_used)
-        _save_image(image_url)
+        url = generate_flux_image(prompt, seed=seed_used)
+        _save_image(url)
         session["last_image_seed"] = seed_used
-        return render_template(
-            "npc_image.html",
-            title="NPC Portrait",
-            npc_image_prompt=prompt,
-            npc_image_url=image_url,
-            seed_used=seed_used
-        )
+        return render_template("npc_image.html",
+                               title="NPC Portrait",
+                               npc_image_prompt=prompt,
+                               npc_image_url=url,
+                               seed_used=seed_used)
     if "regenerate_new_seed" in request.form:
         seed_used = random.randint(100000,999999)
-        image_url = generate_flux_image(prompt, seed=seed_used)
-        _save_image(image_url)
+        url = generate_flux_image(prompt, seed=seed_used)
+        _save_image(url)
         session["last_image_seed"] = seed_used
-        return render_template(
-            "npc_image.html",
-            title="NPC Portrait",
-            npc_image_prompt=prompt,
-            npc_image_url=image_url,
-            seed_used=seed_used
-        )
+        return render_template("npc_image.html",
+                               title="NPC Portrait",
+                               npc_image_prompt=prompt,
+                               npc_image_url=url,
+                               seed_used=seed_used)
 
     return "Invalid request in npc_image", 400
 
 @app.route("/start_story")
 def start_story():
-    # minimal snippet
-    session["last_snippet"] = "The story begins..."
+    session["scene_stack"] = []
+    # produce an environment-intro snippet
+    intro = generate_story_snippet(
+        affection=session["affectionScore"],
+        trust=session["trustScore"],
+        npc_mood=session["npcMood"],
+        current_stage=session["currentStage"],
+        last_user_action="(none)",
+        spoken_dialogue="(none)",
+        full_history="",
+        is_intro=True
+    )
+    store_scene(intro, user_action="(none)")
     return redirect(url_for("story"))
 
 @app.route("/story", methods=["GET","POST"])
 def story():
-    if request.method == "GET":
-        # Display the last snippet
-        snippet = session.get("last_snippet","(no snippet yet)")
-        affection_score = session.get("affectionScore",0.0)
-        trust_score = session.get("trustScore",5.0)
-        current_stage = session.get("currentStage",1)
-        stage_label = STAGE_INFO[current_stage]["label"]
-        stage_desc = STAGE_INFO[current_stage]["desc"]
-        npc_mood = session.get("npcMood","Neutral")
-        npc_memory = get_npc_memory()
+    if request.method=="GET":
+        data = current_scene()
+        scene_text = data["scene_text"]
+        fh = full_story_text()
+        scene_image_prompt = gpt_scene_image_prompt(fh)
 
-        return render_template(
-            "story.html",
-            title="Story",
-            scene_text=snippet,
-            scene_image_prompt="",
-            scene_image_generated=False,
-            seed_used=None,
-            affection_score=affection_score,
-            trust_score=trust_score,
-            npc_mood=npc_mood,
-            current_stage=current_stage,
-            stage_label=stage_label,
-            stage_desc=stage_desc,
-            next_threshold=0,  # we won't show next threshold unless you want
-            npc_private_thoughts=npc_memory
-        )
+        aff = session["affectionScore"]
+        trust = session["trustScore"]
+        mood = session["npcMood"]
+        cstage = session["currentStage"]
+        st_label = STAGE_INFO[cstage]["label"]
+        st_desc = STAGE_INFO[cstage]["desc"]
+        nxt_thresh = session.get("nextStageThreshold",999)
+        npc_priv = session.get("npcPrivateThoughts","")
+
+        return render_template("story.html",
+                               title="Story",
+                               scene_text=scene_text,
+                               scene_image_prompt=scene_image_prompt,
+                               scene_image_generated=False,
+                               seed_used=None,
+                               affection_score=aff,
+                               trust_score=trust,
+                               npc_mood=mood,
+                               current_stage=cstage,
+                               stage_label=st_label,
+                               stage_desc=st_desc,
+                               next_threshold=nxt_thresh,
+                               npc_private_thoughts=npc_priv)
 
     if "go_back" in request.form:
-        session["last_snippet"] = "You decide to rewind. (no real stack here, so not much to go back to)."
+        pop_scene()
         return redirect(url_for("story"))
 
-    # user typed an action
+    data = current_scene()
+    scene_text = data["scene_text"]
+    fh = full_story_text()
+    scene_image_prompt = request.form.get("scene_image_prompt","")
+    use_single_seed = session.get("use_single_seed", False)
+
     custom_action = request.form.get("user_action","").strip()
     if not custom_action:
         custom_action = "(none)"
 
-    # 1) interpret npc
+    # 1) NPC private thoughts
     npc_result = interpret_npc_state(
         affection=session["affectionScore"],
         trust=session["trustScore"],
+        npc_mood=session["npcMood"],
+        current_stage=session["currentStage"],
         last_user_action=custom_action
     )
-
-    # parse the lines
     lines = npc_result.split("\n")
-    monologue_lines = []
     spoken_dialogue = ""
-    gestures = ""
-    affect_change = "0.0"
-    trust_change = "0.0"
-    emotional_state = ""
-    behaviour = ""
+    affchg = "0.0"
+    trustchg = "0.0"
+    new_mood = session["npcMood"]
 
-    # We'll store a short chunk of monologue in npcMemory
-    short_summary = ""
-
-    for line in lines:
-        stripline = line.strip()
-        # We'll try to detect the "lines" by prefix:
-        if stripline.startswith("SPOKEN_DIALOGUE:"):
-            spoken_dialogue = stripline.split(":",1)[1].strip()
-        elif stripline.startswith("GESTURES:"):
-            gestures = stripline.split(":",1)[1].strip()
-        elif stripline.startswith("AFFECT_CHANGE:"):
-            affect_change = stripline.split(":",1)[1].strip()
-        elif stripline.startswith("TRUST_CHANGE:"):
-            trust_change = stripline.split(":",1)[1].strip()
-        elif stripline.startswith("EMOTIONAL_STATE:"):
-            emotional_state = stripline.split(":",1)[1].strip()
-        elif stripline.startswith("BEHAVIOUR:"):
-            behaviour = stripline.split(":",1)[1].strip()
-        else:
-            # it's part of the internal monologue
-            monologue_lines.append(stripline)
+    for ln in lines:
+        s=ln.strip()
+        if s.startswith("SPOKEN_DIALOGUE:"):
+            spoken_dialogue = s.split(":",1)[1].strip()
+        elif s.startswith("AFFECT_CHANGE:"):
+            affchg = s.split(":",1)[1].strip()
+        elif s.startswith("TRUST_CHANGE:"):
+            trustchg = s.split(":",1)[1].strip()
+        elif s.startswith("EMOTIONAL_STATE:"):
+            new_mood = s.split(":",1)[1].strip()
 
     # update affection/trust
-    try:
-        delta_a = float(affect_change)
-    except ValueError:
-        delta_a = 0.0
+    def update_stats(a_str,t_str):
+        try: da=float(a_str)
+        except: da=0.0
+        new_a=session["affectionScore"]+da
+        session["affectionScore"]=new_a
+        check_stage_up_down(new_a)
 
-    old_aff = session["affectionScore"]
-    new_aff = old_aff + delta_a
-    session["affectionScore"] = new_aff
-    check_stage_up_down(new_aff)
+        try: dt=float(t_str)
+        except: dt=0.0
+        new_t=session["trustScore"]+dt
+        new_t=max(0.0, min(15.0,new_t))
+        session["trustScore"]=new_t
 
-    try:
-        delta_t = float(trust_change)
-    except ValueError:
-        delta_t = 0.0
-    old_trust = session["trustScore"]
-    new_trust = old_trust + delta_t
-    new_trust = max(0.0, min(10.0, new_trust))
-    session["trustScore"] = new_trust
+    update_stats(affchg,trustchg)
+    session["npcMood"]=new_mood
+    session["npcPrivateThoughts"]=npc_result
 
-    # Let's build a short summary from the internal monologue for npcMemory
-    # We'll just take the first line or so from monologue
-    if monologue_lines:
-        short_summary = monologue_lines[0]
-    else:
-        short_summary = "(no new internal monologue)"
-
-    old_memory = get_npc_memory()
-    # We'll keep it short: just store the new summary
-    updated_memory = f"{old_memory}\n{short_summary}"
-    # If it gets too big, we could truncate
-    if len(updated_memory) > 300:
-        updated_memory = updated_memory[-300:]  # keep last 300 chars
-    set_npc_memory(updated_memory)
-
-    # 2) generate a single-turn snippet
-    snippet = generate_single_turn_snippet(
-        user_action=custom_action,
+    # 2) user-facing snippet => incorporate spoken dialogue
+    new_snippet = generate_story_snippet(
+        affection=session["affectionScore"],
+        trust=session["trustScore"],
+        npc_mood=session["npcMood"],
+        current_stage=session["currentStage"],
+        last_user_action=custom_action,
         spoken_dialogue=spoken_dialogue,
-        gestures=gestures
+        full_history=fh,
+        is_intro=False
     )
 
-    session["last_snippet"] = snippet
+    store_scene(new_snippet, user_action=custom_action)
     return redirect(url_for("story"))
 
 @app.route("/view_image")
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
-if __name__ == "__main__":
+if __name__=="__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
