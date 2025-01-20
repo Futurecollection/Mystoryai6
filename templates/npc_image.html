@@ -1,25 +1,31 @@
-
 {% extends "base.html" %}
 {% block content %}
-  <h1>NPC Portrait Prompt</h1>
-  <p>Below is an auto-generated single-sentence portrait prompt focusing on the NPC.</p>
-  <form method="POST" class="mb-3">
-    <textarea name="npc_image_prompt" rows="3" class="form-control">{{ npc_image_prompt }}</textarea>
-    <div class="mt-3">
-      <button type="submit" name="generate_npc_image" value="true" class="btn btn-success me-2">Generate NPC Image</button>
-    </div>
-  </form>
+<h1>NPC Portrait Prompt</h1>
+<p class="mb-3">Below is an auto-generated prompt describing the NPC. You can edit if you wish, then generate the image.</p>
+<form method="POST" class="mb-3">
+  <textarea name="npc_image_prompt" rows="3" class="form-control">{{ npc_image_prompt }}</textarea>
+  <div class="mt-3">
+    <button type="submit" name="generate_npc_image" value="true" class="btn btn-success me-2">
+      Generate NPC Image
+    </button>
+  </div>
+</form>
 
-  {% if npc_image_url %}
-    <hr>
-    <h2>NPC Portrait</h2>
-    <img src="/view_image" alt="NPC Image" style="max-width: 60%;"><br>
-    <p>Seed: {{ seed_used }}</p>
-    <form method="POST">
-      <button type="submit" name="regenerate_same_seed" value="true" class="btn btn-secondary me-2">Regenerate (Same Seed)</button>
-      <button type="submit" name="regenerate_new_seed" value="true" class="btn btn-warning">Regenerate (New Seed)</button>
-    </form>
-  {% endif %}
-  <br>
-  <a href="/start_story" class="btn btn-primary">Continue to Story</a>
+{% if npc_image_url %}
+  <hr>
+  <h2>NPC Portrait</h2>
+  <img src="{{ url_for('view_image') }}" alt="NPC Image" style="max-width: 60%;">
+  <p class="mt-2">Seed: {{ seed_used }}</p>
+  <form method="POST">
+    <button type="submit" name="regenerate_same_seed" value="true" class="btn btn-secondary me-2">
+      Regenerate (Same Seed)
+    </button>
+    <button type="submit" name="regenerate_new_seed" value="true" class="btn btn-warning">
+      Regenerate (New Seed)
+    </button>
+  </form>
+{% endif %}
+
+<br>
+<a href="{{ url_for('start_story') }}" class="btn btn-primary btn-lg">Continue to Story</a>
 {% endblock %}

@@ -1,7 +1,11 @@
-
 {% extends "base.html" %}
 {% block content %}
-  <h1 class="mb-4">Romance Roleplay Demo (Server-Side Session)</h1>
-  <p>Welcome! This app uses GPT-4o-mini for story + prompts, Flux for images, and server-side sessions so we can handle long stories without cookie issues.</p>
-  <a href="/restart" class="btn btn-primary">Start / Restart</a>
+<h1 class="text-center mb-3">Destined Encounters: A Slow-Paced Romance RPG</h1>
+<p class="masthead text-center mb-4">
+  Dive into a slow-burn, evolving romance. Control your actions, see how the NPC reacts
+  (with hidden thoughts in the debug panel), and see if love can blossom or fail.
+</p>
+<div class="d-flex justify-content-center">
+  <a href="{{ url_for('restart') }}" class="btn btn-primary btn-lg">Begin / Restart</a>
+</div>
 {% endblock %}
