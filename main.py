@@ -118,13 +118,16 @@ STAGE_REQUIREMENTS = {
 ############################################################################
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "destined_encounters_2024_secure"
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = "./.flask_sess"
-app.config["SESSION_PERMANENT"] = False
+app.config.update(
+    SECRET_KEY="destined_encounters_2024_secure",
+    SESSION_TYPE="filesystem",
+    SESSION_FILE_DIR="./.flask_sess",
+    SESSION_PERMANENT=False
+)
 Session(app)
 
-os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
+if not os.path.exists(app.config["SESSION_FILE_DIR"]):
+    os.makedirs(app.config["SESSION_FILE_DIR"], mode=0o777, exist_ok=True)
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
