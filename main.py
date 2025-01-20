@@ -118,7 +118,7 @@ STAGE_REQUIREMENTS = {
 ############################################################################
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "YOUR_FLASK_SECRET"
+app.config["SECRET_KEY"] = "destined_encounters_2024_secure"
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
 app.config["SESSION_PERMANENT"] = False
