@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Interaction</h1>
+
+<!-- Show the last spoken dialogue from the NPC -->
+<div class="border p-3 mb-3 bg-light" style="white-space: pre-line;">
+  <strong>NPC says:</strong> {{ npc_spoken_dialogue }}
+</div>
+
+<h3>What do you do (if anything)?</h3>
+<form method="POST" class="mb-4">
+  <label class="form-label">Your action:</label>
+  <input type="text" class="form-control mb-2" name="user_action" placeholder="e.g. 'He quietly asks about her day...'">
+  <button type="submit" name="submit_action" class="btn btn-success">
+    Submit Action
+  </button>
+</form>
+
+<hr>
+
+<!-- SCENE IMAGE GENERATION SECTION -->
+<h3>Scene Image Prompt</h3>
+
+<!-- Button to auto-generate single-sentence prompt from GPT (based on conversation log) -->
+<form method="POST">
+  <button type="submit" name="generate_scene_image" class="btn btn-primary">
+    Auto-Generate Prompt (GPT)
+  </button>
+</form>
+
+<p class="mt-3">Below is the current scene prompt (editable):</p>
+<form method="POST">
+  <textarea name="scene_image_prompt" rows="3" class="form-control">{{ scene_image_prompt }}</textarea>
+  <div class="mt-3">
+    <button type="submit" name="do_generate_flux" value="gen" class="btn btn-success me-2">
+      Generate Scene Image
+    </button>
+    <button type="submit" name="same_seed" value="true" class="btn btn-secondary me-2">
+      Regenerate (Same Seed)
+    </button>
+    <button type="submit" name="new_seed" value="true" class="btn btn-warning">
+      Regenerate (New Seed)
+    </button>
+  </div>
+</form>
+
+{% if scene_image_url %}
+  <hr>
+  <h4>Generated Scene Image</h4>
+  <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width:60%;">
+  <p class="mt-2">Seed: {{ scene_image_seed }}</p>
+{% endif %}
+
+<hr>
+<h4>Relationship Stats</h4>
+<ul>
+  <li>Affection Score: {{ affection_score }}</li>
+  <li>Trust Score: {{ trust_score }}</li>
+  <li>NPC Mood: {{ npc_mood }}</li>
+  <li>Current Stage: {{ current_stage }} ({{ stage_label }})</li>
+  <li>Stage Description: {{ stage_desc }}</li>
+  <li>Next Stage Threshold: {{ next_threshold }}</li>
+</ul>
+
+<hr>
+<h4>NPC Private Thoughts (Debug)</h4>
+<p style="white-space: pre-line;">{{ npc_private_thoughts }}</p>
+
+<hr>
+<a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">Restart Entire Story</a>
+{% endblock %}
