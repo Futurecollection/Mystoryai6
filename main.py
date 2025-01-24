@@ -194,9 +194,8 @@ PREVIOUS_LOG:
 
     messages = [
         {
-            "role": "assistant",
-            "content": prefix_instructions,
-            "prefix": True
+            "role": "system",
+            "content": prefix_instructions
         },
         {
             "role": "user",
