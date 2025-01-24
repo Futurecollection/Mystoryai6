@@ -15,33 +15,33 @@ from flask_session import Session
 ############################################################################
 
 app = Flask(__name__)
-
-# SECRET_KEY must be set for sessions, but keep it unique in production
 app.config["SECRET_KEY"] = "abc123supersecret"
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
-# Make sure the directory for session files exists
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 
 ############################################################################
 # 2) Initialize Clients (NOT stored in session!)
 ############################################################################
 
-# We do NOT store these clients in the session. We only keep them as module-level variables.
+# Example approach:
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
+deepseek_client = OpenAI(
+    api_key=DEEPSEEK_API_KEY,
+    base_url="https://api.deepseek.com"
+)
+
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY)  # used for GPT-4o-mini
+client = OpenAI(api_key=OPENAI_API_KEY)  # If you use GPT-4, etc.
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
-replicate.client.api_token = REPLICATE_API_TOKEN  # no storing in session
-
-DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
-deepseek_client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
+replicate.client.api_token = REPLICATE_API_TOKEN
 
 ############################################################################
-# 3) Constants / Lists / Stage Requirements
+# 3) Constants / Stage Requirements / Etc.
 ############################################################################
 
 USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Other"]
@@ -104,17 +104,13 @@ STAGE_REQUIREMENTS = {
     6: 15
 }
 
-GENERATED_IMAGE_PATH = "output.jpg"  # local file path for the last image
+GENERATED_IMAGE_PATH = "output.jpg"
 
 ############################################################################
-# 4) Helper Functions
+# 4) Build Personalization
 ############################################################################
 
 def build_personalization_string():
-    """
-    Returns a big multiline string that includes user & NPC attributes,
-    plus environment info, from the Flask session.
-    """
     user_data = (
         f"USER:\n"
         f"  Name: {session.get('user_name','?')}\n"
@@ -143,72 +139,94 @@ def build_personalization_string():
     )
     return user_data + npc_data + env_data
 
+############################################################################
+# 5) Single-Pass LLM with "assistant prefix" + "user" for deepseek-reasoner
+############################################################################
+
 def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_action, full_history=""):
     """
-    Calls DeepSeek to get NPC's internal monologue, spoken dialogue, and stat changes.
-    We only store the final string in session, never the raw response object.
+    We'll create two messages for deepseek-reasoner:
+      1) assistant with prefix=True = "system-like" instructions about dice logic
+      2) user = the user content (the last action, plus conversation log)
+    The model returns a single answer with lines (DICE_ROLL, OUTCOME, AFFECT_CHANGE_FINAL, etc.)
     """
     stage_label = STAGE_INFO[current_stage]["label"]
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
-    system_msg = f"""
-    You are the NPC's internal thoughts and external response generator.
+    prefix_instructions = f"""
+You are both the conversation generator and the dice-based logic engine for a romance RPG.
 
-    Relationship Stage={current_stage} ({stage_label})
-    {stage_desc}
+For each user action:
+1) Identify ACTION_TIER = low|medium|high|bad.
+2) Generate a random integer DICE_ROLL (1..100). (Simulate fairly, do not cheat.)
+3) Compare DICE_ROLL to these probabilities (based on ACTION_TIER):
+   - low:    60% success, 40% neutral, 0% regression
+   - medium: 50% success, 30% neutral, 20% regression
+   - high:   35% success, 50% neutral, 15% regression
+   - bad:    0% success,  30% neutral, 70% regression
+4) Decide final shift in affection as AFFECT_CHANGE_FINAL:
+   - If success => your recommended shift
+   - If neutral => 0
+   - If regression => invert sign (if 0, fallback to -2)
+5) Produce these lines EXACTLY (no extra lines):
+   DICE_ROLL: ...
+   OUTCOME: success|neutral|regression
+   AFFECT_CHANGE_FINAL: ...
+   SPOKEN_DIALOGUE: ...
+   INTERNAL_MONOLOGUE: ...
 
-    Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
-    The user's last action is: {last_user_action}
+Background (do not contradict):
+{personalization}
 
-    Provide output in this exact format (no extra lines):
-    INTERNAL_MONOLOGUE: ...
-    SPOKEN_DIALOGUE: ...
-    AFFECT_CHANGE: ...
-    TRUST_CHANGE: ...
-    EMOTIONAL_STATE: ...
-    BEHAVIOR: ...
+Relationship Stage={current_stage} ({stage_label})
+{stage_desc}
+
+Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
     """
 
     user_msg = f"""
-    PERSONALIZATION:\n{personalization}
+User's last action: {last_user_action}
 
-    PREVIOUS_LOG:\n{full_history}
+PREVIOUS_LOG:
+{full_history}
+"""
 
-    Please provide an internal monologue plus the NPC's outward spoken dialogue
-    and changes in stats, given the user just did: "{last_user_action}".
-    """
+    messages = [
+        {
+            "role": "assistant",
+            "content": prefix_instructions,
+            "prefix": True
+        },
+        {
+            "role": "user",
+            "content": user_msg
+        }
+    ]
 
-    # This returns an "openai.libcore.ChatCompletion" object, but we only store the final string
-    resp = deepseek_client.chat.completions.create(
+    response = deepseek_client.chat.completions.create(
         model="deepseek-reasoner",
-        messages=[
-            {"role": "system", "content": system_msg},
-            {"role": "user", "content": user_msg}
-        ],
-        temperature=0.7,
-        stream=False
+        messages=messages,
+        temperature=0.5
     )
 
-    # Extract the final text from the response and return it
-    final_text = resp.choices[0].message.content
-    return final_text.strip()
+    final_text = response.choices[0].message.content.strip()
+    return final_text
+
+############################################################################
+# 6) Stage Up/Down Checker
+############################################################################
 
 def check_stage_up_down(new_aff):
-    """
-    Adjust the relationship stage based on the updated affection score.
-    """
     cur_stage = session.get("currentStage",1)
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
-        # Possibly revert stage if affection dropped
         new_st = 1
         for s, needed in STAGE_REQUIREMENTS.items():
             if new_aff >= needed:
                 new_st = max(new_st,s)
         session["currentStage"] = new_st
     else:
-        # Move forward if new_aff meets next stage thresholds
         while session["currentStage"] < 6:
             nxt = session["currentStage"] + 1
             if new_aff >= STAGE_REQUIREMENTS[nxt]:
@@ -216,18 +234,14 @@ def check_stage_up_down(new_aff):
             else:
                 break
 
-    # compute next threshold
     st = session["currentStage"]
-    if st < 6:
-        session["nextStageThreshold"] = STAGE_REQUIREMENTS[st+1]
-    else:
-        session["nextStageThreshold"] = 999
+    session["nextStageThreshold"] = STAGE_REQUIREMENTS[st+1] if st < 6 else 999
 
-def generate_flux_image(prompt, seed=None):
-    """
-    Calls Replicate to generate an image from the 'black-forest-labs/flux-1.1-pro-ultra' model.
-    We return a string URL, do NOT store the replicate response object in session.
-    """
+############################################################################
+# 7) Image Generation
+############################################################################
+
+def generate_flux_image_safely(prompt, seed=None):
     replicate_input = {
         "prompt": prompt,
         "raw": True,
@@ -236,48 +250,22 @@ def generate_flux_image(prompt, seed=None):
     if seed is not None:
         replicate_input["seed"] = seed
 
-    # replicate.run returns a URL string typically
-    url = replicate.run("black-forest-labs/flux-1.1-pro-ultra", input=replicate_input)
-    return url
+    result = replicate.run("black-forest-labs/flux-1.1-pro-ultra", input=replicate_input)
+    if isinstance(result, list):
+        if result:
+            return str(result[-1])
+        else:
+            return "No URL returned??"
+    else:
+        return str(result)
 
 def _save_image(url):
-    """
-    Downloads the image data from the given url to a local file (output.jpg).
-    """
     r = requests.get(url)
     with open(GENERATED_IMAGE_PATH, "wb") as f:
         f.write(r.content)
 
-def gpt_scene_image_prompt(full_history):
-    """
-    Creates a single-sentence prompt for the scene using 'gpt-4o-mini'.
-    We only store or return the final string, never the raw response object.
-    """
-    npc_age = session.get("npc_age", "?")
-    npc_eth = session.get("npc_ethnicity", "?")
-    env_loc = session.get("environment", "?")
-
-    sys_content = f"""
-    Create a single-sentence photographic prompt featuring the NPC (age {npc_age}, {npc_eth}), 
-    possibly referencing the environment '{env_loc}'. 
-    Focus on describing the NPC's appearance or posture and the scene vibe. 
-    No mention of 'user' or 'photographer'.
-    """
-
-    user_content = f"STORY CONTEXT:\n{full_history}\nOne line describing the NPC in environment."
-
-    resp = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": sys_content},
-            {"role": "user", "content": user_content}
-        ],
-        temperature=0.7
-    )
-    return resp.choices[0].message.content.strip()
-
 ############################################################################
-# 5) Flask Routes
+# 8) Flask Routes
 ############################################################################
 
 @app.route("/")
@@ -331,12 +319,13 @@ def personalize():
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
         session["npcPrivateThoughts"] = "(none)"
-        session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]  # stage1 => next=2 => 2
+        session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
 
-        # create an empty log for user/NPC lines
+        # debug
+        session["dice_debug_roll"] = "(none)"
+        session["dice_debug_outcome"] = "(none)"
+
         session["interaction_log"] = []
-
-        # scene prompt placeholders
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
@@ -344,6 +333,7 @@ def personalize():
         return redirect(url_for("npc_image"))
 
     else:
+        # Render your existing personalization form
         return render_template(
             "personalize.html",
             title="Personalizations",
@@ -388,8 +378,8 @@ def npc_image():
 
     if "generate_npc_image" in request.form:
         seed_used = session["global_seed"] if use_single_seed else random.randint(100000,999999)
-        url = generate_flux_image(prompt, seed=seed_used)
-        _save_image(url)  # save to output.jpg
+        url = generate_flux_image_safely(prompt, seed=seed_used)
+        _save_image(url)
         session["last_image_seed"] = seed_used
         return render_template(
             "npc_image.html",
@@ -403,7 +393,7 @@ def npc_image():
         seed_used = session.get("last_image_seed", None)
         if not seed_used:
             seed_used = session["global_seed"] if use_single_seed else random.randint(100000,999999)
-        url = generate_flux_image(prompt, seed=seed_used)
+        url = generate_flux_image_safely(prompt, seed=seed_used)
         _save_image(url)
         session["last_image_seed"] = seed_used
         return render_template(
@@ -416,7 +406,7 @@ def npc_image():
 
     if "regenerate_new_seed" in request.form:
         seed_used = random.randint(100000,999999)
-        url = generate_flux_image(prompt, seed=seed_used)
+        url = generate_flux_image_safely(prompt, seed=seed_used)
         _save_image(url)
         session["last_image_seed"] = seed_used
         return render_template(
@@ -432,11 +422,10 @@ def npc_image():
 @app.route("/interaction", methods=["GET","POST"])
 def interaction():
     """
-    Main route for user actions + NPC responses + optional scene image generation
+    Main user action route. Single pass call to deepseek-reasoner using interpret_npc_state.
+    Then parse the model's lines (DICE_ROLL, OUTCOME, AFFECT_CHANGE_FINAL, etc.).
     """
-
     if request.method == "GET":
-        # Show the form, plus last NPC response, stats, and any scene image
         affection = session.get("affectionScore", 0.0)
         trust = session.get("trustScore", 5.0)
         mood = session.get("npcMood", "Neutral")
@@ -452,6 +441,9 @@ def interaction():
         scene_url = session.get("scene_image_url", None)
         seed_used = session.get("scene_image_seed", None)
 
+        dice_roll_dbg = session.get("dice_debug_roll","(none)")
+        dice_outcome_dbg = session.get("dice_debug_outcome","(none)")
+
         return render_template(
             "interaction.html",
             title="Interact with NPC",
@@ -466,12 +458,16 @@ def interaction():
             npc_spoken_dialogue=last_spoken,
             scene_image_prompt=scene_prompt,
             scene_image_url=scene_url,
-            scene_image_seed=seed_used
+            scene_image_seed=seed_used,
+            environment_options=ENVIRONMENT_OPTIONS,
+            clothing_options=CLOTHING_OPTIONS,
+            interaction_log=session.get("interaction_log", []),
+            dice_roll_dbg=dice_roll_dbg,
+            dice_outcome_dbg=dice_outcome_dbg
         )
 
     else:
         if "submit_action" in request.form:
-            # A new user action
             user_action = request.form.get("user_action", "").strip()
             if not user_action:
                 user_action = "(no action)"
@@ -481,10 +477,10 @@ def interaction():
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
 
-            # Build a minimal "full_history" from the session logs
             log_entries = session.get("interaction_log", [])
             full_history = "\n".join(log_entries)
 
+            # Single pass to deepseek-reasoner
             result_text = interpret_npc_state(
                 affection=affection,
                 trust=trust,
@@ -495,75 +491,81 @@ def interaction():
             )
 
             # parse them
-            internal_monologue = ""
+            dice_roll_val = "(none)"
+            outcome_val = "(none)"
+            final_affect = 0.0
             spoken_dialogue = ""
-            affect_change = 0.0
-            trust_change = 0.0
-            new_mood = mood
-            behavior_desc = ""
+            internal_monologue = ""
 
             lines = result_text.split("\n")
             for ln in lines:
                 s = ln.strip()
-                if s.startswith("INTERNAL_MONOLOGUE:"):
-                    internal_monologue = s.split(":",1)[1].strip()
+                if s.startswith("DICE_ROLL:"):
+                    dice_roll_val = s.split(":",1)[1].strip()
+                elif s.startswith("OUTCOME:"):
+                    outcome_val = s.split(":",1)[1].strip()
+                elif s.startswith("AFFECT_CHANGE_FINAL:"):
+                    try:
+                        final_affect = float(s.split(":",1)[1].strip())
+                    except:
+                        final_affect = 0.0
                 elif s.startswith("SPOKEN_DIALOGUE:"):
                     spoken_dialogue = s.split(":",1)[1].strip()
-                elif s.startswith("AFFECT_CHANGE:"):
-                    try:
-                        affect_change = float(s.split(":",1)[1].strip())
-                    except:
-                        affect_change = 0.0
-                elif s.startswith("TRUST_CHANGE:"):
-                    try:
-                        trust_change = float(s.split(":",1)[1].strip())
-                    except:
-                        trust_change = 0.0
-                elif s.startswith("EMOTIONAL_STATE:"):
-                    new_mood = s.split(":",1)[1].strip()
-                elif s.startswith("BEHAVIOR:"):
-                    behavior_desc = s.split(":",1)[1].strip()
-                else:
-                    # Possibly leftover lines from internal monologue
-                    pass
+                elif s.startswith("INTERNAL_MONOLOGUE:"):
+                    internal_monologue = s.split(":",1)[1].strip()
 
-            # Update stats
-            new_aff = affection + affect_change
+            new_aff = affection + final_affect
             session["affectionScore"] = new_aff
-            check_stage_up_down(new_aff)
 
-            new_trust = trust + trust_change
-            new_trust = max(0.0, min(15.0, new_trust))
-            session["trustScore"] = new_trust
+            session["dice_debug_roll"] = dice_roll_val
+            session["dice_debug_outcome"] = outcome_val
 
-            session["npcMood"] = new_mood
-
-            # Save the entire text in npcPrivateThoughts
-            # => final_text is a string, so it's safe
+            session["npcMood"] = mood
             session["npcPrivateThoughts"] = result_text
             session["npcSpokenDialogue"] = spoken_dialogue
 
-            # Append new lines to the log (strings only)
+            check_stage_up_down(new_aff)
+
             log_entries.append(f"User: {user_action}")
-            log_entries.append(f"NPC: {spoken_dialogue}")
+            log_entries.append(
+                f"NPC: {spoken_dialogue} [DiceRoll={dice_roll_val}, Outcome={outcome_val}, FinalAffect={final_affect}]"
+            )
             session["interaction_log"] = log_entries
 
             return redirect(url_for("interaction"))
 
-        elif "generate_scene_image" in request.form:
-            # We want a GPT-based scene prompt
-            log_entries = session.get("interaction_log", [])
-            full_history = "\n".join(log_entries)
+        elif "update_mutable" in request.form:
+            new_env = request.form.get("new_environment", "").strip()
+            new_clothing = request.form.get("new_clothing", "").strip()
 
-            auto_prompt = gpt_scene_image_prompt(full_history)
-            session["scene_image_prompt"] = auto_prompt
-            session["scene_image_url"] = None
-            session["scene_image_seed"] = None
+            log_entries = session.get("interaction_log", [])
+            changed_something = False
+
+            if new_env:
+                session["environment"] = new_env
+                log_entries.append(f"SYSTEM: Environment changed to '{new_env}'.")
+                changed_something = True
+
+            if new_clothing:
+                session["npc_clothing"] = new_clothing
+                log_entries.append(f"SYSTEM: NPC clothing changed to '{new_clothing}'.")
+                changed_something = True
+
+            if changed_something:
+                session["interaction_log"] = log_entries
 
             return redirect(url_for("interaction"))
 
+        elif "generate_scene_image" in request.form:
+            log_entries = session.get("interaction_log", [])
+            full_history = "\n".join(log_entries)
+            prompt = f"A scene featuring the NPC, referencing the environment.\n\nHistory:\n{full_history}"
+            session["scene_image_prompt"] = prompt
+            session["scene_image_url"] = None
+            session["scene_image_seed"] = None
+            return redirect(url_for("interaction"))
+
         elif "do_generate_flux" in request.form or "same_seed" in request.form or "new_seed" in request.form:
-            # Actually call replicate with the prompt
             prompt_text = request.form.get("scene_image_prompt","").strip()
             if not prompt_text:
                 prompt_text = "(No prompt text?)"
@@ -572,39 +574,30 @@ def interaction():
             seed_used = session.get("scene_image_seed", None)
 
             if "same_seed" in request.form:
-                # Re-generate with same seed
                 if not seed_used:
-                    # fallback to global or random
                     seed_used = session.get("global_seed", None) or random.randint(100000,999999)
             elif "new_seed" in request.form:
-                # brand new random seed
                 seed_used = random.randint(100000,999999)
             else:
-                # "Generate Scene Image" with default approach
                 if use_single_seed:
                     if not seed_used:
                         seed_used = session.get("global_seed", None) or random.randint(100000,999999)
                 else:
                     seed_used = random.randint(100000,999999)
 
-            url = generate_flux_image(prompt_text, seed=seed_used)
+            url = generate_flux_image_safely(prompt_text, seed=seed_used)
             _save_image(url)
-
             session["scene_image_prompt"] = prompt_text
-            session["scene_image_url"] = url  # just a string
-            session["scene_image_seed"] = seed_used  # just an int
+            session["scene_image_url"] = url
+            session["scene_image_seed"] = seed_used
 
             return redirect(url_for("interaction"))
 
-        else:
-            return "Invalid form submission in /interaction", 400
+        return "Invalid form submission in /interaction", 400
 
 @app.route("/view_image")
 def view_image():
-    """
-    Returns the locally saved image from replicate.
-    """
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False)

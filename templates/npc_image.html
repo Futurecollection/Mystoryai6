@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>NPC Portrait Prompt</h1>
-<p class="mb-3">Below is an auto-generated prompt describing the NPC. You can edit if you wish, then generate the image.</p>
+<p class="mb-3">
+  Below is an auto-generated prompt describing the NPC. You can edit if you wish,
+  then generate the image.
+</p>
 <form method="POST" class="mb-3">
   <textarea name="npc_image_prompt" rows="3" class="form-control">{{ npc_image_prompt }}</textarea>
   <div class="mt-3">
