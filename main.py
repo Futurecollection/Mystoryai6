@@ -200,13 +200,12 @@ PREVIOUS_LOG:
 
     messages = [
         {
-            "role": "assistant",
-            "content": prefix_instructions,
-            "prefix": True
+            "role": "user", 
+            "content": user_msg
         },
         {
-            "role": "user",
-            "content": user_msg
+            "role": "assistant",
+            "content": prefix_instructions
         }
     ]
 
