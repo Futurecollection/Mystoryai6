@@ -260,7 +260,7 @@ No "we see" or "the photographer sees." Just describe the scene.
         model="deepseek-reasoner",
         messages=[
             {"role":"user","content":user_content},
-            {"role":"assistant","content":prefix_instructions}
+            {"role":"assistant","content":prefix_instructions,"prefix":True}
         ],
         temperature=0.7
     )
