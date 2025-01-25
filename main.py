@@ -1,3 +1,39 @@
+python
+from flask import Flask, render_template, request, url_for, redirect, session
+import os
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+app.config['SESSION_TYPE'] = 'filesystem'
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/interaction', methods=['GET', 'POST'])
+def interaction():
+    return render_template('interaction.html',
+                         npc_spoken_dialogue="Welcome!",
+                         environment_options=["Park", "Cafe", "Library"],
+                         clothing_options=["Casual", "Formal", "Athletic"],
+                         interaction_log=[],
+                         affection_score=0,
+                         trust_score=0,
+                         npc_mood="Neutral",
+                         current_stage=1,
+                         stage_label="Beginning",
+                         stage_desc="Initial meeting",
+                         next_threshold=10,
+                         dice_roll_dbg=0,
+                         dice_outcome_dbg="None")
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)
+
+```
+
+```html
+<!-- templates/interaction.html -->
 {% extends "base.html" %}
 {% block content %}
 <h1>Interaction</h1>
@@ -114,3 +150,19 @@
 <hr>
 <a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">Restart Entire Story</a>
 {% endblock %}
+```
+
+```html
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Story</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
