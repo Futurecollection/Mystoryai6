@@ -259,8 +259,8 @@ No "we see" or "the photographer sees." Just describe the scene.
     resp = deepseek_client.chat.completions.create(
         model="deepseek-reasoner",
         messages=[
-            {"role":"user","content":user_content},
-            {"role":"assistant","content":prefix_instructions,"prefix":True}
+            {"role":"assistant","content":prefix_instructions,"prefix":True},
+            {"role":"user","content":user_content}
         ],
         temperature=0.7
     )
