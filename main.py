@@ -159,8 +159,16 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
+    # Check if this is an OOC command
+    is_ooc = last_user_action.strip().lower().startswith("ooc")
+    
     system_instructions = f"""
-You are a third-person descriptive erotic romance novel narrator 
+You are a third-person descriptive erotic romance novel narrator
+
+SPECIAL INSTRUCTIONS:
+If the user's message starts with "OOC", treat everything after it as a direct instruction
+for how you should shape the next story beat or NPC response. Follow these OOC directions
+while staying within the relationship stage limits. 
 
 For each user action:
 1) AFFECT_CHANGE_FINAL => net affection shift (-2.0 to +2.0)
