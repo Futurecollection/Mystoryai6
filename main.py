@@ -3,7 +3,7 @@ import replicate
 import requests
 import random
 
-from openai import OpenAI
+import google.generativeai as genai
 from flask import (
     Flask, request, render_template,
     session, redirect, url_for, send_file
@@ -23,8 +23,9 @@ os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 # 1) Initialize GPT-4o-mini + Replicate
 ############################################################################
 
-GPT4O_MINI_API_KEY = os.environ.get("GPT4O_MINI_API_KEY")
-gpt4o_mini_client = OpenAI(api_key=GPT4O_MINI_API_KEY)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-pro')
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 replicate.client.api_token = REPLICATE_API_TOKEN
@@ -181,16 +182,13 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{full_history}"
 
-    resp = gpt4o_mini_client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_instructions},
-            {"role": "user", "content": user_text}
-        ],
-        temperature=0.7
+    chat = model.start_chat()
+    resp = chat.send_message(
+        f"{system_instructions}\n\n{user_text}",
+        generation_config={"temperature": 0.7}
     )
-
-    return resp.choices[0].message.content.strip()
+    
+    return resp.text.strip()
 
 ############################################################################
 # 6) Stage Checker
