@@ -25,7 +25,7 @@ os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 replicate.client.api_token = REPLICATE_API_TOKEN
