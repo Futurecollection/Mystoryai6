@@ -27,7 +27,7 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-2.0-flash-exp')
+model = genai.GenerativeModel('gemini-1.5-pro')
 
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
