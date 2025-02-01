@@ -258,16 +258,23 @@ def generate_flux_image_safely(prompt, seed=None):
 ############################################################################
 
 def gpt_scene_image_prompt(full_history):
+    # Get all NPC details
     npc_age = session.get("npc_age","?")
+    npc_gender = session.get("npc_gender","?") 
     npc_eth = session.get("npc_ethnicity","?")
+    npc_body = session.get("npc_body_type","?")
+    npc_hair_color = session.get("npc_hair_color","?")
+    npc_hair_style = session.get("npc_hair_style","?")
+    npc_clothing = session.get("npc_clothing","?")
     env_loc = session.get("environment","?")
 
     prompt = f"""
 You are a creative scene image prompt generator.
-Create a single-sentence photographic prompt focusing on:
-- NPC (age {npc_age}, {npc_eth})
+Create a single-sentence photographic prompt that must include:
+- NPC physical details: {npc_gender}, age {npc_age}, {npc_eth}, {npc_body} build
+- NPC hair: {npc_hair_color}, {npc_hair_style} style
+- NPC clothing: {npc_clothing}
 - Environment: {env_loc}
-- Their hair/clothing if mentioned in context
 Do not reference 'user' or 'photographer'.
 
 STORY CONTEXT:
