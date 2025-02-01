@@ -160,20 +160,16 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     personalization = build_personalization_string()
 
     system_instructions = f"""
-You are both a dice-based logic engine and a third-person narrator from the user's POV.
+You are a third-person narrator from the user's POV.
 
 For each user action:
-1) Generate DICE_ROLL=1..100
-2) Compare success/neutral/regression probabilities
-3) AFFECT_CHANGE_FINAL => net affection shift
-4) ACTION_TIER => (low/medium/high/bad)
-5) BEHAVIOR => short outward style
-6) NARRATION => single paragraph describing user’s action, environment, NPC reaction + dialogue
-7) IMAGE_PROMPT => single sentence referencing NPC’s age/body/hair/clothing, environment
+1) AFFECT_CHANGE_FINAL => net affection shift (-2.0 to +2.0)
+2) ACTION_TIER => (low/medium/high)
+3) BEHAVIOR => short outward style
+4) NARRATION => single paragraph describing user's action, environment, NPC reaction + dialogue
+5) IMAGE_PROMPT => single sentence referencing NPC's age/body/hair/clothing, environment
 
 Output exactly (no extra lines):
-DICE_ROLL: ...
-OUTCOME: success|neutral|regression
 AFFECT_CHANGE_FINAL: ...
 ACTION_TIER: ...
 BEHAVIOR: ...
@@ -197,7 +193,7 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
         generation_config={"temperature": 0.7},
         safety_settings=safety_settings
     )
-    
+
     return resp.text.strip()
 
 ############################################################################
@@ -457,11 +453,7 @@ def interaction():
             lines = result_text.split("\n")
             for ln in lines:
                 s = ln.strip()
-                if s.startswith("DICE_ROLL:"):
-                    dice_val = s.split(":",1)[1].strip()
-                elif s.startswith("OUTCOME:"):
-                    outcome_val = s.split(":",1)[1].strip()
-                elif s.startswith("AFFECT_CHANGE_FINAL:"):
+                if s.startswith("AFFECT_CHANGE_FINAL:"):
                     try:
                         affect_delta = float(s.split(":",1)[1].strip())
                     except:
@@ -484,7 +476,7 @@ def interaction():
             session["scene_image_prompt"] = image_prompt
 
             logs.append(f"User: {user_action}")
-            logs.append(f"Dice={dice_val}, outcome={outcome_val}, affect={affect_delta}, tier={action_tier}")
+            logs.append(f"Affect={affect_delta}, tier={action_tier}")
             logs.append(f"NARRATION => {narration_txt}")
             session["interaction_log"] = logs
 
