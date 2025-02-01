@@ -49,25 +49,25 @@ STAGE_INFO = {
     3: {"label": "Comfortable", "desc": "Sharing moderate personal info, plan small outings."},
     4: {"label": "Close", "desc": "Frequent contact, emotional trust, safe time alone together."},
     5: {"label": "Serious Potential", "desc": "Openly affectionate, discussing future possibilities."},
-    6: {"label": "Committed Relationship", "desc": "Life partners with strong devotion, shared long-term goals."}
+    6: {"label": "Committed Relationship", "desc": "Life partners with strong devotion, shared long-term goals, can be sexually intimate."}
 }
 
 STAGE_REQUIREMENTS = {
     1: 0,
-    2: 5,
-    3: 10,
-    4: 18,
-    5: 28,
-    6: 40
+    2: 1,
+    3: 3,
+    4: 5,
+    5: 7,
+    6: 10
 }
 
 DEFAULT_STAGE_UNLOCKS = {
     1: "Basic intros, no perks",
-    2: "Casual jokes, mild flirting possible",
+    2: "Casual jokes, mild flirting possible,",
     3: "Comfortable enough to ask personal questions",
     4: "Deeper trust, hugging/cuddling possible",
     5: "Serious romance, discussing future plans",
-    6: "Fully committed, sharing a life together"
+    6: "Fully committed, sharing a life together, will be sexually intimate, NPC can initiate sexual intimacy "
 }
 
 GENERATED_IMAGE_PATH = "output.jpg"
@@ -160,13 +160,13 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     personalization = build_personalization_string()
 
     system_instructions = f"""
-You are a third-person narrator from the user's POV.
+You are a third-person descriptive erotic romance narrator from the user's POV about 200-300 words 
 
 For each user action:
 1) AFFECT_CHANGE_FINAL => net affection shift (-2.0 to +2.0)
 2) ACTION_TIER => (low/medium/high)
 3) BEHAVIOR => short outward style
-4) NARRATION => single paragraph describing user's action, environment, NPC reaction + dialogue
+4) NARRATION => narrates describing user's action, and also creates the NPC reaction + NPC speech/dialogue and actions, and describes the environment (about 200-300 words can be in separate paragragrahs)
 5) IMAGE_PROMPT => single sentence referencing NPC's age/body/hair/clothing, environment
 
 Output exactly (no extra lines):
