@@ -263,24 +263,27 @@ def gpt_scene_image_prompt(full_history):
     npc_eth = session.get("npc_ethnicity","?")
     env_loc = session.get("environment","?")
 
-    system_msg = f"""
-You are a short text generator that produces a single-sentence photographic prompt.
-Focus on describing the NPC (age {npc_age}, {npc_eth}) possibly referencing the environment '{env_loc}'.
-Mention hair/clothing if relevant. No mention of 'user' or 'photographer'.
-    """
+    prompt = f"""
+You are a creative scene image prompt generator.
+Create a single-sentence photographic prompt focusing on:
+- NPC (age {npc_age}, {npc_eth})
+- Environment: {env_loc}
+- Their hair/clothing if mentioned in context
+Do not reference 'user' or 'photographer'.
 
-    user_msg = f"STORY CONTEXT:\n{full_history}\nOne line describing the NPC in environment."
+STORY CONTEXT:
+{full_history}
 
-    resp = gpt4o_mini_client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_msg},
-            {"role": "user", "content": user_msg}
-        ],
-        temperature=0.7
+Generate one descriptive line for a scene image:"""
+
+    chat = model.start_chat()
+    resp = chat.send_message(
+        prompt,
+        generation_config={"temperature": 0.7},
+        safety_settings=safety_settings
     )
 
-    final_line = resp.choices[0].message.content.strip()
+    final_line = resp.text.strip()
     print("[DEBUG] gpt_scene_image_prompt =>", final_line)
     return final_line
 
