@@ -2,248 +2,221 @@
 {% block content %}
 <h1 class="mb-4">Personalizations</h1>
 
-<form method="POST" class="row g-3">
+<form method="POST">
 
-  <!-- User Section -->
-  <div class="col-12">
-    <h3>User Personalizations</h3>
-  </div>
-
-  <!-- USER Name -->
-  <div class="col-md-6">
-    <label class="form-label">Name</label>
-    <select class="form-select" name="user_name">
-      <option value="">--Select--</option>
-      {% for opt in user_name_options %}
-        <option value="{{ opt }}">{{ opt }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="user_name_custom">
-  </div>
-
-  <!-- USER Age -->
-  <div class="col-md-6">
-    <label class="form-label">Age</label>
-    <select class="form-select" name="user_age">
-      <option value="">--Select--</option>
-      {% for age in user_age_options %}
-        <option value="{{ age }}">{{ age }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="user_age_custom">
-  </div>
-
-  <!-- USER Personality + Background -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Personality</label>
-    <select class="form-select" name="user_personality">
-      <option value="">--Select--</option>
-      {% for up in user_personality_options %}
-        <option value="{{ up }}">{{ up }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="user_personality_custom">
-  </div>
-  <div class="col-md-6">
-    <label class="form-label mt-2">Background</label>
-    <textarea class="form-control" name="user_background" rows="2"></textarea>
+  <!-- USER Section -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <h3>Your Character</h3>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">User Name</label>
+      <select class="form-select mb-1" name="user_name">
+        <option value="">--Select--</option>
+        {% for uname in user_name_options %}
+          <option value="{{ uname }}">{{ uname }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="user_name_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">User Age</label>
+      <select class="form-select mb-1" name="user_age">
+        <option value="">--Select--</option>
+        {% for uage in user_age_options %}
+          <option value="{{ uage }}">{{ uage }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="user_age_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">User Personality</label>
+      <select class="form-select mb-1" name="user_personality">
+        <option value="">--Select--</option>
+        {% for upers in user_personality_options %}
+          <option value="{{ upers }}">{{ upers }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="user_personality_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">User Background</label>
+      <textarea class="form-control" name="user_background" rows="2"></textarea>
+    </div>
   </div>
 
   <hr class="my-4">
 
   <!-- NPC Section -->
-  <div class="col-12">
-    <h3>Romantic Interest Personalizations</h3>
-  </div>
-
-  <!-- NPC Name -->
-  <div class="col-md-6">
-    <label class="form-label">Name</label>
-    <select class="form-select" name="npc_name">
-      <option value="">--Select--</option>
-      {% for nn in npc_name_options %}
-        <option value="{{ nn }}">{{ nn }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_name_custom">
-  </div>
-
-  <!-- NPC Gender -->
-  <div class="col-md-6">
-    <label class="form-label">Gender</label>
-    <select class="form-select" name="npc_gender">
-      <option value="">--Select--</option>
-      {% for g in npc_gender_options %}
-        <option value="{{ g }}">{{ g }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_gender_custom">
-  </div>
-
-  <!-- NPC Age -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Age</label>
-    <select class="form-select" name="npc_age">
-      <option value="">--Select--</option>
-      {% for na in npc_age_options %}
-        <option value="{{ na }}">{{ na }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_age_custom">
-  </div>
-
-  <!-- NPC Ethnicity -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Ethnicity</label>
-    <select class="form-select" name="npc_ethnicity">
-      <option value="">--Select--</option>
-      {% for eth in ethnicity_options %}
-        <option value="{{ eth }}">{{ eth }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_ethnicity_custom">
-  </div>
-
-  <!-- NPC Body Type -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Body Type</label>
-    <select class="form-select" name="npc_body_type">
-      <option value="">--Select--</option>
-      {% for bt in body_type_options %}
-        <option value="{{ bt }}">{{ bt }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_body_type_custom">
-  </div>
-
-  <!-- NPC Hair Color -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Hair Color</label>
-    <select class="form-select" name="npc_hair_color">
-      <option value="">--Select--</option>
-      {% for hc in hair_color_options %}
-        <option value="{{ hc }}">{{ hc }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_hair_color_custom">
-  </div>
-
-  <!-- NPC Hair Style -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Hair Style</label>
-    <select class="form-select" name="npc_hair_style">
-      <option value="">--Select--</option>
-      {% for hs in hair_style_options %}
-        <option value="{{ hs }}">{{ hs }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_hair_style_custom">
-  </div>
-
-  <!-- NPC Personality -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Personality</label>
-    <select class="form-select" name="npc_personality">
-      <option value="">--Select--</option>
-      {% for np in npc_personality_options %}
-        <option value="{{ np }}">{{ np }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_personality_custom">
-  </div>
-
-  <!-- NPC Clothing -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Clothing</label>
-    <select class="form-select" name="npc_clothing">
-      <option value="">--Select--</option>
-      {% for c in clothing_options %}
-        <option value="{{ c }}">{{ c }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_clothing_custom">
-  </div>
-
-  <!-- NPC Occupation -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Occupation</label>
-    <select class="form-select" name="npc_occupation">
-      <option value="">--Select--</option>
-      {% for o in occupation_options %}
-        <option value="{{ o }}">{{ o }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_occupation_custom">
-  </div>
-
-  <!-- NPC Current Situation -->
-  <div class="col-md-6">
-    <label class="form-label mt-2">Current Situation</label>
-    <select class="form-select" name="npc_current_situation">
-      <option value="">--Select--</option>
-      {% for cs in current_situation_options %}
-        <option value="{{ cs }}">{{ cs }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="npc_current_situation_custom">
-  </div>
-
-  <hr class="my-4">
-  <div class="col-12">
-    <h3>Location / Encounter Context</h3>
-  </div>
-  <div class="col-md-6">
-    <label class="form-label">Physical Location / Environment</label>
-    <select class="form-select" name="environment">
-      <option value="">--Select--</option>
-      {% for envopt in environment_options %}
-        <option value="{{ envopt }}">{{ envopt }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="environment_custom">
-  </div>
-  <div class="col-md-6">
-    <label class="form-label">Encounter Context</label>
-    <select class="form-select" name="encounter_context">
-      <option value="">--Select--</option>
-      {% for ctxopt in encounter_context_options %}
-        <option value="{{ ctxopt }}">{{ ctxopt }}</option>
-      {% endfor %}
-    </select>
-    <label class="form-label mt-1">Or custom:</label>
-    <input type="text" class="form-control" name="encounter_context_custom">
-  </div>
-
-  <hr class="my-4">
-  <div class="col-12">
-    <h4>Image Generation Settings</h4>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="use_single_seed" value="yes">
-      <label class="form-check-label">
-        Use the same seed for all images (consistent style)
-      </label>
+  <div class="row mb-3">
+    <div class="col-12">
+      <h3>NPC Personalizations</h3>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">NPC Name</label>
+      <select class="form-select mb-1" name="npc_name">
+        <option value="">--Select--</option>
+        {% for nn in npc_name_options %}
+          <option value="{{ nn }}">{{ nn }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_name_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">NPC Gender</label>
+      <select class="form-select mb-1" name="npc_gender">
+        <option value="">--Select--</option>
+        {% for gopt in npc_gender_options %}
+          <option value="{{ gopt }}">{{ gopt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_gender_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Age</label>
+      <select class="form-select mb-1" name="npc_age">
+        <option value="">--Select--</option>
+        {% for na in npc_age_options %}
+          <option value="{{ na }}">{{ na }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_age_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Ethnicity</label>
+      <select class="form-select mb-1" name="npc_ethnicity">
+        <option value="">--Select--</option>
+        {% for eopt in ethnicity_options %}
+          <option value="{{ eopt }}">{{ eopt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_ethnicity_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Body Type</label>
+      <select class="form-select mb-1" name="npc_body_type">
+        <option value="">--Select--</option>
+        {% for bopt in body_type_options %}
+          <option value="{{ bopt }}">{{ bopt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_body_type_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Hair Color</label>
+      <select class="form-select mb-1" name="npc_hair_color">
+        <option value="">--Select--</option>
+        {% for hc in hair_color_options %}
+          <option value="{{ hc }}">{{ hc }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_hair_color_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Hair Style</label>
+      <select class="form-select mb-1" name="npc_hair_style">
+        <option value="">--Select--</option>
+        {% for hs in hair_style_options %}
+          <option value="{{ hs }}">{{ hs }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_hair_style_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Personality</label>
+      <select class="form-select mb-1" name="npc_personality">
+        <option value="">--Select--</option>
+        {% for persopt in npc_personality_options %}
+          <option value="{{ persopt }}">{{ persopt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_personality_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Clothing</label>
+      <select class="form-select mb-1" name="npc_clothing">
+        <option value="">--Select--</option>
+        {% for copt in clothing_options %}
+          <option value="{{ copt }}">{{ copt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_clothing_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Occupation</label>
+      <select class="form-select mb-1" name="npc_occupation">
+        <option value="">--Select--</option>
+        {% for occ in occupation_options %}
+          <option value="{{ occ }}">{{ occ }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_occupation_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label mt-2">NPC Current Situation</label>
+      <select class="form-select mb-1" name="npc_current_situation">
+        <option value="">--Select--</option>
+        {% for cs in current_situation_options %}
+          <option value="{{ cs }}">{{ cs }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="npc_current_situation_custom">
     </div>
   </div>
 
-  <div class="col-12 mt-4">
-    <button type="submit" name="save_personalization" value="true" class="btn btn-primary btn-lg">
-      Save &amp; Next
-    </button>
+  <hr class="my-4">
+  <div class="row mb-3">
+    <div class="col-12">
+      <h3>Environment / Encounter</h3>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Location / Environment</label>
+      <select class="form-select mb-1" name="environment">
+        <option value="">--Select--</option>
+        {% for envopt in environment_options %}
+          <option value="{{ envopt }}">{{ envopt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="environment_custom">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Encounter Context</label>
+      <select class="form-select mb-1" name="encounter_context">
+        <option value="">--Select--</option>
+        {% for ctxopt in encounter_context_options %}
+          <option value="{{ ctxopt }}">{{ ctxopt }}</option>
+        {% endfor %}
+      </select>
+      <label>Or custom:</label>
+      <input type="text" class="form-control" name="encounter_context_custom">
+    </div>
   </div>
+
+  <hr class="my-4">
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="use_single_seed" value="yes" id="useSingleSeedCheck">
+    <label class="form-check-label" for="useSingleSeedCheck">
+      Use the same seed for all images (for consistent style)
+    </label>
+  </div>
+
+  <button type="submit" name="save_personalization" value="true" class="btn btn-primary btn-lg">
+    Save &amp; Next
+  </button>
 </form>
 {% endblock %}
