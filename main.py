@@ -20,12 +20,21 @@ Session(app)
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 
 ############################################################################
-# 1) Initialize GPT-4o-mini + Replicate
+# 1) Initialize Gemini + Replicate
 ############################################################################
+
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.0-flash-exp')
+
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+}
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 replicate.client.api_token = REPLICATE_API_TOKEN
@@ -185,7 +194,8 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
     chat = model.start_chat()
     resp = chat.send_message(
         f"{system_instructions}\n\n{user_text}",
-        generation_config={"temperature": 0.7}
+        generation_config={"temperature": 0.7},
+        safety_settings=safety_settings
     )
     
     return resp.text.strip()
