@@ -187,10 +187,9 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{full_history}"
 
-    chat = model.start_chat()
-    resp = chat.send_message(
+    resp = model.generate_content(
         f"{system_instructions}\n\n{user_text}",
-        generation_config={"temperature": 0.7},
+        generation_config={"temperature": 0.9},
         safety_settings=safety_settings
     )
 
