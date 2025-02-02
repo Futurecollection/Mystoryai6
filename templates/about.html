@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>About / Help</h1>
+
+<p>
+  Welcome to <strong>Destined Encounters</strong>, where you can shape a romantic storyline 
+  through AI-generated narratives and interactions. This application blends storytelling, 
+  romance, and dynamic AI-driven characters to give you a unique, customizable experience.
+</p>
+
+<hr>
+
+<h3>Basic Usage</h3>
+<ol>
+  <li>
+    <strong>Personalize Your Characters:</strong>  
+    On the <em>Personalize</em> page, fill out details for both yourself (the user) and the NPC. 
+    You can pick from dropdowns or type in your own custom entries.
+  </li>
+  <li>
+    <strong>Set the Environment:</strong>  
+    Decide where the story begins—at a café, a gym, etc. Select from the provided options or 
+    type in a custom location.
+  </li>
+  <li>
+    <strong>Begin Interaction:</strong>  
+    After saving your details, go to the <em>Interaction</em> page. Type in actions or dialogue 
+    to guide the story, and the AI will respond with a narrative and the NPC’s perspective.
+  </li>
+</ol>
+
+<hr>
+
+<h3>Generating Images</h3>
+<ol>
+  <li>
+    <strong>Auto-Generate Prompt:</strong>  
+    Click “Auto Generate Scene Prompt” to have the AI produce a single-sentence description 
+    of the current scene. You can then generate an AI image from that prompt.
+  </li>
+  <li>
+    <strong>Customize for Better Results:</strong>  
+    If the auto-generated prompt is lacking detail, feel free to edit it before hitting 
+    “Generate Scene Image.” Consider adding words like <em>“warm lighting”</em> or <em>“casual pose”</em> 
+    to get more consistent results.
+  </li>
+  <li>
+    <strong>One Image per Turn:</strong>  
+    By default, you can only generate an image once per turn to keep the story flow balanced.
+  </li>
+</ol>
+
+<hr>
+
+<h3>Mid-Game Customizations</h3>
+<p>
+  Sometimes you’ll need to adjust the NPC’s details (like changing hair color, clothing, 
+  or personality) or shift the environment. You can do this via the “Update NPC” section 
+  on the <em>Interaction</em> page. This is helpful if the story takes a new direction or if you need to
+  clarify details that the AI has started to “forget.”
+</p>
+
+<hr>
+
+<h3>Affection & Relationship Stages</h3>
+<ol>
+  <li>
+    <strong>Monitor Affection:</strong>  
+    The NPC’s affection score changes based on how they react to your actions.
+  </li>
+  <li>
+    <strong>Stages of Relationship:</strong>  
+    As affection grows, the relationship moves through stages (Strangers → Casual → Comfortable → Close → Serious → Committed).
+  </li>
+  <li>
+    <strong>Unlock Perks:</strong>  
+    Each stage unlocks new possibilities, from casual flirting to serious future-planning discussions.
+  </li>
+</ol>
+
+<hr>
+
+<h3>OOC Commands</h3>
+<p>
+  To give the AI special instructions, simply begin your action with <em>“OOC:”</em>. For example, 
+  <code>OOC: Make the NPC act more shy about the future date.</code> This is useful if you 
+  need to reshape the AI’s response or correct its memory without changing the official 
+  “Update NPC” fields.
+</p>
+
+<hr>
+
+<h3>Important Notes</h3>
+<ul>
+  <li><strong>Frequent Updates & Timeouts:</strong> We’re actively adding new features, and sometimes your session may time out while we deploy changes. We currently don’t have a way to save sessions, but we’re working on it.</li>
+  <li><strong>Occasional Repeated Replies:</strong> The narrator may occasionally return the same reply. If that happens, just press “Send” again; it usually resolves on the second try (we’re still investigating why this occurs).</li>
+</ul>
+
+<hr>
+
+<h3>Development Status & Feedback</h3>
+<p>This is currently a <strong>free web app</strong> under active development. If you’re interested in updates or want to provide feedback, you can find me on Reddit at <a href="https://www.reddit.com/u/Known-Concern-2836/s/co5w6uvvIQ" target="_blank">u/Known-Concern-2836</a>. Feel free to DM me or comment on my Reddit posts—your feedback helps gauge interest and improve the program!</p>
+
+<hr>
+
+<div class="mt-4">
+  <a href="{{ url_for('home') }}" class="btn btn-secondary me-2">Back to Home</a>
+  <a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Game</a>
+</div>
+{% endblock %}

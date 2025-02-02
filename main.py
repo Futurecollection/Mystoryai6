@@ -54,11 +54,11 @@ STAGE_INFO = {
 
 STAGE_REQUIREMENTS = {
     1: 0,
-    2: 1,
-    3: 3,
-    4: 5,
-    5: 7,
-    6: 10
+    2: 2,
+    3: 5,
+    4: 9,
+    5: 15,
+    6: 20
 }
 
 DEFAULT_STAGE_UNLOCKS = {
@@ -109,9 +109,12 @@ ENVIRONMENT_OPTIONS = [
   "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge",
   "Music Festival","Restaurant","Mountain Resort"
 ]
+
+# (ADDED) Scenario for "Matching on Tinder"
 ENCOUNTER_CONTEXT_OPTIONS = [
-  "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Other"
+  "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
+
 ETHNICITY_OPTIONS = [
     "American (Black)","American (White)","Hispanic","Russian","German","Brazilian","Chinese",
     "Japanese","Indian","Australian","French","British","Other"
@@ -162,17 +165,22 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     # Check if this is an OOC command
     is_ooc = last_user_action.strip().lower().startswith("ooc")
 
+    # (UPDATED) Add instructions for actual emojis in text messages
     system_instructions = f"""
-You are a third-person descriptive erotic romance novel narrator
+You are a third-person descriptive erotic romance novel narrator.
 
 SPECIAL INSTRUCTIONS:
-If the user's message starts with "OOC", treat everything after it as a direct instruction
-for how you should shape the next story beat or NPC response. Follow these OOC directions
-while staying within the relationship stage limits. 
+1) If the user's message starts with "OOC", treat everything after it as a direct instruction
+   for how you should shape the next story beat or NPC response. Follow these OOC directions
+   while staying within the relationship stage limits.
+2) If the scene involves texting or the NPC sends emojis, use the actual emoji characters 
+   (e.g., 😛) rather than describing them in words.
 
 For each user action:
 1) AFFECT_CHANGE_FINAL => net affection shift (-2.0 to +2.0)
-2) NARRATION => narrates and describes the story and also creates the NPC reaction e.g. speech/dialogue, actions, noises, gestures, text messages, emojis the NPC sends via text and describes the environment (about 200-300 words can be separate paragragrahs)
+2) NARRATION => narrates and describes the story and also creates the NPC reaction e.g. speech/dialogue, 
+   actions, noises, gestures, text messages, emojis the NPC sends via text, and describes the environment 
+   (about 200-300 words can be separate paragraphs)
 3) IMAGE_PROMPT => single sentence referencing NPC's age/body/hair/clothing, environment
 
 Output exactly (no extra lines):
@@ -264,7 +272,7 @@ def generate_flux_image_safely(prompt, seed=None):
 def gpt_scene_image_prompt(full_history):
     # Get all NPC details
     npc_age = session.get("npc_age","?")
-    npc_gender = session.get("npc_gender","?") 
+    npc_gender = session.get("npc_gender","?")
     npc_eth = session.get("npc_ethnicity","?")
     npc_body = session.get("npc_body_type","?")
     npc_hair_color = session.get("npc_hair_color","?")
@@ -382,7 +390,7 @@ def personalize():
             occupation_options=OCCUPATION_OPTIONS,
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
-            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,  # updated
             ethnicity_options=ETHNICITY_OPTIONS
         )
 

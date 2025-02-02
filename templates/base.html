@@ -5,79 +5,89 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
   <style>
-    /* Soft, romantic theme */
+    /* Dark burgundy background, pinkish text, everything 50% larger than before */
     body {
-      background: #ffe9ec; /* soft pink background */
+      background: #3b0b0b;
+      color: #f8d0d0;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       margin: 0;
       padding: 0;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      /* Original 1.3rem increased by 50% => 1.95rem */
+      /* 1.3rem * 1.5 => ~1.95rem for 50% bigger text */
       font-size: 1.95rem;
       line-height: 1.5;
-      color: #333;
     }
+
     .container {
       max-width: 900px;
-      background-color: #ffffffc0; /* white with slight transparency */
+      background-color: rgba(255,255,255,0.05);
       margin: 1rem auto;
       padding: 1.5rem;
       border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     }
+
     h1, h2, h3, h4 {
       font-family: "Georgia", serif;
-      color: #e3306f; /* a romantic pink/red accent color */
+      color: #ff9fa3;
       margin-bottom: 0.75rem;
     }
+
     .btn {
-      background-color: #e3306f !important; /* pinkish button */
+      background-color: #ff5789 !important;
       border: none !important;
       color: #fff !important;
+      /* Make buttons a bit bigger too */
+      font-size: 1.95rem !important;
     }
     .btn:hover {
-      background-color: #d82b66 !important; 
+      background-color: #e4467d !important; 
     }
+
+    /* Make form controls 50% bigger as well */
     .form-control,
     .form-select {
-      background-color: #fff !important;
-      border: 1px solid #ccc !important;
-      color: #333 !important;
-      font-size: 1rem;
+      font-size: 1.95rem !important;
+      /* for comfortable vertical space, can tweak as you like */
+      min-height: 3rem;
+      line-height: 1.4;
+      background-color: #2a0a0a;
+      color: #f8d0d0;
+      border: 1px solid #ccc;
     }
     .form-control:focus,
     .form-select:focus {
       outline: none !important;
-      box-shadow: 0 0 0 0.2rem rgba(227,48,111,0.25) !important;
-      border-color: #e3306f !important;
+      box-shadow: 0 0 0 0.2rem rgba(255,87,137,0.25) !important;
+      border-color: #ff5789 !important;
     }
-    .border {
-      border-color: #e3306f !important;
-    }
+
     @media (max-width: 576px) {
-      /* Original 1.2rem increased by 50% => 1.8rem */
+      /* On small screens, you might want to reduce slightly 
+         so it doesn't overflow too much. */
       body {
-        font-size: 1.8rem;
+        font-size: 1.7rem;
       }
       .container {
         margin: 0.5rem auto;
         padding: 1rem;
       }
+      .btn {
+        font-size: 1.7rem !important;
+      }
+      .form-control,
+      .form-select {
+        font-size: 1.7rem !important;
+        min-height: 2.8rem;
+      }
     }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <!-- A small row to hold the About link on top-right -->
-    <div class="row">
-      <div class="col text-end">
-        <a class="btn btn-secondary" href="{{ url_for('about') }}">About / Help</a>
-      </div>
+    <div class="text-end mb-3">
+      <a href="{{ url_for('about') }}" class="btn btn-secondary">About / Help</a>
     </div>
 
     {% block content %}{% endblock %}
-
   </div>
-
 </body>
 </html>
