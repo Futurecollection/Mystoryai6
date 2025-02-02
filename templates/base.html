@@ -11,7 +11,8 @@
       margin: 0;
       padding: 0;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-size: 1.3rem;
+      /* Original 1.3rem increased by 50% => 1.95rem */
+      font-size: 1.95rem;
       line-height: 1.5;
       color: #333;
     }
@@ -53,8 +54,9 @@
       border-color: #e3306f !important;
     }
     @media (max-width: 576px) {
+      /* Original 1.2rem increased by 50% => 1.8rem */
       body {
-        font-size: 1.2rem;
+        font-size: 1.8rem;
       }
       .container {
         margin: 0.5rem auto;
@@ -64,8 +66,18 @@
   </style>
 </head>
 <body>
+
   <div class="container">
+    <!-- A small row to hold the About link on top-right -->
+    <div class="row">
+      <div class="col text-end">
+        <a class="btn btn-secondary" href="{{ url_for('about') }}">About / Help</a>
+      </div>
+    </div>
+
     {% block content %}{% endblock %}
+
   </div>
+
 </body>
 </html>

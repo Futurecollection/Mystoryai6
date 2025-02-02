@@ -27,7 +27,7 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-pro')
+model = genai.GenerativeModel('models/gemini-2.0-flash-exp')
 
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
@@ -161,7 +161,7 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
 
     # Check if this is an OOC command
     is_ooc = last_user_action.strip().lower().startswith("ooc")
-    
+
     system_instructions = f"""
 You are a third-person descriptive erotic romance novel narrator
 
@@ -305,6 +305,11 @@ Generate one descriptive line for a scene image:"""
 def home():
     return render_template("home.html", title="Destined Encounters")
 
+@app.route("/about")
+def about():
+    """Renders the About/Help page explaining how to use the app."""
+    return render_template("about.html", title="About/Help")
+
 @app.route("/restart")
 def restart():
     session.clear()
@@ -355,6 +360,9 @@ def personalize():
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
+
+        # When starting fresh, allow an image generation later:
+        session["image_generated_this_turn"] = False
 
         return redirect(url_for("interaction"))
     else:
@@ -455,11 +463,7 @@ def interaction():
                 full_history=full_history
             )
 
-            dice_val = "(none)"
-            outcome_val = "(none)"
             affect_delta = 0.0
-            action_tier = "(none)"
-            behavior_desc = ""
             narration_txt = ""
             image_prompt = ""
 
@@ -471,10 +475,6 @@ def interaction():
                         affect_delta = float(s.split(":",1)[1].strip())
                     except:
                         affect_delta = 0.0
-                elif s.startswith("ACTION_TIER:"):
-                    action_tier = s.split(":",1)[1].strip().lower()
-                elif s.startswith("BEHAVIOR:"):
-                    behavior_desc = s.split(":",1)[1].strip()
                 elif s.startswith("NARRATION:"):
                     narration_txt = s.split(":",1)[1].strip()
                 elif s.startswith("IMAGE_PROMPT:"):
@@ -484,14 +484,16 @@ def interaction():
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
 
-            session["npcBehavior"] = behavior_desc
             session["narrationText"] = narration_txt
             session["scene_image_prompt"] = image_prompt
 
             logs.append(f"User: {user_action}")
-            logs.append(f"Affect={affect_delta}, tier={action_tier}")
+            logs.append(f"Affect={affect_delta}")
             logs.append(f"NARRATION => {narration_txt}")
             session["interaction_log"] = logs
+
+            # After a user action, allow image generation again for the new "turn"
+            session["image_generated_this_turn"] = False
 
             return redirect(url_for("interaction"))
 
@@ -558,66 +560,83 @@ def interaction():
             session["scene_image_prompt"] = auto_prompt
             session["scene_image_url"] = None
 
-            # DO NOT reset the seed => we want to keep old seed for re-generation
-            # session["scene_image_seed"] = None  # <--- remove this line
-
             logs.append(f"[AUTO Scene Prompt] => {auto_prompt}")
             session["interaction_log"] = logs
 
             return redirect(url_for("interaction"))
 
         elif "do_generate_flux" in request.form:
-            # "Generate Scene Image" => reuse old seed
-            logs = session.get("interaction_log",[])
-            prompt_text = request.form.get("scene_image_prompt","").strip()
-            if not prompt_text:
-                prompt_text = "(No prompt text)"
-
-            existing_seed = session.get("scene_image_seed")
-            if existing_seed:
-                # Reuse the old seed
-                seed_used = existing_seed
-                logs.append("SYSTEM: Re-using old seed => " + str(existing_seed))
+            # Check if we've generated an image this turn already
+            if session.get("image_generated_this_turn", False):
+                # Already generated this turn => block or just ignore
+                logs = session.get("interaction_log",[])
+                logs.append("[SYSTEM] Attempted second image generation this turn, blocked.")
+                session["interaction_log"] = logs
+                return redirect(url_for("interaction"))
             else:
-                # If no seed found, pick new random
-                seed_used = random.randint(100000,999999)
-                logs.append("SYSTEM: No existing seed => random => " + str(seed_used))
+                # Not yet generated => proceed
+                logs = session.get("interaction_log",[])
+                prompt_text = request.form.get("scene_image_prompt","").strip()
+                if not prompt_text:
+                    prompt_text = "(No prompt text)"
 
-            url = generate_flux_image_safely(prompt_text, seed=seed_used)
-            _save_image(url)
+                existing_seed = session.get("scene_image_seed")
+                if existing_seed:
+                    # reuse old seed
+                    seed_used = existing_seed
+                    logs.append("SYSTEM: Re-using old seed => " + str(existing_seed))
+                else:
+                    # random new seed
+                    seed_used = random.randint(100000,999999)
+                    logs.append("SYSTEM: No existing seed => random => " + str(seed_used))
 
-            session["scene_image_prompt"] = prompt_text
-            session["scene_image_url"] = url
-            session["scene_image_seed"] = seed_used
+                url = generate_flux_image_safely(prompt_text, seed=seed_used)
+                _save_image(url)
 
-            logs.append(f"Scene Image Prompt => {prompt_text}")
-            logs.append(f"Image seed={seed_used}")
-            session["interaction_log"] = logs
+                session["scene_image_prompt"] = prompt_text
+                session["scene_image_url"] = url
+                session["scene_image_seed"] = seed_used
 
-            return redirect(url_for("interaction"))
+                # Now we've used our one generation for this turn
+                session["image_generated_this_turn"] = True
+
+                logs.append(f"Scene Image Prompt => {prompt_text}")
+                logs.append(f"Image seed={seed_used}")
+                session["interaction_log"] = logs
+
+                return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
-            # "New Seed" => always pick brand new random
-            logs = session.get("interaction_log",[])
-            prompt_text = request.form.get("scene_image_prompt","").strip()
-            if not prompt_text:
-                prompt_text = "(No prompt text)"
+            # This also generates an image, so check the same flag
+            if session.get("image_generated_this_turn", False):
+                logs = session.get("interaction_log",[])
+                logs.append("[SYSTEM] Attempted second image generation (new seed) this turn, blocked.")
+                session["interaction_log"] = logs
+                return redirect(url_for("interaction"))
+            else:
+                logs = session.get("interaction_log",[])
+                prompt_text = request.form.get("scene_image_prompt","").strip()
+                if not prompt_text:
+                    prompt_text = "(No prompt text)"
 
-            new_seed_val = random.randint(100000,999999)
-            logs.append("SYSTEM: user requested new random => " + str(new_seed_val))
+                new_seed_val = random.randint(100000,999999)
+                logs.append("SYSTEM: user requested new random => " + str(new_seed_val))
 
-            url = generate_flux_image_safely(prompt_text, seed=new_seed_val)
-            _save_image(url)
+                url = generate_flux_image_safely(prompt_text, seed=new_seed_val)
+                _save_image(url)
 
-            session["scene_image_prompt"] = prompt_text
-            session["scene_image_url"] = url
-            session["scene_image_seed"] = new_seed_val
+                session["scene_image_prompt"] = prompt_text
+                session["scene_image_url"] = url
+                session["scene_image_seed"] = new_seed_val
 
-            logs.append(f"Scene Image Prompt => {prompt_text}")
-            logs.append(f"Image seed={new_seed_val}")
-            session["interaction_log"] = logs
+                # Mark that we've generated our image for this turn
+                session["image_generated_this_turn"] = True
 
-            return redirect(url_for("interaction"))
+                logs.append(f"Scene Image Prompt => {prompt_text}")
+                logs.append(f"Image seed={new_seed_val}")
+                session["interaction_log"] = logs
+
+                return redirect(url_for("interaction"))
 
         else:
             return "Invalid submission in /interaction",400
