@@ -1,5 +1,18 @@
 {% extends "base.html" %}
+
 {% block content %}
+<!-- New top-left button linking to the full story page -->
+<div class="row mb-3">
+  <div class="col text-start">
+    <a href="{{ url_for('full_story') }}" class="btn btn-info">
+      Full Narration
+    </a>
+  </div>
+  <div class="col text-end">
+    <!-- (Optionally put something on the top-right, or leave blank) -->
+  </div>
+</div>
+
 <h1>Interaction</h1>
 
 <!-- Scene / NARRATION from gpt-4o-mini -->
