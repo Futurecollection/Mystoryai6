@@ -110,7 +110,7 @@ ENVIRONMENT_OPTIONS = [
   "Music Festival","Restaurant","Mountain Resort"
 ]
 
-# (ADDED) Scenario for "Matching on Tinder"
+# “Matching on Tinder” scenario:
 ENCOUNTER_CONTEXT_OPTIONS = [
   "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
@@ -162,10 +162,6 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
-    # Check if this is an OOC command
-    is_ooc = last_user_action.strip().lower().startswith("ooc")
-
-    # (UPDATED) Add instructions for actual emojis in text messages
     system_instructions = f"""
 You are a third-person descriptive erotic romance novel narrator.
 
@@ -178,8 +174,8 @@ SPECIAL INSTRUCTIONS:
 
 For each user action:
 1) AFFECT_CHANGE_FINAL => net affection shift (-2.0 to +2.0)
-2) NARRATION => narrates and describes the story and also creates the NPC reaction e.g. speech/dialogue, 
-   actions, noises, gestures, text messages, emojis the NPC sends via text, and describes the environment 
+2) NARRATION => narrates and describes the story and also creates the NPC reaction (speech/dialogue, 
+   actions, noises, gestures, text messages, emojis the NPC sends via text) and describes the environment 
    (about 200-300 words can be separate paragraphs)
 3) IMAGE_PROMPT => single sentence referencing NPC's age/body/hair/clothing, environment
 
@@ -212,13 +208,13 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 ############################################################################
 
 def check_stage_up_down(new_aff):
-    cur_stage = session.get("currentStage",1)
+    cur_stage = session.get("currentStage", 1)
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
         new_st = 1
         for s, needed in STAGE_REQUIREMENTS.items():
             if new_aff >= needed:
-                new_st = max(new_st,s)
+                new_st = max(new_st, s)
         session["currentStage"] = new_st
     else:
         while session["currentStage"] < 6:
@@ -270,20 +266,19 @@ def generate_flux_image_safely(prompt, seed=None):
 ############################################################################
 
 def gpt_scene_image_prompt(full_history):
-    # Get all NPC details
-    npc_age = session.get("npc_age","?")
-    npc_gender = session.get("npc_gender","?")
-    npc_eth = session.get("npc_ethnicity","?")
-    npc_body = session.get("npc_body_type","?")
-    npc_hair_color = session.get("npc_hair_color","?")
-    npc_hair_style = session.get("npc_hair_style","?")
-    npc_clothing = session.get("npc_clothing","?")
-    env_loc = session.get("environment","?")
+    npc_age = session.get("npc_age", "?")
+    npc_gender = session.get("npc_gender", "?")
+    npc_eth = session.get("npc_ethnicity", "?")
+    npc_body = session.get("npc_body_type", "?")
+    npc_hair_color = session.get("npc_hair_color", "?")
+    npc_hair_style = session.get("npc_hair_style", "?")
+    npc_clothing = session.get("npc_clothing", "?")
+    env_loc = session.get("environment", "?")
 
     prompt = f"""
 You are a creative scene image prompt generator.
 Create a single-sentence photographic prompt that must include:
-- NPC physical details: {npc_gender}, age {npc_age}, {npc_eth}, {npc_body} build
+- NPC physical details: {npc_gender}, age {npc_age}, {npc_eth} {npc_body} build
 - NPC hair: {npc_hair_color}, {npc_hair_style} style
 - NPC clothing: {npc_clothing}
 - Environment: {env_loc}
@@ -325,35 +320,35 @@ def restart():
     session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
     return redirect(url_for("personalize"))
 
-@app.route("/personalize", methods=["GET","POST"])
+@app.route("/personalize", methods=["GET", "POST"])
 def personalize():
-    if request.method=="POST" and "save_personalization" in request.form:
+    if request.method == "POST" and "save_personalization" in request.form:
         def merge_dd(dd_key, cust_key):
-            dd_val = request.form.get(dd_key,"").strip()
-            c_val = request.form.get(cust_key,"").strip()
+            dd_val = request.form.get(dd_key, "").strip()
+            c_val = request.form.get(cust_key, "").strip()
             return c_val if c_val else dd_val
 
         # user
-        session["user_name"] = merge_dd("user_name","user_name_custom")
-        session["user_age"] = merge_dd("user_age","user_age_custom")
-        session["user_personality"] = merge_dd("user_personality","user_personality_custom")
-        session["user_background"] = request.form.get("user_background","").strip()
+        session["user_name"] = merge_dd("user_name", "user_name_custom")
+        session["user_age"] = merge_dd("user_age", "user_age_custom")
+        session["user_personality"] = merge_dd("user_personality", "user_personality_custom")
+        session["user_background"] = request.form.get("user_background", "").strip()
 
         # npc
-        session["npc_name"] = merge_dd("npc_name","npc_name_custom")
-        session["npc_gender"] = merge_dd("npc_gender","npc_gender_custom")
-        session["npc_age"] = merge_dd("npc_age","npc_age_custom")
-        session["npc_ethnicity"] = merge_dd("npc_ethnicity","npc_ethnicity_custom")
-        session["npc_body_type"] = merge_dd("npc_body_type","npc_body_type_custom")
-        session["npc_hair_color"] = merge_dd("npc_hair_color","npc_hair_color_custom")
-        session["npc_hair_style"] = merge_dd("npc_hair_style","npc_hair_style_custom")
-        session["npc_personality"] = merge_dd("npc_personality","npc_personality_custom")
-        session["npc_clothing"] = merge_dd("npc_clothing","npc_clothing_custom")
-        session["npc_occupation"] = merge_dd("npc_occupation","npc_occupation_custom")
-        session["npc_current_situation"] = merge_dd("npc_current_situation","npc_current_situation_custom")
+        session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
+        session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
+        session["npc_age"] = merge_dd("npc_age", "npc_age_custom")
+        session["npc_ethnicity"] = merge_dd("npc_ethnicity", "npc_ethnicity_custom")
+        session["npc_body_type"] = merge_dd("npc_body_type", "npc_body_type_custom")
+        session["npc_hair_color"] = merge_dd("npc_hair_color", "npc_hair_color_custom")
+        session["npc_hair_style"] = merge_dd("npc_hair_style", "npc_hair_style_custom")
+        session["npc_personality"] = merge_dd("npc_personality", "npc_personality_custom")
+        session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
+        session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
+        session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
 
-        session["environment"] = merge_dd("environment","environment_custom")
-        session["encounter_context"] = merge_dd("encounter_context","encounter_context_custom")
+        session["environment"] = merge_dd("environment", "environment_custom")
+        session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
 
         # stats
         session["affectionScore"] = 0.0
@@ -390,30 +385,30 @@ def personalize():
             occupation_options=OCCUPATION_OPTIONS,
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
-            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,  # updated
+            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
-@app.route("/interaction", methods=["GET","POST"])
+@app.route("/interaction", methods=["GET", "POST"])
 def interaction():
-    if request.method=="GET":
-        affection = session.get("affectionScore",0.0)
-        trust = session.get("trustScore",5.0)
-        mood = session.get("npcMood","Neutral")
-        cstage = session.get("currentStage",1)
+    if request.method == "GET":
+        affection = session.get("affectionScore", 0.0)
+        trust = session.get("trustScore", 5.0)
+        mood = session.get("npcMood", "Neutral")
+        cstage = session.get("currentStage", 1)
         st_label = STAGE_INFO[cstage]["label"]
         st_desc = STAGE_INFO[cstage]["desc"]
-        nxt_thresh = session.get("nextStageThreshold",999)
+        nxt_thresh = session.get("nextStageThreshold", 999)
 
-        stage_unlocks = session.get("stage_unlocks",{})
-        last_narration = session.get("narrationText","(No scene yet.)")
-        scene_prompt = session.get("scene_image_prompt","")
-        scene_url = session.get("scene_image_url",None)
-        seed_used = session.get("scene_image_seed",None)
+        stage_unlocks = session.get("stage_unlocks", {})
+        last_narration = session.get("narrationText", "(No scene yet.)")
+        scene_prompt = session.get("scene_image_prompt", "")
+        scene_url = session.get("scene_image_url", None)
+        seed_used = session.get("scene_image_seed", None)
 
-        dice_val = session.get("dice_debug_roll","(none)")
-        outcome_val = session.get("dice_debug_outcome","(none)")
-        interaction_log = session.get("interaction_log",[])
+        dice_val = session.get("dice_debug_roll", "(none)")
+        outcome_val = session.get("dice_debug_outcome", "(none)")
+        interaction_log = session.get("interaction_log", [])
 
         return render_template("interaction.html",
             title="Interact with NPC",
@@ -450,16 +445,19 @@ def interaction():
 
     else:
         if "submit_action" in request.form:
-            user_action = request.form.get("user_action","").strip()
+            user_action = request.form.get("user_action", "").strip()
             if not user_action:
                 user_action = "(no action)"
 
-            affection = session.get("affectionScore",0.0)
-            trust = session.get("trustScore",5.0)
-            mood = session.get("npcMood","Neutral")
-            cstage = session.get("currentStage",1)
+            affection = session.get("affectionScore", 0.0)
+            trust = session.get("trustScore", 5.0)
+            mood = session.get("npcMood", "Neutral")
+            cstage = session.get("currentStage", 1)
 
-            logs = session.get("interaction_log",[])
+            logs = session.get("interaction_log", [])
+            logs.append(f"User: {user_action}")
+            session["interaction_log"] = logs
+
             full_history = "\n".join(logs)
 
             result_text = interpret_npc_state(
@@ -480,13 +478,13 @@ def interaction():
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
                     try:
-                        affect_delta = float(s.split(":",1)[1].strip())
+                        affect_delta = float(s.split(":", 1)[1].strip())
                     except:
                         affect_delta = 0.0
                 elif s.startswith("NARRATION:"):
-                    narration_txt = s.split(":",1)[1].strip()
+                    narration_txt = s.split(":", 1)[1].strip()
                 elif s.startswith("IMAGE_PROMPT:"):
-                    image_prompt = s.split(":",1)[1].strip()
+                    image_prompt = s.split(":", 1)[1].strip()
 
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
@@ -495,45 +493,44 @@ def interaction():
             session["narrationText"] = narration_txt
             session["scene_image_prompt"] = image_prompt
 
-            logs.append(f"User: {user_action}")
             logs.append(f"Affect={affect_delta}")
             logs.append(f"NARRATION => {narration_txt}")
             session["interaction_log"] = logs
 
-            # After a user action, allow image generation again for the new "turn"
+            # Reset image generation for new turn
             session["image_generated_this_turn"] = False
 
             return redirect(url_for("interaction"))
 
         elif "update_npc" in request.form:
             def merge_dd(dd_key, cust_key):
-                dd_val = request.form.get(dd_key,"").strip()
-                c_val = request.form.get(cust_key,"").strip()
+                dd_val = request.form.get(dd_key, "").strip()
+                c_val = request.form.get(cust_key, "").strip()
                 return c_val if c_val else dd_val
 
-            session["npc_name"] = merge_dd("npc_name","npc_name_custom")
-            session["npc_gender"] = merge_dd("npc_gender","npc_gender_custom")
-            session["npc_age"] = merge_dd("npc_age","npc_age_custom")
-            session["npc_ethnicity"] = merge_dd("npc_ethnicity","npc_ethnicity_custom")
-            session["npc_body_type"] = merge_dd("npc_body_type","npc_body_type_custom")
-            session["npc_hair_color"] = merge_dd("npc_hair_color","npc_hair_color_custom")
-            session["npc_hair_style"] = merge_dd("npc_hair_style","npc_hair_style_custom")
-            session["npc_personality"] = merge_dd("npc_personality","npc_personality_custom")
-            session["npc_clothing"] = merge_dd("npc_clothing","npc_clothing_custom")
-            session["npc_occupation"] = merge_dd("npc_occupation","npc_occupation_custom")
-            session["npc_current_situation"] = merge_dd("npc_current_situation","npc_current_situation_custom")
+            session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
+            session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
+            session["npc_age"] = merge_dd("npc_age", "npc_age_custom")
+            session["npc_ethnicity"] = merge_dd("npc_ethnicity", "npc_ethnicity_custom")
+            session["npc_body_type"] = merge_dd("npc_body_type", "npc_body_type_custom")
+            session["npc_hair_color"] = merge_dd("npc_hair_color", "npc_hair_color_custom")
+            session["npc_hair_style"] = merge_dd("npc_hair_style", "npc_hair_style_custom")
+            session["npc_personality"] = merge_dd("npc_personality", "npc_personality_custom")
+            session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
+            session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
+            session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
 
-            session["environment"] = merge_dd("environment","environment_custom")
-            session["encounter_context"] = merge_dd("encounter_context","encounter_context_custom")
+            session["environment"] = merge_dd("environment", "environment_custom")
+            session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
 
-            logs = session.get("interaction_log",[])
+            logs = session.get("interaction_log", [])
             logs.append("SYSTEM: NPC personalizations updated mid-game.")
             session["interaction_log"] = logs
 
             return redirect(url_for("interaction"))
 
         elif "update_affection" in request.form:
-            new_val_str = request.form.get("affection_new","0.0").strip()
+            new_val_str = request.form.get("affection_new", "0.0").strip()
             try:
                 new_val = float(new_val_str)
             except:
@@ -541,27 +538,26 @@ def interaction():
             session["affectionScore"] = new_val
             check_stage_up_down(new_val)
 
-            logs = session.get("interaction_log",[])
+            logs = session.get("interaction_log", [])
             logs.append(f"SYSTEM: Affection manually set => {new_val}")
             session["interaction_log"] = logs
             return redirect(url_for("interaction"))
 
         elif "update_stage_unlocks" in request.form:
-            su = session.get("stage_unlocks",{})
-            for i in range(1,7):
+            su = session.get("stage_unlocks", {})
+            for i in range(1, 7):
                 key = f"stage_unlock_{i}"
-                new_text = request.form.get(key,"").strip()
+                new_text = request.form.get(key, "").strip()
                 su[i] = new_text
             session["stage_unlocks"] = su
 
-            logs = session.get("interaction_log",[])
+            logs = session.get("interaction_log", [])
             logs.append("SYSTEM: Stage unlock text updated mid-game.")
             session["interaction_log"] = logs
             return redirect(url_for("interaction"))
 
         elif "generate_scene_prompt" in request.form:
-            # Auto-generate the single-sentence scene prompt
-            logs = session.get("interaction_log",[])
+            logs = session.get("interaction_log", [])
             full_history = "\n".join(logs)
 
             auto_prompt = gpt_scene_image_prompt(full_history)
@@ -574,28 +570,23 @@ def interaction():
             return redirect(url_for("interaction"))
 
         elif "do_generate_flux" in request.form:
-            # Check if we've generated an image this turn already
             if session.get("image_generated_this_turn", False):
-                # Already generated this turn => block or just ignore
-                logs = session.get("interaction_log",[])
+                logs = session.get("interaction_log", [])
                 logs.append("[SYSTEM] Attempted second image generation this turn, blocked.")
                 session["interaction_log"] = logs
                 return redirect(url_for("interaction"))
             else:
-                # Not yet generated => proceed
-                logs = session.get("interaction_log",[])
-                prompt_text = request.form.get("scene_image_prompt","").strip()
+                logs = session.get("interaction_log", [])
+                prompt_text = request.form.get("scene_image_prompt", "").strip()
                 if not prompt_text:
                     prompt_text = "(No prompt text)"
 
                 existing_seed = session.get("scene_image_seed")
                 if existing_seed:
-                    # reuse old seed
                     seed_used = existing_seed
                     logs.append("SYSTEM: Re-using old seed => " + str(existing_seed))
                 else:
-                    # random new seed
-                    seed_used = random.randint(100000,999999)
+                    seed_used = random.randint(100000, 999999)
                     logs.append("SYSTEM: No existing seed => random => " + str(seed_used))
 
                 url = generate_flux_image_safely(prompt_text, seed=seed_used)
@@ -605,7 +596,6 @@ def interaction():
                 session["scene_image_url"] = url
                 session["scene_image_seed"] = seed_used
 
-                # Now we've used our one generation for this turn
                 session["image_generated_this_turn"] = True
 
                 logs.append(f"Scene Image Prompt => {prompt_text}")
@@ -615,19 +605,18 @@ def interaction():
                 return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
-            # This also generates an image, so check the same flag
             if session.get("image_generated_this_turn", False):
-                logs = session.get("interaction_log",[])
+                logs = session.get("interaction_log", [])
                 logs.append("[SYSTEM] Attempted second image generation (new seed) this turn, blocked.")
                 session["interaction_log"] = logs
                 return redirect(url_for("interaction"))
             else:
-                logs = session.get("interaction_log",[])
-                prompt_text = request.form.get("scene_image_prompt","").strip()
+                logs = session.get("interaction_log", [])
+                prompt_text = request.form.get("scene_image_prompt", "").strip()
                 if not prompt_text:
                     prompt_text = "(No prompt text)"
 
-                new_seed_val = random.randint(100000,999999)
+                new_seed_val = random.randint(100000, 999999)
                 logs.append("SYSTEM: user requested new random => " + str(new_seed_val))
 
                 url = generate_flux_image_safely(prompt_text, seed=new_seed_val)
@@ -637,7 +626,6 @@ def interaction():
                 session["scene_image_url"] = url
                 session["scene_image_seed"] = new_seed_val
 
-                # Mark that we've generated our image for this turn
                 session["image_generated_this_turn"] = True
 
                 logs.append(f"Scene Image Prompt => {prompt_text}")
@@ -647,11 +635,24 @@ def interaction():
                 return redirect(url_for("interaction"))
 
         else:
-            return "Invalid submission in /interaction",400
+            return "Invalid submission in /interaction", 400
 
 @app.route("/view_image")
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
+
+############################################################################
+# 10) Full Story Route
+############################################################################
+@app.route("/full_story")
+def full_story():
+    """
+    Shows a page with the full 'story so far' from the interaction log.
+    We can simply show every entry in session["interaction_log"] or filter just NARRATION lines.
+    Here, we display the entire log for completeness.
+    """
+    logs = session.get("interaction_log", [])
+    return render_template("full_story.html", logs=logs, title="Full Story So Far")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
