@@ -109,12 +109,10 @@ ENVIRONMENT_OPTIONS = [
   "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge",
   "Music Festival","Restaurant","Mountain Resort"
 ]
-
-# “Matching on Tinder” scenario:
+# "Matching on Tinder" scenario included:
 ENCOUNTER_CONTEXT_OPTIONS = [
   "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
-
 ETHNICITY_OPTIONS = [
     "American (Black)","American (White)","Hispanic","Russian","German","Brazilian","Chinese",
     "Japanese","Indian","Australian","French","British","Other"
@@ -497,7 +495,6 @@ def interaction():
             logs.append(f"NARRATION => {narration_txt}")
             session["interaction_log"] = logs
 
-            # Reset image generation for new turn
             session["image_generated_this_turn"] = False
 
             return redirect(url_for("interaction"))
@@ -647,12 +644,51 @@ def view_image():
 @app.route("/full_story")
 def full_story():
     """
-    Shows a page with the full 'story so far' from the interaction log.
-    We can simply show every entry in session["interaction_log"] or filter just NARRATION lines.
-    Here, we display the entire log for completeness.
+    Displays the full interaction_log on a dedicated page.
     """
     logs = session.get("interaction_log", [])
     return render_template("full_story.html", logs=logs, title="Full Story So Far")
+
+############################################################################
+# 11) Generate Erotica Route
+############################################################################
+@app.route("/generate_erotica", methods=["POST"])
+def generate_erotica():
+    """
+    Takes the entire story log and calls Gemini again
+    to produce an erotic short story in the style of r/eroticliterature.
+    Includes existing dialogue from the log.
+    """
+    logs = session.get("interaction_log", [])
+    if not logs:
+        return redirect(url_for("full_story"))
+
+    full_narration = "\n".join(logs)
+
+    # Create a custom prompt
+    erotica_prompt = f"""
+You are an author on r/eroticliterature or r/gonewildstories.
+Rewrite the entire scenario below into a cohesive erotic short story
+that includes the same characters, setting, and especially dialogue from the logs.
+Maintain a sensual tone, focusing on emotional and physical details, 
+while ensuring a consistent narrative arc.
+
+STORY LOG:
+{full_narration}
+
+Now produce a single erotica story:
+"""
+
+    chat = model.start_chat()
+    erotica_response = chat.send_message(
+        erotica_prompt,
+        generation_config={"temperature": 0.8, "max_output_tokens": 1200},
+        safety_settings=safety_settings
+    )
+
+    erotica_text = erotica_response.text.strip()
+    return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)

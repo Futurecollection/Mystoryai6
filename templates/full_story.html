@@ -3,17 +3,27 @@
 {% block content %}
 <h1>Full Story So Far</h1>
 
-<div class="p-3 mb-3" style="background:rgba(255,255,255,0.1); color:#fff;">
+<div class="p-3 mb-4" style="background: rgba(255,255,255,0.1); white-space: pre-wrap;">
   {% if logs %}
     {% for entry in logs %}
-      <div style="white-space: pre-wrap; margin-bottom:0.5rem;">
+      <div style="margin-bottom: 0.5rem;">
         {{ entry }}
       </div>
     {% endfor %}
   {% else %}
-    <p>(No story yet.)</p>
+    <p>(No story yet)</p>
   {% endif %}
 </div>
 
-<a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Interaction</a>
+<!-- Button to generate erotica from the full story -->
+<form method="POST" action="{{ url_for('generate_erotica') }}">
+  <button type="submit" class="btn btn-danger">
+    Generate Erotica
+  </button>
+</form>
+
+<hr>
+<a href="{{ url_for('interaction') }}" class="btn btn-secondary">
+  Back to Interaction
+</a>
 {% endblock %}
