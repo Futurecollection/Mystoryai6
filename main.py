@@ -86,11 +86,11 @@ NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe"
 NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
 NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
 HAIR_STYLE_OPTIONS = ["Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut","Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes","Other"]
-BODY_TYPE_OPTIONS = ["Slender","Petite","Tall & Lean","Plus-size","Athletic","Muscular","Curvy"]
+BODY_TYPE_OPTIONS = ["Athletic","Muscular","Tall & Broad","Lean & Toned","Average Build","Rugby Build","Swimmer's Build","Basketball Build","Other"]
 HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Brown","Grey","Dyed (Blue/Pink/etc)"]
 NPC_PERSONALITY_OPTIONS = [
-  "Flirty","Passionate","Submissive","Creative","Nurturer","Intellectual","Healer","Entertainer",
-  "Reserved","Cheerful","Sassy","Calm","Witty","Other"
+  "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
+  "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive","Other"
 ]
 CLOTHING_OPTIONS = [
   "Red Summer Dress","Blue T-shirt & Jeans","Black Evening Gown",
