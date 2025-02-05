@@ -571,7 +571,7 @@ def interaction():
             cstage = session.get("currentStage", 1)
 
             logs = session.get("interaction_log", [])
-            logs.append(f"User: {user_action}")
+            logs.append(user_action)
             session["interaction_log"] = logs
 
             full_history = "\n".join(logs)
