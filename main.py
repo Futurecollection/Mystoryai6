@@ -792,13 +792,17 @@ def generate_erotica():
 You are an author on r/eroticliterature or r/gonewildstories.
 Rewrite the entire scenario below into a cohesive erotic short story that includes
 the same events, setting, and dialogue. Maintain a sensual tone, focusing on emotional
-and physical details, while ensuring a consistent narrative arc.
+and physical details, while ensuring a consistent narrative arc. Allowed Explicitness
+    * You may describe sexual acts in graphic detail, provided they depict consensual adult activity.
+    * You may include language depicting nudity, arousal, orgasm, and explicit bodily contact or sensations.
 
 STORY LOG:
 {full_narration}
 
 Now produce a single erotica story (about 600-900 words). 
-Keep the character dialogue from the text as well.
+Keep the character dialogue from the text as well. Allowed Explicitness
+    * You may describe sexual acts in graphic detail, provided they depict consensual adult activity.
+    * You may include language depicting nudity, arousal, orgasm, and explicit bodily contact or sensations.
 """
 
     chat = model.start_chat()
