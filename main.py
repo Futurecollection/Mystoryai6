@@ -76,7 +76,7 @@ GENERATED_IMAGE_PATH = "output.jpg"
 # 3) Dropdown Options
 ############################################################################
 
-USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Other"]
+USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Emma","Sarah","Jessica","Emily","Sophie","Anna","Rachel","Lisa","Maria","Ashley","Other"]
 USER_AGE_OPTIONS = ["20","25","30","35","40","45"]
 USER_PERSONALITY_OPTIONS = [
     "Friendly","Funny","Adventurous","Introverted","Ambitious","Laid-back","Kind","Curious","Other"
