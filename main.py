@@ -142,6 +142,7 @@ def build_personalization_string():
         f"  Personality: {session.get('npc_personality','?')}\n"
         f"  Occupation: {session.get('npc_occupation','?')}\n"
         f"  CurrentSituation: {session.get('npc_current_situation','?')}\n"
+        f"  Instructions: {session.get('npc_instructions','')}\n"
     )
     env_data = (
         f"ENVIRONMENT:\n"
@@ -342,6 +343,7 @@ def personalize():
         session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
         session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
         session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
+        session["npc_instructions"] = request.form.get("npc_instructions", "").strip()
 
         session["environment"] = merge_dd("environment", "environment_custom")
         session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
