@@ -343,7 +343,8 @@ def personalize():
         session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
         session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
         session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
-        session["npc_instructions"] = request.form.get("npc_instructions", "").strip()
+        # Set default NPC instructions regardless of form input
+        session["npc_instructions"] = """The NPC should respond naturally to user actions while maintaining their personality traits. They can initiate physical contact based on the current relationship stage and show genuine emotional responses. The NPC should remember previous interactions and gradually build trust/intimacy according to the stage system."""
 
         session["environment"] = merge_dd("environment", "environment_custom")
         session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
