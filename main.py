@@ -85,7 +85,7 @@ USER_PERSONALITY_OPTIONS = [
 NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella","James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew","Other"]
 NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
 NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
-HAIR_STYLE_OPTIONS = ["Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Other"]
+HAIR_STYLE_OPTIONS = ["Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut","Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes","Other"]
 BODY_TYPE_OPTIONS = ["Slender","Petite","Tall & Lean","Plus-size","Athletic","Muscular","Curvy"]
 HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Brown","Grey","Dyed (Blue/Pink/etc)"]
 NPC_PERSONALITY_OPTIONS = [
@@ -95,7 +95,9 @@ NPC_PERSONALITY_OPTIONS = [
 CLOTHING_OPTIONS = [
   "Red Summer Dress","Blue T-shirt & Jeans","Black Evening Gown",
   "Green Hoodie & Leggings","White Blouse & Dark Skirt","Business Attire",
-  "Grey Sweater & Jeans","Pink Casual Dress","Other"
+  "Grey Sweater & Jeans","Pink Casual Dress","Suit & Tie","Leather Jacket & Dark Jeans",
+  "Button-up Shirt & Chinos","Tank Top & Shorts","Polo & Khakis","Athletic Wear",
+  "Blazer & Fitted Pants","Denim Jacket & White Tee","Other"
 ]
 OCCUPATION_OPTIONS = [
   "College Student","School Teacher","Librarian","Office Worker","Freelance Artist","Bartender",
