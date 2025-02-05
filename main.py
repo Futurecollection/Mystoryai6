@@ -763,13 +763,15 @@ def view_image():
 @app.route("/full_story")
 def full_story():
     logs = session.get("interaction_log", [])
-    # Keep only lines starting with "NARRATION => "
-    narration_lines = []
+    story_lines = []
     for line in logs:
         if line.startswith("NARRATION => "):
             pure_narr = line.replace("NARRATION => ", "", 1)
-            narration_lines.append(pure_narr)
-    return render_template("full_story.html", lines=narration_lines, title="Full Story So Far")
+            story_lines.append(pure_narr)
+        elif line.startswith("User: "):
+            user_action = line.replace("User: ", "", 1)
+            story_lines.append(user_action)
+    return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
 
 ############################################################################
 # 11) Generate Erotica => only the NARRATION lines
