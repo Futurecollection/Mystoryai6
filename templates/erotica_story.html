@@ -7,6 +7,11 @@
   {{ erotica_text }}
 </div>
 
+<form method="POST" action="{{ url_for('continue_erotica') }}" class="mb-3">
+  <input type="hidden" name="previous_text" value="{{ erotica_text }}">
+  <button type="submit" class="btn btn-danger me-2">Continue Story</button>
+</form>
+
 <a href="{{ url_for('full_story') }}" class="btn btn-secondary me-2">
   Back to Full Story
 </a>

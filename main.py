@@ -774,6 +774,30 @@ def full_story():
 ############################################################################
 # 11) Generate Erotica => only the NARRATION lines
 ############################################################################
+@app.route("/continue_erotica", methods=["POST"])
+def continue_erotica():
+    previous_text = request.form.get("previous_text", "").strip()
+    
+    continue_prompt = f"""
+You are continuing an erotic story. Pick up exactly where this left off and continue
+the scene for another 600-900 words. Maintain the same tone, characters, and setting.
+Keep the story cohesive and flowing naturally from the previous text.
+
+PREVIOUS TEXT:
+{previous_text}
+
+Now continue the story from this exact point (600-900 more words):"""
+
+    chat = model.start_chat()
+    continuation = chat.send_message(
+        continue_prompt,
+        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
+        safety_settings=safety_settings
+    )
+    
+    full_text = f"{previous_text}\n\n{continuation.text.strip()}"
+    return render_template("erotica_story.html", erotica_text=full_text, title="Generated Erotica")
+
 @app.route("/generate_erotica", methods=["POST"])
 def generate_erotica():
     logs = session.get("interaction_log", [])
