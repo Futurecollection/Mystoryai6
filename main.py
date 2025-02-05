@@ -101,7 +101,9 @@ CLOTHING_OPTIONS = [
 ]
 OCCUPATION_OPTIONS = [
   "College Student","School Teacher","Librarian","Office Worker","Freelance Artist","Bartender",
-  "Travel Blogger","Ex-Military","Nurse","Startup Founder","Other"
+  "Travel Blogger","Ex-Military","Nurse","Startup Founder","CEO","Investment Banker",
+  "Professional Athlete","Doctor","Firefighter","Police Detective","Personal Trainer",
+  "Musician","Chef","Architect","Tech Executive","Business Consultant","Other"
 ]
 CURRENT_SITUATION_OPTIONS = [
   "Recently Broke Up","Recovering from Divorce","Single & Looking",
