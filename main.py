@@ -82,7 +82,7 @@ USER_PERSONALITY_OPTIONS = [
     "Friendly","Funny","Adventurous","Introverted","Ambitious","Laid-back","Kind","Curious","Other"
 ]
 
-NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella","Other"]
+NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella","James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew","Other"]
 NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
 NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
 HAIR_STYLE_OPTIONS = ["Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Other"]
