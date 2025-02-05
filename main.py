@@ -754,7 +754,7 @@ def interaction():
 
 @app.route("/view_image")
 def view_image():
-    return "Image generation is not available in the free version", 403
+    return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
 
 ############################################################################
