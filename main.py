@@ -803,17 +803,20 @@ Now continue the story from this exact point (600-900 more words):"""
 @app.route("/generate_erotica", methods=["POST"])
 def generate_erotica():
     logs = session.get("interaction_log", [])
-    # Filter out only "NARRATION => ..."
-    narration_only = []
+    # Include both narration and user actions
+    story_parts = []
     for line in logs:
         if line.startswith("NARRATION => "):
             text = line.replace("NARRATION => ", "", 1)
-            narration_only.append(text)
+            story_parts.append(text)
+        elif line.startswith("User: "):
+            text = line.replace("User: ", "", 1)
+            story_parts.append(text)
 
-    if not narration_only:
+    if not story_parts:
         return redirect(url_for("full_story"))
 
-    full_narration = "\n".join(narration_only)
+    full_narration = "\n".join(story_parts)
     erotica_prompt = f"""
 You are an author on r/eroticliterature or r/gonewildstories.
 Rewrite the entire scenario below into a cohesive erotic short story that includes
