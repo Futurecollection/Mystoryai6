@@ -1,17 +1,16 @@
-
 {% extends "base.html" %}
-{% block content %}
-<h1>Erotica Story</h1>
 
-<div class="p-3 mb-3" style="background:rgba(255,255,255,0.1); color:#fff;">
-  {% if erotica_text %}
-    <div style="white-space: pre-wrap;">
-      {{ erotica_text }}
-    </div>
-  {% else %}
-    <p>(No story content yet.)</p>
-  {% endif %}
+{% block content %}
+<h1>Generated Erotica</h1>
+
+<div class="p-3 mb-4" style="background: rgba(255,255,255,0.1); white-space: pre-wrap;">
+  {{ erotica_text }}
 </div>
 
-<a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Interaction</a>
+<a href="{{ url_for('full_story') }}" class="btn btn-secondary me-2">
+  Back to Full Story
+</a>
+<a href="{{ url_for('interaction') }}" class="btn btn-primary">
+  Back to Interaction
+</a>
 {% endblock %}

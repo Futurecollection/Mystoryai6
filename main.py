@@ -109,7 +109,6 @@ ENVIRONMENT_OPTIONS = [
   "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge",
   "Music Festival","Restaurant","Mountain Resort"
 ]
-# "Matching on Tinder" scenario included:
 ENCOUNTER_CONTEXT_OPTIONS = [
   "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
@@ -308,7 +307,6 @@ def home():
 
 @app.route("/about")
 def about():
-    """Renders the About/Help page explaining how to use the app."""
     return render_template("about.html", title="About/Help")
 
 @app.route("/restart")
@@ -442,6 +440,8 @@ def interaction():
         )
 
     else:
+        # Ensure we return a valid response in each block
+
         if "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip()
             if not user_action:
@@ -457,7 +457,6 @@ def interaction():
             session["interaction_log"] = logs
 
             full_history = "\n".join(logs)
-
             result_text = interpret_npc_state(
                 affection=affection,
                 trust=trust,
@@ -496,7 +495,6 @@ def interaction():
             session["interaction_log"] = logs
 
             session["image_generated_this_turn"] = False
-
             return redirect(url_for("interaction"))
 
         elif "update_npc" in request.form:
@@ -632,61 +630,67 @@ def interaction():
                 return redirect(url_for("interaction"))
 
         else:
+            # If none of the known form fields were triggered, 
+            # return an error so we don't produce "None" response
             return "Invalid submission in /interaction", 400
 
 @app.route("/view_image")
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
+
 ############################################################################
-# 10) Full Story Route
+# 10) Full Story Route => Filter only the NPC "NARRATION =>"
 ############################################################################
 @app.route("/full_story")
 def full_story():
-    """
-    Displays the full interaction_log on a dedicated page.
-    """
     logs = session.get("interaction_log", [])
-    return render_template("full_story.html", logs=logs, title="Full Story So Far")
+    # Keep only lines starting with "NARRATION => "
+    narration_lines = []
+    for line in logs:
+        if line.startswith("NARRATION => "):
+            pure_narr = line.replace("NARRATION => ", "", 1)
+            narration_lines.append(pure_narr)
+    return render_template("full_story.html", lines=narration_lines, title="Full Story So Far")
 
 ############################################################################
-# 11) Generate Erotica Route
+# 11) Generate Erotica => only the NARRATION lines
 ############################################################################
 @app.route("/generate_erotica", methods=["POST"])
 def generate_erotica():
-    """
-    Takes the entire story log and calls Gemini again
-    to produce an erotic short story in the style of r/eroticliterature.
-    Includes existing dialogue from the log.
-    """
     logs = session.get("interaction_log", [])
-    if not logs:
+    # Filter out only "NARRATION => ..."
+    narration_only = []
+    for line in logs:
+        if line.startswith("NARRATION => "):
+            text = line.replace("NARRATION => ", "", 1)
+            narration_only.append(text)
+
+    if not narration_only:
         return redirect(url_for("full_story"))
 
-    full_narration = "\n".join(logs)
-
-    # Create a custom prompt
+    full_narration = "\n".join(narration_only)
     erotica_prompt = f"""
 You are an author on r/eroticliterature or r/gonewildstories.
-Rewrite the entire scenario below into a cohesive erotic short story
-that includes the same characters, setting, and especially dialogue from the logs.
-Maintain a sensual tone, focusing on emotional and physical details, 
-while ensuring a consistent narrative arc.
+Rewrite the entire scenario below into a cohesive erotic short story that includes
+the same events, setting, and dialogue. Maintain a sensual tone, focusing on emotional
+and physical details, while ensuring a consistent narrative arc.
 
 STORY LOG:
 {full_narration}
 
-Now produce a single erotica story:
+Now produce a single erotica story (about 600-900 words). 
+Keep the character dialogue from the text as well.
 """
 
     chat = model.start_chat()
-    erotica_response = chat.send_message(
+    erotica_resp = chat.send_message(
         erotica_prompt,
-        generation_config={"temperature": 0.8, "max_output_tokens": 1200},
+        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
         safety_settings=safety_settings
     )
 
-    erotica_text = erotica_response.text.strip()
+    erotica_text = erotica_resp.text.strip()
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
 
