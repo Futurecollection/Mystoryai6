@@ -341,7 +341,7 @@ def personalize():
         # user
         session["user_name"] = merge_dd("user_name", "user_name_custom")
         session["user_age"] = merge_dd("user_age", "user_age_custom")
-        
+
         session["user_background"] = request.form.get("user_background", "").strip()
 
         # npc
@@ -730,7 +730,6 @@ def interaction():
 
             auto_prompt = gpt_scene_image_prompt(full_history)
             session["scene_image_prompt"] = auto_prompt
-            session["scene_image_url"] = None
 
             logs.append(f"[AUTO Scene Prompt] => {auto_prompt}")
             session["interaction_log"] = logs
@@ -925,6 +924,32 @@ def stage_unlocks():
     return render_template("stage_unlocks.html", 
                          stage_unlocks=session.get("stage_unlocks", {}),
                          title="Stage Unlocks")
+
+
+def validate_age_content(text):
+    age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "young", "highschool", "high school", "18 year", "19 year", "college girl", "schoolgirl"]
+    return any(keyword in text.lower() for keyword in age_keywords)
+
+@app.route("/generate_scene_prompt", methods=["POST"])
+def generate_scene_prompt():
+    logs = session.get("interaction_log", [])
+    full_history = "\n".join(logs)
+
+    auto_prompt = gpt_scene_image_prompt(full_history)
+
+    # Check for age-restricted content in prompt
+    if validate_age_content(auto_prompt):
+        logs.append("[SYSTEM] WARNING: Generated prompt contained age-restricted content. Generating new prompt.")
+        session["interaction_log"] = logs
+        session["scene_image_prompt"] = "⚠️ ERROR: Generated prompt contained age-restricted terms. Please try again or edit manually."
+        return redirect(url_for("interaction"))
+
+    session["scene_image_prompt"] = auto_prompt
+    logs.append(f"[AUTO Scene Prompt] => {auto_prompt}")
+    session["interaction_log"] = logs
+
+    return redirect(url_for("interaction"))
+
 
 
 if __name__ == "__main__":
