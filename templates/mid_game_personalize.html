@@ -279,13 +279,6 @@
            value="{% if not cs_in_list %}{{ session['npc_current_situation'] }}{% endif %}">
   </div>
 
-  <!-- NPC Bio/Backstory -->
-  <div class="col-12 mb-3">
-    <label class="form-label">Character Bio</label>
-    <textarea class="form-control" name="npc_backstory" rows="6" 
-              placeholder="Enter or edit the character's biography...">{{ session['npc_backstory'] }}</textarea>
-  </div>
-
   <!-- Environment -->
   <div class="col-md-6">
     <label class="form-label">Environment / Location</label>
@@ -337,7 +330,6 @@
     <button type="submit" name="update_npc" value="true" class="btn btn-warning">
       Update Settings
     </button>
-    <button type="submit" name="generate_bio" value="true" class="btn btn-primary">Generate Bio</button>
     <a href="{{ url_for('interaction') }}" class="btn btn-secondary ms-2">
       Back to Story
     </a>

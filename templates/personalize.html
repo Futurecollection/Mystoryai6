@@ -230,36 +230,10 @@
     </div>
 
     <div class="col-12">
-      <label class="form-label mt-2">NPC Backstory/Bio</label>
-      <div class="d-flex mb-2">
-        <button type="button" id="generateBioBtn" class="btn btn-secondary">Generate Bio</button>
-        <small class="text-muted ms-2 mt-2">Click to auto-generate a bio based on other personalizations</small>
-      </div>
-      <textarea class="form-control" name="npc_backstory" id="bioTextarea" rows="4" 
+      <label class="form-label mt-2">NPC Backstory/Bio (Optional)</label>
+      <textarea class="form-control" name="npc_backstory" rows="4" 
                 placeholder="Enter any additional background information, life story, or character details..."></textarea>
     </div>
-
-    <script>
-      document.getElementById('generateBioBtn').addEventListener('click', async function() {
-        const response = await fetch('/generate_bio', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            npc_name: document.querySelector('[name="npc_name"]').value || document.querySelector('[name="npc_name_custom"]').value,
-            npc_gender: document.querySelector('[name="npc_gender"]').value || document.querySelector('[name="npc_gender_custom"]').value,
-            npc_age: document.querySelector('[name="npc_age"]').value || document.querySelector('[name="npc_age_custom"]').value,
-            npc_ethnicity: document.querySelector('[name="npc_ethnicity"]').value || document.querySelector('[name="npc_ethnicity_custom"]').value,
-            npc_personality: document.querySelector('[name="npc_personality"]').value || document.querySelector('[name="npc_personality_custom"]').value,
-            npc_occupation: document.querySelector('[name="npc_occupation"]').value || document.querySelector('[name="npc_occupation_custom"]').value,
-            npc_current_situation: document.querySelector('[name="npc_current_situation"]').value || document.querySelector('[name="npc_current_situation_custom"]').value
-          })
-        });
-        const data = await response.json();
-        document.getElementById('bioTextarea').value = data.bio;
-      });
-    </script>
 
   </div>
 
