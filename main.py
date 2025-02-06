@@ -377,37 +377,7 @@ def personalize():
         session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
         session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
         session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
-
-        # Collect bio inputs
-        bio_inputs = {
-            "npc_location": request.form.get("npc_location", "").strip(),
-            "npc_hobbies": request.form.get("npc_hobbies", "").strip(),
-            "npc_workplace": request.form.get("npc_workplace", "").strip(),
-            "npc_struggles": request.form.get("npc_struggles", "").strip(),
-            "npc_secrets": request.form.get("npc_secrets", "").strip()
-        }
-
-        # Generate bio with Gemini
-        bio_prompt = f"""
-Create a compelling character bio that reveals some information while maintaining mystery. Include:
-- Where they live and work (Location: {bio_inputs['npc_location']}, Workplace: {bio_inputs['npc_workplace']})
-- Their hobbies and interests ({bio_inputs['npc_hobbies']})
-- Personal struggles or emotional challenges ({bio_inputs['npc_struggles']})
-- Hints at deeper secrets ({bio_inputs['npc_secrets']})
-
-Make it intriguing but don't reveal everything - leave some mysteries for the user to discover.
-Keep it to 2-3 paragraphs. Include emotional depth and personal growth elements.
-"""
-
-        chat = model.start_chat()
-        bio_response = chat.send_message(
-            bio_prompt,
-            generation_config={"temperature": 0.8},
-            safety_settings=safety_settings
-        )
-
-        session["npc_backstory"] = bio_response.text.strip()
-
+        session["npc_backstory"] = request.form.get("npc_backstory", "").strip()
 
         # Set gender-specific NPC instructions
         npc_gender = session.get("npc_gender", "").lower()
