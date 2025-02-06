@@ -391,6 +391,29 @@ def restart():
 @app.route("/personalize", methods=["GET", "POST"])
 def personalize():
     if request.method == "POST":
+        def merge_dd(dd_key, cust_key):
+            dd_val = request.form.get(dd_key, "").strip()
+            c_val = request.form.get(cust_key, "").strip()
+            return c_val if c_val else dd_val
+
+        # Save all personalizations first
+        session["user_name"] = merge_dd("user_name", "user_name_custom")
+        session["user_age"] = merge_dd("user_age", "user_age_custom")
+        session["user_background"] = request.form.get("user_background", "").strip()
+        session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
+        session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
+        session["npc_age"] = merge_dd("npc_age", "npc_age_custom")
+        session["npc_ethnicity"] = merge_dd("npc_ethnicity", "npc_ethnicity_custom")
+        session["npc_body_type"] = merge_dd("npc_body_type", "npc_body_type_custom")
+        session["npc_hair_color"] = merge_dd("npc_hair_color", "npc_hair_color_custom")
+        session["npc_hair_style"] = merge_dd("npc_hair_style", "npc_hair_style_custom")
+        session["npc_personality"] = merge_dd("npc_personality", "npc_personality_custom")
+        session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
+        session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
+        session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
+        session["environment"] = merge_dd("environment", "environment_custom")
+        session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
+
         if "generate_bio" in request.form:
             # Generate and store bio but stay on personalize page
             try:
