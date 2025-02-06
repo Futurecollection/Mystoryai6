@@ -401,10 +401,10 @@ def personalize():
             return redirect(url_for("personalize"))
             
         elif "save_personalization" in request.form:
-        def merge_dd(dd_key, cust_key):
-            dd_val = request.form.get(dd_key, "").strip()
-            c_val = request.form.get(cust_key, "").strip()
-            return c_val if c_val else dd_val
+            def merge_dd(dd_key, cust_key):
+                dd_val = request.form.get(dd_key, "").strip()
+                c_val = request.form.get(cust_key, "").strip()
+                return c_val if c_val else dd_val
 
         # user
         session["user_name"] = merge_dd("user_name", "user_name_custom")
