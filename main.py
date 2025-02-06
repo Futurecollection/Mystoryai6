@@ -531,7 +531,7 @@ def mid_game_personalize():
         session["interaction_log"] = logs
 
         return redirect(url_for("interaction"))
-    
+
     return render_template("mid_game_personalize.html",
         title="Update Settings",
         npc_name_options=NPC_NAME_OPTIONS,
@@ -635,28 +635,6 @@ def interaction():
             image_prompt = ""
 
             lines = result_text.split("\n")
-
-
-@app.route("/stage_unlocks", methods=["GET", "POST"])
-def stage_unlocks():
-    if request.method == "POST" and "update_stage_unlocks" in request.form:
-        su = session.get("stage_unlocks", {})
-        for i in range(1, 7):
-            key = f"stage_unlock_{i}"
-            new_text = request.form.get(key, "").strip()
-            su[i] = new_text
-        session["stage_unlocks"] = su
-
-        logs = session.get("interaction_log", [])
-        logs.append("SYSTEM: Stage unlock text updated.")
-        session["interaction_log"] = logs
-        return redirect(url_for("interaction"))
-
-    return render_template("stage_unlocks.html", 
-                         stage_unlocks=session.get("stage_unlocks", {}),
-                         title="Stage Unlocks")
-
-
             for ln in lines:
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
@@ -682,6 +660,7 @@ def stage_unlocks():
 
             session["image_generated_this_turn"] = False
             return redirect(url_for("interaction"))
+
 
         elif "update_npc" in request.form:
             def merge_dd(dd_key, cust_key):
@@ -847,7 +826,7 @@ def full_story():
 @app.route("/continue_erotica", methods=["POST"])
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
-    
+
     continue_prompt = f"""
 You are continuing an erotic story. Pick up exactly where this left off and continue
 the scene for another 600-900 words. Maintain the same tone, characters, and setting.
@@ -864,7 +843,7 @@ Now continue the story from this exact point (600-900 more words):"""
         generation_config={"temperature": 0.8, "max_output_tokens": 1500},
         safety_settings=safety_settings
     )
-    
+
     full_text = f"{previous_text}\n\n{continuation.text.strip()}"
     return render_template("erotica_story.html", erotica_text=full_text, title="Generated Erotica")
 
@@ -918,6 +897,26 @@ Allowed Explicitness:
 
     erotica_text = erotica_resp.text.strip()
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
+
+
+@app.route("/stage_unlocks", methods=["GET", "POST"])
+def stage_unlocks():
+    if request.method == "POST" and "update_stage_unlocks" in request.form:
+        su = session.get("stage_unlocks", {})
+        for i in range(1, 7):
+            key = f"stage_unlock_{i}"
+            new_text = request.form.get(key, "").strip()
+            su[i] = new_text
+        session["stage_unlocks"] = su
+
+        logs = session.get("interaction_log", [])
+        logs.append("SYSTEM: Stage unlock text updated.")
+        session["interaction_log"] = logs
+        return redirect(url_for("interaction"))
+
+    return render_template("stage_unlocks.html", 
+                         stage_unlocks=session.get("stage_unlocks", {}),
+                         title="Stage Unlocks")
 
 
 if __name__ == "__main__":
