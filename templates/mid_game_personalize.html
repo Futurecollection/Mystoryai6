@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -70,6 +69,14 @@
     <label class="form-label">NPC Ethnicity</label>
     <select class="form-select mb-1" name="npc_ethnicity">
       <option value="">--Select--</option>
+      <style>
+        optgroup {
+          font-size: 2.2rem;
+          font-weight: 800;
+          color: #ff5789;
+          padding: 10px 0;
+        }
+      </style>
       <optgroup label="Americas">
         <option value="American (Black)" {% if session['npc_ethnicity'] == "American (Black)" %}selected{% endif %}>American (Black)</option>
         <option value="American (White)" {% if session['npc_ethnicity'] == "American (White)" %}selected{% endif %}>American (White)</option>
