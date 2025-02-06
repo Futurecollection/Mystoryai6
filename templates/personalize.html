@@ -272,4 +272,15 @@
     Save &amp; Next
   </button>
 </form>
+
+{% if session.get('npc_biography') %}
+<div class="mt-4">
+  <h3>NPC Biography</h3>
+  <div class="card">
+    <div class="card-body">
+      <p style="white-space: pre-wrap;">{{ session.get('npc_biography') }}</p>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

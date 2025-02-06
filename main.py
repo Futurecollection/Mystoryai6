@@ -132,6 +132,44 @@ ETHNICITY_OPTIONS = [
 # 4) Build Personalization String
 ############################################################################
 
+def generate_npc_bio():
+    npc_name = session.get("npc_name", "?")
+    npc_age = session.get("npc_age", "?")
+    npc_gender = session.get("npc_gender", "?")
+    npc_eth = session.get("npc_ethnicity", "?")
+    npc_body = session.get("npc_body_type", "?")
+    npc_occ = session.get("npc_occupation", "?")
+    npc_situation = session.get("npc_current_situation", "?")
+    npc_personality = session.get("npc_personality", "?")
+
+    prompt = f"""
+You are a creative character biography writer. Create a detailed, engaging backstory 
+for this character that explains their current situation and personality. Include:
+- Early life and family background
+- Key life experiences that shaped them
+- Current lifestyle and aspirations
+- Personality traits and how they developed
+- Recent events that led to their current situation
+
+Character Details:
+- Name: {npc_name}
+- Age: {npc_age}
+- Gender: {npc_gender}
+- Ethnicity: {npc_eth}
+- Build: {npc_body}
+- Occupation: {npc_occ}
+- Current Situation: {npc_situation}
+- Personality: {npc_personality}
+
+Write a 300-400 word biography that feels natural and engaging:"""
+
+    chat = model.start_chat()
+    bio = chat.send_message(prompt, 
+        generation_config={"temperature": 0.8},
+        safety_settings=safety_settings
+    )
+    return bio.text.strip()
+
 def build_personalization_string():
     user_data = (
         f"USER:\n"
@@ -506,6 +544,13 @@ Your mission:
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
+        
+        # Generate NPC biography
+        try:
+            npc_bio = generate_npc_bio()
+            session["npc_biography"] = npc_bio
+        except Exception as e:
+            session["npc_biography"] = f"Error generating biography: {str(e)}"
 
         # When starting fresh, allow an image generation later:
         session["image_generated_this_turn"] = False
