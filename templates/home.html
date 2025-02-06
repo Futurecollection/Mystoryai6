@@ -2,13 +2,79 @@
 {% block content %}
 <h1 class="text-center mb-4" style="font-size:2.2rem;">MyStory</h1>
 <p class="mb-4 text-center" style="font-size:1.2rem;">
-  Welcome to <strong>MyStory</strong>, an immersive 
-  romance story generator. Customize your romantic interest, 
-  then explore heartfelt interactions. Will a subtle spark 
-  blossom into a life-changing connection? Take it slow, choose your moves carefully, 
-  and discover your unique romance.
+  Welcome to <strong>MyStory</strong>, an immersive AI-powered storytelling platform that lets you create and explore romantic narratives.
 </p>
-<div class="text-center">
-  <a href="{{ url_for('restart') }}" class="btn btn-lg me-3">Begin / Restart</a>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h4 class="card-title">How It Works</h4>
+          <ol>
+            <li><strong>Personalize Characters:</strong> Create your character and customize your romantic interest</li>
+            <li><strong>Choose Setting:</strong> Select or create a unique environment for your story</li>
+            <li><strong>Interactive Story:</strong> Guide the narrative through your choices and actions</li>
+            <li><strong>AI-Generated Scenes:</strong> Get visualization of key moments with image generation</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h4 class="card-title">Key Features</h4>
+          <ul>
+            <li>Dynamic relationship progression through 6 stages</li>
+            <li>AI-powered character responses and story development</li>
+            <li>Scene visualization with image generation</li>
+            <li>Customizable stage unlocks and relationship milestones</li>
+            <li>Option to generate full erotic story versions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">Relationship Stages</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <ul>
+            <li><strong>Strangers:</strong> Initial meetings and introductions</li>
+            <li><strong>Casual:</strong> Light flirting and getting to know each other</li>
+            <li><strong>Comfortable:</strong> Growing trust and personal conversations</li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <ul>
+            <li><strong>Close:</strong> Deeper emotional connection and intimacy</li>
+            <li><strong>Serious:</strong> Strong romantic feelings and future plans</li>
+            <li><strong>Committed:</strong> Deep bond and complete trust</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">Special Features</h4>
+      <ul>
+        <li><strong>OOC Commands:</strong> Use "OOC:" to give special instructions to the AI</li>
+        <li><strong>Mid-Game Updates:</strong> Modify character details or environment anytime</li>
+        <li><strong>Story Generation:</strong> Convert your interaction into a complete erotic story</li>
+      </ul>
+      <p class="mt-2">
+        <small class="text-muted">Find me on Reddit: <a href="https://reddit.com/u/Known-Concern-2836" target="_blank">u/Known-Concern-2836</a></small>
+      </p>
+    </div>
+  </div>
+
+  <div class="text-center mb-4">
+    <a href="{{ url_for('restart') }}" class="btn btn-primary btn-lg">Begin Your Story</a>
+  </div>
 </div>
 {% endblock %}
