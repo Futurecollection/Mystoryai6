@@ -1,20 +1,23 @@
-
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Stage Unlocks</h1>
+<div class="card mb-3" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+  <div class="card-body" style="color: #f8d0d0;">
+    <h1>Stage Unlocks</h1>
 
-<form method="POST" class="mb-4">
-  {% for i in range(1,7) %}
-    <label>Stage {{ i }} Unlock Text:</label>
-    <textarea class="form-control mb-2" rows="2" 
-              name="stage_unlock_{{ i }}">{{ stage_unlocks[i] }}</textarea>
-  {% endfor %}
-  <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
-    Save Stage Unlocks
-  </button>
-  <a href="{{ url_for('interaction') }}" class="btn btn-secondary ms-2">
-    Back to Story
-  </a>
-</form>
+    <form method="POST" class="mb-4">
+      {% for i in range(1,7) %}
+        <label>Stage {{ i }} Unlock Text:</label>
+        <textarea class="form-control mb-2" rows="2" 
+                  name="stage_unlock_{{ i }}">{{ stage_unlocks[i] }}</textarea>
+      {% endfor %}
+      <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
+        Save Stage Unlocks
+      </button>
+      <a href="{{ url_for('interaction') }}" class="btn btn-secondary ms-2">
+        Back to Story
+      </a>
+    </form>
+  </div>
+</div>
 {% endblock %}
