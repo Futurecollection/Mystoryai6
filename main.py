@@ -747,12 +747,29 @@ def interaction():
                 prompt_text = request.form.get("scene_image_prompt", "").strip()
                 if not prompt_text:
                     prompt_text = "(No prompt text)"
-                    
-                # Check for age-restricted content in manual prompt
-                if validate_age_content(prompt_text):
-                    logs.append("[SYSTEM] WARNING: Manual prompt contained age-restricted content. Generation blocked.")
+
+                # Use Gemini to validate age-appropriate content
+                safety_prompt = f"""
+                Analyze this image generation prompt for any age-inappropriate content.
+                Reject if it contains any references to:
+                - Characters under 20 years old
+                - School/college/teen settings
+                - Young-looking characters
+                - Age-play scenarios
+                
+                Prompt to check: {prompt_text}
+                
+                Return only "ALLOW" or "REJECT"
+                """
+                
+                chat = model.start_chat()
+                validation = chat.send_message(safety_prompt, safety_settings=safety_settings)
+                validation_result = validation.text.strip().upper()
+
+                if validation_result != "ALLOW":
+                    logs.append("[SYSTEM] WARNING: AI detected age-restricted content. Generation blocked.")
                     session["interaction_log"] = logs
-                    session["scene_image_prompt"] = "⚠️ ERROR: Prompt contained age-restricted terms. Please edit and try again."
+                    session["scene_image_prompt"] = "⚠️ ERROR: AI detected age-restricted content. Please edit and try again."
                     return redirect(url_for("interaction"))
 
                 existing_seed = session.get("scene_image_seed")
