@@ -73,18 +73,14 @@
 </form>
 
 <hr>
-<!-- STAGE UNLOCK TEXT -->
-<h3>Stage Unlocks</h3>
-<form method="POST" class="mb-4">
-  {% for i in range(1,7) %}
-    <label>Stage {{ i }} Unlock Text:</label>
-    <textarea class="form-control mb-2" rows="2" 
-              name="stage_unlock_{{ i }}">{{ stage_unlocks[i] }}</textarea>
-  {% endfor %}
-  <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
-    Save Stage Unlocks
-  </button>
-</form>
+<!-- Stage Unlocks Button -->
+<div class="row mb-3">
+  <div class="col-12">
+    <a href="{{ url_for('stage_unlocks') }}" class="btn btn-warning">
+      Edit Stage Unlocks
+    </a>
+  </div>
+</div>
 
 <hr>
 <!-- Mid-Game Personalization Button -->

@@ -635,6 +635,28 @@ def interaction():
             image_prompt = ""
 
             lines = result_text.split("\n")
+
+
+@app.route("/stage_unlocks", methods=["GET", "POST"])
+def stage_unlocks():
+    if request.method == "POST" and "update_stage_unlocks" in request.form:
+        su = session.get("stage_unlocks", {})
+        for i in range(1, 7):
+            key = f"stage_unlock_{i}"
+            new_text = request.form.get(key, "").strip()
+            su[i] = new_text
+        session["stage_unlocks"] = su
+
+        logs = session.get("interaction_log", [])
+        logs.append("SYSTEM: Stage unlock text updated.")
+        session["interaction_log"] = logs
+        return redirect(url_for("interaction"))
+
+    return render_template("stage_unlocks.html", 
+                         stage_unlocks=session.get("stage_unlocks", {}),
+                         title="Stage Unlocks")
+
+
             for ln in lines:
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
