@@ -702,9 +702,9 @@ def interaction():
 
                 # Use Gemini to validate age-appropriate content
                                 safety_prompt = f"""
-                Analyze this image generation prompt for any age-inappropriate content.
-                Reject if it contains any references to:
-                - Characters under 20 years old
+                    Analyze this image generation prompt for any age-inappropriate content.
+                    Reject if it contains any references to:
+                    - Characters under 20 years old
                 - School/college/teen settings
                 - Young-looking characters
                 - Age-play scenarios
