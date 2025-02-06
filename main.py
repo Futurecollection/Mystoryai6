@@ -390,7 +390,17 @@ def restart():
 
 @app.route("/personalize", methods=["GET", "POST"])
 def personalize():
-    if request.method == "POST" and "save_personalization" in request.form:
+    if request.method == "POST":
+        if "generate_bio" in request.form:
+            # Generate and store bio but stay on personalize page
+            try:
+                npc_bio = generate_npc_bio()
+                session["npc_biography"] = npc_bio
+            except Exception as e:
+                session["npc_biography"] = f"Error generating biography: {str(e)}"
+            return redirect(url_for("personalize"))
+            
+        elif "save_personalization" in request.form:
         def merge_dd(dd_key, cust_key):
             dd_val = request.form.get(dd_key, "").strip()
             c_val = request.form.get(cust_key, "").strip()

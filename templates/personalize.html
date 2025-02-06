@@ -268,9 +268,14 @@
     </label>
   </div>
 
-  <button type="submit" name="save_personalization" value="true" class="btn btn-primary btn-lg">
-    Save &amp; Next
-  </button>
+  <div class="d-flex gap-2">
+    <button type="submit" name="save_personalization" value="true" class="btn btn-primary btn-lg">
+      Continue to Interaction
+    </button>
+    <button type="submit" name="generate_bio" value="true" class="btn btn-secondary btn-lg">
+      Generate Optional Bio
+    </button>
+  </div>
 </form>
 
 {% if session.get('npc_biography') %}
