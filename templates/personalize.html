@@ -85,9 +85,53 @@
       <label class="form-label mt-2">NPC Ethnicity</label>
       <select class="form-select mb-1" name="npc_ethnicity">
         <option value="">--Select--</option>
-        {% for eopt in ethnicity_options %}
-          <option value="{{ eopt }}">{{ eopt }}</option>
-        {% endfor %}
+        <optgroup label="Americas">
+          <option value="American (Black)">American (Black)</option>
+          <option value="American (White)">American (White)</option>
+          <option value="Hispanic">Hispanic</option>
+          <option value="Brazilian">Brazilian</option>
+        </optgroup>
+        <optgroup label="European">
+          <option value="British">British</option>
+          <option value="Irish">Irish</option>
+          <option value="Scottish">Scottish</option>
+          <option value="Welsh">Welsh</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
+          <option value="Dutch">Dutch</option>
+          <option value="Danish">Danish</option>
+          <option value="Norwegian">Norwegian</option>
+          <option value="Swedish">Swedish</option>
+          <option value="Italian">Italian</option>
+          <option value="Greek">Greek</option>
+          <option value="Spanish">Spanish</option>
+          <option value="Portuguese">Portuguese</option>
+          <option value="Russian">Russian</option>
+          <option value="Ukrainian">Ukrainian</option>
+          <option value="Polish">Polish</option>
+          <option value="Czech">Czech</option>
+          <option value="Slovak">Slovak</option>
+          <option value="Croatian">Croatian</option>
+          <option value="Serbian">Serbian</option>
+        </optgroup>
+        <optgroup label="Asian">
+          <option value="Chinese">Chinese</option>
+          <option value="Japanese">Japanese</option>
+          <option value="Korean">Korean</option>
+          <option value="Vietnamese">Vietnamese</option>
+          <option value="Thai">Thai</option>
+          <option value="Indian">Indian</option>
+          <option value="Pakistani">Pakistani</option>
+          <option value="Filipino">Filipino</option>
+        </optgroup>
+        <optgroup label="Oceania">
+          <option value="Australian">Australian</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="Turkish">Turkish</option>
+          <option value="Middle Eastern">Middle Eastern</option>
+          <option value="Other">Other</option>
+        </optgroup>
       </select>
       <label>Or custom:</label>
       <input type="text" class="form-control" name="npc_ethnicity_custom">

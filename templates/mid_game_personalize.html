@@ -70,13 +70,53 @@
     <label class="form-label">NPC Ethnicity</label>
     <select class="form-select mb-1" name="npc_ethnicity">
       <option value="">--Select--</option>
-      {% for eopt in ethnicity_options %}
-        {% if eopt == session['npc_ethnicity'] %}
-          <option value="{{ eopt }}" selected>{{ eopt }}</option>
-        {% else %}
-          <option value="{{ eopt }}">{{ eopt }}</option>
-        {% endif %}
-      {% endfor %}
+      <optgroup label="Americas">
+        <option value="American (Black)" {% if session['npc_ethnicity'] == "American (Black)" %}selected{% endif %}>American (Black)</option>
+        <option value="American (White)" {% if session['npc_ethnicity'] == "American (White)" %}selected{% endif %}>American (White)</option>
+        <option value="Hispanic" {% if session['npc_ethnicity'] == "Hispanic" %}selected{% endif %}>Hispanic</option>
+        <option value="Brazilian" {% if session['npc_ethnicity'] == "Brazilian" %}selected{% endif %}>Brazilian</option>
+      </optgroup>
+      <optgroup label="European">
+        <option value="British" {% if session['npc_ethnicity'] == "British" %}selected{% endif %}>British</option>
+        <option value="Irish" {% if session['npc_ethnicity'] == "Irish" %}selected{% endif %}>Irish</option>
+        <option value="Scottish" {% if session['npc_ethnicity'] == "Scottish" %}selected{% endif %}>Scottish</option>
+        <option value="Welsh" {% if session['npc_ethnicity'] == "Welsh" %}selected{% endif %}>Welsh</option>
+        <option value="French" {% if session['npc_ethnicity'] == "French" %}selected{% endif %}>French</option>
+        <option value="German" {% if session['npc_ethnicity'] == "German" %}selected{% endif %}>German</option>
+        <option value="Dutch" {% if session['npc_ethnicity'] == "Dutch" %}selected{% endif %}>Dutch</option>
+        <option value="Danish" {% if session['npc_ethnicity'] == "Danish" %}selected{% endif %}>Danish</option>
+        <option value="Norwegian" {% if session['npc_ethnicity'] == "Norwegian" %}selected{% endif %}>Norwegian</option>
+        <option value="Swedish" {% if session['npc_ethnicity'] == "Swedish" %}selected{% endif %}>Swedish</option>
+        <option value="Italian" {% if session['npc_ethnicity'] == "Italian" %}selected{% endif %}>Italian</option>
+        <option value="Greek" {% if session['npc_ethnicity'] == "Greek" %}selected{% endif %}>Greek</option>
+        <option value="Spanish" {% if session['npc_ethnicity'] == "Spanish" %}selected{% endif %}>Spanish</option>
+        <option value="Portuguese" {% if session['npc_ethnicity'] == "Portuguese" %}selected{% endif %}>Portuguese</option>
+        <option value="Russian" {% if session['npc_ethnicity'] == "Russian" %}selected{% endif %}>Russian</option>
+        <option value="Ukrainian" {% if session['npc_ethnicity'] == "Ukrainian" %}selected{% endif %}>Ukrainian</option>
+        <option value="Polish" {% if session['npc_ethnicity'] == "Polish" %}selected{% endif %}>Polish</option>
+        <option value="Czech" {% if session['npc_ethnicity'] == "Czech" %}selected{% endif %}>Czech</option>
+        <option value="Slovak" {% if session['npc_ethnicity'] == "Slovak" %}selected{% endif %}>Slovak</option>
+        <option value="Croatian" {% if session['npc_ethnicity'] == "Croatian" %}selected{% endif %}>Croatian</option>
+        <option value="Serbian" {% if session['npc_ethnicity'] == "Serbian" %}selected{% endif %}>Serbian</option>
+      </optgroup>
+      <optgroup label="Asian">
+        <option value="Chinese" {% if session['npc_ethnicity'] == "Chinese" %}selected{% endif %}>Chinese</option>
+        <option value="Japanese" {% if session['npc_ethnicity'] == "Japanese" %}selected{% endif %}>Japanese</option>
+        <option value="Korean" {% if session['npc_ethnicity'] == "Korean" %}selected{% endif %}>Korean</option>
+        <option value="Vietnamese" {% if session['npc_ethnicity'] == "Vietnamese" %}selected{% endif %}>Vietnamese</option>
+        <option value="Thai" {% if session['npc_ethnicity'] == "Thai" %}selected{% endif %}>Thai</option>
+        <option value="Indian" {% if session['npc_ethnicity'] == "Indian" %}selected{% endif %}>Indian</option>
+        <option value="Pakistani" {% if session['npc_ethnicity'] == "Pakistani" %}selected{% endif %}>Pakistani</option>
+        <option value="Filipino" {% if session['npc_ethnicity'] == "Filipino" %}selected{% endif %}>Filipino</option>
+      </optgroup>
+      <optgroup label="Oceania">
+        <option value="Australian" {% if session['npc_ethnicity'] == "Australian" %}selected{% endif %}>Australian</option>
+      </optgroup>
+      <optgroup label="Other">
+        <option value="Turkish" {% if session['npc_ethnicity'] == "Turkish" %}selected{% endif %}>Turkish</option>
+        <option value="Middle Eastern" {% if session['npc_ethnicity'] == "Middle Eastern" %}selected{% endif %}>Middle Eastern</option>
+        <option value="Other" {% if session['npc_ethnicity'] == "Other" %}selected{% endif %}>Other</option>
+      </optgroup>
     </select>
     {% set eth_in_list = session['npc_ethnicity'] in ethnicity_options %}
     <label>Or custom:</label>
