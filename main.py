@@ -161,8 +161,20 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
+    # Check for age-related content
+    age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "young", "highschool", "high school", "18 year"]
+    if any(keyword in last_user_action.lower() for keyword in age_keywords):
+        return """AFFECT_CHANGE_FINAL: -5.0
+NARRATION: ⚠️ WARNING: This system does not allow any content involving minors or characters under 20 years old. Please ensure all characters are explicitly adults over 20.
+IMAGE_PROMPT: Portrait photo of a warning sign"""
+
     system_instructions = f"""
 You are a third-person descriptive erotic romance novel narrator.
+
+CRITICAL AGE RESTRICTION:
+- All characters must be explicitly adults over 20 years old
+- Immediately reject any scenarios involving minors or characters under 20
+- Do not reference high school, teenage years, or youth
 
 SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as a direct instruction
