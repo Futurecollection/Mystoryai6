@@ -319,6 +319,13 @@
            value="{% if not ctx_in_list %}{{ session['encounter_context'] }}{% endif %}">
   </div>
 
+  <!-- NPC Backstory -->
+  <div class="col-12">
+    <label class="form-label">NPC Backstory/Bio</label>
+    <textarea class="form-control" name="npc_backstory" rows="4" 
+              placeholder="Enter any additional background information, life story, or character details...">{{ session['npc_backstory'] }}</textarea>
+  </div>
+
   <div class="col-12">
     <button type="submit" name="update_npc" value="true" class="btn btn-warning">
       Update Settings

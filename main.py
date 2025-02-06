@@ -550,6 +550,7 @@ def mid_game_personalize():
         session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
         session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
         session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
+        session["npc_backstory"] = request.form.get("npc_backstory", "").strip()
 
         session["environment"] = merge_dd("environment", "environment_custom")
         session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
