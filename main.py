@@ -747,6 +747,13 @@ def interaction():
                 prompt_text = request.form.get("scene_image_prompt", "").strip()
                 if not prompt_text:
                     prompt_text = "(No prompt text)"
+                    
+                # Check for age-restricted content in manual prompt
+                if validate_age_content(prompt_text):
+                    logs.append("[SYSTEM] WARNING: Manual prompt contained age-restricted content. Generation blocked.")
+                    session["interaction_log"] = logs
+                    session["scene_image_prompt"] = "⚠️ ERROR: Prompt contained age-restricted terms. Please edit and try again."
+                    return redirect(url_for("interaction"))
 
                 existing_seed = session.get("scene_image_seed")
                 if existing_seed:
