@@ -115,8 +115,17 @@ ENCOUNTER_CONTEXT_OPTIONS = [
   "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
 ETHNICITY_OPTIONS = [
-    "American (Black)","American (White)","Hispanic","Russian","German","Brazilian","Chinese",
-    "Japanese","Indian","Australian","French","British","Other"
+    "American (Black)","American (White)","Hispanic","Australian",
+    # European
+    "British","Irish","Scottish","Welsh",
+    "French","German","Dutch","Danish","Norwegian","Swedish",
+    "Italian","Greek","Spanish","Portuguese",
+    "Russian","Ukrainian","Polish","Czech","Slovak","Croatian","Serbian",
+    # Asian
+    "Chinese","Japanese","Korean","Vietnamese","Thai",
+    "Indian","Pakistani","Filipino",
+    # Other
+    "Brazilian","Turkish","Middle Eastern","Other"
 ]
 
 ############################################################################
