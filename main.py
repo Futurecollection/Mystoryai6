@@ -377,7 +377,37 @@ def personalize():
         session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
         session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
         session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
-        session["npc_backstory"] = request.form.get("npc_backstory", "").strip()
+
+        # Collect bio inputs
+        bio_inputs = {
+            "npc_location": request.form.get("npc_location", "").strip(),
+            "npc_hobbies": request.form.get("npc_hobbies", "").strip(),
+            "npc_workplace": request.form.get("npc_workplace", "").strip(),
+            "npc_struggles": request.form.get("npc_struggles", "").strip(),
+            "npc_secrets": request.form.get("npc_secrets", "").strip()
+        }
+
+        # Generate bio with Gemini
+        bio_prompt = f"""
+Create a compelling character bio that reveals some information while maintaining mystery. Include:
+- Where they live and work (Location: {bio_inputs['npc_location']}, Workplace: {bio_inputs['npc_workplace']})
+- Their hobbies and interests ({bio_inputs['npc_hobbies']})
+- Personal struggles or emotional challenges ({bio_inputs['npc_struggles']})
+- Hints at deeper secrets ({bio_inputs['npc_secrets']})
+
+Make it intriguing but don't reveal everything - leave some mysteries for the user to discover.
+Keep it to 2-3 paragraphs. Include emotional depth and personal growth elements.
+"""
+
+        chat = model.start_chat()
+        bio_response = chat.send_message(
+            bio_prompt,
+            generation_config={"temperature": 0.8},
+            safety_settings=safety_settings
+        )
+
+        session["npc_backstory"] = bio_response.text.strip()
+
 
         # Set gender-specific NPC instructions
         npc_gender = session.get("npc_gender", "").lower()
@@ -580,7 +610,7 @@ def mid_game_personalize():
         ethnicity_options=ETHNICITY_OPTIONS
     )
 
-@app.route("/interaction", methods=["GET", "POST"])
+@app.route("/interaction, methods=["GET", "POST"])
 def interaction():
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
@@ -779,12 +809,12 @@ def interaction():
                 - School/college/teen settings
                 - Young-looking characters
                 - Age-play scenarios
-                
+
                 Prompt to check: {prompt_text}
-                
+
                 Return only "ALLOW" or "REJECT"
                 """
-                
+
                 chat = model.start_chat()
                 validation = chat.send_message(safety_prompt, safety_settings=safety_settings)
                 validation_result = validation.text.strip().upper()
@@ -981,12 +1011,12 @@ def validate_age_content(text):
 def generate_scene_prompt():
     logs = session.get("interaction_log", [])
     full_history = "\n".join(logs)
-    
+
     print("[DEBUG] Attempting to generate scene prompt")
     try:
         auto_prompt = gpt_scene_image_prompt(full_history)
         print("[DEBUG] Generated prompt:", auto_prompt)
-        
+
         if not auto_prompt:
             raise ValueError("Generated prompt was empty")
 
