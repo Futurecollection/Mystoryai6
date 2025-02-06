@@ -857,6 +857,38 @@ def interaction():
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
+@app.route("/generate_bio", methods=["POST"])
+def generate_bio():
+    data = request.json
+    
+    bio_prompt = f"""
+Generate a compelling character bio for an adult (age 20+) character with the following traits:
+- Name: {data.get('npc_name', 'unknown')}
+- Gender: {data.get('npc_gender', 'unknown')}
+- Age: {data.get('npc_age', 'unknown')}
+- Ethnicity: {data.get('npc_ethnicity', 'unknown')}
+- Personality: {data.get('npc_personality', 'unknown')}
+- Occupation: {data.get('npc_occupation', 'unknown')}
+- Current Situation: {data.get('npc_current_situation', 'unknown')}
+
+Create a 2-3 paragraph biography that:
+1. Reveals their background and life experiences
+2. Explains their current life situation and goals
+3. Hints at some personal struggles or challenges
+4. Includes some mysterious elements or unexplored aspects
+
+Keep it intriguing but tasteful. Focus on their personality, motivations, and life story.
+"""
+    
+    chat = model.start_chat()
+    bio_response = chat.send_message(
+        bio_prompt,
+        generation_config={"temperature": 0.7},
+        safety_settings=safety_settings
+    )
+    
+    return jsonify({"bio": bio_response.text.strip()})
+
 
 ############################################################################
 # 10) Full Story Route => Filter only the NPC "NARRATION =>"
