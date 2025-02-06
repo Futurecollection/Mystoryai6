@@ -424,7 +424,13 @@ def personalize():
             return redirect(url_for("personalize"))
 
         elif "save_personalization" in request.form:
-            # Set default stats only when proceeding to interaction
+            try:
+                npc_bio = generate_npc_bio()
+                session["npc_biography"] = npc_bio
+            except Exception as e:
+                session["npc_biography"] = f"Error generating biography: {str(e)}"
+
+            # Save personalizations after bio generation
             session["affectionScore"] = 0.0
             session["trustScore"] = 5.0
             session["npcMood"] = "Neutral"
@@ -436,15 +442,7 @@ def personalize():
             session["scene_image_seed"] = None
             session["image_generated_this_turn"] = False
 
-            # Generate NPC biography if not already done
-            if not session.get("npc_biography"):
-                try:
-                    npc_bio = generate_npc_bio()
-                    session["npc_biography"] = npc_bio
-                except Exception as e:
-                    session["npc_biography"] = f"Error generating biography: {str(e)}"
-
-        return redirect(url_for("interaction"))
+            return redirect(url_for("interaction"))
     else:
         return render_template("personalize.html",
             title="Personalizations",
@@ -703,7 +701,7 @@ def interaction():
                     prompt_text = "(No prompt text)"
 
                 # Use Gemini to validate age-appropriate content
-                safety_prompt = f"""
+                                safety_prompt = f"""
                 Analyze this image generation prompt for any age-inappropriate content.
                 Reject if it contains any references to:
                 - Characters under 20 years old
