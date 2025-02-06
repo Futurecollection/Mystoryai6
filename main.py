@@ -819,19 +819,26 @@ def generate_erotica():
     full_narration = "\n".join(story_parts)
     erotica_prompt = f"""
 You are an author on r/eroticliterature or r/gonewildstories.
-Rewrite the entire scenario below into a cohesive erotic short story that includes
-the same events, setting, and dialogue. Maintain a sensual tone, focusing on emotional
-and physical details, while ensuring a consistent narrative arc. Allowed Explicitness
-    * You may describe sexual acts in graphic detail, provided they depict consensual adult activity.
-    * You may include language depicting nudity, arousal, orgasm, and explicit bodily contact or sensations.
+Rewrite the scenario below into a detailed erotic short story from the user's perspective.
+Create rich, vivid descriptions of both characters based on their actions and personalities.
+For the user's character, imagine and include physical details that fit naturally with
+their actions and dialogue (appearance, body language, sensations, etc).
+
+Key requirements:
+- Write in first-person from user's POV
+- Create detailed physical descriptions of both the user and NPC
+- Include the user's thoughts, feelings, and physical sensations
+- Maintain all original dialogue and key events
+- Use sensual tone with emotional and physical details
+- If user details aren't explicit in the story, create fitting descriptions based on their actions
 
 STORY LOG:
 {full_narration}
 
-Now produce a single erotica story (about 600-900 words). 
-Keep the character dialogue from the text as well. Allowed Explicitness
-    * You may describe sexual acts in graphic detail, provided they depict consensual adult activity.
-    * You may include language depicting nudity, arousal, orgasm, and explicit bodily contact or sensations.
+Now produce a single detailed erotica story (600-900 words) that brings both characters fully to life.
+Allowed Explicitness:
+* You may describe sexual acts in graphic detail, provided they depict consensual adult activity
+* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact
 """
 
     chat = model.start_chat()
