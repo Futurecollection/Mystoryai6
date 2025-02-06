@@ -153,6 +153,7 @@ def build_personalization_string():
         f"  Occupation: {session.get('npc_occupation','?')}\n"
         f"  CurrentSituation: {session.get('npc_current_situation','?')}\n"
         f"  Instructions: {session.get('npc_instructions','')}\n"
+        f"  Backstory: {session.get('npc_backstory','')}\n"
     )
     env_data = (
         f"ENVIRONMENT:\n"
