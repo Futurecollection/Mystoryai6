@@ -190,6 +190,7 @@ def build_personalization_string():
         f"  Personality: {session.get('npc_personality','?')}\n"
         f"  Occupation: {session.get('npc_occupation','?')}\n"
         f"  CurrentSituation: {session.get('npc_current_situation','?')}\n"
+        f"  Biography: {session.get('npc_biography','')}\n"
         f"  Instructions: {session.get('npc_instructions','')}\n"
     )
     env_data = (
@@ -396,7 +397,7 @@ def personalize():
             c_val = request.form.get(cust_key, "").strip()
             return c_val if c_val else dd_val
 
-        # Save all personalizations first
+        # Always save personalizations
         session["user_name"] = merge_dd("user_name", "user_name_custom")
         session["user_age"] = merge_dd("user_age", "user_age_custom")
         session["user_background"] = request.form.get("user_background", "").strip()
@@ -415,7 +416,6 @@ def personalize():
         session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
 
         if "generate_bio" in request.form:
-            # Generate and store bio but stay on personalize page
             try:
                 npc_bio = generate_npc_bio()
                 session["npc_biography"] = npc_bio
@@ -424,10 +424,25 @@ def personalize():
             return redirect(url_for("personalize"))
             
         elif "save_personalization" in request.form:
-            def merge_dd(dd_key, cust_key):
-                dd_val = request.form.get(dd_key, "").strip()
-                c_val = request.form.get(cust_key, "").strip()
-                return c_val if c_val else dd_val
+            # Set default stats only when proceeding to interaction
+            session["affectionScore"] = 0.0
+            session["trustScore"] = 5.0
+            session["npcMood"] = "Neutral"
+            session["currentStage"] = 1
+            session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
+            session["interaction_log"] = []
+            session["scene_image_prompt"] = ""
+            session["scene_image_url"] = None
+            session["scene_image_seed"] = None
+            session["image_generated_this_turn"] = False
+            
+            # Generate NPC biography if not already done
+            if not session.get("npc_biography"):
+                try:
+                    npc_bio = generate_npc_bio()
+                    session["npc_biography"] = npc_bio
+                except Exception as e:
+                    session["npc_biography"] = f"Error generating biography: {str(e)}"
 
         # user
         session["user_name"] = merge_dd("user_name", "user_name_custom")
