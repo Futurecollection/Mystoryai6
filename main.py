@@ -484,7 +484,6 @@ Your mission:
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
             user_age_options=USER_AGE_OPTIONS,
-            user_personality_options=USER_PERSONALITY_OPTIONS,
             npc_name_options=NPC_NAME_OPTIONS,
             npc_age_options=NPC_AGE_OPTIONS,
             npc_gender_options=NPC_GENDER_OPTIONS,
