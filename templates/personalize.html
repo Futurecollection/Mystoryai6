@@ -36,17 +36,6 @@
       <input type="text" class="form-control" name="user_age_custom">
     </div>
     <div class="col-md-6">
-      <label class="form-label mt-2">User Personality</label>
-      <select class="form-select mb-1" name="user_personality">
-        <option value="">--Select--</option>
-        {% for upers in user_personality_options %}
-          <option value="{{ upers }}">{{ upers }}</option>
-        {% endfor %}
-      </select>
-      <label>Or custom:</label>
-      <input type="text" class="form-control" name="user_personality_custom">
-    </div>
-    <div class="col-md-6">
       <label class="form-label mt-2">User Background</label>
       <textarea class="form-control" name="user_background" rows="2"></textarea>
     </div>
@@ -180,7 +169,7 @@
       <label>Or custom:</label>
       <input type="text" class="form-control" name="npc_current_situation_custom">
     </div>
-    
+
   </div>
 
   <hr class="my-4">

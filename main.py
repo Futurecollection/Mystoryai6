@@ -78,9 +78,7 @@ GENERATED_IMAGE_PATH = "output.jpg"
 
 USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Emma","Sarah","Jessica","Emily","Sophie","Anna","Rachel","Lisa","Maria","Ashley","Other"]
 USER_AGE_OPTIONS = ["20","25","30","35","40","45"]
-USER_PERSONALITY_OPTIONS = [
-    "Friendly","Funny","Adventurous","Introverted","Ambitious","Laid-back","Kind","Curious","Other"
-]
+
 
 NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella","James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew","Other"]
 NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
@@ -130,7 +128,6 @@ def build_personalization_string():
         f"USER:\n"
         f"  Name: {session.get('user_name','?')}\n"
         f"  Age: {session.get('user_age','?')}\n"
-        f"  Personality: {session.get('user_personality','?')}\n"
         f"  Background: {session.get('user_background','?')}\n"
     )
     npc_data = (
@@ -332,7 +329,7 @@ def personalize():
         # user
         session["user_name"] = merge_dd("user_name", "user_name_custom")
         session["user_age"] = merge_dd("user_age", "user_age_custom")
-        session["user_personality"] = merge_dd("user_personality", "user_personality_custom")
+        
         session["user_background"] = request.form.get("user_background", "").strip()
 
         # npc
