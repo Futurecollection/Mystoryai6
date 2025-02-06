@@ -1,97 +1,10 @@
+
 {% extends "base.html" %}
 
 {% block content %}
-<!-- New top-left button linking to the full story page -->
-<div class="row mb-3">
-  <div class="col text-start">
-    <a href="{{ url_for('full_story') }}" class="btn btn-info">
-      Full Narration
-    </a>
-  </div>
-  <div class="col text-end">
-    <!-- (Optionally put something on the top-right, or leave blank) -->
-  </div>
-</div>
+<h1>Update Character & Environment</h1>
 
-<h1>Interaction</h1>
-
-<!-- Scene / NARRATION from gpt-4o-mini -->
-<div class="border p-3 mb-3" style="white-space: pre-line;">
-  <strong>Scene:</strong> {{ npc_narration }}
-</div>
-
-<!-- USER ACTION -->
-<form method="POST" class="mb-4">
-  <label class="form-label">Your Move (in-game):</label>
-  <input type="text" class="form-control mb-2" name="user_action" 
-         placeholder="He quietly asks how she’s doing...">
-  <button type="submit" name="submit_action" class="btn btn-success">
-    Send Move
-  </button>
-</form>
-
-<hr>
-<!-- SCENE IMAGE PROMPT -->
-<h3>Scene Image Prompt</h3>
-<form method="POST" class="mb-3">
-  <div class="mb-2">
-    <button type="submit" name="generate_scene_prompt" class="btn btn-secondary me-3">
-      Generate Scene Prompt
-    </button>
-    <small>Auto generate prompt referencing NPC & environment</small>
-  </div>
-
-  <textarea name="scene_image_prompt" rows="2" class="form-control">{{ scene_image_prompt }}</textarea>
-  <div class="mt-3">
-    <button type="submit" name="do_generate_flux" class="btn btn-primary me-2">
-      Generate Scene Image
-    </button>
-    <button type="submit" name="new_seed" class="btn btn-warning">
-      New Seed
-    </button>
-  </div>
-</form>
-
-{% if scene_image_url %}
-  <hr>
-  <h4>Generated Scene Image</h4>
-  <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width:60%;">
-  {% if scene_image_seed %}
-    <p class="mt-2">Seed: {{ scene_image_seed }}</p>
-  {% endif %}
-{% endif %}
-
-<hr>
-<!-- AFFECTION OVERRIDE -->
-<form method="POST" class="mb-4">
-  <label class="form-label">Override Affection Score:</label>
-  <input type="number" step="0.1" class="form-control mb-2" 
-         name="affection_new" value="{{ affection_score }}">
-  <button type="submit" name="update_affection" class="btn btn-info">
-    Update Affection
-  </button>
-</form>
-
-<hr>
-<!-- STAGE UNLOCK TEXT -->
-<h3>Stage Unlocks</h3>
-<form method="POST" class="mb-4">
-  {% for i in range(1,7) %}
-    <label>Stage {{ i }} Unlock Text:</label>
-    <textarea class="form-control mb-2" rows="2" 
-              name="stage_unlock_{{ i }}">{{ stage_unlocks[i] }}</textarea>
-  {% endfor %}
-  <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
-    Save Stage Unlocks
-  </button>
-</form>
-
-<hr>
-<div class="text-center mb-4">
-  <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-primary">
-    Update Character & Environment Settings
-  </a>
-</div>
+<form method="POST" class="row g-3 mb-4">
   <!-- NPC Name -->
   <div class="col-md-6">
     <label class="form-label">NPC Name</label>
@@ -352,19 +265,13 @@
            value="{% if not ctx_in_list %}{{ session['encounter_context'] }}{% endif %}">
   </div>
 
-  <hr>
-<!-- Relationship Stats -->
-<h3>Relationship Stats</h3>
-<ul>
-  <li>Affection Score: {{ affection_score }}</li>
-  <li>NPC Mood: {{ npc_mood }}</li>
-  <li>Current Stage: {{ current_stage }} ({{ stage_label }})</li>
-  <li>Stage Description: {{ stage_desc }}</li>
-  <li>Next Stage Threshold: {{ next_threshold }}</li>
-</ul>
-
-<hr>
-<a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">
-  Restart Entire Story
-</a>
+  <div class="col-12">
+    <button type="submit" name="update_npc" value="true" class="btn btn-warning">
+      Update Settings
+    </button>
+    <a href="{{ url_for('interaction') }}" class="btn btn-secondary ms-2">
+      Back to Story
+    </a>
+  </div>
+</form>
 {% endblock %}

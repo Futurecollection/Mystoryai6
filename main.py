@@ -503,6 +503,52 @@ Your mission:
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
+@app.route("/mid_game_personalize", methods=["GET", "POST"])
+def mid_game_personalize():
+    if request.method == "POST" and "update_npc" in request.form:
+        def merge_dd(dd_key, cust_key):
+            dd_val = request.form.get(dd_key, "").strip()
+            c_val = request.form.get(cust_key, "").strip()
+            return c_val if c_val else dd_val
+
+        session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
+        session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
+        session["npc_age"] = merge_dd("npc_age", "npc_age_custom")
+        session["npc_ethnicity"] = merge_dd("npc_ethnicity", "npc_ethnicity_custom")
+        session["npc_body_type"] = merge_dd("npc_body_type", "npc_body_type_custom")
+        session["npc_hair_color"] = merge_dd("npc_hair_color", "npc_hair_color_custom")
+        session["npc_hair_style"] = merge_dd("npc_hair_style", "npc_hair_style_custom")
+        session["npc_personality"] = merge_dd("npc_personality", "npc_personality_custom")
+        session["npc_clothing"] = merge_dd("npc_clothing", "npc_clothing_custom")
+        session["npc_occupation"] = merge_dd("npc_occupation", "npc_occupation_custom")
+        session["npc_current_situation"] = merge_dd("npc_current_situation", "npc_current_situation_custom")
+
+        session["environment"] = merge_dd("environment", "environment_custom")
+        session["encounter_context"] = merge_dd("encounter_context", "encounter_context_custom")
+
+        logs = session.get("interaction_log", [])
+        logs.append("SYSTEM: NPC personalizations updated mid-game.")
+        session["interaction_log"] = logs
+
+        return redirect(url_for("interaction"))
+    
+    return render_template("mid_game_personalize.html",
+        title="Update Settings",
+        npc_name_options=NPC_NAME_OPTIONS,
+        npc_age_options=NPC_AGE_OPTIONS,
+        npc_gender_options=NPC_GENDER_OPTIONS,
+        hair_style_options=HAIR_STYLE_OPTIONS,
+        body_type_options=BODY_TYPE_OPTIONS,
+        hair_color_options=HAIR_COLOR_OPTIONS,
+        npc_personality_options=NPC_PERSONALITY_OPTIONS,
+        clothing_options=CLOTHING_OPTIONS,
+        occupation_options=OCCUPATION_OPTIONS,
+        current_situation_options=CURRENT_SITUATION_OPTIONS,
+        environment_options=ENVIRONMENT_OPTIONS,
+        encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+        ethnicity_options=ETHNICITY_OPTIONS
+    )
+
 @app.route("/interaction", methods=["GET", "POST"])
 def interaction():
     if request.method == "GET":
