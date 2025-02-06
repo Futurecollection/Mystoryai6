@@ -967,19 +967,31 @@ def validate_age_content(text):
 def generate_scene_prompt():
     logs = session.get("interaction_log", [])
     full_history = "\n".join(logs)
+    
+    print("[DEBUG] Attempting to generate scene prompt")
+    try:
+        auto_prompt = gpt_scene_image_prompt(full_history)
+        print("[DEBUG] Generated prompt:", auto_prompt)
+        
+        if not auto_prompt:
+            raise ValueError("Generated prompt was empty")
 
-    auto_prompt = gpt_scene_image_prompt(full_history)
+        # Check for age-restricted content in prompt
+        if validate_age_content(auto_prompt):
+            logs.append("[SYSTEM] WARNING: Generated prompt contained age-restricted content.")
+            session["interaction_log"] = logs
+            session["scene_image_prompt"] = "⚠️ ERROR: Generated prompt contained age-restricted terms. Please try again or edit manually."
+            return redirect(url_for("interaction"))
 
-    # Check for age-restricted content in prompt
-    if validate_age_content(auto_prompt):
-        logs.append("[SYSTEM] WARNING: Generated prompt contained age-restricted content. Generating new prompt.")
+        session["scene_image_prompt"] = auto_prompt
+        logs.append(f"[AUTO Scene Prompt] => {auto_prompt}")
         session["interaction_log"] = logs
-        session["scene_image_prompt"] = "⚠️ ERROR: Generated prompt contained age-restricted terms. Please try again or edit manually."
-        return redirect(url_for("interaction"))
 
-    session["scene_image_prompt"] = auto_prompt
-    logs.append(f"[AUTO Scene Prompt] => {auto_prompt}")
-    session["interaction_log"] = logs
+    except Exception as e:
+        print("[DEBUG] Error generating prompt:", str(e))
+        logs.append(f"[SYSTEM] Error generating scene prompt: {str(e)}")
+        session["interaction_log"] = logs
+        session["scene_image_prompt"] = "⚠️ ERROR: Failed to generate prompt. Please try again."
 
     return redirect(url_for("interaction"))
 
