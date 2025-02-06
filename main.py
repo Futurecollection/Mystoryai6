@@ -287,27 +287,38 @@ def generate_flux_image_safely(prompt, seed=None):
 
 def gpt_scene_image_prompt(full_history):
     npc_age = session.get("npc_age", "?")
-    npc_gender = session.get("npc_gender", "?")
+    npc_gender = session.get("npc_gender", "?") 
     npc_eth = session.get("npc_ethnicity", "?")
     npc_body = session.get("npc_body_type", "?")
     npc_hair_color = session.get("npc_hair_color", "?")
     npc_hair_style = session.get("npc_hair_style", "?")
     npc_clothing = session.get("npc_clothing", "?")
     env_loc = session.get("environment", "?")
+    npc_mood = session.get("npcMood", "Neutral")
+    current_stage = session.get("currentStage", 1)
+
+    # Get last few interactions for immediate context
+    history_lines = full_history.split("\n")[-5:]  # Last 5 lines
+    recent_context = "\n".join(history_lines)
 
     prompt = f"""
 You are a creative scene image prompt generator.
-Create a single-sentence photographic prompt that must include:
-- NPC physical details: {npc_gender}, age {npc_age}, {npc_eth} {npc_body} build
-- NPC hair: {npc_hair_color}, {npc_hair_style} style
-- NPC clothing: {npc_clothing}
-- Environment: {env_loc}
-Do not reference 'user' or 'photographer'.
+Create a vivid single-sentence photographic prompt that captures the current moment.
 
-STORY CONTEXT:
-{full_history}
+CHARACTER DETAILS:
+- Physical: {npc_gender}, age {npc_age}, {npc_eth} with {npc_body} build
+- Hair: {npc_hair_color}, {npc_hair_style} style
+- Outfit: {npc_clothing}
+- Current Mood: {npc_mood}
 
-Generate one descriptive line for a scene image:"""
+SETTING:
+- Location: {env_loc}
+- Relationship Stage: {current_stage}
+
+RECENT CONTEXT:
+{recent_context}
+
+Generate one descriptive scene line that reflects the current emotional state and physical setting:"""
 
     chat = model.start_chat()
     resp = chat.send_message(
