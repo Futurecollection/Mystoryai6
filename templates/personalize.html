@@ -30,12 +30,32 @@
   <!-- Premade Bio Section -->
   <div id="premadeBioSection" style="display: none;">
     <div class="mb-4">
-      <h3>Enter Premade Bio</h3>
+      <h3>Choose or Enter Bio</h3>
       <div class="alert alert-info">
-        <small>Enter a complete character biography. The AI will extract all relevant details from this bio.</small>
+        <small>Select an existing bio slot or enter a new character biography.</small>
       </div>
-      <textarea class="form-control" name="npc_backstory" rows="6" 
-                placeholder="Enter a complete character biography..."></textarea>
+      <div class="mb-3">
+        <label class="form-label">Bio Name</label>
+        <input type="text" class="form-control" name="bio_name" placeholder="Enter a name for this bio">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Bio Content</label>
+        <textarea class="form-control" name="npc_backstory" rows="6" 
+                  placeholder="Enter a complete character biography..."></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Or Select Existing Bio:</label>
+        <select class="form-select" name="selected_bio">
+          <option value="">--Select Existing Bio--</option>
+          {% for category, bios in premade_bios.items() %}
+            <optgroup label="{{ category }}">
+              {% for name, bio in bios.items() %}
+                <option value="{{ category }}|{{ name }}">{{ name }}</option>
+              {% endfor %}
+            </optgroup>
+          {% endfor %}
+        </select>
+      </div>
     </div>
   </div>
 
