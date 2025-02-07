@@ -512,6 +512,7 @@ Your mission:
 
         return redirect(url_for("interaction"))
     else:
+        from character_bios import PREMADE_BIOS
         return render_template("personalize.html",
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
@@ -528,7 +529,8 @@ Your mission:
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
-            ethnicity_options=ETHNICITY_OPTIONS
+            ethnicity_options=ETHNICITY_OPTIONS,
+            premade_bios=PREMADE_BIOS
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
