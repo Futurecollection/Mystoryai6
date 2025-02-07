@@ -321,9 +321,13 @@
 
   <!-- NPC Backstory -->
   <div class="col-12">
-    <label class="form-label">NPC Backstory/Bio</label>
+    <label class="form-label">Premade Bio</label>
+    <div class="alert alert-info">
+      <small>If you enter a premade bio, it will override individual personality traits and characteristics. 
+      The AI will extract all relevant details from this bio instead of using the selections above.</small>
+    </div>
     <textarea class="form-control" name="npc_backstory" rows="4" 
-              placeholder="Enter any additional background information, life story, or character details...">{{ session['npc_backstory'] }}</textarea>
+              placeholder="Enter a complete character biography to override individual traits...">{{ session['npc_backstory'] }}</textarea>
   </div>
 
   <div class="col-12">
