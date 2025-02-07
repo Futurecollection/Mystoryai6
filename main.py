@@ -186,8 +186,9 @@ CRITICAL AGE RESTRICTION:
 - All characters must be explicitly adults over 20 years old
 
 NPC BIO/INSTRUCTIONS:
-{session.get('npc_backstory', '')}
-{session.get('npc_instructions', '')}
+Backstory: {session.get('npc_backstory', '')}
+
+Instructions: {session.get('npc_instructions', '')}
 
 SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as a direct instruction
@@ -375,6 +376,8 @@ def personalize():
             category, name = selected_bio.split("|")
             if category in PREMADE_BIOS and name in PREMADE_BIOS[category]:
                 session["npc_backstory"] = PREMADE_BIOS[category][name]
+                print(f"[DEBUG] Loaded bio: {category}/{name}")
+                print(f"[DEBUG] Bio content: {PREMADE_BIOS[category][name][:100]}...")
             
         session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
         session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
