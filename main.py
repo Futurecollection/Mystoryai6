@@ -773,14 +773,12 @@ def interaction():
 
                 # Use Gemini to validate age-appropriate content
                 safety_prompt = f"""
-                You are a content validator. ONLY check for age-restricted content.
-                Check this prompt and REJECT if it contains:
+                Analyze this image generation prompt for any age-inappropriate content.
+                Reject if it contains any references to:
                 - Characters under 20 years old
                 - School/college/teen settings
                 - Young-looking characters
                 - Age-play scenarios
-                
-                ALLOW all other content including adult/sexual content.
                 
                 Prompt to check: {prompt_text}
                 
