@@ -2,11 +2,45 @@
 {% block content %}
 <h1 class="mb-4">Personalizations</h1>
 
-<div class="alert alert-info mb-4">
-  <strong>Note:</strong> All personalizations are optional. If not selected, the AI will automatically generate appropriate values. Feel free to customize as much or as little as you prefer.
+<div class="mb-4">
+  <h3>Choose Your Personalization Method</h3>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Option 1: Premade Bio</h5>
+          <p class="card-text">Enter a complete character biography and let the AI interpret the details.</p>
+          <button type="button" class="btn btn-primary" onclick="showPremadeBio()">Use Premade Bio</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Option 2: Manual Customization</h5>
+          <p class="card-text">Customize individual traits and characteristics yourself.</p>
+          <button type="button" class="btn btn-primary" onclick="showManualCustomization()">Use Manual Customization</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <form method="POST">
+  <!-- Premade Bio Section -->
+  <div id="premadeBioSection" style="display: none;">
+    <div class="mb-4">
+      <h3>Enter Premade Bio</h3>
+      <div class="alert alert-info">
+        <small>Enter a complete character biography. The AI will extract all relevant details from this bio.</small>
+      </div>
+      <textarea class="form-control" name="npc_backstory" rows="6" 
+                placeholder="Enter a complete character biography..."></textarea>
+    </div>
+  </div>
+
+  <!-- Manual Customization Section -->
+  <div id="manualCustomizationSection" style="display: none;">
 
   <!-- USER Section -->
   <div class="row mb-3">
@@ -278,8 +312,22 @@
     </label>
   </div>
 
+  </div> <!-- Close manualCustomizationSection -->
+
   <button type="submit" name="save_personalization" value="true" class="btn btn-primary btn-lg">
     Save &amp; Next
   </button>
 </form>
+
+<script>
+function showPremadeBio() {
+  document.getElementById('premadeBioSection').style.display = 'block';
+  document.getElementById('manualCustomizationSection').style.display = 'none';
+}
+
+function showManualCustomization() {
+  document.getElementById('premadeBioSection').style.display = 'none';
+  document.getElementById('manualCustomizationSection').style.display = 'block';
+}
+</script>
 {% endblock %}
