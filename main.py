@@ -3,6 +3,7 @@ import replicate
 import requests
 import random
 
+from character_bios import PREMADE_BIOS
 import google.generativeai as genai
 from flask import (
     Flask, request, render_template,
