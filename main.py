@@ -364,6 +364,12 @@ def personalize():
         session["user_background"] = request.form.get("user_background", "").strip()
 
         # npc
+        selected_bio = request.form.get("selected_bio", "")
+        if selected_bio and "|" in selected_bio:
+            category, name = selected_bio.split("|")
+            if category in PREMADE_BIOS and name in PREMADE_BIOS[category]:
+                session["npc_backstory"] = PREMADE_BIOS[category][name]
+            
         session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
         session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
         session["npc_age"] = merge_dd("npc_age", "npc_age_custom")
