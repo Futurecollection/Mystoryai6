@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="row mb-4">
   <div class="col-md-6">
@@ -17,8 +16,7 @@
     </video>
   </div>
 </div>
-
-<h1>About / Help</h1>
+<h1 style="color: #ff5789;">About / Help</h1>
 
 <p>
   Welcome to <strong>Destined Encounters</strong>, where you can shape an adult storyline 
@@ -26,9 +24,9 @@
   romance, and dynamic AI-driven characters to give you a unique, customizable experience.
 </p>
 
-<hr>
+<hr style="border-top: 1px solid #ff5789;">
 
-<h3>Basic Usage</h3>
+<h3 style="color: #ff5789;">Basic Usage</h3>
 <ol>
   <li>
     <strong>Personalize Your Characters:</strong>  
@@ -47,14 +45,14 @@
   </li>
 </ol>
 
-<hr>
+<hr style="border-top: 1px solid #ff5789;">
 
-<h3>Generating Images</h3>
+<h3 style="color: #ff5789;">Generating Images</h3>
 <ol>
   <li>
     <strong>Auto-Generate Prompt:</strong>  
     Click "Auto Generate Scene Prompt" to have the AI produce a single-sentence description 
-    of the current scene. Note: Image generation requires Patreon subscription.
+    of the current scene.
   </li>
   <li>
     <strong>Customize for Better Results:</strong>  
@@ -66,46 +64,18 @@
   </li>
 </ol>
 
-<hr>
+<hr style="border-top: 1px solid #ff5789;">
 
-<h3>Mid-Game Customizations</h3>
-<p>
-  You can adjust the NPC's details or shift the environment using the dedicated pages accessed via 
-  buttons at the bottom of the interaction page. This helps if you need to clarify details that 
-  the AI has started to "forget."
-</p>
-
-<hr>
-
-<h3>Affection & Relationship Stages</h3>
-<ol>
-  <li>
-    <strong>Monitor Affection:</strong>  
-    The NPC's affection score changes based on how they react to your actions.
-  </li>
-  <li>
-    <strong>Stages of Relationship:</strong>  
-    As affection grows, the relationship moves through stages 
-    (Strangers → Casual → Comfortable → Close → Serious → Committed).
-  </li>
-  <li>
-    <strong>Stage Perks:</strong>  
-    Each stage unlocks new possibilities, which can be viewed and customized on the Stage Unlocks page.
-  </li>
-</ol>
-
-<hr>
-
-<h3>OOC Commands</h3>
+<h3 style="color: #ff5789;">Special Commands</h3>
 <p>
   To give the AI special instructions, simply begin your action with <em>"OOC:"</em>. For example, 
   <code>OOC: Make the NPC act more flirtatious</code>. This is useful for reshaping the AI's 
   response without changing the official settings.
 </p>
 
-<hr>
+<hr style="border-top: 1px solid #ff5789;">
 
-<h3>Important Notes</h3>
+<h3 style="color: #ff5789;">Important Notes</h3>
 <ul>
   <li>
     <strong>Age Restriction:</strong> All characters must be explicitly 20+ years old. Any content involving minors 
@@ -121,20 +91,7 @@
   </li>
 </ul>
 
-<hr>
-
-<h3>Development Status & Feedback</h3>
-<p>
-  This is currently under active development. If you're interested in updates or want to provide feedback, 
-  you can find me on Reddit at 
-  <a href="https://www.reddit.com/u/Known-Concern-2836/s/co5w6uvvIQ" target="_blank">u/Known-Concern-2836</a>.
-  Feel free to DM me or comment on my Reddit posts—your feedback helps improve the program!
-</p>
-
-<hr>
-
-<div class="mt-4">
-  <a href="{{ url_for('home') }}" class="btn btn-secondary me-2">Back to Home</a>
-  <a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Game</a>
+<div class="text-center mt-4">
+  <a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Interaction</a>
 </div>
 {% endblock %}
