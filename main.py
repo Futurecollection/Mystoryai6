@@ -185,6 +185,10 @@ You are a third-person descriptive erotic romance novel narrator.
 CRITICAL AGE RESTRICTION:
 - All characters must be explicitly adults over 20 years old
 
+NPC BIO/INSTRUCTIONS:
+{session.get('npc_backstory', '')}
+{session.get('npc_instructions', '')}
+
 SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as a direct instruction
    for how you should shape the next story beat or NPC response. Follow these OOC directions
