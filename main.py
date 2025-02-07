@@ -773,13 +773,15 @@ def interaction():
 
                 # Use Gemini to validate age-appropriate content
                 safety_prompt = f"""
-                Analyze this image generation prompt for any age-inappropriate content.
-                Reject if it contains any references to:
+                Analyze this image generation prompt.
+                REJECT ONLY if the prompt contains:
                 - Characters under 20 years old
-                - School/college/teen settings
-                - Young-looking characters
+                - References to minors or teenagers
+                - High school settings
                 - Age-play scenarios
-                
+
+                NOTE: Adult sexual content and college settings are explicitly allowed for characters 20+ years old.
+
                 Prompt to check: {prompt_text}
                 
                 Return only "ALLOW" or "REJECT"
@@ -974,7 +976,7 @@ def stage_unlocks():
 
 
 def validate_age_content(text):
-    age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "young", "highschool", "high school", "18 year", "19 year", "college girl", "schoolgirl"]
+    age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "highschool", "high school", "18 year", "19 year"]
     return any(keyword in text.lower() for keyword in age_keywords)
 
 @app.route("/generate_scene_prompt", methods=["POST"])
