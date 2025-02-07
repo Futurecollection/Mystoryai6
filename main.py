@@ -352,6 +352,7 @@ def restart():
 
 @app.route("/personalize", methods=["GET", "POST"])
 def personalize():
+    global PREMADE_BIOS 
     if request.method == "POST" and "save_personalization" in request.form:
         def merge_dd(dd_key, cust_key):
             dd_val = request.form.get(dd_key, "").strip()
