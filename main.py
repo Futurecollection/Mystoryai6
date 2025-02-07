@@ -3,7 +3,6 @@ import replicate
 import requests
 import random
 
-from character_bios import PREMADE_BIOS
 import google.generativeai as genai
 from flask import (
     Flask, request, render_template,
@@ -185,11 +184,6 @@ You are a third-person descriptive erotic romance novel narrator.
 CRITICAL AGE RESTRICTION:
 - All characters must be explicitly adults over 20 years old
 
-NPC BIO/INSTRUCTIONS:
-Backstory: {session.get('npc_backstory', '')}
-
-Instructions: {session.get('npc_instructions', '')}
-
 SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as a direct instruction
    for how you should shape the next story beat or NPC response. Follow these OOC directions
@@ -357,7 +351,6 @@ def restart():
 
 @app.route("/personalize", methods=["GET", "POST"])
 def personalize():
-    global PREMADE_BIOS 
     if request.method == "POST" and "save_personalization" in request.form:
         def merge_dd(dd_key, cust_key):
             dd_val = request.form.get(dd_key, "").strip()
@@ -371,14 +364,6 @@ def personalize():
         session["user_background"] = request.form.get("user_background", "").strip()
 
         # npc
-        selected_bio = request.form.get("selected_bio", "")
-        if selected_bio and "|" in selected_bio:
-            category, name = selected_bio.split("|")
-            if category in PREMADE_BIOS and name in PREMADE_BIOS[category]:
-                session["npc_backstory"] = PREMADE_BIOS[category][name]
-                print(f"[DEBUG] Loaded bio: {category}/{name}")
-                print(f"[DEBUG] Bio content: {PREMADE_BIOS[category][name][:100]}...")
-            
         session["npc_name"] = merge_dd("npc_name", "npc_name_custom")
         session["npc_gender"] = merge_dd("npc_gender", "npc_gender_custom")
         session["npc_age"] = merge_dd("npc_age", "npc_age_custom")
@@ -527,7 +512,6 @@ Your mission:
 
         return redirect(url_for("interaction"))
     else:
-        from character_bios import PREMADE_BIOS
         return render_template("personalize.html",
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
@@ -544,8 +528,7 @@ Your mission:
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
-            ethnicity_options=ETHNICITY_OPTIONS,
-            premade_bios=PREMADE_BIOS
+            ethnicity_options=ETHNICITY_OPTIONS
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
