@@ -319,15 +319,21 @@
            value="{% if not ctx_in_list %}{{ session['encounter_context'] }}{% endif %}">
   </div>
 
-  <!-- NPC Backstory -->
-  <div class="col-12">
-    <label class="form-label">Premade Bio</label>
+  <!-- Premade Bio Section -->
+  <div class="col-12 mb-4">
+    <h3>Premade Bio</h3>
     <div class="alert alert-info">
-      <small>If you enter a premade bio, it will override individual personality traits and characteristics. 
-      The AI will extract all relevant details from this bio instead of using the selections above.</small>
+      <small>Choose a predefined bio or enter your own character biography. The AI will extract all relevant details.</small>
     </div>
-    <textarea class="form-control" name="npc_backstory" rows="4" 
-              placeholder="Enter a complete character biography to override individual traits...">{{ session['npc_backstory'] }}</textarea>
+    <select class="form-select mb-3" id="predefinedBios" onchange="updateBioText()">
+      <option value="">--Select Predefined Bio--</option>
+      <option value="lucy">Lucy</option>
+      <option value="aurora">Grand Aurora Hotel Resort and Spa</option>
+      <option value="fifty">Fifty Shades of Grey</option>
+    </select>
+    <textarea class="form-control" name="npc_backstory" id="bioText" rows="6" 
+              placeholder="Enter a complete character biography..."
+              style="display: none;">{{ session['npc_backstory'] }}</textarea>
   </div>
 
   <div class="col-12">
@@ -338,5 +344,21 @@
       Back to Story
     </a>
   </div>
+
+  <script>
+  function updateBioText() {
+    const textarea = document.getElementById('bioText');
+    const select = document.getElementById('predefinedBios');
+    textarea.style.display = select.value ? 'block' : 'none';
+    
+    const bios = {
+      lucy: `CHARACTER BIO: Lucy Chen... (same content as before)`,
+      aurora: `SETTING: * CITY: Aurora Heights... (same content as before)`,
+      fifty: `You are to embody Christian Grey... (same content as before)`
+    };
+    
+    textarea.value = bios[select.value] || '';
+  }
+  </script>
 </form>
 {% endblock %}
