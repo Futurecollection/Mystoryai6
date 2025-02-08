@@ -22,9 +22,22 @@
 
 <!-- USER ACTION -->
 <form method="POST" class="mb-4">
+  <!-- Quick Action Buttons -->
+  <div class="mb-3">
+    <button type="submit" name="user_action" value="OOC: More dialogue" class="btn btn-outline-info me-2">
+      More Dialogue
+    </button>
+    <button type="submit" name="user_action" value="OOC: More sexually detailed" class="btn btn-outline-danger me-2">
+      More Sexual Details
+    </button>
+    <button type="submit" name="user_action" value="OOC: More dirty talk" class="btn btn-outline-warning">
+      More Dirty Talk
+    </button>
+  </div>
+
   <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
   <input type="text" class="form-control mb-2" name="user_action" 
-         placeholder="He quietly asks how she’s doing...">
+         placeholder="He quietly asks how she's doing...">
   <button type="submit" name="submit_action" class="btn btn-success">
     Send Move
   </button>
