@@ -30,83 +30,27 @@
   <!-- Premade Bio Section -->
   <div id="premadeBioSection" style="display: none;">
     <div class="mb-4">
-      <h3>Choose a Premade Bio</h3>
+      <h3>Enter Premade Bio</h3>
       <div class="alert alert-info">
-        <small>Click a card to select that bio. The AI will extract all relevant details.</small>
+        <small>Choose a predefined bio or enter your own character biography. The AI will extract all relevant details.</small>
       </div>
-
-      <div class="row g-4 mb-3">
-        <!-- Lucy Bio Card -->
-        <div class="col-md-4">
-          <div class="card h-100" onclick="selectBio('lucy')" style="cursor: pointer;">
-            <div class="card-body">
-              <h5 class="card-title">Lucy Chen</h5>
-              <h6 class="card-subtitle mb-2 text-muted">Sweet & Complex</h6>
-              <p class="card-text">A 24-year-old Chinese-American marketing executive with a dancer's grace. Sweet and bubbly on the surface, but highly intelligent and ambitious. Recently single and exploring new connections.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Aurora Bio Card -->
-        <div class="col-md-4">
-          <div class="card h-100" onclick="selectBio('aurora')" style="cursor: pointer;">
-            <div class="card-body">
-              <h5 class="card-title">Grand Aurora Resort</h5>
-              <h6 class="card-subtitle mb-2 text-muted">Luxury Setting</h6>
-              <p class="card-text">An upscale mountain resort town with a hidden culture of pleasure and exploration. Features multiple elegant venues, private suites, and a cast of diverse international characters.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fifty Shades Bio Card -->
-        <div class="col-md-4">
-          <div class="card h-100" onclick="selectBio('fifty')" style="cursor: pointer;">
-            <div class="card-body">
-              <h5 class="card-title">Christian Grey</h5>
-              <h6 class="card-subtitle mb-2 text-muted">Intense & Dominant</h6>
-              <p class="card-text">A 27-year-old powerful entrepreneur with a complex personality. Known for his controlling nature and explicit preferences in relationships. Based on Fifty Shades of Grey.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <select class="form-select mb-3" id="predefinedBios" onchange="updateBioText()" style="display: none;">
+      <select class="form-select mb-3" id="predefinedBios" onchange="updateBioText()">
         <option value="">--Select Predefined Bio--</option>
         <option value="lucy">Lucy</option>
         <option value="aurora">Grand Aurora Hotel Resort and Spa</option>
         <option value="fifty">Fifty Shades of Grey</option>
       </select>
-      
       <textarea class="form-control" name="npc_backstory" id="bioText" rows="6" 
                 placeholder="Enter a complete character biography..."
                 style="display: none;"></textarea>
     </div>
-
-    <style>
-      .card.selected {
-        border: 2px solid #007bff;
-        box-shadow: 0 0 10px rgba(0,123,255,0.5);
-      }
-    </style>
   </div>
 
   <script>
-  function selectBio(bioType) {
-    // Remove previous selection
-    document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
-    
-    // Find and select the clicked card
-    const clickedCard = document.querySelector(`.card[onclick="selectBio('${bioType}')"]`);
-    if (clickedCard) {
-      clickedCard.classList.add('selected');
-    }
-
-    // Update hidden select and textarea
-    const select = document.getElementById('predefinedBios');
-    select.value = bioType;
-    
+  function updateBioText() {
     const textarea = document.getElementById('bioText');
-    textarea.style.display = 'block';
+    const select = document.getElementById('predefinedBios');
+    textarea.style.display = select.value ? 'block' : 'none';
     
     const bios = {
       lucy: `Okay, here's the revised version, addressing your requests:
