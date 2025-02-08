@@ -171,6 +171,10 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
+    # Handle OOC commands more explicitly
+    if last_user_action.startswith("OOC:"):
+        print("[DEBUG] Processing OOC command:", last_user_action)
+
     # Check for age-related content
     age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "highschool", "high school", "18 year"]
     if any(keyword in last_user_action.lower() for keyword in age_keywords):
