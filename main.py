@@ -1020,6 +1020,8 @@ PREDEFINED_BIOS = {
 
     "The Chef": """Restaurant owner, age 32. Medium build with strong hands from years in the kitchen. Brown hair with subtle highlights. Passionate about food and life. Opening a new fusion restaurant next month. Wearing professional chef's attire.""",
 
+    "Custom Bio": """PASTE YOUR BIO HERE""",
+
     "Fifty Shades of Grey": """Christian Grey, age 27, a wealthy and powerful entrepreneur in Seattle. Tall with broad shoulders and a muscular build. Dark copper-colored hair artfully disheveled, intense grey eyes. Known for being controlling, intense, and passionate. CEO of Grey Enterprises Holdings wearing an impeccably tailored grey suit. Has a lavish penthouse apartment with stunning views of Seattle. Experienced in intense private encounters, highly dominant personality who demands control in all aspects of life. Currently seeking someone to share his lifestyle preferences with."""
 }
 
