@@ -32,12 +32,35 @@
     <div class="mb-4">
       <h3>Enter Premade Bio</h3>
       <div class="alert alert-info">
-        <small>Enter a complete character biography. The AI will extract all relevant details from this bio.</small>
+        <small>Choose a predefined bio or enter your own character biography. The AI will extract all relevant details.</small>
       </div>
-      <textarea class="form-control" name="npc_backstory" rows="6" 
+      <select class="form-select mb-3" id="predefinedBios" onchange="updateBioText()">
+        <option value="">--Select Predefined Bio--</option>
+        <option value="athlete">The Athlete</option>
+        <option value="executive">The Executive</option>
+        <option value="artist">The Artist</option>
+        <option value="chef">The Chef</option>
+        <option value="fifty">Fifty Shades of Grey</option>
+      </select>
+      <textarea class="form-control" name="npc_backstory" id="bioText" rows="6" 
                 placeholder="Enter a complete character biography..."></textarea>
     </div>
   </div>
+
+  <script>
+  function updateBioText() {
+    const bios = {
+      athlete: `Professional tennis player, age 25. Athletic build with toned muscles from years of training. Long blonde hair usually tied in a ponytail. Known for being competitive yet friendly. Currently taking a break between tournaments and looking to explore life outside of sports. Wearing stylish athletic wear.`,
+      executive: `Successful CEO, age 35. Tall with an imposing presence and well-maintained physique. Short dark hair, always perfectly styled. Confident and direct personality. Recently promoted and adapting to new responsibilities. Wearing a tailored business suit.`,
+      artist: `Freelance painter, age 28. Graceful with delicate features. Purple-dyed hair in a messy bun. Creative and free-spirited personality. Recently opened first gallery show. Wearing bohemian-style clothing with paint stains.`,
+      chef: `Restaurant owner, age 32. Medium build with strong hands from years in the kitchen. Brown hair with subtle highlights. Passionate about food and life. Opening a new fusion restaurant next month. Wearing professional chef's attire.`,
+      fifty: `Christian Grey, age 27, a wealthy and powerful entrepreneur in Seattle. Tall with broad shoulders and a muscular build. Dark copper-colored hair artfully disheveled, intense grey eyes. Known for being controlling, intense, and passionate. CEO of Grey Enterprises Holdings wearing an impeccably tailored grey suit. Has a lavish penthouse apartment with stunning views of Seattle. Experienced in intense private encounters, highly dominant personality who demands control in all aspects of life. Currently seeking someone to share his lifestyle preferences with.`
+    };
+    const select = document.getElementById('predefinedBios');
+    const textarea = document.getElementById('bioText');
+    textarea.value = bios[select.value] || '';
+  }
+  </script>
 
   <!-- Manual Customization Section -->
   <div id="manualCustomizationSection" style="display: none;">
