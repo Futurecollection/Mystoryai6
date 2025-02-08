@@ -24,16 +24,22 @@
 <form method="POST" class="mb-4">
   <!-- Quick Action Buttons -->
   <div class="mb-3">
-    <button type="submit" name="user_action" value="OOC: More dialogue" class="btn btn-outline-info me-2">
+    <button type="button" onclick="prefillAction('OOC: More dialogue')" class="btn btn-outline-info me-2">
       More Dialogue
     </button>
-    <button type="submit" name="user_action" value="OOC: More sexually detailed" class="btn btn-outline-danger me-2">
+    <button type="button" onclick="prefillAction('OOC: More sexually detailed')" class="btn btn-outline-danger me-2">
       More Sexual Details
     </button>
-    <button type="submit" name="user_action" value="OOC: More dirty talk" class="btn btn-outline-warning">
+    <button type="button" onclick="prefillAction('OOC: More dirty talk')" class="btn btn-outline-warning">
       More Dirty Talk
     </button>
   </div>
+
+  <script>
+    function prefillAction(text) {
+      document.querySelector('input[name="user_action"]').value = text;
+    }
+  </script>
 
   <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
   <input type="text" class="form-control mb-2" name="user_action" 
