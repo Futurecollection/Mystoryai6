@@ -41,12 +41,17 @@
         <option value="fifty">Fifty Shades of Grey</option>
       </select>
       <textarea class="form-control" name="npc_backstory" id="bioText" rows="6" 
-                placeholder="Enter a complete character biography..."></textarea>
+                placeholder="Enter a complete character biography..."
+                style="display: none;"></textarea>
     </div>
   </div>
 
   <script>
   function updateBioText() {
+    const textarea = document.getElementById('bioText');
+    const select = document.getElementById('predefinedBios');
+    textarea.style.display = select.value ? 'block' : 'none';
+    
     const bios = {
       lucy: `Okay, here's the revised version, addressing your requests:
 
