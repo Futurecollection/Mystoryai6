@@ -231,6 +231,15 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 ############################################################################
 
 def check_stage_up_down(new_aff):
+    # Initialize session if needed
+    if "currentStage" not in session:
+        session["currentStage"] = 1
+        session["affectionScore"] = 0.0
+        session["trustScore"] = 5.0
+        session["npcMood"] = "Neutral"
+        session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
+        session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
+        
     cur_stage = session.get("currentStage", 1)
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
