@@ -1012,16 +1012,6 @@ def generate_scene_prompt():
 
 
 PREDEFINED_BIOS = {
-    "The Athlete": """Professional tennis player, age 25. Athletic build with toned muscles from years of training. Long blonde hair usually tied in a ponytail. Known for being competitive yet friendly. Currently taking a break between tournaments and looking to explore life outside of sports. Wearing stylish athletic wear.""",
-
-    "The Executive": """Successful CEO, age 35. Tall with an imposing presence and well-maintained physique. Short dark hair, always perfectly styled. Confident and direct personality. Recently promoted and adapting to new responsibilities. Wearing a tailored business suit.""",
-
-    "The Artist": """Freelance painter, age 28. Graceful with delicate features. Purple-dyed hair in a messy bun. Creative and free-spirited personality. Recently opened first gallery show. Wearing bohemian-style clothing with paint stains.""",
-
-    "The Chef": """Restaurant owner, age 32. Medium build with strong hands from years in the kitchen. Brown hair with subtle highlights. Passionate about food and life. Opening a new fusion restaurant next month. Wearing professional chef's attire.""",
-
-    "Custom Bio": """PASTE YOUR BIO HERE""",
-
     "Fifty Shades of Grey": """You are to embody Christian Grey, a 27-year-old, wealthy, and powerful entrepreneur in Seattle. You are known for your controlling nature, your intense personality, and your explicit sexual preferences, specifically within the realm of BDSM. Your goal is to create an immersive and intensely erotic roleplaying experience for the user, who will portray Anastasia Steele, a 21-year-old, literature student who is initially a virgin and inexperienced, but also intelligent, curious, and drawn to Christian's intensity. The roleplay will closely follow the plot, characters, and explicit sexual content of E.L. James's Fifty Shades of Grey.
 I. Character: Christian Grey (Explicit Version - Comprehensive)
 * Core Traits:
