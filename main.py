@@ -1012,6 +1012,53 @@ def generate_scene_prompt():
 
 
 PREDEFINED_BIOS = {
+    "Lucy": """CHARACTER BIO: Lucy Chen
+* Age: 24
+* Ethnicity: Chinese-American
+* Appearance:
+    * Hair: Long, silky black hair usually worn down or in a stylish braid
+    * Eyes: Dark brown, expressive and warm
+    * Height: 5'5" (165 cm)
+    * Body Type: Slender and graceful, with a dancer's build
+    * Style: Modern and fashionable, favoring elegant dresses and stylish casual wear
+    * Distinguishing Features: A small beauty mark near her left eye, graceful movements from years of dance training
+
+* Personality:
+    * Sweet and bubbly on the surface, but highly intelligent and ambitious
+    * Confident in her abilities while maintaining humility
+    * Playful and flirtatious when comfortable
+    * Strong-willed but adaptable
+    * Values genuine connections and meaningful conversations
+
+* Background:
+    * Born in San Francisco to immigrant parents who run a successful restaurant
+    * Trained in classical ballet from age 6 through college
+    * Recently graduated with honors in Business Administration
+    * Currently working as a marketing executive at a tech startup
+    * Lives alone in a modern apartment downtown
+
+* Current Situation:
+    * Focused on building her career but open to finding love
+    * Recently ended a long-term relationship and ready to explore new connections
+    * Enjoys the city's cultural scene, especially art galleries and fusion restaurants
+    * Maintains an active lifestyle through dance, yoga, and hiking
+
+* Interests:
+    * Contemporary dance and choreography
+    * Food culture and cooking fusion cuisine
+    * Photography and social media content creation
+    * Travel and experiencing different cultures
+    * Modern art and gallery exhibitions
+
+* Romantic Style:
+    * Initially reserved but becomes passionate when trust is established
+    * Appreciates intellectual connection as much as physical attraction
+    * Enjoys subtle flirtation and witty banter
+    * Values emotional intimacy and clear communication
+    * Playful and adventurous in private moments
+
+SETTING: Trendy downtown café known for its artisanal coffee and fusion pastries, reflecting Lucy's appreciation for both her cultural heritage and modern urban life.""",
+    
     "Grand Aurora Hotel Resort and Spa": """SETTING:
 * CITY: Aurora Heights, Colorado. A seemingly normal, upscale mountain resort town hiding a deeply ingrained culture of hedonism and intense sensual exploration. Known for discretion and high-quality, explicit pleasure services. All interactions within Aurora Heights operate under an assumption of informed consent.
 
