@@ -171,10 +171,6 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
-    # Handle OOC commands more explicitly
-    if last_user_action.startswith("OOC:"):
-        print("[DEBUG] Processing OOC command:", last_user_action)
-
     # Check for age-related content
     age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "highschool", "high school", "18 year"]
     if any(keyword in last_user_action.lower() for keyword in age_keywords):
@@ -231,15 +227,6 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 ############################################################################
 
 def check_stage_up_down(new_aff):
-    # Initialize session if needed
-    if "currentStage" not in session:
-        session["currentStage"] = 1
-        session["affectionScore"] = 0.0
-        session["trustScore"] = 5.0
-        session["npcMood"] = "Neutral"
-        session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
-        session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
-        
     cur_stage = session.get("currentStage", 1)
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
