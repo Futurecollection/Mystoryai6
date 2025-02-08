@@ -781,10 +781,10 @@ def interaction():
                 NOTE: Adult sexual content and college settings are explicitly allowed for characters 20+ years old.
 
                 Prompt to check: {prompt_text}
-                
+
                 Return only "ALLOW" or "REJECT"
                 """
-                
+
                 chat = model.start_chat()
                 validation = chat.send_message(safety_prompt, safety_settings=safety_settings)
                 validation_result = validation.text.strip().upper()
@@ -981,12 +981,12 @@ def validate_age_content(text):
 def generate_scene_prompt():
     logs = session.get("interaction_log", [])
     full_history = "\n".join(logs)
-    
+
     print("[DEBUG] Attempting to generate scene prompt")
     try:
         auto_prompt = gpt_scene_image_prompt(full_history)
         print("[DEBUG] Generated prompt:", auto_prompt)
-        
+
         if not auto_prompt:
             raise ValueError("Generated prompt was empty")
 
@@ -1010,6 +1010,18 @@ def generate_scene_prompt():
     return redirect(url_for("interaction"))
 
 
+
+PREDEFINED_BIOS = {
+    "The Athlete": """Professional tennis player, age 25. Athletic build with toned muscles from years of training. Long blonde hair usually tied in a ponytail. Known for being competitive yet friendly. Currently taking a break between tournaments and looking to explore life outside of sports. Wearing stylish athletic wear.""",
+
+    "The Executive": """Successful CEO, age 35. Tall with an imposing presence and well-maintained physique. Short dark hair, always perfectly styled. Confident and direct personality. Recently promoted and adapting to new responsibilities. Wearing a tailored business suit.""",
+
+    "The Artist": """Freelance painter, age 28. Graceful with delicate features. Purple-dyed hair in a messy bun. Creative and free-spirited personality. Recently opened first gallery show. Wearing bohemian-style clothing with paint stains.""",
+
+    "The Chef": """Restaurant owner, age 32. Medium build with strong hands from years in the kitchen. Brown hair with subtle highlights. Passionate about food and life. Opening a new fusion restaurant next month. Wearing professional chef's attire.""",
+
+    "Fifty Shades of Grey": """Christian Grey, age 27, a wealthy and powerful entrepreneur in Seattle. Tall with broad shoulders and a muscular build. Dark copper-colored hair artfully disheveled, intense grey eyes. Known for being controlling, intense, and passionate. CEO of Grey Enterprises Holdings wearing an impeccably tailored grey suit. Has a lavish penthouse apartment with stunning views of Seattle. Experienced in intense private encounters, highly dominant personality who demands control in all aspects of life. Currently seeking someone to share his lifestyle preferences with."""
+}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
