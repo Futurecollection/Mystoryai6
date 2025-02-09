@@ -196,7 +196,7 @@ For each user action:
 2) NARRATION => narrates and describes the story and also creates the NPC reaction (speech/dialogue, 
    actions, noises, gestures) and describes the environment 
    (about 200-300 words can be separate paragraphs)
-3) IMAGE_PROMPT => single sentence referencing NPC's age/body/hair/clothing, environment
+3) IMAGE_PROMPT => single sentence referencing the NPC's age/ethnicity/bodytype/hair colour/style, outfit, environment
 
 Output exactly (no extra lines):
 AFFECT_CHANGE_FINAL: ...
