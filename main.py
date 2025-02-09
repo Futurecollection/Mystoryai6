@@ -443,22 +443,25 @@ def login_route():
         email = request.form.get("email")
         password = request.form.get("password")
         try:
-            try:
-                response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                user = response.user
-                if not user:
-                    raise ValueError("Invalid credentials")
-                    
-                user_id = user.id
-                session_data = {
-                    "logged_in": True,
-                    "user_email": user.email,
-                    "access_token": response.session.access_token,
-                    "user_id": user_id
-                }
+            response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            user = response.user
+            if not user:
+                raise ValueError("Invalid credentials")
+                
+            user_id = user.id
+            session_data = {
+                "logged_in": True,
+                "user_email": user.email,
+                "access_token": response.session.access_token,
+                "user_id": user_id
+            }
             
             # Store session in Supabase
             supabase.table("user_sessions").upsert({
+                "user_id": user_id,
+                "session_data": session_data,
+                "last_activity": datetime.datetime.utcnow().isoformat()
+            }).execute()
                 "user_id": user_id,
                 "session_data": session_data,
                 "last_activity": datetime.datetime.utcnow().isoformat()
