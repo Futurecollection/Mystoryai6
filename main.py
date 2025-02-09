@@ -445,18 +445,19 @@ def login_route():
         try:
             if not email or not password:
                 raise ValueError("Email and password are required")
-            
+
             print("DEBUG: Attempting login with email =", email)
             try:
                 response = supabase.auth.sign_in_with_password({"email": email, "password": password})
                 print("DEBUG: response =", response)
             except Exception as e:
                 print("DEBUG: exception =", e)
-                raise e
-                
+                flash("Login failed: " + str(e), "danger")
+                return redirect(url_for("login_route"))
+
             if not response or not response.user:
                 raise ValueError("Invalid credentials")
-            
+
             user = response.user
             user_id = user.id
             session_data = {
@@ -465,14 +466,14 @@ def login_route():
                 "access_token": response.session.access_token,
                 "user_id": user_id
             }
-            
+
             # Store session in Supabase
             supabase.table("user_sessions").upsert({
                 "user_id": user_id,
                 "session_data": session_data,
                 "last_activity": datetime.datetime.utcnow().isoformat()
             }).execute()
-            
+
             # Also store in Flask session
             session.update(session_data)
             flash("Logged in successfully!", "success")
@@ -511,7 +512,7 @@ def logout_route():
             supabase.table("user_sessions").delete().eq("user_id", session["user_id"]).execute()
         except Exception as e:
             print("Error clearing Supabase session:", str(e))
-    
+
     # Clear Flask session
     session.clear()
     flash("Logged out successfully.", "info")
