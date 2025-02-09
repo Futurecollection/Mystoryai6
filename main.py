@@ -458,8 +458,8 @@ def login_route():
             
             try:
                 # Store session in Supabase
-                supabase.table("User_state").upsert({
-                    "id": str(user_id),  # Convert UUID to string
+                supabase.table("User_state").insert({
+                    "id": int(user_id.replace("-", "")[:16]),  # Convert UUID to numeric ID
                     "Session_data": session_data,
                     "Last_activity": datetime.datetime.utcnow().isoformat()
                 }).execute()
