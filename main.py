@@ -443,7 +443,13 @@ def login_route():
         email = request.form.get("email")
         password = request.form.get("password")
         try:
+            if not email or not password:
+                raise ValueError("Email and password are required")
+                
             response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            if not response or not response.user:
+                raise ValueError("Invalid credentials")
+                
             user = response.user
             user_id = user.id
             session_data = {
