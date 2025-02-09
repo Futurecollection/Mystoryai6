@@ -1,35 +1,25 @@
+
 {% extends "base.html" %}
 {% block content %}
-<h1 style="color: #ff5789;">MyStory</h1>
-
-<p>
-  Welcome to <strong>MyStory</strong>, an immersive AI-powered storytelling platform that lets you create and explore romantic narratives.
-</p>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<h3 style="color: #ff5789;">How It Works</h3>
-<ol>
-  <li><strong>Personalize Characters:</strong> Create your character and customize your romantic interest</li>
-  <li><strong>Choose Setting:</strong> Select or create a unique environment for your story</li>
-  <li><strong>Interactive Story:</strong> Guide the narrative through your choices and actions</li>
-  <li><strong>AI-Generated Scenes:</strong> Get visualization of key moments with image generation</li>
-</ol>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<h3 style="color: #ff5789;">Special Features</h3>
-<ul>
-  <li><strong>OOC Commands:</strong> Use "OOC:" to give special instructions to the AI</li>
-  <li><strong>Mid-Game Updates:</strong> Modify character details or environment anytime</li>
-  <li><strong>Story Generation:</strong> Convert your interaction into a complete erotic story</li>
-</ul>
-
-<p class="mt-4">
-  <small>Join our official subreddit for the latest updates and discussions: <a href="https://www.reddit.com/r/MyStoryAI/s/EalpGwwbuv" target="_blank">r/MyStoryAI</a></small>
-</p>
-
-<div class="text-center mt-4">
-  <a href="{{ url_for('restart') }}" class="btn btn-primary btn-lg">Begin Your Story</a>
+<div class="text-center">
+  <h1 style="color: #ff5789;">Welcome to MyStory</h1>
+  <p class="lead mb-4">
+    An immersive AI-powered storytelling platform that lets you create and explore romantic narratives.
+  </p>
+  
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card bg-dark text-light mb-4">
+        <div class="card-body">
+          <h3 style="color: #ff5789;">Get Started</h3>
+          <p>Join our community to start creating your own stories.</p>
+          <div class="d-grid gap-2 col-6 mx-auto">
+            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg mb-2">Login</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary btn-lg">Register</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
