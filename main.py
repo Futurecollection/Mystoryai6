@@ -441,8 +441,11 @@ def login_route():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
-        response = supabase.auth.sign_in(email=email, password=password)
-        error = response.get("error")
+        try:
+            response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            error = None
+        except Exception as e:
+            error = {"message": str(e)}
         if error:
             flash("Login failed: " + error["message"], "danger")
             return redirect(url_for("login_route"))
