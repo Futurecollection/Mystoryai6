@@ -462,7 +462,6 @@ def login_route():
                 "Session_data": session_data,
                 "Last_activity": datetime.datetime.utcnow().isoformat()
             }).execute()
-            }).execute()
             
             # Also store in Flask session
             session.update(session_data)
