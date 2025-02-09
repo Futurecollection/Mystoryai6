@@ -469,6 +469,18 @@ def login_route():
                 
             # Also store in Flask session
             session.update(session_data)
+            
+            # Try to restore previous session data
+            try:
+                saved_data = supabase.table("User_state").select("Session_data").eq("id", int(user_id.replace("-", "")[:16])).execute()
+                if saved_data.data and saved_data.data[0]["Session_data"]:
+                    stored_session = saved_data.data[0]["Session_data"]
+                    session.update(stored_session)
+                    flash("Previous session restored!", "success")
+                    return redirect(url_for("interaction"))
+            except Exception as e:
+                print("Session restoration error:", str(e))
+            
             flash("Logged in successfully!", "success")
             return redirect(url_for("personalize"))
         except Exception as e:
@@ -679,6 +691,17 @@ def interaction():
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
             session["image_generated_this_turn"] = False
+            
+            # Save updated session to Supabase
+            try:
+                user_id = session.get("user_id")
+                if user_id:
+                    supabase.table("User_state").update({
+                        "Session_data": dict(session),
+                        "Last_activity": datetime.datetime.utcnow().isoformat()
+                    }).eq("id", int(user_id.replace("-", "")[:16])).execute()
+            except Exception as e:
+                print("Session save error:", str(e))
             return redirect(url_for("interaction"))
         elif "update_npc" in request.form:
             update_npc_info(request.form)
