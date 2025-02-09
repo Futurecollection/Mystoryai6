@@ -454,10 +454,9 @@ def login_route():
             
             # Store session in Supabase
             supabase.table("user_sessions").upsert({
-                "id": user_id,  # Using id column instead of user_id
-                "user_email": user.email,
-                "session_data": session_data
-                # created_at will be handled automatically by Supabase
+                "user_id": user_id,
+                "session_data": session_data,
+                "last_activity": datetime.datetime.utcnow().isoformat()
             }).execute()
             
             # Also store in Flask session
