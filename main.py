@@ -445,11 +445,14 @@ def login_route():
         try:
             if not email or not password:
                 raise ValueError("Email and password are required")
-                
+            
+            print("DEBUG: Attempting login with email =", email)
             response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            print("DEBUG: response =", response)
+            
             if not response or not response.user:
                 raise ValueError("Invalid credentials")
-                
+            
             user = response.user
             user_id = user.id
             session_data = {
