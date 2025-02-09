@@ -443,19 +443,15 @@ def login_route():
         password = request.form.get("password")
         try:
             response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-            error = None
-        except Exception as e:
-            error = {"message": str(e)}
-        if error:
-            flash("Login failed: " + error["message"], "danger")
-            return redirect(url_for("login_route"))
-        else:
-            user = response.get("user")
+            user = response.user
             session["logged_in"] = True
-            session["user_email"] = user.get("email") if user else email
-            session["access_token"] = response.get("access_token")
+            session["user_email"] = user.email
+            session["access_token"] = response.session.access_token
             flash("Logged in successfully!", "success")
             return redirect(url_for("personalize"))
+        except Exception as e:
+            flash("Login failed: " + str(e), "danger")
+            return redirect(url_for("login_route"))
     return render_template("login.html", title="Login")
 
 @app.route("/register", methods=["GET", "POST"])
