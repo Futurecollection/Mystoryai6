@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -17,7 +18,7 @@
     {% endwith %}
     {% if session.logged_in %}
       <p>You are logged in as {{ session.user_email }}.</p>
-      <p><a href="{{ url_for('dashboard') }}">Dashboard</a> | <a href="{{ url_for('logout') }}">Logout</a></p>
+      <p><a href="{{ url_for('personalize') }}">Start Experience</a> | <a href="{{ url_for('logout_route') }}">Logout</a></p>
     {% else %}
       <p><a href="{{ url_for('login_route') }}">Login</a> | <a href="{{ url_for('register_route') }}">Register</a></p>
     {% endif %}
