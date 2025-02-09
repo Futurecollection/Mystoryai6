@@ -444,9 +444,23 @@ def login_route():
         try:
             response = supabase.auth.sign_in_with_password({"email": email, "password": password})
             user = response.user
-            session["logged_in"] = True
-            session["user_email"] = user.email
-            session["access_token"] = response.session.access_token
+            user_id = user.id
+            session_data = {
+                "logged_in": True,
+                "user_email": user.email,
+                "access_token": response.session.access_token,
+                "user_id": user_id
+            }
+            
+            # Store session in Supabase
+            supabase.table("user_sessions").upsert({
+                "user_id": user_id,
+                "session_data": session_data,
+                "last_activity": datetime.datetime.utcnow().isoformat()
+            }).execute()
+            
+            # Also store in Flask session
+            session.update(session_data)
             flash("Logged in successfully!", "success")
             return redirect(url_for("personalize"))
         except Exception as e:
@@ -474,6 +488,14 @@ def register_route():
 
 @app.route("/logout")
 def logout_route():
+    if session.get("user_id"):
+        try:
+            # Clear Supabase session
+            supabase.table("user_sessions").delete().eq("user_id", session["user_id"]).execute()
+        except Exception as e:
+            print("Error clearing Supabase session:", str(e))
+    
+    # Clear Flask session
     session.clear()
     flash("Logged out successfully.", "info")
     return redirect(url_for("main_home"))
