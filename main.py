@@ -468,7 +468,10 @@ def login_route():
             flash("Logged in successfully!", "success")
             return redirect(url_for("personalize"))
         except Exception as e:
-            flash("Login failed: " + str(e), "danger")
+            error_msg = str(e)
+            if not error_msg:
+                error_msg = "Invalid email or password"
+            flash("Login failed: " + error_msg, "danger")
             return redirect(url_for("login_route"))
     return render_template("login.html", title="Login")
 
