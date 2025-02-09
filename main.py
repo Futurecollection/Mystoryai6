@@ -457,28 +457,27 @@ def login_route():
                 "user_id": user_id
             }
             
-            # Store in Flask session first
-            session.clear()  # Clear any existing session data
+            # Initialize session
+            session.clear()
+            session.permanent = True
             session.update(session_data)
+            session["logged_in"] = True
+            session["user_id"] = user_id
+            session["user_email"] = user.email
+            session["access_token"] = response.session.access_token
             
             try:
                 # Try to restore previous session data
                 saved_data = supabase.table("User_state").select("Session_data").eq("id", int(user_id.replace("-", "")[:16])).execute()
                 if saved_data.data and saved_data.data[0]["Session_data"]:
                     stored_session = saved_data.data[0]["Session_data"]
-                    session.update(stored_session)
+                    for key, value in stored_session.items():
+                        if key not in ["_permanent"]:  # Preserve certain Flask session keys
+                            session[key] = value
                     flash("Previous session restored!", "success")
-                    try:
-                        # Update the existing record
-                        supabase.table("User_state").update({
-                            "Session_data": dict(session),
-                            "Last_activity": datetime.datetime.utcnow().isoformat()
-                        }).eq("id", int(user_id.replace("-", "")[:16])).execute()
-                    except Exception as e:
-                        print("Session update error:", str(e))
                     return redirect(url_for("interaction"))
                 else:
-                    # Create new session record if none exists
+                    # Create new session record
                     supabase.table("User_state").upsert({
                         "id": int(user_id.replace("-", "")[:16]),
                         "Session_data": dict(session),
@@ -541,6 +540,9 @@ def restart():
 @app.route("/personalize", methods=["GET", "POST"])
 @login_required
 def personalize():
+    if not session.get("logged_in"):
+        flash("Please log in to continue.", "warning")
+        return redirect(url_for("login_route"))
     if request.method == "POST" and "save_personalization" in request.form:
         session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
         session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
