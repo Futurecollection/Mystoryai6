@@ -457,10 +457,11 @@ def login_route():
             }
             
             # Store session in Supabase
-            supabase.table("user_sessions").upsert({
-                "user_id": user_id,
-                "session_data": session_data,
-                "last_activity": datetime.datetime.utcnow().isoformat()
+            supabase.table("User_state").upsert({
+                "id": user_id,
+                "Session_data": session_data,
+                "Last_activity": datetime.datetime.utcnow().isoformat()
+            }).execute()
             }).execute()
             
             # Also store in Flask session
