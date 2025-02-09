@@ -456,13 +456,17 @@ def login_route():
                 "user_id": user_id
             }
             
-            # Store session in Supabase
-            supabase.table("User_state").upsert({
-                "id": user_id,
-                "Session_data": session_data,
-                "Last_activity": datetime.datetime.utcnow().isoformat()
-            }).execute()
-            
+            try:
+                # Store session in Supabase
+                supabase.table("User_state").upsert({
+                    "id": str(user_id),  # Convert UUID to string
+                    "Session_data": session_data,
+                    "Last_activity": datetime.datetime.utcnow().isoformat()
+                }).execute()
+            except Exception as e:
+                print("Supabase session storage error:", str(e))
+                # Continue even if Supabase storage fails
+                
             # Also store in Flask session
             session.update(session_data)
             flash("Logged in successfully!", "success")
