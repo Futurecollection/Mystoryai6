@@ -545,12 +545,15 @@ def personalize():
             session["npc_instructions"] = """[Male-specific instructions ...]"""
         else:
             session["npc_instructions"] = """[Female-specific instructions ...]"""
+        # Initialize all required session variables
+        session.clear()  # Clear any existing session data
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
         session["npcPrivateThoughts"] = "(none)"
         session["npcBehavior"] = "(none)"
+        session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
         session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
         session["interaction_log"] = []
         session["scene_image_prompt"] = ""
