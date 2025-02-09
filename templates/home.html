@@ -1,25 +1,25 @@
-
-{% extends "base.html" %}
-{% block content %}
-<div class="text-center">
-  <h1 style="color: #ff5789;">Welcome to MyStory</h1>
-  <p class="lead mb-4">
-    An immersive AI-powered storytelling platform that lets you create and explore romantic narratives.
-  </p>
-  
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card bg-dark text-light mb-4">
-        <div class="card-body">
-          <h3 style="color: #ff5789;">Get Started</h3>
-          <p>Join our community to start creating your own stories.</p>
-          <div class="d-grid gap-2 col-6 mx-auto">
-            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg mb-2">Login</a>
-            <a href="{{ url_for('register') }}" class="btn btn-secondary btn-lg">Register</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>Welcome to Our App</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li><strong>{{ category.capitalize() }}:</strong> {{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% if session.logged_in %}
+      <p>You are logged in as {{ session.user_email }}.</p>
+      <p><a href="{{ url_for('dashboard') }}">Dashboard</a> | <a href="{{ url_for('logout') }}">Logout</a></p>
+    {% else %}
+      <p><a href="{{ url_for('login') }}">Login</a> | <a href="{{ url_for('register') }}">Register</a></p>
+    {% endif %}
+  </body>
+</html>

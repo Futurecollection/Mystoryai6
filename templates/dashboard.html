@@ -1,48 +1,13 @@
-
-{% extends "base.html" %}
-{% block content %}
-<div class="row">
-  <div class="col-12">
-    <h1 style="color: #ff5789;">Dashboard</h1>
-  </div>
-</div>
-
-<div class="row mb-4">
-  <div class="col-md-6">
-    <div class="card bg-dark text-light mb-3">
-      <div class="card-body">
-        <h3 class="card-title">Profile Stats</h3>
-        <p class="card-text">
-          Affection Score: {{ affection_score|default(0) }}<br>
-          Trust Level: {{ trust_score|default(5) }}<br>
-          Current Stage: {{ current_stage|default(1) }}
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card bg-dark text-light">
-      <div class="card-body">
-        <h3 class="card-title">Quick Actions</h3>
-        <a href="{{ url_for('interaction') }}" class="btn btn-primary mb-2">Continue Story</a>
-        <a href="{{ url_for('full_story') }}" class="btn btn-secondary">View Full Story</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-12">
-    <div class="card bg-dark text-light">
-      <div class="card-body">
-        <h3 class="card-title">Recent Interactions</h3>
-        <div class="interaction-history">
-          {% for log in interaction_log[-5:]|reverse %}
-            <p>{{ log }}</p>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h1>Dashboard</h1>
+    <p>Welcome, {{ email }}!</p>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    <p><a href="{{ url_for('home') }}">Home</a></p>
+  </body>
+</html>

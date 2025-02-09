@@ -6,18 +6,39 @@ import random
 import google.generativeai as genai
 from flask import (
     Flask, request, render_template,
-    session, redirect, url_for, send_file
+    session, redirect, url_for, send_file, flash
 )
 from flask_session import Session
+from functools import wraps
+from supabase import create_client, Client
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "abc123supersecret"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "abc123supersecret")  # Change this in production!
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
+
+############################################################################
+# Initialize Supabase Client for Authentication
+############################################################################
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+############################################################################
+# Login Required Decorator
+############################################################################
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("logged_in"):
+            flash("Please log in to access this page.", "warning")
+            return redirect(url_for("login_route"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 ############################################################################
 # 1) Initialize Gemini + Replicate
@@ -76,52 +97,52 @@ GENERATED_IMAGE_PATH = "output.jpg"
 # 3) Dropdown Options
 ############################################################################
 
-USER_NAME_OPTIONS = ["John", "Michael", "David", "Chris", "James", "Alex", "Nick", "Adam", "Andrew", "Jason", "Emma", "Sarah", "Jessica", "Emily", "Sophie", "Anna", "Rachel", "Lisa", "Maria", "Ashley", "Other"]
-USER_AGE_OPTIONS = ["20", "25", "30", "35", "40", "45"]
+USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Emma","Sarah","Jessica","Emily","Sophie","Anna","Rachel","Lisa","Maria","Ashley","Other"]
+USER_AGE_OPTIONS = ["20","25","30","35","40","45"]
 
-NPC_NAME_OPTIONS = ["Emily", "Sarah", "Lisa", "Anna", "Mia", "Sophia", "Grace", "Chloe", "Emma", "Isabella", "James", "Michael", "William", "Alexander", "Daniel", "David", "Joseph", "Thomas", "Christopher", "Matthew", "Other"]
-NPC_AGE_OPTIONS = ["20", "25", "30", "35", "40", "45"]
-NPC_GENDER_OPTIONS = ["Female", "Male", "Non-binary", "Other"]
-HAIR_STYLE_OPTIONS = ["Short", "Medium Length", "Long", "Bald", "Ponytail", "Braided", "Bun", "Messy Bun", "Fade Cut", "Crew Cut", "Slicked Back", "Undercut", "Quiff", "Textured Crop", "Side Part", "Messy Spikes", "Other"]
-BODY_TYPE_OPTIONS = ["Athletic", "Muscular", "Tall & Broad", "Lean & Toned", "Average Build", "Rugby Build", "Swimmer's Build", "Basketball Build", "Other"]
-HAIR_COLOR_OPTIONS = ["Blonde", "Brunette", "Black", "Red", "Brown", "Grey", "Dyed (Blue/Pink/etc)"]
+NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella","James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew","Other"]
+NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
+NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
+HAIR_STYLE_OPTIONS = ["Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut","Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes","Other"]
+BODY_TYPE_OPTIONS = ["Athletic","Muscular","Tall & Broad","Lean & Toned","Average Build","Rugby Build","Swimmer's Build","Basketball Build","Other"]
+HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Brown","Grey","Dyed (Blue/Pink/etc)"]
 NPC_PERSONALITY_OPTIONS = [
-  "Flirty", "Passionate", "Confident", "Protective", "Intellectual", "Charming", "Ambitious", "Professional",
-  "Playful", "Mysterious", "Gentle", "Athletic", "Dominant", "Reserved", "Witty", "Supportive", "Other"
+  "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
+  "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive","Other"
 ]
 CLOTHING_OPTIONS = [
-  "Red Summer Dress", "Blue T-shirt & Jeans", "Black Evening Gown",
-  "Green Hoodie & Leggings", "White Blouse & Dark Skirt", "Business Attire",
-  "Grey Sweater & Jeans", "Pink Casual Dress", "Suit & Tie", "Leather Jacket & Dark Jeans",
-  "Button-up Shirt & Chinos", "Tank Top & Shorts", "Polo & Khakis", "Athletic Wear",
-  "Blazer & Fitted Pants", "Denim Jacket & White Tee", "Other"
+  "Red Summer Dress","Blue T-shirt & Jeans","Black Evening Gown",
+  "Green Hoodie & Leggings","White Blouse & Dark Skirt","Business Attire",
+  "Grey Sweater & Jeans","Pink Casual Dress","Suit & Tie","Leather Jacket & Dark Jeans",
+  "Button-up Shirt & Chinos","Tank Top & Shorts","Polo & Khakis","Athletic Wear",
+  "Blazer & Fitted Pants","Denim Jacket & White Tee","Other"
 ]
 OCCUPATION_OPTIONS = [
-  "College Student", "School Teacher", "Librarian", "Office Worker", "Freelance Artist", "Bartender",
-  "Travel Blogger", "Ex-Military", "Nurse", "Startup Founder", "CEO", "Investment Banker",
-  "Professional Athlete", "Doctor", "Firefighter", "Police Detective", "Personal Trainer",
-  "Musician", "Chef", "Architect", "Tech Executive", "Business Consultant", "Other"
+  "College Student","School Teacher","Librarian","Office Worker","Freelance Artist","Bartender",
+  "Travel Blogger","Ex-Military","Nurse","Startup Founder","CEO","Investment Banker",
+  "Professional Athlete","Doctor","Firefighter","Police Detective","Personal Trainer",
+  "Musician","Chef","Architect","Tech Executive","Business Consultant","Other"
 ]
 CURRENT_SITUATION_OPTIONS = [
-  "Recently Broke Up", "Recovering from Divorce", "Single & Looking",
-  "New in Town", "Trying Online Dating", "Hobby Enthusiast", "Other"
+  "Recently Broke Up","Recovering from Divorce","Single & Looking",
+  "New in Town","Trying Online Dating","Hobby Enthusiast","Other"
 ]
 ENVIRONMENT_OPTIONS = [
-  "Cafe", "Library", "Gym", "Beach", "Park", "Nightclub", "Airport Lounge",
-  "Music Festival", "Restaurant", "Mountain Resort"
+  "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge",
+  "Music Festival","Restaurant","Mountain Resort"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-  "First date", "Accidental meeting", "Haven't met yet", "Group activity", "Work-related encounter", "Matching on Tinder", "Other"
+  "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
 ETHNICITY_OPTIONS = [
-    "American (Black)", "American (White)", "Hispanic", "Australian",
-    "British", "Irish", "Scottish", "Welsh",
-    "French", "German", "Dutch", "Danish", "Norwegian", "Swedish",
-    "Italian", "Greek", "Spanish", "Portuguese",
-    "Russian", "Ukrainian", "Polish", "Czech", "Slovak", "Croatian", "Serbian",
-    "Chinese", "Japanese", "Korean", "Vietnamese", "Thai",
-    "Indian", "Pakistani", "Filipino",
-    "Brazilian", "Turkish", "Middle Eastern", "Other"
+    "American (Black)","American (White)","Hispanic","Australian",
+    "British","Irish","Scottish","Welsh",
+    "French","German","Dutch","Danish","Norwegian","Swedish",
+    "Italian","Greek","Spanish","Portuguese",
+    "Russian","Ukrainian","Polish","Czech","Slovak","Croatian","Serbian",
+    "Chinese","Japanese","Korean","Vietnamese","Thai",
+    "Indian","Pakistani","Filipino",
+    "Brazilian","Turkish","Middle Eastern","Other"
 ]
 
 ############################################################################
@@ -163,15 +184,11 @@ def build_personalization_string():
 ############################################################################
 
 def merge_dd(form, dd_key, cust_key):
-    """
-    Return the custom value if provided; otherwise, return the dropdown value.
-    """
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
 
 def update_npc_info(form):
-    """Update NPC (and environment) fields from the submitted form."""
     npc_fields = [
         "npc_name", "npc_gender", "npc_age", "npc_ethnicity", "npc_body_type",
         "npc_hair_color", "npc_hair_style", "npc_personality", "npc_clothing",
@@ -184,21 +201,15 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 def log_message(msg):
-    """Append a message to the interaction log stored in session."""
     logs = session.get("interaction_log", [])
     logs.append(msg)
     session["interaction_log"] = logs
 
 def handle_image_generation(prompt_text, force_new_seed=False):
-    """
-    Perform a safety check on the prompt, generate an image using Replicate,
-    save the image, and update the session.
-    """
     if session.get("image_generated_this_turn", False):
         log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
         return None
 
-    # Use Gemini to validate the prompt for age-appropriate content.
     safety_prompt = f"""
 Analyze this image generation prompt.
 REJECT ONLY if the prompt contains:
@@ -254,7 +265,6 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     stage_desc = STAGE_INFO[current_stage]["desc"]
     personalization = build_personalization_string()
 
-    # Check for age-related content
     age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "highschool", "high school", "18 year"]
     if any(keyword in last_user_action.lower() for keyword in age_keywords):
         return """AFFECT_CHANGE_FINAL: -5.0
@@ -379,8 +389,7 @@ def gpt_scene_image_prompt(full_history):
     npc_mood = session.get("npcMood", "Neutral")
     current_stage = session.get("currentStage", 1)
 
-    # Get last few interactions for immediate context
-    history_lines = full_history.split("\n")[-5:]  # Last 5 lines
+    history_lines = full_history.split("\n")[-5:]
     recent_context = "\n".join(history_lines)
 
     prompt = f"""
@@ -417,15 +426,59 @@ Generate one descriptive scene line that reflects the current emotional state an
 # 10) Flask Routes
 ############################################################################
 
+# --- Public Routes ---
 @app.route("/")
-def home():
+def main_home():
     return render_template("home.html", title="Destined Encounters")
 
 @app.route("/about")
 def about():
     return render_template("about.html", title="About/Help")
 
+# --- Authentication Routes ---
+@app.route("/login", methods=["GET", "POST"])
+def login_route():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        response = supabase.auth.sign_in(email=email, password=password)
+        error = response.get("error")
+        if error:
+            flash("Login failed: " + error["message"], "danger")
+            return redirect(url_for("login_route"))
+        else:
+            user = response.get("user")
+            session["logged_in"] = True
+            session["user_email"] = user.get("email") if user else email
+            session["access_token"] = response.get("access_token")
+            flash("Logged in successfully!", "success")
+            return redirect(url_for("personalize"))
+    return render_template("login.html", title="Login")
+
+@app.route("/register", methods=["GET", "POST"])
+def register_route():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        response = supabase.auth.sign_up(email=email, password=password)
+        error = response.get("error")
+        if error:
+            flash("Registration failed: " + error["message"], "danger")
+            return redirect(url_for("register_route"))
+        else:
+            flash("Registration successful! Check your email for confirmation, then log in.", "success")
+            return redirect(url_for("login_route"))
+    return render_template("register.html", title="Register")
+
+@app.route("/logout")
+def logout_route():
+    session.clear()
+    flash("Logged out successfully.", "info")
+    return redirect(url_for("main_home"))
+
+# --- Protected Routes ---
 @app.route("/restart")
+@login_required
 def restart():
     session.clear()
     os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
@@ -433,24 +486,18 @@ def restart():
     return redirect(url_for("personalize"))
 
 @app.route("/personalize", methods=["GET", "POST"])
+@login_required
 def personalize():
     if request.method == "POST" and "save_personalization" in request.form:
-        # User fields
         session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
         session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
         session["user_background"] = request.form.get("user_background", "").strip()
-
-        # NPC and environment fields
         update_npc_info(request.form)
-
-        # Set gender-specific NPC instructions
         npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = """[Male-specific instructions ...]"""
         else:
             session["npc_instructions"] = """[Female-specific instructions ...]"""
-
-        # Stats and initial session values
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
@@ -463,7 +510,6 @@ def personalize():
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
         session["image_generated_this_turn"] = False
-
         return redirect(url_for("interaction"))
     else:
         return render_template("personalize.html",
@@ -486,6 +532,7 @@ def personalize():
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
+@login_required
 def mid_game_personalize():
     if request.method == "POST" and "update_npc" in request.form:
         update_npc_info(request.form)
@@ -509,6 +556,7 @@ def mid_game_personalize():
     )
 
 @app.route("/interaction", methods=["GET", "POST"])
+@login_required
 def interaction():
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
@@ -518,17 +566,14 @@ def interaction():
         st_label = STAGE_INFO[cstage]["label"]
         st_desc = STAGE_INFO[cstage]["desc"]
         nxt_thresh = session.get("nextStageThreshold", 999)
-
         stage_unlocks = session.get("stage_unlocks", {})
         last_narration = session.get("narrationText", "(No scene yet.)")
         scene_prompt = session.get("scene_image_prompt", "")
         scene_url = session.get("scene_image_url", None)
         seed_used = session.get("scene_image_seed", None)
-
         dice_val = session.get("dice_debug_roll", "(none)")
         outcome_val = session.get("dice_debug_outcome", "(none)")
         interaction_log = session.get("interaction_log", [])
-
         return render_template("interaction.html",
             title="Interact with NPC",
             affection_score=affection,
@@ -560,16 +605,13 @@ def interaction():
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
             ethnicity_options=ETHNICITY_OPTIONS
         )
-
     else:
-        # Process various POST actions
         if "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip() or "(no action)"
             affection = session.get("affectionScore", 0.0)
             trust = session.get("trustScore", 5.0)
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
-
             log_message(f"User: {user_action}")
             full_history = "\n".join(session.get("interaction_log", []))
             result_text = interpret_npc_state(
@@ -580,7 +622,6 @@ def interaction():
                 last_user_action=user_action,
                 full_history=full_history
             )
-
             affect_delta = 0.0
             narration_txt = ""
             image_prompt = ""
@@ -595,7 +636,6 @@ def interaction():
                     narration_txt = s.split(":", 1)[1].strip()
                 elif s.startswith("IMAGE_PROMPT:"):
                     image_prompt = s.split(":", 1)[1].strip()
-
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
@@ -605,12 +645,10 @@ def interaction():
             log_message(f"NARRATION => {narration_txt}")
             session["image_generated_this_turn"] = False
             return redirect(url_for("interaction"))
-
         elif "update_npc" in request.form:
             update_npc_info(request.form)
             log_message("SYSTEM: NPC personalizations updated mid-game.")
             return redirect(url_for("interaction"))
-
         elif "update_affection" in request.form:
             try:
                 new_val = float(request.form.get("affection_new", "0.0").strip())
@@ -620,7 +658,6 @@ def interaction():
             check_stage_up_down(new_val)
             log_message(f"SYSTEM: Affection manually set => {new_val}")
             return redirect(url_for("interaction"))
-
         elif "update_stage_unlocks" in request.form:
             su = session.get("stage_unlocks", {})
             for i in range(1, 7):
@@ -629,21 +666,19 @@ def interaction():
             session["stage_unlocks"] = su
             log_message("SYSTEM: Stage unlock text updated mid-game.")
             return redirect(url_for("interaction"))
-
         elif "do_generate_flux" in request.form:
             prompt_text = request.form.get("scene_image_prompt", "").strip() or "(No prompt text)"
             handle_image_generation(prompt_text, force_new_seed=False)
             return redirect(url_for("interaction"))
-
         elif "new_seed" in request.form:
             prompt_text = request.form.get("scene_image_prompt", "").strip() or "(No prompt text)"
             handle_image_generation(prompt_text, force_new_seed=True)
             return redirect(url_for("interaction"))
-
         else:
             return "Invalid submission in /interaction", 400
 
 @app.route("/view_image")
+@login_required
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
@@ -652,6 +687,7 @@ def view_image():
 ############################################################################
 
 @app.route("/full_story")
+@login_required
 def full_story():
     logs = session.get("interaction_log", [])
     story_lines = []
@@ -663,6 +699,7 @@ def full_story():
     return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
 
 @app.route("/continue_erotica", methods=["POST"])
+@login_required
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
     continue_prompt = f"""
@@ -684,6 +721,7 @@ Now continue the story from this exact point (600-900 more words):"""
     return render_template("erotica_story.html", erotica_text=full_text, title="Generated Erotica")
 
 @app.route("/generate_erotica", methods=["POST"])
+@login_required
 def generate_erotica():
     logs = session.get("interaction_log", [])
     story_parts = []
@@ -728,6 +766,7 @@ Allowed Explicitness:
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
 @app.route("/stage_unlocks", methods=["GET", "POST"])
+@login_required
 def stage_unlocks():
     if request.method == "POST" and "update_stage_unlocks" in request.form:
         su = session.get("stage_unlocks", {})
@@ -746,6 +785,7 @@ def validate_age_content(text):
     return any(keyword in text.lower() for keyword in age_keywords)
 
 @app.route("/generate_scene_prompt", methods=["POST"])
+@login_required
 def generate_scene_prompt():
     logs = session.get("interaction_log", [])
     full_history = "\n".join(logs)

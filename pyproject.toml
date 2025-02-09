@@ -11,4 +11,5 @@ dependencies = [
     "replicate>=1.0.4",
     "requests>=2.32.3",
     "google-generativeai>=0.8.4",
+    "supabase>=2.13.0",
 ]
