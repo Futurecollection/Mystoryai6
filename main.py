@@ -19,6 +19,9 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
 app.config["SESSION_PERMANENT"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = 'Lax'
 Session(app)
 
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
@@ -440,6 +443,9 @@ def about():
 # --- Authentication Routes ---
 @app.route("/login", methods=["GET", "POST"])
 def login_route():
+    if session.get('logged_in'):
+        return redirect(url_for('personalize'))
+        
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
