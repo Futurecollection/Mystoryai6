@@ -17,7 +17,8 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "abc123supersecret")  # Change this in production!
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "./.flask_sess"
-app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
 Session(app)
 
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
