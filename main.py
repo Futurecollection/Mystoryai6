@@ -457,30 +457,35 @@ def login_route():
                 "user_id": user_id
             }
             
-            try:
-                # Store session in Supabase
-                supabase.table("User_state").insert({
-                    "id": int(user_id.replace("-", "")[:16]),  # Convert UUID to numeric ID
-                    "Session_data": session_data,
-                    "Last_activity": datetime.datetime.utcnow().isoformat()
-                }).execute()
-            except Exception as e:
-                print("Supabase session storage error:", str(e))
-                # Continue even if Supabase storage fails
-                
-            # Also store in Flask session
+            # Store in Flask session first
+            session.clear()  # Clear any existing session data
             session.update(session_data)
             
-            # Try to restore previous session data
             try:
+                # Try to restore previous session data
                 saved_data = supabase.table("User_state").select("Session_data").eq("id", int(user_id.replace("-", "")[:16])).execute()
                 if saved_data.data and saved_data.data[0]["Session_data"]:
                     stored_session = saved_data.data[0]["Session_data"]
                     session.update(stored_session)
                     flash("Previous session restored!", "success")
+                    try:
+                        # Update the existing record
+                        supabase.table("User_state").update({
+                            "Session_data": dict(session),
+                            "Last_activity": datetime.datetime.utcnow().isoformat()
+                        }).eq("id", int(user_id.replace("-", "")[:16])).execute()
+                    except Exception as e:
+                        print("Session update error:", str(e))
                     return redirect(url_for("interaction"))
+                else:
+                    # Create new session record if none exists
+                    supabase.table("User_state").upsert({
+                        "id": int(user_id.replace("-", "")[:16]),
+                        "Session_data": dict(session),
+                        "Last_activity": datetime.datetime.utcnow().isoformat()
+                    }).execute()
             except Exception as e:
-                print("Session restoration error:", str(e))
+                print("Session handling error:", str(e))
             
             flash("Logged in successfully!", "success")
             return redirect(url_for("personalize"))
