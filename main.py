@@ -13,6 +13,9 @@ from flask_session import Session
 from functools import wraps
 from supabase import create_client, Client
 
+############################################################################
+# Flask Setup
+############################################################################
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "abc123supersecret")  # Change this in production!
 app.config["SESSION_TYPE"] = "filesystem"
@@ -44,7 +47,6 @@ def login_required(f):
 ############################################################################
 # 1) Initialize Gemini + Replicate
 ############################################################################
-
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -64,7 +66,6 @@ replicate.client.api_token = REPLICATE_API_TOKEN
 ############################################################################
 # 2) Stage Info & Requirements
 ############################################################################
-
 STAGE_INFO = {
     1: {"label": "Strangers", "desc": "They barely know each other."},
     2: {"label": "Casual Acquaintances", "desc": "Superficial chatting, no real depth yet."},
@@ -74,15 +75,7 @@ STAGE_INFO = {
     6: {"label": "Committed Relationship", "desc": "Life partners with strong devotion, shared long-term goals, can be sexually intimate."}
 }
 
-STAGE_REQUIREMENTS = {
-    1: 0,
-    2: 2,
-    3: 5,
-    4: 9,
-    5: 15,
-    6: 20
-}
-
+STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
 DEFAULT_STAGE_UNLOCKS = {
     1: "Basic intros, no perks",
     2: "Casual jokes, mild flirting possible,",
@@ -97,7 +90,6 @@ GENERATED_IMAGE_PATH = "output.jpg"
 ############################################################################
 # 3) Dropdown Options
 ############################################################################
-
 USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Nick","Adam","Andrew","Jason","Emma","Sarah","Jessica","Emily","Sophie","Anna","Rachel","Lisa","Maria","Ashley","Other"]
 USER_AGE_OPTIONS = ["20","25","30","35","40","45"]
 
@@ -149,7 +141,6 @@ ETHNICITY_OPTIONS = [
 ############################################################################
 # 4) Build Personalization String
 ############################################################################
-
 def build_personalization_string():
     user_data = (
         f"USER:\n"
@@ -183,7 +174,6 @@ def build_personalization_string():
 ############################################################################
 # 5) Utility Helpers
 ############################################################################
-
 def merge_dd(form, dd_key, cust_key):
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
@@ -211,6 +201,7 @@ def handle_image_generation(prompt_text, force_new_seed=False):
         log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
         return None
 
+    # Checking for disallowed content
     safety_prompt = f"""
 Analyze this image generation prompt.
 REJECT ONLY if the prompt contains:
@@ -247,6 +238,10 @@ Return only "ALLOW" or "REJECT"
             log_message("SYSTEM: No existing seed => random => " + str(seed_used))
 
     url = generate_flux_image_safely(prompt_text, seed=seed_used)
+    if not isinstance(url, str):
+        log_message("[SYSTEM] No valid URL returned from replicate.")
+        return None
+
     _save_image(url)
     session["scene_image_prompt"] = prompt_text
     session["scene_image_url"] = url
@@ -260,7 +255,6 @@ Return only "ALLOW" or "REJECT"
 ############################################################################
 # 6) Interpret NPC State
 ############################################################################
-
 def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_action, full_history=""):
     stage_label = STAGE_INFO[current_stage]["label"]
     stage_desc = STAGE_INFO[current_stage]["desc"]
@@ -307,19 +301,16 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{full_history}"
-
     resp = model.generate_content(
         f"{system_instructions}\n\n{user_text}",
         generation_config={"temperature": 0.9},
         safety_settings=safety_settings
     )
-
     return resp.text.strip()
 
 ############################################################################
 # 7) Stage Checker
 ############################################################################
-
 def check_stage_up_down(new_aff):
     cur_stage = session.get("currentStage", 1)
     req = STAGE_REQUIREMENTS[cur_stage]
@@ -346,7 +337,6 @@ def check_stage_up_down(new_aff):
 ############################################################################
 # 8) Replicate / Image Functions
 ############################################################################
-
 def _save_image(url):
     r = requests.get(url)
     with open(GENERATED_IMAGE_PATH, "wb") as f:
@@ -377,7 +367,6 @@ def generate_flux_image_safely(prompt, seed=None):
 ############################################################################
 # 9) GPT-based Scene Prompt
 ############################################################################
-
 def gpt_scene_image_prompt(full_history):
     npc_age = session.get("npc_age", "?")
     npc_gender = session.get("npc_gender", "?") 
@@ -410,15 +399,14 @@ SETTING:
 RECENT CONTEXT:
 {recent_context}
 
-Generate one descriptive scene line that reflects the current emotional state and physical setting:"""
-
+Generate one descriptive scene line that reflects the current emotional state and physical setting:
+"""
     chat = model.start_chat()
     resp = chat.send_message(
         prompt,
         generation_config={"temperature": 0.7},
         safety_settings=safety_settings
     )
-
     final_line = resp.text.strip()
     print("[DEBUG] gpt_scene_image_prompt =>", final_line)
     return final_line
@@ -427,7 +415,6 @@ Generate one descriptive scene line that reflects the current emotional state an
 # 10) Flask Routes
 ############################################################################
 
-# --- Public Routes ---
 @app.route("/")
 def main_home():
     return render_template("home.html", title="Destined Encounters")
@@ -439,24 +426,22 @@ def about():
 # --- Authentication Routes ---
 @app.route("/login", methods=["GET", "POST"])
 def login_route():
+    """Logs in a user via Supabase email/password."""
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
         try:
             if not email or not password:
-                raise ValueError("Email and password are required")
-
-            print("DEBUG: Attempting login with email =", email)
-            try:
-                response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                print("DEBUG: response =", response)
-            except Exception as e:
-                print("DEBUG: exception =", e)
-                flash("Login failed: " + str(e), "danger")
+                flash("Email and password are required", "danger")
                 return redirect(url_for("login_route"))
 
+            print("DEBUG: Attempting login with email =", email)
+            response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            print("DEBUG: response =", response)
+
             if not response or not response.user:
-                raise ValueError("Invalid credentials")
+                flash("Invalid credentials. Please try again.", "danger")
+                return redirect(url_for("login_route"))
 
             user = response.user
             user_id = user.id
@@ -467,53 +452,56 @@ def login_route():
                 "user_id": user_id
             }
 
-            # Store session in Supabase
-            supabase.table("user_sessions").upsert({
-                "user_id": user_id,
-                "session_data": session_data,
-                "last_activity": datetime.datetime.utcnow().isoformat()
-            }).execute()
+            # If you have a "user_sessions" table, you can upsert:
+            # (Make sure you created this table in Supabase or remove this block if not needed.)
+            try:
+                supabase.table("user_sessions").upsert({
+                    "user_id": user_id,
+                    "session_data": session_data,
+                    "last_activity": datetime.datetime.utcnow().isoformat()
+                }).execute()
+            except Exception as upsert_ex:
+                print("[WARNING] user_sessions table upsert failed:", upsert_ex)
 
             # Also store in Flask session
             session.update(session_data)
             flash("Logged in successfully!", "success")
             return redirect(url_for("personalize"))
+
         except Exception as e:
-            error_msg = str(e)
-            if not error_msg:
-                error_msg = "Invalid credentials"
-            flash(f"Login failed: {error_msg}", "danger")
+            print("DEBUG: Exception =>", e)
+            flash("Login failed: " + str(e), "danger")
             return redirect(url_for("login_route"))
     return render_template("login.html", title="Login")
 
 @app.route("/register", methods=["GET", "POST"])
 def register_route():
+    """Creates a new user in Supabase with email/password."""
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
         try:
+            if not email or not password:
+                flash("Email and password are required for registration", "danger")
+                return redirect(url_for("register_route"))
+
             response = supabase.auth.sign_up({"email": email, "password": password})
-            error = None
-        except Exception as e:
-            error = {"message": str(e)}
-        if error:
-            flash("Registration failed: " + error["message"], "danger")
-            return redirect(url_for("register_route"))
-        else:
             flash("Registration successful! Check your email for confirmation, then log in.", "success")
             return redirect(url_for("login_route"))
+        except Exception as e:
+            flash("Registration failed: " + str(e), "danger")
+            return redirect(url_for("register_route"))
     return render_template("register.html", title="Register")
 
 @app.route("/logout")
 def logout_route():
+    """Logs out the user by clearing session data."""
     if session.get("user_id"):
         try:
-            # Clear Supabase session
             supabase.table("user_sessions").delete().eq("user_id", session["user_id"]).execute()
         except Exception as e:
-            print("Error clearing Supabase session:", str(e))
+            print("Error clearing Supabase session:", e)
 
-    # Clear Flask session
     session.clear()
     flash("Logged out successfully.", "info")
     return redirect(url_for("main_home"))
@@ -616,6 +604,7 @@ def interaction():
         dice_val = session.get("dice_debug_roll", "(none)")
         outcome_val = session.get("dice_debug_outcome", "(none)")
         interaction_log = session.get("interaction_log", [])
+
         return render_template("interaction.html",
             title="Interact with NPC",
             affection_score=affection,
@@ -654,6 +643,7 @@ def interaction():
             trust = session.get("trustScore", 5.0)
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
+
             log_message(f"User: {user_action}")
             full_history = "\n".join(session.get("interaction_log", []))
             result_text = interpret_npc_state(
@@ -667,6 +657,7 @@ def interaction():
             affect_delta = 0.0
             narration_txt = ""
             image_prompt = ""
+
             for ln in result_text.split("\n"):
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
@@ -678,19 +669,23 @@ def interaction():
                     narration_txt = s.split(":", 1)[1].strip()
                 elif s.startswith("IMAGE_PROMPT:"):
                     image_prompt = s.split(":", 1)[1].strip()
+
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
             session["narrationText"] = narration_txt
             session["scene_image_prompt"] = image_prompt
+
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
             session["image_generated_this_turn"] = False
             return redirect(url_for("interaction"))
+
         elif "update_npc" in request.form:
             update_npc_info(request.form)
             log_message("SYSTEM: NPC personalizations updated mid-game.")
             return redirect(url_for("interaction"))
+
         elif "update_affection" in request.form:
             try:
                 new_val = float(request.form.get("affection_new", "0.0").strip())
@@ -700,6 +695,7 @@ def interaction():
             check_stage_up_down(new_val)
             log_message(f"SYSTEM: Affection manually set => {new_val}")
             return redirect(url_for("interaction"))
+
         elif "update_stage_unlocks" in request.form:
             su = session.get("stage_unlocks", {})
             for i in range(1, 7):
@@ -708,14 +704,17 @@ def interaction():
             session["stage_unlocks"] = su
             log_message("SYSTEM: Stage unlock text updated mid-game.")
             return redirect(url_for("interaction"))
+
         elif "do_generate_flux" in request.form:
             prompt_text = request.form.get("scene_image_prompt", "").strip() or "(No prompt text)"
             handle_image_generation(prompt_text, force_new_seed=False)
             return redirect(url_for("interaction"))
+
         elif "new_seed" in request.form:
             prompt_text = request.form.get("scene_image_prompt", "").strip() or "(No prompt text)"
             handle_image_generation(prompt_text, force_new_seed=True)
             return redirect(url_for("interaction"))
+
         else:
             return "Invalid submission in /interaction", 400
 
@@ -753,6 +752,7 @@ PREVIOUS TEXT:
 {previous_text}
 
 Now continue the story from this exact point (600-900 more words):"""
+
     chat = model.start_chat()
     continuation = chat.send_message(
         continue_prompt,
@@ -772,8 +772,10 @@ def generate_erotica():
             story_parts.append(line.replace("NARRATION => ", "", 1))
         elif line.startswith("User: "):
             story_parts.append(line.replace("User: ", "", 1))
+
     if not story_parts:
         return redirect(url_for("full_story"))
+
     full_narration = "\n".join(story_parts)
     erotica_prompt = f"""
 You are an author on r/eroticliterature or r/gonewildstories.
@@ -855,5 +857,9 @@ PREDEFINED_BIOS = {
     "Fifty Shades of Grey": "Fifty Shades of Grey Roleplay"
 }
 
+############################################################################
+# Run the App
+############################################################################
 if __name__ == "__main__":
+    # Make sure to set debug=False in production.
     app.run(host="0.0.0.0", port=8080, debug=False)
