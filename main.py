@@ -49,6 +49,40 @@ def login_required(f):
 ############################################################################
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
+
+def build_personalization_string():
+    """Build a string containing all NPC and environment personalization details"""
+    npc_name = session.get("npc_name", "?")
+    npc_gender = session.get("npc_gender", "?")
+    npc_age = session.get("npc_age", "?") 
+    npc_eth = session.get("npc_ethnicity", "?")
+    npc_body = session.get("npc_body_type", "?")
+    npc_hair_color = session.get("npc_hair_color", "?")
+    npc_hair_style = session.get("npc_hair_style", "?")
+    npc_personality = session.get("npc_personality", "?")
+    npc_clothing = session.get("npc_clothing", "?")
+    npc_occupation = session.get("npc_occupation", "?")
+    npc_situation = session.get("npc_current_situation", "?")
+    npc_backstory = session.get("npc_backstory", "")
+    environment = session.get("environment", "?")
+    encounter = session.get("encounter_context", "?")
+    
+    return f"""NPC Details:
+Name: {npc_name}
+Gender: {npc_gender} 
+Age: {npc_age}
+Ethnicity: {npc_eth}
+Body Type: {npc_body}
+Hair: {npc_hair_color}, {npc_hair_style}
+Personality: {npc_personality}
+Wearing: {npc_clothing}
+Occupation: {npc_occupation}
+Situation: {npc_situation}
+Backstory: {npc_backstory}
+
+Environment: {environment}
+Context: {encounter}"""
+
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
