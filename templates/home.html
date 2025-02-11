@@ -17,13 +17,17 @@
     {% endwith %}
     {% if session.logged_in %}
       <p>You are logged in as {{ session.user_email }}.</p>
-      <p><a href="{{ url_for('personalize') }}">Start Experience</a> | <a href="{{ url_for('logout_route') }}">Logout</a></p>
       {% if has_previous_session %}
         <div class="mb-4">
           <h3>Previous Session Available</h3>
           <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Previous Session</a>
+          <span class="mx-2">or</span>
+          <a href="{{ url_for('personalize') }}" class="btn btn-primary">Start New Experience</a>
         </div>
+      {% else %}
+        <p><a href="{{ url_for('personalize') }}" class="btn btn-primary">Start Experience</a></p>
       {% endif %}
+      <p><a href="{{ url_for('logout_route') }}">Logout</a></p>
     {% else %}
       <p><a href="{{ url_for('login_route') }}">Login</a> | <a href="{{ url_for('register_route') }}">Register</a></p>
     {% endif %}
