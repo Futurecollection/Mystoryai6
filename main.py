@@ -376,7 +376,42 @@ One single-sentence photographic prompt:
 ############################################################################
 @app.route("/")
 def main_home():
-    return render_template("home.html", title="Destined Encounters")
+    has_previous = False
+    if session.get("logged_in"):
+        # Check for previous session data
+        result = supabase.table("flask_sessions") \
+            .select("data") \
+            .eq("session_id", session.get("session_id")) \
+            .execute()
+        if result.data and result.data[0].get("data",{}).get("npc_name"):
+            has_previous = True
+            
+    return render_template("home.html", 
+                         title="Destined Encounters",
+                         has_previous_session=has_previous)
+
+@app.route("/continue")
+@login_required
+def continue_session():
+    # Load previous session data
+    result = supabase.table("flask_sessions") \
+        .select("data") \
+        .eq("session_id", session.get("session_id")) \
+        .execute()
+        
+    if result.data:
+        session_data = result.data[0].get("data",{})
+        # Restore relevant session variables
+        for key in ["npc_name", "npc_gender", "npc_age", "npc_ethnicity",
+                   "npc_body_type", "npc_hair_color", "npc_hair_style",
+                   "npc_personality", "npc_clothing", "npc_occupation",
+                   "npc_current_situation", "npc_backstory", "environment",
+                   "encounter_context", "affectionScore", "trustScore",
+                   "npcMood", "currentStage", "interaction_log"]:
+            if key in session_data:
+                session[key] = session_data[key]
+        return redirect(url_for("interaction"))
+    return redirect(url_for("personalize"))
 
 @app.route("/about")
 def about():
