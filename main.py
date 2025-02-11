@@ -368,11 +368,21 @@ Recent:
 {recent_context}
 One single-sentence photographic prompt:
 """
-    chat = model.start_chat()
-    resp = chat.send_message(prompt, generation_config={"temperature":0.7}, safety_settings=safety_settings)
-    final_line = resp.text.strip()
-    print("[DEBUG] scene_image_prompt =>", final_line)
-    return final_line
+    try:
+        chat = model.start_chat()
+        resp = chat.send_message(
+            prompt,
+            generation_config={"temperature":0.7, "max_output_tokens":100},
+            safety_settings=safety_settings
+        )
+        final_line = resp.text.strip()
+        print("[DEBUG] scene_image_prompt =>", final_line)
+        if not final_line:
+            raise ValueError("Empty response from AI")
+        return final_line
+    except Exception as e:
+        print("[DEBUG] AI generation error:", str(e))
+        return None
 
 ############################################################################
 # Flask Routes
