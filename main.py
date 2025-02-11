@@ -94,6 +94,13 @@ safety_settings = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 
+generation_config = {
+    "temperature": 0.9,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 1024,
+}
+
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 replicate.client.api_token = REPLICATE_API_TOKEN
 
@@ -277,12 +284,20 @@ Background:
 """
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{full_history}"
 
-    resp = model.generate_content(
-        f"{system_instructions}\n\n{user_text}",
-        generation_config={"temperature":0.9},
-        safety_settings=safety_settings
-    )
-    return resp.text.strip()
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            resp = model.generate_content(
+                f"{system_instructions}\n\n{user_text}",
+                generation_config=generation_config,
+                safety_settings=safety_settings
+            )
+            if resp and resp.text:
+                return resp.text.strip()
+        except Exception as e:
+            log_message(f"[SYSTEM] Generation attempt {attempt + 1} failed: {str(e)}")
+            if attempt == max_retries - 1:
+                return "AFFECT_CHANGE_FINAL: 0\nNARRATION: [System: Response generation failed, please try again]\nIMAGE_PROMPT: error"
 
 ############################################################################
 # check_stage_up_down
