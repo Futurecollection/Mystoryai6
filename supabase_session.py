@@ -1,53 +1,92 @@
+import json
+from uuid import uuid4
+from datetime import datetime, timedelta
+from flask.sessions import SessionInterface, SessionMixin
 
-from supabase import Client, create_client
-import os
-from datetime import datetime
-from typing import Optional, Dict, Any
+class SupabaseSession(dict, SessionMixin):
+    def __init__(self, initial=None, session_id=None):
+        super().__init__(initial or {})
+        self.session_id = session_id
 
-class SupabaseSessionManager:
-    def __init__(self):
-        self.supabase_url = os.environ.get("SUPABASE_URL")
-        self.supabase_key = os.environ.get("SUPABASE_KEY")
-        self.client: Optional[Client] = None
-        
-    def initialize(self) -> Client:
-        if not self.client:
-            self.client = create_client(self.supabase_url, self.supabase_key)
-        return self.client
-        
-    def store_session(self, user_id: str, session_data: Dict[str, Any]) -> None:
-        if not self.client:
-            self.initialize()
-            
-        try:
-            self.client.table("user_sessions").upsert({
-                "user_id": user_id,
-                "session_data": session_data,
-                "last_activity": datetime.utcnow().isoformat()
-            }).execute()
-        except Exception as e:
-            print(f"Failed to store session: {str(e)}")
-            
-    def get_session(self, user_id: str) -> Optional[Dict[str, Any]]:
-        if not self.client:
-            self.initialize()
-            
-        try:
-            response = self.client.table("user_sessions").select("*").eq("user_id", user_id).execute()
-            if response.data:
-                return response.data[0]
-        except Exception as e:
-            print(f"Failed to retrieve session: {str(e)}")
-        return None
-            
-    def delete_session(self, user_id: str) -> None:
-        if not self.client:
-            self.initialize()
-            
-        try:
-            self.client.table("user_sessions").delete().eq("user_id", user_id).execute()
-        except Exception as e:
-            print(f"Failed to delete session: {str(e)}")
+class SupabaseSessionInterface(SessionInterface):
+    """
+    A custom Flask SessionInterface that stores session data in a Supabase table
+    called 'flask_sessions'. This prevents large data from bloating the cookie.
 
-# Create a singleton instance
-supabase_manager = SupabaseSessionManager()
+    Table schema needed:
+        CREATE TABLE public.flask_sessions (
+            session_id uuid PRIMARY KEY,
+            data jsonb,
+            expiry timestamptz
+        );
+    Disable RLS or create a policy for inserts/updates.
+    """
+
+    def __init__(self, supabase_client, table_name="flask_sessions", session_lifetime=timedelta(days=1)):
+        self.supabase = supabase_client
+        self.table_name = table_name
+        self.session_lifetime = session_lifetime
+
+    def open_session(self, app, request):
+        cookie_name = app.config.get("SESSION_COOKIE_NAME", "session")
+        session_id = request.cookies.get(cookie_name)
+
+        if not session_id:
+            # No cookie -> create a new session
+            session_id = str(uuid4())
+            return SupabaseSession(session_id=session_id)
+
+        # Try to load from Supabase
+        result = self.supabase.table(self.table_name) \
+                              .select("data, expiry") \
+                              .eq("session_id", session_id) \
+                              .execute()
+        if result.data:
+            row = result.data[0]
+            expiry_str = row.get("expiry")
+            if expiry_str:
+                expiry = datetime.fromisoformat(expiry_str)
+                # Convert to naive if needed
+                expiry = expiry.replace(tzinfo=None)
+                if expiry < datetime.utcnow():
+                    # Expired => new session
+                    return SupabaseSession(session_id=session_id)
+
+            data = row.get("data") or {}
+            return SupabaseSession(initial=data, session_id=session_id)
+        else:
+            # No record => new session
+            return SupabaseSession(session_id=session_id)
+
+    def save_session(self, app, session, response):
+        cookie_name = app.config.get("SESSION_COOKIE_NAME", "session")
+        domain = self.get_cookie_domain(app)
+
+        # If session is empty, remove from DB + clear cookie
+        if not session:
+            if getattr(session, 'session_id', None):
+                self.supabase.table(self.table_name) \
+                             .delete() \
+                             .eq("session_id", session.session_id) \
+                             .execute()
+            response.delete_cookie(cookie_name, domain=domain)
+            return
+
+        # Otherwise, upsert the session record in DB
+        expiry = datetime.utcnow() + self.session_lifetime
+        session_data = dict(session)
+
+        self.supabase.table(self.table_name).upsert({
+            "session_id": session.session_id,
+            "data": session_data,
+            "expiry": expiry.isoformat()
+        }).execute()
+
+        # Set a small cookie with only the session_id
+        response.set_cookie(
+            cookie_name,
+            session.session_id,
+            expires=expiry,
+            httponly=True,
+            domain=domain
+        )
