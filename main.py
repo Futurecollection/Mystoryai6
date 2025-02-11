@@ -378,13 +378,20 @@ One single-sentence photographic prompt:
 def main_home():
     has_previous = False
     if session.get("logged_in"):
-        # Check for previous session data
-        result = supabase.table("flask_sessions") \
-            .select("data") \
-            .eq("session_id", session.get("session_id")) \
-            .execute()
-        if result.data and result.data[0].get("data",{}).get("npc_name"):
-            has_previous = True
+        try:
+            # Check for previous session data
+            result = supabase.table("flask_sessions") \
+                .select("data") \
+                .eq("user_id", session.get("user_id")) \
+                .execute()
+            if result.data:
+                for row in result.data:
+                    session_data = row.get("data", {})
+                    if session_data.get("npc_name"):
+                        has_previous = True
+                        break
+        except Exception as e:
+            print("Session check error:", e)
             
     return render_template("home.html", 
                          title="Destined Encounters",
