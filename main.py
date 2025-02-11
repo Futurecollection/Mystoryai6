@@ -344,19 +344,23 @@ def generate_flux_image_safely(prompt,seed=None):
         return None
 
 def gpt_scene_image_prompt(full_history):
-    npc_age = session.get("npc_age","?")
-    npc_gender = session.get("npc_gender","?")
-    npc_eth = session.get("npc_ethnicity","?")
-    npc_body = session.get("npc_body_type","?")
-    npc_hair_color = session.get("npc_hair_color","?")
-    npc_hair_style = session.get("npc_hair_style","?")
-    npc_clothing = session.get("npc_clothing","?")
-    env_loc = session.get("environment","?")
-    npc_mood = session.get("npcMood","Neutral")
-    current_stage = session.get("currentStage",1)
+    try:
+        npc_age = session.get("npc_age","?")
+        npc_gender = session.get("npc_gender","?")
+        npc_eth = session.get("npc_ethnicity","?")
+        npc_body = session.get("npc_body_type","?")
+        npc_hair_color = session.get("npc_hair_color","?")
+        npc_hair_style = session.get("npc_hair_style","?")
+        npc_clothing = session.get("npc_clothing","?")
+        env_loc = session.get("environment","?")
+        npc_mood = session.get("npcMood","Neutral")
+        current_stage = session.get("currentStage",1)
 
-    history_lines = full_history.split("\n")[-5:]
-    recent_context = "\n".join(history_lines)
+        if not full_history:
+            full_history = "(No history yet)"
+            
+        history_lines = full_history.split("\n")[-5:]
+        recent_context = "\n".join(history_lines)
 
     prompt = f"""
 You are a scene image prompt generator:
