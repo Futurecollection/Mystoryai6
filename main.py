@@ -453,7 +453,7 @@ def login_route():
                 "access_token":response.session.access_token
             })
             flash("Logged in successfully!", "success")
-            return redirect(url_for("personalize"))
+            return redirect(url_for("main_home"))
         except Exception as e:
             print("DEBUG: login exception =>",e)
             flash(f"Login failed: {e}","danger")
