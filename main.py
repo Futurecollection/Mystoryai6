@@ -479,7 +479,11 @@ def register_route():
 
 @app.route("/logout")
 def logout_route():
-    session.clear()
+    # Only clear login-related session data
+    session["logged_in"] = False
+    session["user_id"] = None
+    session["user_email"] = None
+    session["access_token"] = None
     flash("Logged out successfully.","info")
     return redirect(url_for("main_home"))
 
