@@ -344,23 +344,19 @@ def generate_flux_image_safely(prompt,seed=None):
         return None
 
 def gpt_scene_image_prompt(full_history):
-    try:
-        npc_age = session.get("npc_age","?")
-        npc_gender = session.get("npc_gender","?")
-        npc_eth = session.get("npc_ethnicity","?")
-        npc_body = session.get("npc_body_type","?")
-        npc_hair_color = session.get("npc_hair_color","?")
-        npc_hair_style = session.get("npc_hair_style","?")
-        npc_clothing = session.get("npc_clothing","?")
-        env_loc = session.get("environment","?")
-        npc_mood = session.get("npcMood","Neutral")
-        current_stage = session.get("currentStage",1)
+    npc_age = session.get("npc_age","?")
+    npc_gender = session.get("npc_gender","?")
+    npc_eth = session.get("npc_ethnicity","?")
+    npc_body = session.get("npc_body_type","?")
+    npc_hair_color = session.get("npc_hair_color","?")
+    npc_hair_style = session.get("npc_hair_style","?")
+    npc_clothing = session.get("npc_clothing","?")
+    env_loc = session.get("environment","?")
+    npc_mood = session.get("npcMood","Neutral")
+    current_stage = session.get("currentStage",1)
 
-        if not full_history:
-            full_history = "(No history yet)"
-            
-        history_lines = full_history.split("\n")[-5:]
-        recent_context = "\n".join(history_lines)
+    history_lines = full_history.split("\n")[-5:]
+    recent_context = "\n".join(history_lines)
 
     prompt = f"""
 You are a scene image prompt generator:
@@ -372,21 +368,11 @@ Recent:
 {recent_context}
 One single-sentence photographic prompt:
 """
-    try:
-        chat = model.start_chat()
-        resp = chat.send_message(
-            prompt,
-            generation_config={"temperature":0.7, "max_output_tokens":100},
-            safety_settings=safety_settings
-        )
-        final_line = resp.text.strip()
-        print("[DEBUG] scene_image_prompt =>", final_line)
-        if not final_line:
-            raise ValueError("Empty response from AI")
-        return final_line
-    except Exception as e:
-        print("[DEBUG] AI generation error:", str(e))
-        return None
+    chat = model.start_chat()
+    resp = chat.send_message(prompt, generation_config={"temperature":0.7}, safety_settings=safety_settings)
+    final_line = resp.text.strip()
+    print("[DEBUG] scene_image_prompt =>", final_line)
+    return final_line
 
 ############################################################################
 # Flask Routes
