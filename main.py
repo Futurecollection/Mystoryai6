@@ -288,7 +288,10 @@ Background:
 # check_stage_up_down
 ############################################################################
 def check_stage_up_down(new_aff):
-    # default to 1 if missing
+    # Initialize currentStage if not set
+    if "currentStage" not in session:
+        session["currentStage"] = 1
+    
     cur_stage = session.get("currentStage", 1)
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
