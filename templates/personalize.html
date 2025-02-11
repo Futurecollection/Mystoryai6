@@ -2,6 +2,12 @@
 {% block content %}
 <h1 class="mb-4">Personalizations</h1>
 
+{% if has_previous_session %}
+<div class="mb-4">
+  <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Previous Session</a>
+</div>
+{% endif %}
+
 <div class="mb-4">
   <h3>Choose Your Personalization Method</h3>
   <div class="row">

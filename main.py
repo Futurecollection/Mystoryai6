@@ -504,6 +504,22 @@ def save_game():
 @app.route("/personalize", methods=["GET","POST"])
 @login_required
 def personalize():
+    has_previous = False
+    if session.get("logged_in"):
+        try:
+            result = supabase.table("flask_sessions") \
+                .select("data") \
+                .eq("user_id", session.get("user_id")) \
+                .execute()
+            if result.data:
+                for row in result.data:
+                    session_data = row.get("data", {})
+                    if session_data.get("npc_name"):
+                        has_previous = True
+                        break
+        except Exception as e:
+            print("Session check error:", e)
+            
     if request.method=="POST" and "save_personalization" in request.form:
         session["user_name"] = merge_dd(request.form,"user_name","user_name_custom")
         session["user_age"] = merge_dd(request.form,"user_age","user_age_custom")
