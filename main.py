@@ -66,7 +66,7 @@ def build_personalization_string():
     npc_backstory = session.get("npc_backstory", "")
     environment = session.get("environment", "?")
     encounter = session.get("encounter_context", "?")
-    
+
     return f"""NPC Details:
 Name: {npc_name}
 Gender: {npc_gender} 
@@ -291,7 +291,7 @@ def check_stage_up_down(new_aff):
     # Initialize currentStage if not set
     if "currentStage" not in session:
         session["currentStage"] = 1
-    
+
     cur_stage = session.get("currentStage", 1)
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
@@ -395,7 +395,7 @@ def main_home():
                         break
         except Exception as e:
             print("Session check error:", e)
-            
+
     return render_template("home.html", 
                          title="Destined Encounters",
                          has_previous_session=has_previous)
@@ -408,7 +408,7 @@ def continue_session():
         .select("data") \
         .eq("session_id", session.get("session_id")) \
         .execute()
-        
+
     if result.data:
         session_data = result.data[0].get("data",{})
         # Restore relevant session variables
@@ -452,6 +452,24 @@ def login_route():
                 "user_email":user.email,
                 "access_token":response.session.access_token
             })
+
+            # Check for previous session
+            try:
+                result = supabase.table("flask_sessions") \
+                    .select("data") \
+                    .eq("user_id", user_id) \
+                    .execute()
+
+                has_previous = False
+                if result.data:
+                    for row in result.data:
+                        session_data = row.get("data", {})
+                        if session_data.get("npc_name"):
+                            has_previous = True
+                            break
+            except Exception as e:
+                has_previous = False
+
             flash("Logged in successfully!", "success")
             return redirect(url_for("main_home"))
         except Exception as e:
@@ -519,7 +537,7 @@ def personalize():
                         break
         except Exception as e:
             print("Session check error:", e)
-            
+
     if request.method=="POST" and "save_personalization" in request.form:
         session["user_name"] = merge_dd(request.form,"user_name","user_name_custom")
         session["user_age"] = merge_dd(request.form,"user_age","user_age_custom")
