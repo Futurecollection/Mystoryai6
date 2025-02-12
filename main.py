@@ -454,11 +454,18 @@ def gpt_scene_image_prompt(full_history):
     history_lines = full_history.split("\n")[-5:]
     recent_context = "\n".join(history_lines)
 
+    stage_label = STAGE_INFO[current_stage]["label"]
+    stage_desc = STAGE_INFO[current_stage]["desc"]
+    personalization = build_personalization_string()
+
     prompt = f"""
-You are a scene image prompt generator:
-NPC => {npc_gender}, age {npc_age}, {npc_eth}, {npc_body}, {npc_hair_color} hair, style={npc_hair_style}, outfit={npc_clothing}, mood={npc_mood}
-Location={env_loc}
-Stage={current_stage}
+You are a scene image prompt generator.
+CRITICAL: Everyone is 20+.
+For each user action, generate one single-sentence photographic prompt.
+Relationship Stage={current_stage}({stage_label}) => {stage_desc}
+Stats: Mood={npc_mood}
+Background:
+{personalization}
 
 Recent:
 {recent_context}
