@@ -267,51 +267,58 @@ def log_message(msg):
 # handle_image_generation
 ############################################################################
 def handle_image_generation(prompt_text, force_new_seed=False):
-    if session.get("image_generated_this_turn", False):
-        log_message(
-            "[SYSTEM] Attempted second image generation this turn, blocked.")
-        return None
+    try:
+        if not prompt_text:
+            prompt_text = "(No prompt text)"
+            
+        # Checking for disallowed content
+        restricted_words = [
+            'child', 'kid', 'teen', 'teenage', 'teenager', 'minor', 'underage',
+            'young', 'youth', 'juvenile', 'adolescent', 'highschool', 'high school',
+            '18', '19', '17', '16', '15', '14', '13', '12', '11', '10'
+        ]
+        
+        lower_prompt = prompt_text.lower()
+        for word in restricted_words:
+            if word in lower_prompt:
+                log_message(f"[SYSTEM] WARNING: Restricted word '{word}' found in prompt")
+                session["scene_image_prompt"] = "⚠️ ERROR: Restricted content."
+                return None
 
-    # Checking for disallowed content with simple string filtering
-    restricted_words = [
-        'child', 'kid', 'teen', 'teenage', 'teenager', 'minor', 'underage',
-        'young', 'youth', 'juvenile', 'adolescent', 'highschool', 'high school',
-        '18', '19', '17', '16', '15', '14', '13', '12', '11', '10'
-    ]
-    
-    lower_prompt = prompt_text.lower()
-    for word in restricted_words:
-        if word in lower_prompt:
-            log_message(f"[SYSTEM] WARNING: Restricted word '{word}' found in prompt")
-            session["scene_image_prompt"] = "⚠️ ERROR: Restricted content."
+        # Use or create seed
+        existing_seed = session.get("scene_image_seed")
+        if not force_new_seed and existing_seed:
+            seed_used = existing_seed
+            log_message(f"[DEBUG] Reusing seed => {seed_used}")
+        else:
+            seed_used = random.randint(100000, 999999)
+            log_message(f"[DEBUG] New seed => {seed_used}")
+
+        print(f"[DEBUG] Generating image with prompt: {prompt_text}")
+        url = generate_flux_image_safely(prompt_text, seed=seed_used)
+        
+        if not url or not isinstance(url, str):
+            print("[ERROR] Failed to generate image URL")
+            log_message("[SYSTEM] Failed to generate image.")
+            session["scene_image_prompt"] = "⚠️ ERROR: Generation failed"
             return None
 
-    if not prompt_text:
-        prompt_text = "(No prompt text)"
+        print(f"[DEBUG] Image URL generated: {url}")
+        _save_image(url)
+        
+        session["scene_image_prompt"] = prompt_text
+        session["scene_image_url"] = url
+        session["scene_image_seed"] = seed_used
+        session["image_generated_this_turn"] = True
 
-    # Use or create seed
-    existing_seed = session.get("scene_image_seed")
-    if not force_new_seed and existing_seed:
-        seed_used = existing_seed
-        log_message(f"SYSTEM: Reusing old seed => {seed_used}")
-    else:
-        seed_used = random.randint(100000, 999999)
-        log_message(f"SYSTEM: new seed => {seed_used}")
-
-    url = generate_flux_image_safely(prompt_text, seed=seed_used)
-    if not isinstance(url, str):
-        log_message("[SYSTEM] replicate returned invalid URL.")
+        log_message(f"Scene Image Generated => {prompt_text}")
+        return url
+        
+    except Exception as e:
+        print(f"[ERROR] Image generation error: {str(e)}")
+        log_message(f"[SYSTEM] Image generation error: {str(e)}")
+        session["scene_image_prompt"] = "⚠️ ERROR: Generation failed"
         return None
-
-    _save_image(url)
-    session["scene_image_prompt"] = prompt_text
-    session["scene_image_url"] = url
-    session["scene_image_seed"] = seed_used
-    session["image_generated_this_turn"] = True
-
-    log_message(f"Scene Image Prompt => {prompt_text}")
-    log_message(f"Image seed={seed_used}")
-    return url
 
 
 ############################################################################
