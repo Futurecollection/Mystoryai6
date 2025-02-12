@@ -964,6 +964,9 @@ def validate_age_content(text):
 @app.route("/generate_scene_prompt", methods=["POST"])
 @login_required
 def generate_scene_prompt():
+    if "generate_scene_prompt" not in request.form:
+        return redirect(url_for("interaction"))
+        
     logs = session.get("interaction_log", [])
     full_history = "\n".join(logs[-10:])  # Only use last 10 lines to keep context relevant
     print("[DEBUG] Attempting scene prompt")
