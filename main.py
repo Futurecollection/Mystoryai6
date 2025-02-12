@@ -350,9 +350,13 @@ IMAGE_PROMPT: (warning sign)"""
 You are a third-person romance narrator.
 CRITICAL: Everyone is 20+.
 For each user action:
-  AFFECT_CHANGE_FINAL: ...
-  NARRATION: ...
-  IMAGE_PROMPT: ...
+  AFFECT_CHANGE_FINAL: [number for affection change]
+  NARRATION: [story text]
+  IMAGE_PROMPT: [detailed portrait prompt including: age, gender, ethnicity, body type, hair details, outfit, environment, emotional state, and current action. Format as a single portrait description.]
+
+Example IMAGE_PROMPT format:
+"Portrait of a [age] [gender] [ethnicity] with [body type], [hair color] [hair style] hair, wearing [outfit], [action/pose] in [environment], [emotional state]"
+
 Relationship Stage={current_stage}({stage_label}) => {stage_desc}
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background:
