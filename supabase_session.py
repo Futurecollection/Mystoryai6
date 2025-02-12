@@ -16,7 +16,6 @@ class SupabaseSessionInterface(SessionInterface):
     Table schema needed:
         CREATE TABLE public.flask_sessions (
             session_id uuid PRIMARY KEY,
-            user_id UUID,
             data jsonb,
             expiry timestamptz
         );
@@ -39,7 +38,7 @@ class SupabaseSessionInterface(SessionInterface):
 
         # Try to load from Supabase
         result = self.supabase.table(self.table_name) \
-                              .select("data, expiry, user_id") \
+                              .select("data, expiry") \
                               .eq("session_id", session_id) \
                               .execute()
         if result.data:
