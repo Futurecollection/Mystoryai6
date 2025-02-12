@@ -332,6 +332,17 @@ def interpret_npc_state(affection,
                         full_history=""):
     stage_label = STAGE_INFO[current_stage]["label"]
     stage_desc = STAGE_INFO[current_stage]["desc"]
+    
+    # Check if we need a summary (every 5 turns)
+    logs = session.get("interaction_log", [])
+    turn_count = sum(1 for log in logs if log.startswith("User: "))
+    needs_summary = turn_count > 0 and turn_count % 5 == 0
+    
+    if needs_summary:
+        # Create summary of last 5 interactions
+        recent_logs = [log for log in logs[-10:] if log.startswith(("User: ", "NARRATION =>"))][-10:]
+        summary = "\n=== Story Summary So Far ===\n" + "\n".join(recent_logs) + "\n===================="
+        log_message(summary)
 
     # Build personalization
     personalization = build_personalization_string()
