@@ -64,7 +64,7 @@
 <hr style="border-top: 1px solid #ff5789;">
 <!-- SCENE IMAGE PROMPT -->
 <h3 style="color: #ff5789;">Scene Image Prompt</h3>
-<form method="POST" class="mb-3">
+<form action="{{ url_for('generate_scene_prompt') }}" method="POST" class="mb-3">
   <div class="mb-2">
     <button type="submit" name="generate_scene_prompt" class="btn btn-secondary me-3">
       Generate Scene Prompt
