@@ -972,39 +972,7 @@ def validate_age_content(text):
     return any(k in text.lower() for k in age_keywords)
 
 
-@app.route("/generate_scene_prompt", methods=["POST"])
-@login_required
-def generate_scene_prompt():
-    if "generate_scene_prompt" not in request.form:
-        return redirect(url_for("interaction"))
-        
-    if not session.get("interaction_log"):
-        session["scene_image_prompt"] = "⚠️ No interaction history yet"
-        return redirect(url_for("interaction"))
-        
-    logs = session.get("interaction_log", [])
-    full_history = "\n".join(logs[-10:])  # Only use last 10 lines to keep context relevant
-    
-    try:
-        auto_prompt = gpt_scene_image_prompt(full_history)
-        if not auto_prompt or len(auto_prompt.strip()) < 5:
-            session["scene_image_prompt"] = "⚠️ ERROR: empty prompt generated"
-            return redirect(url_for("interaction"))
-            
-        if validate_age_content(auto_prompt):
-            log_message("[SYSTEM] WARNING: prompt had minor references.")
-            session["scene_image_prompt"] = "⚠️ Prompt had age references"
-            return redirect(url_for("interaction"))
-            
-        session["scene_image_prompt"] = auto_prompt
-        log_message(f"[AUTO Scene Prompt] => {auto_prompt}")
-        
-    except Exception as e:
-        print(f"[DEBUG] Error generating prompt => {str(e)}")
-        log_message(f"[SYSTEM] Error generating scene prompt: {str(e)}")
-        session["scene_image_prompt"] = f"⚠️ ERROR: {str(e)}"
-        
-    return redirect(url_for("interaction"))
+
 
 
 PREDEFINED_BIOS = {
