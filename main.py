@@ -272,20 +272,19 @@ def handle_image_generation(prompt_text, force_new_seed=False):
             "[SYSTEM] Attempted second image generation this turn, blocked.")
         return None
 
-    # Checking for disallowed content
-    safety_prompt = f"""
-Analyze this image generation prompt.
-REJECT ONLY if prompt has minors or under 20, etc.
-Prompt: {prompt_text}
-Return ALLOW or REJECT
-"""
-    chat = model.start_chat()
-    validation = chat.send_message(safety_prompt,
-                                   safety_settings=safety_settings)
-    if validation.text.strip().upper() != "ALLOW":
-        log_message("[SYSTEM] WARNING: AI says prompt restricted.")
-        session["scene_image_prompt"] = "⚠️ ERROR: AI blocked."
-        return None
+    # Checking for disallowed content with simple string filtering
+    restricted_words = [
+        'child', 'kid', 'teen', 'teenage', 'teenager', 'minor', 'underage',
+        'young', 'youth', 'juvenile', 'adolescent', 'highschool', 'high school',
+        '18', '19', '17', '16', '15', '14', '13', '12', '11', '10'
+    ]
+    
+    lower_prompt = prompt_text.lower()
+    for word in restricted_words:
+        if word in lower_prompt:
+            log_message(f"[SYSTEM] WARNING: Restricted word '{word}' found in prompt")
+            session["scene_image_prompt"] = "⚠️ ERROR: Restricted content."
+            return None
 
     if not prompt_text:
         prompt_text = "(No prompt text)"
