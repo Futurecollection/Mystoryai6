@@ -965,13 +965,14 @@ def validate_age_content(text):
 @login_required
 def generate_scene_prompt():
     logs = session.get("interaction_log", [])
-    full_history = "\n".join(logs)
+    full_history = "\n".join(logs[-10:])  # Only use last 10 lines to keep context relevant
     print("[DEBUG] Attempting scene prompt")
     try:
         auto_prompt = gpt_scene_image_prompt(full_history)
         print("[DEBUG] Generated prompt:", auto_prompt)
-        if not auto_prompt:
-            raise ValueError("Generated prompt was empty")
+        if not auto_prompt or len(auto_prompt.strip()) < 5:
+            session["scene_image_prompt"] = "⚠️ ERROR: empty prompt generated"
+            return redirect(url_for("interaction"))
         if validate_age_content(auto_prompt):
             log_message("[SYSTEM] WARNING: prompt had minor references.")
             session["scene_image_prompt"] = "⚠️ Prompt had age references"
@@ -980,8 +981,8 @@ def generate_scene_prompt():
         log_message(f"[AUTO Scene Prompt] => {auto_prompt}")
     except Exception as e:
         print("[DEBUG] Error generating prompt =>", e)
-        log_message(f"[SYSTEM] Error generating scene prompt:{e}")
-        session["scene_image_prompt"] = "⚠️ ERROR: generation failed."
+        log_message(f"[SYSTEM] Error generating scene prompt: {str(e)}")
+        session["scene_image_prompt"] = "⚠️ ERROR: generation failed"
     return redirect(url_for("interaction"))
 
 
