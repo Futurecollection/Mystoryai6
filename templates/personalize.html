@@ -2,7 +2,7 @@
 {% block content %}
 <h1 class="mb-4">Personalizations</h1>
 
-{% if has_previous_session %}
+{% if session.get('logged_in') %}
 <div class="mb-4">
   <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Previous Session</a>
 </div>
