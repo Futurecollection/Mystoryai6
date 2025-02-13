@@ -406,20 +406,24 @@ def generate_flux_image_safely(prompt,seed=None):
 def main_home():
     has_previous = False
     if session.get("logged_in"):
-        # optionally check if we have any saved session data
-        try:
-            result = supabase.table("flask_sessions") \
-                .select("data") \
-                .eq("user_id", session.get("user_id")) \
-                .execute()
-            if result.data:
-                for row in result.data:
-                    session_data = row.get("data", {})
-                    if session_data.get("npc_name"):
-                        has_previous = True
-                        break
-        except Exception as e:
-            print("Session check error:", e)
+        # Check current session first
+        if session.get("npc_name"):
+            has_previous = True
+        else:
+            # Then check saved sessions in database
+            try:
+                result = supabase.table("flask_sessions") \
+                    .select("data") \
+                    .eq("user_id", session.get("user_id")) \
+                    .execute()
+                if result.data:
+                    for row in result.data:
+                        session_data = row.get("data", {})
+                        if session_data.get("npc_name"):
+                            has_previous = True
+                            break
+            except Exception as e:
+                print("Session check error:", e)
 
     return render_template("home.html", 
                          title="Destined Encounters",
