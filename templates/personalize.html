@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
+
+{% if session.npc_name %}
+<div class="mb-4">
+  <a href="{{ url_for('interaction') }}" class="btn btn-success">Continue Interaction</a>
+</div>
+{% endif %}
 <h1 class="mb-4">Personalizations</h1>
 
 {% if has_previous_session and session.get('logged_in') %}
