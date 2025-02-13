@@ -30,8 +30,6 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Please set SUPABASE_URL and SUPABASE_KEY in the environment.")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# Use the custom session interface
 app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
 
 def login_required(f):
@@ -44,7 +42,7 @@ def login_required(f):
     return decorated_function
 
 # --------------------------------------------------------------------------
-# Gemini + Replicate
+# Gemini + Replicate Setup
 # --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
@@ -92,7 +90,6 @@ def prepare_history():
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
         session["log_summary"] = ""
-
     if len(log_list) > 10:
         old_chunk = log_list[:-5]
         new_chunk = log_list[-5:]
@@ -121,27 +118,26 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
 # --------------------------------------------------------------------------
-# Utility
+# Utility Functions
 # --------------------------------------------------------------------------
-def log_message(msg):
+def log_message(msg: str):
     logs = session.get("interaction_log", [])
     logs.append(msg)
     session["interaction_log"] = logs
 
-def merge_dd(form, dd_key, cust_key):
+def merge_dd(form, dd_key: str, cust_key: str) -> str:
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
 
-def _save_image(url):
+def _save_image(url: str):
     r = requests.get(url)
     with open(GENERATED_IMAGE_PATH, "wb") as f:
         f.write(r.content)
 
-def check_stage_up_down(new_aff):
+def check_stage_up_down(new_aff: float):
     if "currentStage" not in session:
         session["currentStage"] = 1
-
     cur_stage = session["currentStage"]
     req = STAGE_REQUIREMENTS[cur_stage]
     if new_aff < req:
@@ -157,67 +153,64 @@ def check_stage_up_down(new_aff):
                 session["currentStage"] = nxt
             else:
                 break
-
     st = session["currentStage"]
-    if st < 6:
-        session["nextStageThreshold"] = STAGE_REQUIREMENTS[st+1]
-    else:
-        session["nextStageThreshold"] = 999
+    session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
-def validate_age_content(text):
-    age_keywords = ["teen","teenage","underage","minor","child","kid","highschool","high school","18 year","19 year"]
+def validate_age_content(text: str) -> bool:
+    age_keywords = [
+        "teen", "teenage", "underage", "minor",
+        "child", "kid", "highschool", "high school",
+        "18 year", "19 year"
+    ]
     return any(k in text.lower() for k in age_keywords)
 
 # --------------------------------------------------------------------------
-# Build Personalization
+# Build Personalization String
 # --------------------------------------------------------------------------
-def build_personalization_string():
+def build_personalization_string() -> str:
     npc_data = (
         f"NPC:\n"
-        f"  Name: {session.get('npc_name','?')}\n"
-        f"  Gender: {session.get('npc_gender','?')}\n"
-        f"  Age: {session.get('npc_age','?')}\n"
-        f"  Ethnicity: {session.get('npc_ethnicity','?')}\n"
-        f"  BodyType: {session.get('npc_body_type','?')}\n"
-        f"  HairColor: {session.get('npc_hair_color','?')}\n"
-        f"  HairStyle: {session.get('npc_hair_style','?')}\n"
-        f"  Clothing: {session.get('npc_clothing','?')}\n"
-        f"  Personality: {session.get('npc_personality','?')}\n"
-        f"  Occupation: {session.get('npc_occupation','?')}\n"
-        f"  CurrentSituation: {session.get('npc_current_situation','?')}\n"
-        f"  Instructions: {session.get('npc_instructions','')}\n"
-        f"  Backstory: {session.get('npc_backstory','')}\n"
+        f"  Name: {session.get('npc_name', '?')}\n"
+        f"  Gender: {session.get('npc_gender', '?')}\n"
+        f"  Age: {session.get('npc_age', '?')}\n"
+        f"  Ethnicity: {session.get('npc_ethnicity', '?')}\n"
+        f"  BodyType: {session.get('npc_body_type', '?')}\n"
+        f"  HairColor: {session.get('npc_hair_color', '?')}\n"
+        f"  HairStyle: {session.get('npc_hair_style', '?')}\n"
+        f"  Clothing: {session.get('npc_clothing', '?')}\n"
+        f"  Personality: {session.get('npc_personality', '?')}\n"
+        f"  Occupation: {session.get('npc_occupation', '?')}\n"
+        f"  CurrentSituation: {session.get('npc_current_situation', '?')}\n"
+        f"  Instructions: {session.get('npc_instructions', '')}\n"
+        f"  Backstory: {session.get('npc_backstory', '')}\n"
     )
     env_data = (
         f"ENVIRONMENT:\n"
-        f"  Location: {session.get('environment','?')}\n"
-        f"  EncounterContext: {session.get('encounter_context','?')}\n"
+        f"  Location: {session.get('environment', '?')}\n"
+        f"  EncounterContext: {session.get('encounter_context', '?')}\n"
     )
     user_data = (
         f"USER:\n"
-        f"  Name: {session.get('user_name','?')}\n"
-        f"  Age: {session.get('user_age','?')}\n"
-        f"  Background: {session.get('user_background','?')}\n"
+        f"  Name: {session.get('user_name', '?')}\n"
+        f"  Age: {session.get('user_age', '?')}\n"
+        f"  Background: {session.get('user_background', '?')}\n"
     )
     return user_data + npc_data + env_data
 
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
 # --------------------------------------------------------------------------
-def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_action, full_history=""):
+def interpret_npc_state(affection: float, trust: float, npc_mood: str,
+                        current_stage: int, last_user_action: str, full_history: str = "") -> str:
     prepare_history()
-
     memory_summary = session.get("log_summary", "")
     recent_lines = session.get("interaction_log", [])
     combined_history = memory_summary + "\n" + "\n".join(recent_lines)
-
     if not last_user_action.strip():
         last_user_action = "OOC: Continue the scene"
-
     stage_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
     stage_desc = STAGE_INFO.get(current_stage, {}).get("desc", "No desc")
     personalization = build_personalization_string()
-
     system_instructions = f"""
 You are a third-person descriptive erotic romance novel narrator.
 
@@ -226,7 +219,7 @@ CRITICAL AGE RESTRICTION:
 
 SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as a direct instruction
-   for how you shape the next story beat or NPC response. 
+   for how you shape the next story beat or NPC response.
 2) The story must remain consenting, adult-only content, with no minors.
 
 For each user action:
@@ -245,9 +238,7 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 """
-
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
-
     max_retries = 2
     for attempt in range(max_retries):
         try:
@@ -259,10 +250,9 @@ Background (do not contradict):
             if resp and resp.text.strip():
                 return resp.text.strip()
             else:
-                log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
+                log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt + 1}")
         except Exception as e:
-            log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
-
+            log_message(f"[SYSTEM] Generation attempt {attempt + 1} error: {str(e)}")
     return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 IMAGE_PROMPT: (fallback)
@@ -271,7 +261,7 @@ IMAGE_PROMPT: (fallback)
 # --------------------------------------------------------------------------
 # Replicate => flux-schnell
 # --------------------------------------------------------------------------
-def generate_flux_image_safely(prompt, seed=None):
+def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
         "prompt": final_prompt,
@@ -282,7 +272,6 @@ def generate_flux_image_safely(prompt, seed=None):
     }
     if seed:
         replicate_input["seed"] = seed
-
     print(f"[DEBUG] replicate => prompt={final_prompt}, seed={seed}")
     result = replicate.run("black-forest-labs/flux-schnell", input=replicate_input)
     if isinstance(result, list) and result:
@@ -292,14 +281,72 @@ def generate_flux_image_safely(prompt, seed=None):
     else:
         return None
 
-def handle_image_generation(prompt_text, force_new_seed=False):
+# --------------------------------------------------------------------------
+# Generate Image Prompt via Separate LLM Call
+# --------------------------------------------------------------------------
+def generate_image_prompt_llm() -> str:
+    """
+    Use a dedicated LLM call to generate a consistent image prompt based on
+    the NPC's personalizations and the current scene context.
+    """
+    npc_name = session.get("npc_name", "Unnamed")
+    npc_age = session.get("npc_age", "unknown age")
+    npc_gender = session.get("npc_gender", "unspecified gender")
+    npc_ethnicity = session.get("npc_ethnicity", "unspecified ethnicity")
+    npc_body_type = session.get("npc_body_type", "average build")
+    npc_hair_color = session.get("npc_hair_color", "unknown hair color")
+    npc_hair_style = session.get("npc_hair_style", "unknown style")
+    npc_clothing = session.get("npc_clothing", "simple clothing")
+    npc_personality = session.get("npc_personality", "neutral")
+    npc_occupation = session.get("npc_occupation", "")
+    npc_current_situation = session.get("npc_current_situation", "")
+    npc_backstory = session.get("npc_backstory", "")
+    narration_text = session.get("narrationText", "").strip()
+
+    prompt = f"""
+You are an assistant specialized in generating detailed image prompts for an AI image generation system.
+Generate a concise, structured image prompt that reflects the following details:
+
+NPC Details:
+- Name: {npc_name}
+- Age: {npc_age}
+- Gender: {npc_gender}
+- Ethnicity: {npc_ethnicity}
+- Body type: {npc_body_type}
+- Hair: {npc_hair_color} hair styled in {npc_hair_style}
+- Clothing: {npc_clothing}
+- Personality: {npc_personality}
+- Occupation: {npc_occupation}
+- Current situation: {npc_current_situation}
+- Backstory: {npc_backstory}
+
+Scene Context:
+{narration_text}
+
+The prompt should start with "Portrait photo of" and include all of the above details in a natural language description. Do not include any extra commentary.
+Output only the final prompt.
+"""
+    try:
+        resp = model.generate_content(
+            prompt,
+            generation_config={"temperature": 0.5, "max_output_tokens": 200},
+            safety_settings=safety_settings
+        )
+        if resp and resp.text.strip():
+            return resp.text.strip()
+        else:
+            return "Portrait photo of a detailed NPC."
+    except Exception as e:
+        log_message(f"[SYSTEM] Image prompt generation LLM call failed: {str(e)}")
+        return "Portrait photo of a detailed NPC."
+
+# --------------------------------------------------------------------------
+# Handle Image Generation using a Provided Prompt
+# --------------------------------------------------------------------------
+def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False):
     if session.get("image_generated_this_turn", False):
         log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
         return None
-
-    if not prompt_text:
-        prompt_text = "(No prompt text)"
-
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
         seed_used = existing_seed
@@ -307,24 +354,21 @@ def handle_image_generation(prompt_text, force_new_seed=False):
     else:
         seed_used = random.randint(100000, 999999)
         log_message(f"SYSTEM: new seed => {seed_used}")
-
     url = generate_flux_image_safely(prompt_text, seed=seed_used)
     if not url:
-        log_message("[SYSTEM] replicate returned invalid URL or error.")
+        log_message("[SYSTEM] Replicate returned invalid URL or error.")
         return None
-
     _save_image(url)
     session["scene_image_prompt"] = prompt_text
     session["scene_image_url"] = url
     session["scene_image_seed"] = seed_used
     session["image_generated_this_turn"] = True
-
-    log_message(f"Scene Image Prompt => {prompt_text}")
-    log_message(f"Image seed={seed_used}")
+    log_message(f"Scene Image Prompt used for generation => {prompt_text}")
+    log_message(f"Image seed = {seed_used}")
     return url
 
 # --------------------------------------------------------------------------
-# NPC Info
+# NPC Info Update
 # --------------------------------------------------------------------------
 def update_npc_info(form):
     npc_fields = [
@@ -333,14 +377,13 @@ def update_npc_info(form):
         "npc_occupation", "npc_current_situation"
     ]
     for key in npc_fields:
-        session[key] = merge_dd(form, key, key+"_custom")
-
-    session["npc_backstory"] = form.get("npc_backstory","").strip()
+        session[key] = merge_dd(form, key, key + "_custom")
+    session["npc_backstory"] = form.get("npc_backstory", "").strip()
     session["environment"] = merge_dd(form, "environment", "environment_custom")
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Landing + Auth
+# Landing + Auth Routes
 # --------------------------------------------------------------------------
 @app.route("/")
 def main_home():
@@ -350,20 +393,19 @@ def main_home():
 def about():
     return render_template("about.html", title="About/Help")
 
-@app.route("/login", methods=["GET","POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login_route():
     if request.method == "POST":
-        email = request.form.get("email","").strip()
-        password = request.form.get("password","").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
         if not email or not password:
             flash("Email and password are required", "danger")
             return redirect(url_for("login_route"))
         try:
-            response = supabase.auth.sign_in_with_password({"email": email,"password": password})
+            response = supabase.auth.sign_in_with_password({"email": email, "password": password})
             if not response or not response.user:
                 flash("Invalid credentials", "danger")
                 return redirect(url_for("login_route"))
-
             user = response.user
             user_id = user.id
             session.update({
@@ -372,25 +414,23 @@ def login_route():
                 "user_email": user.email,
                 "access_token": response.session.access_token
             })
-
             flash("Logged in successfully!", "success")
             return redirect(url_for("main_home"))
         except Exception as e:
             flash(f"Login failed: {e}", "danger")
             return redirect(url_for("login_route"))
-
     return render_template("login.html", title="Login")
 
-@app.route("/register", methods=["GET","POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register_route():
     if request.method == "POST":
-        email = request.form.get("email","").strip()
-        password = request.form.get("password","").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
         if not email or not password:
             flash("Email + password required", "danger")
             return redirect(url_for("register_route"))
         try:
-            response = supabase.auth.sign_up({"email": email,"password": password})
+            response = supabase.auth.sign_up({"email": email, "password": password})
             flash("Registration success! Check your email, then log in.", "success")
             return redirect(url_for("login_route"))
         except Exception as e:
@@ -406,52 +446,30 @@ def logout_route():
     return redirect(url_for("main_home"))
 
 # --------------------------------------------------------------------------
-# Continue / Restart
+# Continue / Restart Routes
 # --------------------------------------------------------------------------
 @app.route("/continue")
 @login_required
 def continue_session():
-    """
-    This route tries to see if the user already has an NPC name or prior data
-    in the session. If not, it can check the database to see if there's an
-    existing 'flask_sessions' row with data for that user.
-
-    If found, we restore it. If not, we redirect them to 'personalize'.
-    """
-    # 1) If we already have NPC data in memory, just jump to interaction
     if session.get("npc_name"):
         flash("Session loaded from in-memory data!", "info")
         return redirect(url_for("interaction"))
-
     user_id = session.get("user_id")
     if not user_id:
         flash("Error: no user_id found in session.", "danger")
         return redirect(url_for("main_home"))
-
     try:
-        # 2) Check the 'flask_sessions' table for a session belonging to user
-        #    This logic depends on how your SupabaseSessionInterface is storing data.
-        #    Typically, you might store 'user_id' as a column. 
-        #    Let's assume that row['data'] is the session dict, so we can load it manually if we want.
-
         result = supabase.table("flask_sessions").select("*").eq("user_id", user_id).execute()
         rows = result.data
         if not rows:
             flash("No saved session data found. Please start a new game.", "info")
             return redirect(url_for("personalize"))
-
-        # If multiple rows, pick the most recent
         row = rows[-1]
         session_data = row.get("data", {})
-
-        # Optionally, you can load each key back into session
-        # But be careful not to break the session cookie approach
         for k, v in session_data.items():
             session[k] = v
-
         flash("Saved session loaded from database!", "success")
         return redirect(url_for("interaction"))
-
     except Exception as e:
         flash(f"Error loading session: {e}", "danger")
         return redirect(url_for("personalize"))
@@ -465,39 +483,38 @@ def restart():
     return redirect(url_for("personalize"))
 
 # --------------------------------------------------------------------------
-# Personalization
+# Personalization Routes
 # --------------------------------------------------------------------------
-USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex"]
-USER_AGE_OPTIONS = ["20","25","30","35","40","45"]
-NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia"]
-NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
-NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
-HAIR_STYLE_OPTIONS = ["Short","Medium","Long","Bald"]
-BODY_TYPE_OPTIONS = ["Athletic","Muscular","Average","Tall"]
-HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red"]
-NPC_PERSONALITY_OPTIONS = ["Flirty","Passionate","Confident","Playful","Gentle"]
-CLOTHING_OPTIONS = ["Red Dress","T-shirt & Jeans","Black Gown","Green Hoodie"]
-OCCUPATION_OPTIONS = ["College Student","Teacher","Artist","Doctor","Chef","Engineer"]
-CURRENT_SITUATION_OPTIONS = ["Recently Broke Up","Single & Looking","On Vacation","Working"]
-ENVIRONMENT_OPTIONS = ["Cafe","Library","Gym","Beach","Park"]
-ENCOUNTER_CONTEXT_OPTIONS = ["First date","Accidental meeting","Group activity","Work event","Online Match"]
-ETHNICITY_OPTIONS = ["American (Black)","American (White)","British","French","German","Chinese","Indian","Other"]
+USER_NAME_OPTIONS = ["John", "Michael", "David", "Chris", "James", "Alex"]
+USER_AGE_OPTIONS = ["20", "25", "30", "35", "40", "45"]
+NPC_NAME_OPTIONS = ["Emily", "Sarah", "Lisa", "Anna", "Mia", "Sophia"]
+NPC_AGE_OPTIONS = ["20", "25", "30", "35", "40", "45"]
+NPC_GENDER_OPTIONS = ["Female", "Male", "Non-binary", "Other"]
+HAIR_STYLE_OPTIONS = ["Short", "Medium", "Long", "Bald"]
+BODY_TYPE_OPTIONS = ["Athletic", "Muscular", "Average", "Tall"]
+HAIR_COLOR_OPTIONS = ["Blonde", "Brunette", "Black", "Red"]
+NPC_PERSONALITY_OPTIONS = ["Flirty", "Passionate", "Confident", "Playful", "Gentle"]
+CLOTHING_OPTIONS = ["Red Dress", "T-shirt & Jeans", "Black Gown", "Green Hoodie"]
+OCCUPATION_OPTIONS = ["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"]
+CURRENT_SITUATION_OPTIONS = ["Recently Broke Up", "Single & Looking", "On Vacation", "Working"]
+ENVIRONMENT_OPTIONS = ["Cafe", "Library", "Gym", "Beach", "Park"]
+ENCOUNTER_CONTEXT_OPTIONS = ["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"]
+ETHNICITY_OPTIONS = ["American (Black)", "American (White)", "British", "French", "German", "Chinese", "Indian", "Other"]
 
-@app.route("/personalize", methods=["GET","POST"])
+@app.route("/personalize", methods=["GET", "POST"])
 @login_required
 def personalize():
     if request.method == "POST" and "save_personalization" in request.form:
-        session["user_name"] = merge_dd(request.form, "user_name","user_name_custom")
-        session["user_age"] = merge_dd(request.form, "user_age","user_age_custom")
-        session["user_background"] = request.form.get("user_background","").strip()
+        session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
+        session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
+        session["user_background"] = request.form.get("user_background", "").strip()
         update_npc_info(request.form)
-
-        npc_gender = session.get("npc_gender","").lower()
+        # Reinsert Male/Female instruction block as in the original code:
+        npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = """(MALE-SPECIFIC INSTRUCTIONS BLOCK)"""
         else:
             session["npc_instructions"] = """(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"""
-
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
@@ -511,11 +528,11 @@ def personalize():
         session["scene_image_seed"] = None
         session["image_generated_this_turn"] = False
         session["log_summary"] = ""
-
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
     else:
-        return render_template("personalize.html",
+        return render_template(
+            "personalize.html",
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
             user_age_options=USER_AGE_OPTIONS,
@@ -534,22 +551,22 @@ def personalize():
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
-@app.route("/mid_game_personalize", methods=["GET","POST"])
+@app.route("/mid_game_personalize", methods=["GET", "POST"])
 @login_required
 def mid_game_personalize():
     if request.method == "POST" and "update_npc" in request.form:
         update_npc_info(request.form)
-        # optional re-check of gender
-        npc_gender = session.get("npc_gender","").lower()
+        # Reinsert Male/Female instruction block here as well:
+        npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
-            session["npc_instructions"] = "(MALE instructions...)"
+            session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
-            session["npc_instructions"] = "(FEMALE instructions...)"
-
+            session["npc_instructions"] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
         log_message("SYSTEM: NPC personalizations updated mid-game.")
         flash("NPC info updated mid-game!", "info")
         return redirect(url_for("interaction"))
-    return render_template("mid_game_personalize.html",
+    return render_template(
+        "mid_game_personalize.html",
         title="Update Settings",
         npc_name_options=NPC_NAME_OPTIONS,
         npc_age_options=NPC_AGE_OPTIONS,
@@ -567,9 +584,9 @@ def mid_game_personalize():
     )
 
 # --------------------------------------------------------------------------
-# Interaction
+# Interaction Routes
 # --------------------------------------------------------------------------
-@app.route("/interaction", methods=["GET","POST"])
+@app.route("/interaction", methods=["GET", "POST"])
 @login_required
 def interaction():
     if request.method == "GET":
@@ -588,8 +605,8 @@ def interaction():
         dice_val = session.get("dice_debug_roll", "(none)")
         outcome_val = session.get("dice_debug_outcome", "(none)")
         interaction_log = session.get("interaction_log", [])
-
-        return render_template("interaction.html",
+        return render_template(
+            "interaction.html",
             title="Interact with NPC",
             affection_score=affection,
             trust_score=trust,
@@ -620,15 +637,14 @@ def interaction():
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
             ethnicity_options=ETHNICITY_OPTIONS
         )
-
     else:
+        # Check which button was pressed in the POST:
         if "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip()
             affection = session.get("affectionScore", 0.0)
             trust = session.get("trustScore", 5.0)
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
-
             log_message(f"User: {user_action}")
             result_text = interpret_npc_state(
                 affection=affection,
@@ -638,7 +654,6 @@ def interaction():
                 last_user_action=user_action,
                 full_history=""
             )
-
             affect_delta = 0.0
             narration_txt = ""
             image_prompt = ""
@@ -646,41 +661,35 @@ def interaction():
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
                     try:
-                        affect_delta = float(s.split(":",1)[1].strip())
-                    except:
+                        affect_delta = float(s.split(":", 1)[1].strip())
+                    except Exception:
                         affect_delta = 0.0
                 elif s.startswith("NARRATION:"):
-                    narration_txt = s.split(":",1)[1].strip()
+                    narration_txt = s.split(":", 1)[1].strip()
                 elif s.startswith("IMAGE_PROMPT:"):
-                    image_prompt = s.split(":",1)[1].strip()
-
+                    image_prompt = s.split(":", 1)[1].strip()
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
             session["narrationText"] = narration_txt
             session["scene_image_prompt"] = image_prompt
-
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
-
             session["image_generated_this_turn"] = False
             return redirect(url_for("interaction"))
-
         elif "update_npc" in request.form:
             update_npc_info(request.form)
             log_message("SYSTEM: NPC personalizations updated mid-game.")
             return redirect(url_for("interaction"))
-
         elif "update_affection" in request.form:
             try:
                 new_val = float(request.form.get("affection_new", "0.0").strip())
-            except:
+            except Exception:
                 new_val = 0.0
             session["affectionScore"] = new_val
             check_stage_up_down(new_val)
             log_message(f"SYSTEM: Affection manually set => {new_val}")
             return redirect(url_for("interaction"))
-
         elif "update_stage_unlocks" in request.form:
             su = session.get("stage_unlocks", {})
             for i in range(1, 7):
@@ -689,22 +698,36 @@ def interaction():
             session["stage_unlocks"] = su
             log_message("SYSTEM: Stage unlock text updated mid-game.")
             return redirect(url_for("interaction"))
-
-        elif "do_generate_flux" in request.form:
-            prompt_text = request.form.get("scene_image_prompt","").strip()
-            handle_image_generation(prompt_text, force_new_seed=False)
+        elif "generate_prompt" in request.form:
+            # 1st step: generate accurate image prompt via LLM call.
+            prompt = generate_image_prompt_llm()
+            session["scene_image_prompt"] = prompt
+            log_message(f"Generated accurate image prompt: {prompt}")
+            flash("Image prompt generated. You can now edit it if needed, then press 'Generate Image'.", "info")
             return redirect(url_for("interaction"))
-
+        elif "generate_image" in request.form:
+            # 2nd step: use the prompt from the text field (user may have edited it)
+            user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
+            if not user_supplied_prompt:
+                flash("No image prompt provided.", "danger")
+                return redirect(url_for("interaction"))
+            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=False)
+            flash("Image generated successfully.", "success")
+            return redirect(url_for("interaction"))
         elif "new_seed" in request.form:
-            prompt_text = request.form.get("scene_image_prompt","").strip()
-            handle_image_generation(prompt_text, force_new_seed=True)
+            # Optionally allow forcing a new seed for image generation using the provided prompt.
+            user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
+            if not user_supplied_prompt:
+                flash("No image prompt provided.", "danger")
+                return redirect(url_for("interaction"))
+            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=True)
+            flash("New image generated with a new seed.", "success")
             return redirect(url_for("interaction"))
-
         else:
             return "Invalid submission in /interaction", 400
 
 # --------------------------------------------------------------------------
-# View Image
+# View Image Route
 # --------------------------------------------------------------------------
 @app.route("/view_image")
 @login_required
@@ -712,7 +735,7 @@ def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
 # --------------------------------------------------------------------------
-# Full Story + Erotica
+# Full Story + Erotica Routes
 # --------------------------------------------------------------------------
 @app.route("/full_story")
 @login_required
@@ -759,10 +782,8 @@ def generate_erotica():
             story_parts.append(line.replace("NARRATION => ", "", 1))
         elif line.startswith("User: "):
             story_parts.append(line.replace("User: ", "", 1))
-
     if not story_parts:
         return redirect(url_for("full_story"))
-
     full_narration = "\n".join(story_parts)
     erotica_prompt = f"""
 You are an author on an adult erotica forum.
@@ -783,9 +804,9 @@ Now produce a single narrative (600-900 words), focusing on emotional + physical
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
 # --------------------------------------------------------------------------
-# Stage Unlocks
+# Stage Unlocks Route
 # --------------------------------------------------------------------------
-@app.route("/stage_unlocks", methods=["GET","POST"])
+@app.route("/stage_unlocks", methods=["GET", "POST"])
 @login_required
 def stage_unlocks():
     if request.method == "POST" and "update_stage_unlocks" in request.form:
@@ -796,12 +817,14 @@ def stage_unlocks():
         session["stage_unlocks"] = su
         log_message("SYSTEM: Stage unlock text updated.")
         return redirect(url_for("interaction"))
-    return render_template("stage_unlocks.html",
+    return render_template(
+        "stage_unlocks.html",
         stage_unlocks=session.get("stage_unlocks", {}),
-        title="Stage Unlocks")
+        title="Stage Unlocks"
+    )
 
 # --------------------------------------------------------------------------
-# Run
+# Run App
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
