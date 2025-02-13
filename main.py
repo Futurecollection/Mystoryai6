@@ -719,11 +719,10 @@ def view_image():
 def full_story():
     logs = session.get("interaction_log", [])
     story_lines = []
-    for line in logs:
-        if line.startswith("NARRATION => "):
-            story_lines.append(line.replace("NARRATION => ", "", 1))
-        elif line.startswith("User: "):
-            story_lines.append(line.replace("User: ", "", 1))
+    summary = session.get("log_summary", "")
+    if summary:
+        story_lines.append(summary)
+    story_lines.extend(logs)  # Include all log lines
     return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
 
 @app.route("/continue_erotica", methods=["POST"])
