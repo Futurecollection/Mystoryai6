@@ -15,15 +15,9 @@
   <p>You are logged in as {{ session.user_email }}</p>
   
   <div class="row mt-4">
-    {% if has_previous_session and session.logged_in %}
-      <div class="col-md-6 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Continue Previous Session</h5>
-            <p class="card-text">Resume your last saved story where you left off.</p>
-            <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Session</a>
-          </div>
-        </div>
+    {% if session.npc_name %}
+      <div class="text-center mb-4">
+        <a href="{{ url_for('interaction') }}" class="btn btn-success btn-lg">Continue Interaction</a>
       </div>
     {% endif %}
     
