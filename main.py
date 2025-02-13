@@ -236,19 +236,6 @@ def handle_image_generation(prompt_text, force_new_seed=False):
         log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
         return None
 
-    safety_prompt = f"""
-Analyze this image generation prompt.
-REJECT ONLY if prompt references minors (<20) etc. allow for if no mention of specifically <20yo characters 
-Prompt: {prompt_text}
-ALLOW or REJECT
-"""
-    chat = model.start_chat()
-    validation = chat.send_message(safety_prompt, safety_settings=safety_settings)
-    if validation.text.strip().upper() != "ALLOW":
-        log_message("[SYSTEM] WARNING: AI blocked the prompt.")
-        session["scene_image_prompt"] = "⚠️ ERROR: AI blocked."
-        return None
-
     if not prompt_text:
         prompt_text = "(No prompt text)"
 
