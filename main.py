@@ -1,9 +1,6 @@
 import os
 import random
 import requests
-import datetime
-from datetime import datetime, timedelta
-
 from functools import wraps
 from flask import (
     Flask, request, render_template,
@@ -21,10 +18,9 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 # 3) Replicate
 import replicate
 
-############################################################################
+# --------------------------------------------------------------------------
 # Flask + Supabase Setup
-############################################################################
-
+# --------------------------------------------------------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "abc123supersecret")
 
@@ -35,13 +31,9 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Use the custom session interface from supabase_session.py
-# This writes session data to a 'flask_sessions' table in Supabase
+# Use the custom session interface
 app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
 
-############################################################################
-# Decorator: login_required
-############################################################################
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -51,39 +43,27 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-############################################################################
-# 1) Initialize Google Gemini + Replicate
-############################################################################
-
+# --------------------------------------------------------------------------
+# Gemini + Replicate
+# --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-
-# You can pick your model name here:
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
-# LLM safety settings
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
+generation_config = {"temperature": 0.9, "top_p": 0.95, "top_k": 40}
 
-# LLM generation config (example)
-generation_config = {
-    "temperature": 0.9,
-    "top_p": 0.95,
-    "top_k": 40
-}
-
-# Replicate
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 replicate.client.api_token = REPLICATE_API_TOKEN
 
-############################################################################
-# 2) Stage Info & Requirements
-############################################################################
-
+# --------------------------------------------------------------------------
+# Stage Info
+# --------------------------------------------------------------------------
 STAGE_INFO = {
     1: {"label": "Strangers", "desc": "They barely know each other."},
     2: {"label": "Casual Acquaintances", "desc": "Superficial chatting, no real depth yet."},
@@ -93,7 +73,6 @@ STAGE_INFO = {
     6: {"label": "Committed Relationship", "desc": "Life partners with strong devotion, shared long-term goals, can be sexually intimate."}
 }
 STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
-
 DEFAULT_STAGE_UNLOCKS = {
     1: "Basic intros, no perks",
     2: "Casual jokes, mild flirting possible,",
@@ -105,37 +84,23 @@ DEFAULT_STAGE_UNLOCKS = {
 
 GENERATED_IMAGE_PATH = "output.jpg"
 
-############################################################################
-# 3) Summarization / Memory (optional)
-############################################################################
-
+# --------------------------------------------------------------------------
+# Summarization / Memory (Optional)
+# --------------------------------------------------------------------------
 def prepare_history():
-    """
-    Summarize older lines in interaction_log beyond 10 lines,
-    store the summary in session["log_summary"],
-    keep only the last 5 lines as full detail.
-    """
+    """Summarize older lines in interaction_log beyond 10 lines."""
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
-        session["log_summary"] = ""  # aggregated memory
+        session["log_summary"] = ""
 
-    # If we have more than 10 lines, let's summarize everything except the last 5
     if len(log_list) > 10:
-        old_chunk = log_list[:-5]  # lines to summarize
-        new_chunk = log_list[-5:]  # keep last 5 lines
-
+        old_chunk = log_list[:-5]
+        new_chunk = log_list[-5:]
         summary_text = summarize_lines(old_chunk)
-        # append to the existing memory
         session["log_summary"] += "\n" + summary_text
-
-        # now keep only 5 lines
         session["interaction_log"] = new_chunk
 
 def summarize_lines(lines):
-    """
-    Summarize these lines into a short memory chunk (about 300-500 words).
-    Return a string like "[Memory Summary]: <short summary>"
-    """
     text_to_summarize = "\n".join(lines)
     summary_prompt = f"""
 You are a summarizing assistant.
@@ -143,7 +108,6 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
 
 {text_to_summarize}
 """
-
     try:
         chat = model.start_chat()
         resp = chat.send_message(
@@ -154,13 +118,59 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         return "[Memory Summary]: " + resp.text.strip()
     except Exception as e:
         print("[ERROR] Summarize lines failed:", e)
-        # fallback, just store them raw
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
-############################################################################
-# 4) Build Personalization String
-############################################################################
+# --------------------------------------------------------------------------
+# Utility
+# --------------------------------------------------------------------------
+def log_message(msg):
+    logs = session.get("interaction_log", [])
+    logs.append(msg)
+    session["interaction_log"] = logs
 
+def merge_dd(form, dd_key, cust_key):
+    dd_val = form.get(dd_key, "").strip()
+    cust_val = form.get(cust_key, "").strip()
+    return cust_val if cust_val else dd_val
+
+def _save_image(url):
+    r = requests.get(url)
+    with open(GENERATED_IMAGE_PATH, "wb") as f:
+        f.write(r.content)
+
+def check_stage_up_down(new_aff):
+    if "currentStage" not in session:
+        session["currentStage"] = 1
+
+    cur_stage = session["currentStage"]
+    req = STAGE_REQUIREMENTS[cur_stage]
+    if new_aff < req:
+        new_stage = 1
+        for s, needed in STAGE_REQUIREMENTS.items():
+            if new_aff >= needed:
+                new_stage = max(new_stage, s)
+        session["currentStage"] = new_stage
+    else:
+        while session["currentStage"] < 6:
+            nxt = session["currentStage"] + 1
+            if new_aff >= STAGE_REQUIREMENTS[nxt]:
+                session["currentStage"] = nxt
+            else:
+                break
+
+    st = session["currentStage"]
+    if st < 6:
+        session["nextStageThreshold"] = STAGE_REQUIREMENTS[st+1]
+    else:
+        session["nextStageThreshold"] = 999
+
+def validate_age_content(text):
+    age_keywords = ["teen","teenage","underage","minor","child","kid","highschool","high school","18 year","19 year"]
+    return any(k in text.lower() for k in age_keywords)
+
+# --------------------------------------------------------------------------
+# Build Personalization
+# --------------------------------------------------------------------------
 def build_personalization_string():
     npc_data = (
         f"NPC:\n"
@@ -183,39 +193,27 @@ def build_personalization_string():
         f"  Location: {session.get('environment','?')}\n"
         f"  EncounterContext: {session.get('encounter_context','?')}\n"
     )
-
-    # If you also track user_name / user_age, etc., you can add them here:
     user_data = (
         f"USER:\n"
         f"  Name: {session.get('user_name','?')}\n"
         f"  Age: {session.get('user_age','?')}\n"
         f"  Background: {session.get('user_background','?')}\n"
     )
-
     return user_data + npc_data + env_data
 
-############################################################################
-# 5) interpret_npc_state => LLM output
-############################################################################
-
+# --------------------------------------------------------------------------
+# interpret_npc_state => LLM
+# --------------------------------------------------------------------------
 def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_action, full_history=""):
-    """
-    Called after the user enters an action.
-    1) Summarize older lines
-    2) Combine memory + recent lines
-    3) Generate an NPC response with: AFFECT_CHANGE_FINAL, NARRATION, IMAGE_PROMPT
-    """
-    prepare_history()  # Summarize if needed
+    prepare_history()
 
     memory_summary = session.get("log_summary", "")
     recent_lines = session.get("interaction_log", [])
     combined_history = memory_summary + "\n" + "\n".join(recent_lines)
 
-    # If user action is empty => treat as "OOC: Continue scene"
     if not last_user_action.strip():
         last_user_action = "OOC: Continue the scene"
 
-    # Some stage metadata
     stage_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
     stage_desc = STAGE_INFO.get(current_stage, {}).get("desc", "No desc")
     personalization = build_personalization_string()
@@ -250,7 +248,6 @@ Background (do not contradict):
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
 
-    # Attempt generation
     max_retries = 2
     for attempt in range(max_retries):
         try:
@@ -266,48 +263,14 @@ Background (do not contradict):
         except Exception as e:
             log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
 
-    # Fallback
     return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 IMAGE_PROMPT: (fallback)
 """
 
-############################################################################
-# 6) Stage Checker
-############################################################################
-
-def check_stage_up_down(new_aff):
-    if "currentStage" not in session:
-        session["currentStage"] = 1
-
-    cur_stage = session["currentStage"]
-    req = STAGE_REQUIREMENTS[cur_stage]
-    if new_aff < req:
-        # might drop down stages
-        new_stage = 1
-        for s, needed in STAGE_REQUIREMENTS.items():
-            if new_aff >= needed:
-                new_stage = max(new_stage, s)
-        session["currentStage"] = new_stage
-    else:
-        # might go up
-        while session["currentStage"] < 6:
-            nxt = session["currentStage"] + 1
-            if new_aff >= STAGE_REQUIREMENTS[nxt]:
-                session["currentStage"] = nxt
-            else:
-                break
-
-    st = session["currentStage"]
-    if st < 6:
-        session["nextStageThreshold"] = STAGE_REQUIREMENTS[st+1]
-    else:
-        session["nextStageThreshold"] = 999
-
-############################################################################
-# 7) Replicate => flux-schnell
-############################################################################
-
+# --------------------------------------------------------------------------
+# Replicate => flux-schnell
+# --------------------------------------------------------------------------
 def generate_flux_image_safely(prompt, seed=None):
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
@@ -322,7 +285,6 @@ def generate_flux_image_safely(prompt, seed=None):
 
     print(f"[DEBUG] replicate => prompt={final_prompt}, seed={seed}")
     result = replicate.run("black-forest-labs/flux-schnell", input=replicate_input)
-
     if isinstance(result, list) and result:
         return str(result[-1])
     elif isinstance(result, str):
@@ -330,29 +292,40 @@ def generate_flux_image_safely(prompt, seed=None):
     else:
         return None
 
-def _save_image(url):
-    r = requests.get(url)
-    with open(GENERATED_IMAGE_PATH, "wb") as f:
-        f.write(r.content)
+def handle_image_generation(prompt_text, force_new_seed=False):
+    if session.get("image_generated_this_turn", False):
+        log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
+        return None
 
-############################################################################
-# 8) Logging Helper
-############################################################################
+    if not prompt_text:
+        prompt_text = "(No prompt text)"
 
-def log_message(msg):
-    logs = session.get("interaction_log", [])
-    logs.append(msg)
-    session["interaction_log"] = logs
+    existing_seed = session.get("scene_image_seed")
+    if not force_new_seed and existing_seed:
+        seed_used = existing_seed
+        log_message(f"SYSTEM: Re-using old seed => {seed_used}")
+    else:
+        seed_used = random.randint(100000, 999999)
+        log_message(f"SYSTEM: new seed => {seed_used}")
 
-############################################################################
-# 9) Helper to Merge form data for NPC
-############################################################################
+    url = generate_flux_image_safely(prompt_text, seed=seed_used)
+    if not url:
+        log_message("[SYSTEM] replicate returned invalid URL or error.")
+        return None
 
-def merge_dd(form, dd_key, cust_key):
-    dd_val = form.get(dd_key, "").strip()
-    cust_val = form.get(cust_key, "").strip()
-    return cust_val if cust_val else dd_val
+    _save_image(url)
+    session["scene_image_prompt"] = prompt_text
+    session["scene_image_url"] = url
+    session["scene_image_seed"] = seed_used
+    session["image_generated_this_turn"] = True
 
+    log_message(f"Scene Image Prompt => {prompt_text}")
+    log_message(f"Image seed={seed_used}")
+    return url
+
+# --------------------------------------------------------------------------
+# NPC Info
+# --------------------------------------------------------------------------
 def update_npc_info(form):
     npc_fields = [
         "npc_name", "npc_gender", "npc_age", "npc_ethnicity", "npc_body_type",
@@ -366,10 +339,16 @@ def update_npc_info(form):
     session["environment"] = merge_dd(form, "environment", "environment_custom")
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
+# --------------------------------------------------------------------------
+# Landing + Auth
+# --------------------------------------------------------------------------
+@app.route("/")
+def main_home():
+    return render_template("home.html", title="Destined Encounters")
 
-############################################################################
-# 10) Auth Routes (Login, Register, Logout)
-############################################################################
+@app.route("/about")
+def about():
+    return render_template("about.html", title="About/Help")
 
 @app.route("/login", methods=["GET","POST"])
 def login_route():
@@ -421,62 +400,75 @@ def register_route():
 
 @app.route("/logout")
 def logout_route():
-    # Clears only auth info
     for key in ["logged_in", "user_id", "user_email", "access_token"]:
         session.pop(key, None)
     flash("Logged out successfully.", "info")
     return redirect(url_for("main_home"))
 
-############################################################################
-# 11) Basic Landing + About
-############################################################################
+# --------------------------------------------------------------------------
+# Continue / Restart
+# --------------------------------------------------------------------------
+@app.route("/continue")
+@login_required
+def continue_session():
+    """
+    This route tries to see if the user already has an NPC name or prior data
+    in the session. If not, it can check the database to see if there's an
+    existing 'flask_sessions' row with data for that user.
 
-@app.route("/")
-def main_home():
-    return render_template("home.html", title="Destined Encounters")
+    If found, we restore it. If not, we redirect them to 'personalize'.
+    """
+    # 1) If we already have NPC data in memory, just jump to interaction
+    if session.get("npc_name"):
+        flash("Session loaded from in-memory data!", "info")
+        return redirect(url_for("interaction"))
 
-@app.route("/about")
-def about():
-    return render_template("about.html", title="About/Help")
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Error: no user_id found in session.", "danger")
+        return redirect(url_for("main_home"))
 
-############################################################################
-# 12) Restart / Continue
-############################################################################
+    try:
+        # 2) Check the 'flask_sessions' table for a session belonging to user
+        #    This logic depends on how your SupabaseSessionInterface is storing data.
+        #    Typically, you might store 'user_id' as a column. 
+        #    Let's assume that row['data'] is the session dict, so we can load it manually if we want.
+
+        result = supabase.table("flask_sessions").select("*").eq("user_id", user_id).execute()
+        rows = result.data
+        if not rows:
+            flash("No saved session data found. Please start a new game.", "info")
+            return redirect(url_for("personalize"))
+
+        # If multiple rows, pick the most recent
+        row = rows[-1]
+        session_data = row.get("data", {})
+
+        # Optionally, you can load each key back into session
+        # But be careful not to break the session cookie approach
+        for k, v in session_data.items():
+            session[k] = v
+
+        flash("Saved session loaded from database!", "success")
+        return redirect(url_for("interaction"))
+
+    except Exception as e:
+        flash(f"Error loading session: {e}", "danger")
+        return redirect(url_for("personalize"))
 
 @app.route("/restart")
 @login_required
 def restart():
-    # If you want to preserve login info, do not call session.clear().
-    # But if you want a complete wipe, do so:
     session.clear()
-    # Re-add the user info if you want them still "logged in":
-    # ...
-    # For example, let’s keep them logged in:
-    # (If you truly want to wipe everything, remove these lines.)
-    # user_id = session.get("user_id")
-    # user_email = session.get("user_email")
-    # session["logged_in"] = True
-    # session["user_id"] = user_id
-    # session["user_email"] = user_email
-
-    # Stage unlocks default
     session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
+    flash("Session restarted (NPC data cleared).", "info")
     return redirect(url_for("personalize"))
 
-@app.route("/continue")
-@login_required
-def continue_session():
-    # Just a placeholder route if you want to do something fancy
-    return redirect(url_for("interaction"))
-
-############################################################################
-# 13) Personalization
-############################################################################
-
-# Example dropdown options (shortened)
+# --------------------------------------------------------------------------
+# Personalization
+# --------------------------------------------------------------------------
 USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex"]
 USER_AGE_OPTIONS = ["20","25","30","35","40","45"]
-
 NPC_NAME_OPTIONS = ["Emily","Sarah","Lisa","Anna","Mia","Sophia"]
 NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
 NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
@@ -495,22 +487,17 @@ ETHNICITY_OPTIONS = ["American (Black)","American (White)","British","French","G
 @login_required
 def personalize():
     if request.method == "POST" and "save_personalization" in request.form:
-        # Save user fields
         session["user_name"] = merge_dd(request.form, "user_name","user_name_custom")
         session["user_age"] = merge_dd(request.form, "user_age","user_age_custom")
         session["user_background"] = request.form.get("user_background","").strip()
-
-        # Save NPC fields
         update_npc_info(request.form)
 
-        # Gender-specific instructions
         npc_gender = session.get("npc_gender","").lower()
         if npc_gender == "male":
-            session["npc_instructions"] = """[Male-specific instructions...]"""
+            session["npc_instructions"] = """(MALE-SPECIFIC INSTRUCTIONS BLOCK)"""
         else:
-            session["npc_instructions"] = """[Female-specific instructions...]"""
+            session["npc_instructions"] = """(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"""
 
-        # Reset stats
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
@@ -518,7 +505,6 @@ def personalize():
         session["npcPrivateThoughts"] = "(none)"
         session["npcBehavior"] = "(none)"
         session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
-
         session["interaction_log"] = []
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
@@ -528,7 +514,6 @@ def personalize():
 
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
-
     else:
         return render_template("personalize.html",
             title="Personalizations",
@@ -554,6 +539,13 @@ def personalize():
 def mid_game_personalize():
     if request.method == "POST" and "update_npc" in request.form:
         update_npc_info(request.form)
+        # optional re-check of gender
+        npc_gender = session.get("npc_gender","").lower()
+        if npc_gender == "male":
+            session["npc_instructions"] = "(MALE instructions...)"
+        else:
+            session["npc_instructions"] = "(FEMALE instructions...)"
+
         log_message("SYSTEM: NPC personalizations updated mid-game.")
         flash("NPC info updated mid-game!", "info")
         return redirect(url_for("interaction"))
@@ -574,10 +566,9 @@ def mid_game_personalize():
         ethnicity_options=ETHNICITY_OPTIONS
     )
 
-############################################################################
-# 14) Interaction
-############################################################################
-
+# --------------------------------------------------------------------------
+# Interaction
+# --------------------------------------------------------------------------
 @app.route("/interaction", methods=["GET","POST"])
 @login_required
 def interaction():
@@ -615,7 +606,6 @@ def interaction():
             dice_outcome_dbg=outcome_val,
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
-
             npc_name_options=NPC_NAME_OPTIONS,
             npc_age_options=NPC_AGE_OPTIONS,
             npc_gender_options=NPC_GENDER_OPTIONS,
@@ -639,25 +629,20 @@ def interaction():
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
 
-            # Log the user action
             log_message(f"User: {user_action}")
-
-            # We pass "full_history" but we mostly rely on session logs + summarization
             result_text = interpret_npc_state(
                 affection=affection,
                 trust=trust,
                 npc_mood=mood,
                 current_stage=cstage,
                 last_user_action=user_action,
-                full_history="(unused here)"
+                full_history=""
             )
 
-            # Parse out AFFECT_CHANGE_FINAL, NARRATION, IMAGE_PROMPT
             affect_delta = 0.0
             narration_txt = ""
             image_prompt = ""
-            lines = result_text.split("\n")
-            for ln in lines:
+            for ln in result_text.split("\n"):
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
                     try:
@@ -672,14 +657,12 @@ def interaction():
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
-
             session["narrationText"] = narration_txt
             session["scene_image_prompt"] = image_prompt
 
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
 
-            # allow image generation next turn
             session["image_generated_this_turn"] = False
             return redirect(url_for("interaction"))
 
@@ -709,7 +692,7 @@ def interaction():
 
         elif "do_generate_flux" in request.form:
             prompt_text = request.form.get("scene_image_prompt","").strip()
-            handle_image_generation(prompt_text, force_new_seed=request.form.get("force_new_seed",False))
+            handle_image_generation(prompt_text, force_new_seed=False)
             return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
@@ -720,57 +703,17 @@ def interaction():
         else:
             return "Invalid submission in /interaction", 400
 
-############################################################################
-# 15) handle_image_generation function
-############################################################################
-
-def handle_image_generation(prompt_text, force_new_seed=False):
-    """
-    Reusable helper for creating the scene image
-    """
-    if session.get("image_generated_this_turn", False):
-        log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
-        return None
-
-    if not prompt_text:
-        prompt_text = "(No prompt text)"
-
-    existing_seed = session.get("scene_image_seed")
-    if not force_new_seed and existing_seed:
-        seed_used = existing_seed
-        log_message(f"SYSTEM: Re-using old seed => {seed_used}")
-    else:
-        seed_used = random.randint(100000, 999999)
-        log_message(f"SYSTEM: new seed => {seed_used}")
-
-    url = generate_flux_image_safely(prompt_text, seed=seed_used)
-    if not url:
-        log_message("[SYSTEM] replicate returned invalid URL or error.")
-        return None
-
-    _save_image(url)
-    session["scene_image_prompt"] = prompt_text
-    session["scene_image_url"] = url
-    session["scene_image_seed"] = seed_used
-    session["image_generated_this_turn"] = True
-
-    log_message(f"Scene Image Prompt => {prompt_text}")
-    log_message(f"Image seed={seed_used}")
-    return url
-
-############################################################################
-# 16) View Image
-############################################################################
-
+# --------------------------------------------------------------------------
+# View Image
+# --------------------------------------------------------------------------
 @app.route("/view_image")
 @login_required
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
-############################################################################
-# 17) Full Story + Erotica
-############################################################################
-
+# --------------------------------------------------------------------------
+# Full Story + Erotica
+# --------------------------------------------------------------------------
 @app.route("/full_story")
 @login_required
 def full_story():
@@ -787,16 +730,16 @@ def full_story():
 @login_required
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
-
     continue_prompt = f"""
-You are continuing an erotic story. 
+You are continuing an erotic story.
 Pick up exactly where this left off and continue
 the scene for another 600-900 words.
+
 PREVIOUS TEXT:
 {previous_text}
+
 Now continue the story:
 """
-
     chat = model.start_chat()
     continuation = chat.send_message(
         continue_prompt,
@@ -804,14 +747,12 @@ Now continue the story:
         safety_settings=safety_settings
     )
     full_text = f"{previous_text}\n\n{continuation.text.strip()}"
-
     return render_template("erotica_story.html", erotica_text=full_text, title="Generated Erotica")
 
 @app.route("/generate_erotica", methods=["POST"])
 @login_required
 def generate_erotica():
     logs = session.get("interaction_log", [])
-    # gather user + npc lines
     story_parts = []
     for line in logs:
         if line.startswith("NARRATION => "):
@@ -823,15 +764,15 @@ def generate_erotica():
         return redirect(url_for("full_story"))
 
     full_narration = "\n".join(story_parts)
-
     erotica_prompt = f"""
 You are an author on an adult erotica forum.
 Rewrite the scenario below into a detailed erotic short story from the user's perspective.
+
 STORY LOG:
 {full_narration}
+
 Now produce a single narrative (600-900 words), focusing on emotional + physical details.
 """
-
     chat = model.start_chat()
     erotica_resp = chat.send_message(
         erotica_prompt,
@@ -841,10 +782,9 @@ Now produce a single narrative (600-900 words), focusing on emotional + physical
     erotica_text = erotica_resp.text.strip()
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
-############################################################################
-# 18) Stage Unlocks
-############################################################################
-
+# --------------------------------------------------------------------------
+# Stage Unlocks
+# --------------------------------------------------------------------------
 @app.route("/stage_unlocks", methods=["GET","POST"])
 @login_required
 def stage_unlocks():
@@ -860,17 +800,8 @@ def stage_unlocks():
         stage_unlocks=session.get("stage_unlocks", {}),
         title="Stage Unlocks")
 
-############################################################################
-# 19) Content Validation Helper (optional)
-############################################################################
-
-def validate_age_content(text):
-    age_keywords = ["teen","teenage","underage","minor","child","kid","highschool","high school","18 year","19 year"]
-    return any(k in text.lower() for k in age_keywords)
-
-############################################################################
-# 20) Run
-############################################################################
-
+# --------------------------------------------------------------------------
+# Run
+# --------------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
