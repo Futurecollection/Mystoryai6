@@ -22,7 +22,7 @@ class SupabaseSessionInterface(SessionInterface):
     Disable RLS or create a policy for inserts/updates.
     """
 
-    def __init__(self, supabase_client, table_name="flask_sessions", session_lifetime=timedelta(days=1)):
+    def __init__(self, supabase_client, table_name="flask_sessions", session_lifetime=timedelta(days=7)):
         self.supabase = supabase_client
         self.table_name = table_name
         self.session_lifetime = session_lifetime
