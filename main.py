@@ -407,7 +407,7 @@ def main_home():
     has_previous = False
     if session.get("logged_in"):
         # Check current session first
-        if session.get("npc_name"):
+        if session.get("npc_name") or session.get("narrationText"):
             has_previous = True
         else:
             # Then check saved sessions in database
@@ -419,7 +419,7 @@ def main_home():
                 if result.data:
                     for row in result.data:
                         session_data = row.get("data", {})
-                        if session_data.get("npc_name"):
+                        if session_data.get("npc_name") or session_data.get("narrationText"):
                             has_previous = True
                             break
             except Exception as e:
