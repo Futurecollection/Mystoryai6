@@ -427,7 +427,8 @@ def main_home():
 
     return render_template("home.html", 
                          title="Destined Encounters",
-                         has_previous_session=has_previous)
+                         has_previous_session=has_previous,
+                         logged_in=session.get("logged_in", False))
 
 @app.route("/continue")
 @login_required
