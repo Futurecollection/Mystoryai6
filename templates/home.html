@@ -14,17 +14,29 @@
 {% if session.logged_in %}
   <p>You are logged in as {{ session.user_email }}</p>
   
-  {% if has_previous_session %}
-    <div class="mb-4">
-      <h3>Previous Session Available</h3>
-      <div class="btn-group">
-        <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Previous Session</a>
-        <a href="{{ url_for('personalize') }}" class="btn btn-primary">Start New Experience</a>
+  <div class="row mt-4">
+    {% if has_previous_session %}
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Continue Previous Session</h5>
+            <p class="card-text">Resume your previous story where you left off.</p>
+            <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Session</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    
+    <div class="col-md-6 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Start New Experience</h5>
+          <p class="card-text">Begin a fresh story with new characters.</p>
+          <a href="{{ url_for('personalize') }}" class="btn btn-primary">New Session</a>
+        </div>
       </div>
     </div>
-  {% else %}
-    <p><a href="{{ url_for('personalize') }}" class="btn btn-primary">Start New Experience</a></p>
-  {% endif %}
+  </div>
   
   <p class="mt-3">
     <a href="{{ url_for('logout_route') }}" class="btn btn-danger">Logout</a>
