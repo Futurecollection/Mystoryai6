@@ -722,6 +722,8 @@ def full_story():
     for line in logs:
         if line.startswith("NARRATION => "):
             story_lines.append(line.replace("NARRATION => ", "", 1))
+        elif line.startswith("User: "):
+            story_lines.append("> " + line.replace("User: ", "", 1))
     return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
 
 @app.route("/continue_erotica", methods=["POST"])
