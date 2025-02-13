@@ -20,19 +20,19 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Continue Previous Session</h5>
-            <p class="card-text">Resume your previous story where you left off.</p>
+            <p class="card-text">Resume your last saved story where you left off.</p>
             <a href="{{ url_for('continue_session') }}" class="btn btn-success">Continue Session</a>
           </div>
         </div>
       </div>
     {% endif %}
     
-    <div class="col-md-6 mb-3">
+    <div class="col-md-{% if has_previous_session %}6{% else %}12{% endif %} mb-3">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Start New Experience</h5>
-          <p class="card-text">Begin a fresh story with new characters.</p>
-          <a href="{{ url_for('personalize') }}" class="btn btn-primary">New Session</a>
+          <h5 class="card-title">Start New Story</h5>
+          <p class="card-text">Create a fresh story with new characters and settings.</p>
+          <a href="{{ url_for('personalize') }}" class="btn btn-primary">Start New Story</a>
         </div>
       </div>
     </div>
