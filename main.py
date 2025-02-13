@@ -187,21 +187,32 @@ Context: {encounter}"""
 ############################################################################
 # UI / NPC Option Lists (Truncated for brevity)
 ############################################################################
-USER_NAME_OPTIONS = [...]
-USER_AGE_OPTIONS = [...]
-NPC_NAME_OPTIONS = [...]
-NPC_AGE_OPTIONS = [...]
-NPC_GENDER_OPTIONS = [...]
-HAIR_STYLE_OPTIONS = [...]
-BODY_TYPE_OPTIONS = [...]
-HAIR_COLOR_OPTIONS = [...]
-NPC_PERSONALITY_OPTIONS = [...]
-CLOTHING_OPTIONS = [...]
-OCCUPATION_OPTIONS = [...]
-CURRENT_SITUATION_OPTIONS = [...]
-ENVIRONMENT_OPTIONS = [...]
-ENCOUNTER_CONTEXT_OPTIONS = [...]
-ETHNICITY_OPTIONS = [...]
+# Male Options
+MALE_NAMES = ["James", "William", "Michael", "David", "John", "Robert", "Thomas", "Christopher", "Daniel", "Matthew", "Andrew", "Joseph", "Edward", "Alexander", "Richard", "Charles", "Steven", "Kevin", "Brian", "George"]
+MALE_HAIR_STYLES = ["Short and Neat", "Messy", "Buzzcut", "Fade", "Slicked Back", "Curly", "Wavy", "Military Cut", "Undercut", "Pompadour"]
+MALE_BODY_TYPES = ["Athletic", "Muscular", "Slim", "Tall", "Average", "Stocky", "Lean", "Broad-shouldered", "Fit", "Toned"]
+
+# Female Options
+FEMALE_NAMES = ["Emma", "Olivia", "Ava", "Isabella", "Sophia", "Mia", "Charlotte", "Amelia", "Harper", "Evelyn", "Abigail", "Emily", "Elizabeth", "Sofia", "Madison", "Avery", "Ella", "Scarlett", "Victoria", "Grace"]
+FEMALE_HAIR_STYLES = ["Long and Straight", "Wavy", "Curly", "Bob Cut", "Pixie Cut", "Braided", "Ponytail", "Bun", "Layered", "Side-swept"]
+FEMALE_BODY_TYPES = ["Slim", "Athletic", "Curvy", "Petite", "Hourglass", "Tall", "Average", "Toned", "Lean", "Fit"]
+
+# Common Options
+USER_NAME_OPTIONS = MALE_NAMES
+USER_AGE_OPTIONS = ["20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35"]
+NPC_NAME_OPTIONS = FEMALE_NAMES
+NPC_AGE_OPTIONS = ["20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"]
+NPC_GENDER_OPTIONS = ["Female", "Male"]
+HAIR_STYLE_OPTIONS = FEMALE_HAIR_STYLES
+BODY_TYPE_OPTIONS = FEMALE_BODY_TYPES
+HAIR_COLOR_OPTIONS = ["Blonde", "Brown", "Black", "Red", "Auburn", "Platinum", "Dark Brown", "Light Brown", "Honey Blonde", "Golden Brown"]
+NPC_PERSONALITY_OPTIONS = ["Shy", "Confident", "Playful", "Serious", "Mysterious", "Friendly", "Reserved", "Outgoing", "Flirty", "Sweet", "Sassy", "Gentle", "Bold"]
+CLOTHING_OPTIONS = ["Casual", "Professional", "Elegant", "Sporty", "Bohemian", "Trendy", "Classic", "Vintage", "Business Casual", "Summer Dress", "Jeans and T-shirt"]
+OCCUPATION_OPTIONS = ["Student", "Teacher", "Artist", "Doctor", "Engineer", "Writer", "Musician", "Business Owner", "Nurse", "Chef", "Designer", "Lawyer", "Model", "Photographer"]
+CURRENT_SITUATION_OPTIONS = ["Working", "Studying", "Traveling", "Moving", "Starting New Job", "Taking a Break", "On Vacation", "Between Jobs", "Freelancing", "Exploring New City"]
+ENVIRONMENT_OPTIONS = ["Coffee Shop", "Park", "Beach", "Library", "Restaurant", "Office", "University Campus", "Shopping Mall", "Art Gallery", "Museum", "Gym", "Bookstore"]
+ENCOUNTER_CONTEXT_OPTIONS = ["Chance Meeting", "Blind Date", "Work Event", "Social Gathering", "Through Friends", "Online Match", "Coffee Break", "Group Activity", "Mutual Interest", "Party"]
+ETHNICITY_OPTIONS = ["American (Black)", "American (White)", "Hispanic", "Brazilian", "British", "Irish", "Scottish", "Welsh", "French", "German", "Dutch", "Danish", "Norwegian", "Swedish", "Italian", "Greek", "Spanish", "Portuguese", "Russian", "Ukrainian", "Polish", "Czech", "Slovak", "Croatian", "Serbian", "Chinese", "Japanese", "Korean", "Vietnamese", "Thai", "Indian", "Pakistani", "Filipino", "Australian", "Turkish", "Middle Eastern"]
 
 ############################################################################
 # Utility Helpers
