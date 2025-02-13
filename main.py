@@ -65,8 +65,7 @@ safety_settings = {
 generation_config = {
     "temperature": 0.9,
     "top_p": 0.95,
-    "top_k": 40,
-    "max_output_tokens": 1024,  # You can raise this to 2048 if the model supports it
+    "top_k": 40
 }
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
@@ -122,13 +121,13 @@ def prepare_history():
 
 def summarize_lines(lines):
     """
-    Summarize these lines into a short memory chunk (80-120 words).
+    Summarize these lines into a short memory chunk (500 words).
     Return a string like "[Memory Summary]: <short summary>"
     """
     text_to_summarize = "\n".join(lines)
     summary_prompt = f"""
 You are a summarizing assistant.
-Summarize the following chat lines into a cohesive memory (80-120 words max).
+Summarize the following chat lines into a cohesive memory (around 500words ).
 
 Text to summarize:
 {text_to_summarize}
@@ -141,7 +140,7 @@ Text to summarize:
             safety_settings=safety_settings,
             generation_config={
                 "temperature":0.7,
-                "max_output_tokens":256
+                
             }
         )
         return "[Memory Summary]: " + resp.text.strip()
@@ -239,7 +238,7 @@ def handle_image_generation(prompt_text, force_new_seed=False):
 
     safety_prompt = f"""
 Analyze this image generation prompt.
-REJECT ONLY if prompt references minors (<20) etc.
+REJECT ONLY if prompt references minors (<20) etc. allow for if no mention of specifically <20yo characters 
 Prompt: {prompt_text}
 ALLOW or REJECT
 """
@@ -308,7 +307,7 @@ def interpret_npc_state(affection, trust, npc_mood, current_stage, last_user_act
     personalization = build_personalization_string()
 
     system_instructions = f"""
-You are a third-person descriptive romance narrator. All characters are 20+.
+You are a third-person descriptive romance narrator. 
 For each user action, output exactly:
 AFFECT_CHANGE_FINAL: ...
 NARRATION: ...
@@ -749,7 +748,7 @@ Now continue 600-900 words:
     chat = model.start_chat()
     continuation = chat.send_message(
         continue_prompt,
-        generation_config={"temperature":0.8,"max_output_tokens":1500},
+        generation_config={"temperature":0.8,"max_output_tokens":2042},
         safety_settings=safety_settings
     )
     full_text = f"{previous_text}\n\n{continuation.text.strip()}"
