@@ -15,7 +15,7 @@
   <p>You are logged in as {{ session.user_email }}</p>
   
   <div class="row mt-4">
-    {% if session.npc_name %}
+    {% if session.npc_name or session.logged_in %}
       <div class="text-center mb-4">
         <a href="{{ url_for('interaction') }}" class="btn btn-success btn-lg">Continue Interaction</a>
       </div>
