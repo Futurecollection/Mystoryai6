@@ -460,7 +460,7 @@ def login_route():
             })
 
             flash("Logged in successfully!", "success")
-            return redirect(url_for("personalize"))
+            return redirect(url_for("main_home"))
         except Exception as e:
             flash(f"Login failed: {e}","danger")
             return redirect(url_for("login_route"))
