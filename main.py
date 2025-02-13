@@ -709,7 +709,7 @@ def interaction():
 
         elif "do_generate_flux" in request.form:
             prompt_text = request.form.get("scene_image_prompt","").strip()
-            handle_image_generation(prompt_text, force_new_seed=False=request.form.get("force_new_seed",False))
+            handle_image_generation(prompt_text, force_new_seed=request.form.get("force_new_seed",False))
             return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
