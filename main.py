@@ -327,48 +327,7 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     else:
         return None
 
-# 2) URPM
-URPM_NEGATIVE_PROMPT = (
-    "pubic hair not visible, animal ears, large breasts, large boobs, text, logo, "
-    "((big hands, un-detailed skin, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime)), "
-    "((ugly mouth, ugly eyes, missing teeth, crooked teeth, close up, cropped, out of frame)), "
-    "worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, "
-    "mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, "
-    "bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, "
-    "missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck,"
-    "(more than two arm per body:1.5), (more than two leg per body:1.5), "
-    "(more than five fingers on one hand:1.5), multi arms, multi legs, bad arm anatomy, bad leg anatomy, "
-    "bad hand anatomy, bad finger anatomy, bad detailed background, unclear architectural outline, "
-    "non-linear background, elf-ears, hair crosses the screen border, obesity, fat, lowres, worst quality, "
-    "low quality, blurry, mutated hands and fingers, disfigured, fused, cloned, duplicate, artist name, "
-    "giantess, odd eyes, long fingers, long neck, watermarked"
-)
 
-def generate_urpm_image_safely(prompt: str, seed: int = None) -> str:
-    replicate_input = {
-        "model": "ductridev/uber-realistic-porn-merge-urpm",
-        "width": 512,
-        "height": 512,
-        "cfg_scale": 7,
-        "scheduler": "DPM++ 2M Karras",
-        "negative_prompt": URPM_NEGATIVE_PROMPT,
-        "num_inference_steps": 55,
-        "prompt": prompt
-    }
-    if seed:
-        replicate_input["seed"] = seed
-
-    print(f"[DEBUG] replicate => URPM prompt={prompt}, seed={seed}")
-    result = replicate.run(
-        "ductridev/uber-realistic-porn-merge-urpm-1:1cca487c3bfe167e987fc3639477cf2cf617747cd38772421241b04d27a113a8",
-        replicate_input
-    )
-    if isinstance(result, list) and result:
-        return str(result[-1])
-    elif isinstance(result, str):
-        return result
-    else:
-        return None
 
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False, model_type: str = "flux"):
     if session.get("image_generated_this_turn", False):
@@ -383,10 +342,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         seed_used = random.randint(100000, 999999)
         log_message(f"SYSTEM: new seed => {seed_used}")
 
-    if model_type == "urpm":
-        url = generate_urpm_image_safely(prompt_text, seed=seed_used)
-    else:
-        url = generate_flux_image_safely(prompt_text, seed=seed_used)
+    url = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not url:
         log_message("[SYSTEM] replicate returned invalid URL or error.")
@@ -740,10 +696,8 @@ def interaction():
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
 
-            # user picks flux or urpm from a form field => model_type
-            chosen_model = request.form.get("model_type", "flux")
-            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=False, model_type=chosen_model)
-            flash(f"Image generated successfully (model={chosen_model}).", "success")
+            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=False, model_type="flux")
+            flash("Image generated successfully.", "success")
             return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
