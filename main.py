@@ -519,7 +519,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             seed=seed_used,
             steps=steps_final,
             width=512,
-            height=728,
+            height=768,
             guidance=5.0,
             scheduler=chosen_sched
         )
