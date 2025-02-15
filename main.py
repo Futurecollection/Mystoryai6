@@ -350,8 +350,15 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
     if seed:
         replicate_input["seed"] = seed
     print(f"[DEBUG] replicate => FLUX prompt={final_prompt}, seed={seed}")
-    result = replicate.run("black-forest-labs/flux-schnell", replicate_input)
-    return result
+    try:
+        result = replicate.run("black-forest-labs/flux-schnell", replicate_input)
+        # Return in consistent format for _save_image
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
+    except Exception as e:
+        print(f"[ERROR] Flux call failed: {e}")
+        return None
 
 def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 60) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
