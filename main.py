@@ -382,7 +382,8 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None) -> s
         "num_outputs": 1,
         "apply_watermark": True,
         "high_noise_frac": 0.8,
-        "prompt_strength": 0.8
+        "prompt_strength": 0.8,
+        "disable_safety_checker": True
     }
     if seed is not None:
         replicate_input["seed"] = seed
@@ -686,7 +687,7 @@ def mid_game_personalize():
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
             session["npc_instructions"] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
-        log_message("SYSTEM: NPC personalizations updated mid-game.")
+        log_message("SYSTEM: NPC personalizations updatedmid-game.")
         flash("NPC info updated mid-game!", "info")
         return redirect(url_for("interaction"))
     return render_template("mid_game_personalize.html",
