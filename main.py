@@ -117,7 +117,7 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
 # --------------------------------------------------------------------------
-# Utility
+# Utility Functions
 # --------------------------------------------------------------------------
 def log_message(msg: str):
     logs = session.get("interaction_log", [])
@@ -131,24 +131,52 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
 
 def _save_image(result):
     """
-    Saves 'result' to output.jpg. If result is a file-like object from Replicate (FileOut),
-    read it directly. If it's a string (URL), download it. If it's something else, attempt
-    to interpret it as a URL.
+    Saves the output to output.jpg. Handles file-like objects, dicts with "output", lists, or strings.
     """
+    if isinstance(result, dict) and "output" in result:
+        final_url = result["output"]
+        print("[DEBUG] _save_image => Received dict with output:", final_url)
+        try:
+            r = requests.get(final_url)
+            with open(GENERATED_IMAGE_PATH, "wb") as f:
+                f.write(r.content)
+        except Exception as e:
+            print("[ERROR] _save_image => Error downloading from output key:", e)
+        return
+
     if hasattr(result, "read"):
-        # It's a file-like object
-        print("[DEBUG] _save_image => got a file-like object from replicate.")
+        print("[DEBUG] _save_image => File-like object received.")
         with open(GENERATED_IMAGE_PATH, "wb") as f:
             f.write(result.read())
         return
-    # If it's a string (likely a URL), or something else, try GET
-    try:
-        print("[DEBUG] _save_image => trying to interpret as a URL.")
-        r = requests.get(str(result))
-        with open(GENERATED_IMAGE_PATH, "wb") as f:
-            f.write(r.content)
-    except Exception as e:
-        print("[ERROR] _save_image => cannot handle result =>", e)
+
+    if isinstance(result, list) and result:
+        final_item = result[-1]
+        if isinstance(final_item, str):
+            print("[DEBUG] _save_image => Received list; using final item:", final_item)
+            try:
+                r = requests.get(final_item)
+                with open(GENERATED_IMAGE_PATH, "wb") as f:
+                    f.write(r.content)
+                return
+            except Exception as e:
+                print("[ERROR] _save_image => Error downloading from list item:", e)
+                return
+        else:
+            print("[ERROR] _save_image => List item is not a string:", final_item)
+            return
+
+    if isinstance(result, str):
+        print("[DEBUG] _save_image => Received string:", result)
+        try:
+            r = requests.get(result)
+            with open(GENERATED_IMAGE_PATH, "wb") as f:
+                f.write(r.content)
+        except Exception as e:
+            print("[ERROR] _save_image => Error downloading from string:", e)
+        return
+
+    print("[ERROR] _save_image => Unknown result type:", type(result))
 
 def check_stage_up_down(new_aff: float):
     if "currentStage" not in session:
@@ -214,14 +242,8 @@ def build_personalization_string() -> str:
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
 # --------------------------------------------------------------------------
-def interpret_npc_state(
-    affection: float,
-    trust: float,
-    npc_mood: str,
-    current_stage: int,
-    last_user_action: str,
-    full_history: str = ""
-) -> str:
+def interpret_npc_state(affection: float, trust: float, npc_mood: str,
+                        current_stage: int, last_user_action: str, full_history: str = "") -> str:
     prepare_history()
     memory_summary = session.get("log_summary", "")
     recent_lines = session.get("interaction_log", [])
@@ -255,7 +277,6 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 """
-
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
     max_retries = 2
     for attempt in range(max_retries):
@@ -271,14 +292,13 @@ Background (do not contradict):
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
         except Exception as e:
             log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
-
     return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 IMAGE_PROMPT: (fallback)
 """
 
 # --------------------------------------------------------------------------
-# Generate short image prompt from interpret input
+# generate_image_prompt_from_interpret_input => LLM
 # --------------------------------------------------------------------------
 def generate_image_prompt_from_interpret_input() -> str:
     prepare_history()
@@ -316,9 +336,9 @@ Output only the final prompt (1-2 sentences, no extra commentary).
         return "Ultrarealistic photo of the NPC in the current environment."
 
 # --------------------------------------------------------------------------
-# Flux-Schnell
+# Replicate Model Functions
 # --------------------------------------------------------------------------
-def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
+def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
         "prompt": final_prompt,
@@ -331,17 +351,9 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
         replicate_input["seed"] = seed
     print(f"[DEBUG] replicate => FLUX prompt={final_prompt}, seed={seed}")
     result = replicate.run("black-forest-labs/flux-schnell", replicate_input)
-    if isinstance(result, list) and result:
-        return str(result[-1])
-    elif isinstance(result, str):
-        return result
-    else:
-        return None
+    return result
 
-# --------------------------------------------------------------------------
-# Pony-SDXL
-# --------------------------------------------------------------------------
-def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 60) -> str:
+def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 60) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
     replicate_input = {
@@ -359,9 +371,9 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         "prepend_preprompt": True,
         "negative_prompt": (
             "low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, "
-            "worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name,"
+            "worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, "
             "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
-            "floating limbs,(mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
+            "floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
         ),
         "clip_last_layer": -2
     }
@@ -373,20 +385,12 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
             "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
             replicate_input
         )
-    except Exception as e:
-        print(f"[ERROR] Pony-SDXL call failed: {e}")
-        return None
-    if isinstance(result, list) and result:
-        return str(result[-1])
-    elif isinstance(result, str):
         return result
-    else:
+    except Exception as e:
+        print("[ERROR] Pony-SDXL call failed:", e)
         return None
 
-# --------------------------------------------------------------------------
-# CyberRealisticPony
-# --------------------------------------------------------------------------
-def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, scheduler: str = "K_EULER", steps: int = 50) -> str:
+def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, scheduler: str = "K_EULER", steps: int = 50) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
     negative_prompt_text = (
@@ -419,32 +423,20 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
             "charlesmccarthy/cyberrealisticpony_v40:7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665",
             replicate_input
         )
-    except Exception as e:
-        print(f"[ERROR] CyberRealisticPony call failed: {e}")
-        return None
-    if isinstance(result, list) and result:
-        return str(result[-1])
-    elif isinstance(result, str):
         return result
-    else:
+    except Exception as e:
+        print("[ERROR] CyberRealisticPony call failed:", e)
         return None
 
-# --------------------------------------------------------------------------
-# Realistic Vision v5.1
-# --------------------------------------------------------------------------
 def generate_realistic_vision_image_safely(
     prompt: str,
     seed: int = 0,
     steps: int = 20,
     width: int = 512,
-    height: int = 768,
+    height: int = 728,
     guidance: float = 5.0,
     scheduler: str = "EulerA"
-) -> str:
-    # Ensure dimensions are valid (must be multiples of 8)
-    width = (width // 8) * 8
-    height = (height // 8) * 8
-    
+) -> object:
     negative_prompt_text = (
         "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), "
         "text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, "
@@ -458,10 +450,9 @@ def generate_realistic_vision_image_safely(
         "width": width,
         "height": height,
         "prompt": prompt,
-        "guidance_scale": guidance,  # Fixed parameter name
-        "scheduler": scheduler,  # "EulerA" or "MultistepDPM-Solver"
-        "negative_prompt": negative_prompt_text,
-        "num_outputs": 1
+        "guidance": guidance,
+        "scheduler": scheduler,
+        "negative_prompt": negative_prompt_text
     }
     print(f"[DEBUG] replicate => RealisticVision prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, width={width}, height={height}")
     try:
@@ -469,22 +460,24 @@ def generate_realistic_vision_image_safely(
             "lucataco/realistic-vision-v5.1:2c8e954decbf70b7607a4414e5785ef9e4de4b8c51d50fb8b8b349160e0ef6bb",
             replicate_input
         )
+        # Check if result is a dict with an "output" key.
+        if isinstance(result, dict) and "output" in result:
+            return result["output"]
+        elif hasattr(result, "read"):
+            return result
+        elif isinstance(result, list) and result:
+            if isinstance(result[-1], str):
+                return result[-1]
+        elif isinstance(result, str):
+            return result
+        else:
+            return None
     except Exception as e:
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
 
-    # If replicate returns a file-like object (FileOut), just return it
-    if hasattr(result, "read"):
-        return result
-    elif isinstance(result, list) and result:
-        return str(result[-1])
-    elif isinstance(result, str):
-        return result
-    else:
-        return None
-
 # --------------------------------------------------------------------------
-# handle_image_generation_from_prompt
+# handle_image_generation_from_prompt => multi-model selection
 # --------------------------------------------------------------------------
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None, steps: int = None):
@@ -496,7 +489,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         seed_used = random.randint(100000, 999999)
         log_message(f"SYSTEM: new seed => {seed_used}")
 
-    # 1) Generate image with the chosen model
     if model_type == "pony":
         steps = steps if steps is not None else 60
         result = generate_pony_sdxl_image_safely(prompt_text, seed=seed_used, steps=steps)
@@ -519,25 +511,26 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             seed=seed_used,
             steps=steps_final,
             width=512,
-            height=768,
+            height=728,
             guidance=5.0,
             scheduler=chosen_sched
         )
     else:
-        # flux-schnell
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
         log_message("[SYSTEM] replicate returned invalid or empty result.")
         return None
 
-    # 2) Save the image to output.jpg
     _save_image(result)
 
-    # 3) Always set the URL since we have a local file
-    session["scene_image_url"] = url_for('view_image')
+    if isinstance(result, dict) and "output" in result:
+        session["scene_image_url"] = result["output"]
+    elif isinstance(result, str):
+        session["scene_image_url"] = result
+    else:
+        session["scene_image_url"] = None
 
-    # 4) Store prompt & seed in session
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
 
@@ -561,78 +554,81 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Expanded Lists + Routes
+# Expanded Dropdown Lists
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
-    "John","Michael","David","Chris","James","Alex",
-    "Emily","Olivia","Sophia","Emma","Ava","Isabella",
-    "Liam","Noah","Ethan","Mason","Lucas","Logan"
+    "John", "Michael", "David", "Chris", "James", "Alex",
+    "Emily", "Olivia", "Sophia", "Emma", "Ava", "Isabella",
+    "Liam", "Noah", "Ethan", "Mason", "Lucas", "Logan"
 ]
 NPC_NAME_OPTIONS = [
-    "Lucy","Emily","Sarah","Lisa","Anna","Mia","Sophia",
-    "Olivia","Chloe","Isabella","Grace","Lily","Ella","Zoe","Emma",
-    "Victoria","Madison","Natalie","Jasmine","Aurora","Ruby","Scarlett",
-    "Hazel","Ivy","Luna","Penelope","Stella"
+    "Lucy", "Emily", "Sarah", "Lisa", "Anna", "Mia", "Sophia",
+    "Olivia", "Chloe", "Isabella", "Grace", "Lily", "Ella", "Zoe", "Emma",
+    "Victoria", "Madison", "Natalie", "Jasmine", "Aurora", "Ruby", "Scarlett",
+    "Hazel", "Ivy", "Luna", "Penelope", "Stella"
 ]
 HAIR_STYLE_OPTIONS = [
-    "Short","Medium","Long","Bald","Pixie","Bob",
-    "Curly","Wavy","Braided","Updo","Ponytail","Messy bun",
-    "Side-swept bangs","Fishtail braid","Sleek straight","Layered",
-    "Curls","Tousled","Wavy bob","Half-up half-down"
+    "Short", "Medium", "Long", "Bald", "Pixie", "Bob",
+    "Curly", "Wavy", "Braided", "Updo", "Ponytail", "Messy bun",
+    "Side-swept bangs", "Fishtail braid", "Sleek straight", "Layered",
+    "Curls", "Tousled", "Wavy bob", "Half-up half-down"
 ]
 BODY_TYPE_OPTIONS = [
-    "Athletic","Muscular","Average","Tall","Slim",
-    "Curvy","Petite","Voluptuous","Fit","Lithe","Hourglass",
-    "Elegant","Graceful"
+    "Athletic", "Muscular", "Average", "Tall", "Slim",
+    "Curvy", "Petite", "Voluptuous", "Fit", "Lithe", "Hourglass",
+    "Elegant", "Graceful"
 ]
 CLOTHING_OPTIONS = [
-    "Red Dress","T-shirt & Jeans","Black Gown","Green Hoodie",
-    "Elegant Evening Gown","Casual Blouse & Skirt","Office Suit",
-    "Summer dress","Black mini skirt and white blouse",
-    "Leather Jacket and Shorts","Vintage Outfit",
-    "High-waisted trousers with a crop top","Lace lingerie set",
-    "Silk robe","Intimate chemise","Bodysuit",
-    "Off-shoulder top with skirt","Corset and thigh-high stockings"
+    "Red Dress", "T-shirt & Jeans", "Black Gown", "Green Hoodie",
+    "Elegant Evening Gown", "Casual Blouse & Skirt", "Office Suit",
+    "Summer dress", "Black mini skirt and white blouse",
+    "Leather Jacket and Shorts", "Vintage Outfit",
+    "High-waisted trousers with a crop top", "Lace lingerie set",
+    "Silk robe", "Intimate chemise", "Bodysuit",
+    "Off-shoulder top with skirt", "Corset and thigh-high stockings"
 ]
 ETHNICITY_OPTIONS = [
-    "British","French","German","Italian","Spanish","Portuguese",
-    "Greek","Dutch","Swedish","Norwegian","Finnish","Danish",
-    "Polish","Russian","Ukrainian","Austrian","Swiss","Belgian",
-    "Czech","Slovak","Hungarian","Romanian","Bulgarian","Serbian",
-    "Croatian","Slovenian","Bosnian","Australian","New Zealander",
-    "Maori","Chinese","Japanese","Korean","Indian","Pakistani",
-    "Bangladeshi","Indonesian","Filipino","Thai","Vietnamese",
-    "Malaysian","Singaporean","American (Black)","American (White)",
-    "Hispanic","Latino","Middle Eastern","African","Other"
+    "British", "French", "German", "Italian", "Spanish", "Portuguese",
+    "Greek", "Dutch", "Swedish", "Norwegian", "Finnish", "Danish",
+    "Polish", "Russian", "Ukrainian", "Austrian", "Swiss", "Belgian",
+    "Czech", "Slovak", "Hungarian", "Romanian", "Bulgarian", "Serbian",
+    "Croatian", "Slovenian", "Bosnian", "Australian", "New Zealander",
+    "Maori", "Chinese", "Japanese", "Korean", "Indian", "Pakistani",
+    "Bangladeshi", "Indonesian", "Filipino", "Thai", "Vietnamese",
+    "Malaysian", "Singaporean", "American (Black)", "American (White)",
+    "Hispanic", "Latino", "Middle Eastern", "African", "Other"
 ]
 NPC_PERSONALITY_OPTIONS = [
-    "Flirty","Passionate","Confident","Playful","Gentle",
-    "Seductive","Sensual","Provocative","Lascivious","Romantic",
-    "Erotic","Alluring","Mysterious","Intense","Charming","Warm",
-    "Feminine","Nurturing"
+    "Flirty", "Passionate", "Confident", "Playful", "Gentle",
+    "Seductive", "Sensual", "Provocative", "Lascivious", "Romantic",
+    "Erotic", "Alluring", "Mysterious", "Intense", "Charming", "Warm",
+    "Feminine", "Nurturing"
 ]
 HAIR_COLOR_OPTIONS = [
-    "Blonde","Brunette","Black","Red","Auburn","Platinum Blonde",
-    "Jet Black","Chestnut","Strawberry Blonde","Honey Blonde",
-    "Caramel","Golden"
+    "Blonde", "Brunette", "Black", "Red", "Auburn", "Platinum Blonde",
+    "Jet Black", "Chestnut", "Strawberry Blonde", "Honey Blonde",
+    "Caramel", "Golden"
 ]
 CURRENT_SITUATION_OPTIONS = [
-    "Recently Broke Up","Single & Looking","On Vacation",
-    "Working","In a Relationship","Divorced","Exploring new desires",
+    "Recently Broke Up", "Single & Looking", "On Vacation",
+    "Working", "In a Relationship", "Divorced", "Exploring new desires",
     "Feeling liberated"
 ]
 ENVIRONMENT_OPTIONS = [
-    "Cafe","Library","Gym","Beach","Park","Nightclub","Bar",
-    "Studio","Loft","Garden","Rooftop","Boutique hotel","Luxury spa",
+    "Cafe", "Library", "Gym", "Beach", "Park", "Nightclub", "Bar",
+    "Studio", "Loft", "Garden", "Rooftop", "Boutique hotel", "Luxury spa",
     "Chic restaurant"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-    "First Date","Accidental Meeting","Group Activity","Work Event",
-    "Online Match","Blind Date","Unexpected Reunion","Romantic Getaway",
-    "After-Party","Private Dinner","Secret Meeting","Intimate Gathering",
-    "Spontaneous Encounter","Cozy Evening"
+    "First Date", "Accidental Meeting", "Group Activity", "Work Event",
+    "Online Match", "Blind Date", "Unexpected Reunion", "Romantic Getaway",
+    "After-Party", "Private Dinner", "Secret Meeting", "Intimate Gathering",
+    "Spontaneous Encounter", "Cozy Evening"
 ]
 
+# --------------------------------------------------------------------------
+# Routes
+# --------------------------------------------------------------------------
 @app.route("/")
 def main_home():
     return render_template("home.html", title="Destined Encounters")
@@ -644,8 +640,8 @@ def about():
 @app.route("/login", methods=["GET", "POST"])
 def login_route():
     if request.method == "POST":
-        email = request.form.get("email","").strip()
-        password = request.form.get("password","").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
         if not email or not password:
             flash("Email and password are required", "danger")
             return redirect(url_for("login_route"))
@@ -672,8 +668,8 @@ def login_route():
 @app.route("/register", methods=["GET", "POST"])
 def register_route():
     if request.method == "POST":
-        email = request.form.get("email","").strip()
-        password = request.form.get("password","").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
         if not email or not password:
             flash("Email + password required", "danger")
             return redirect(url_for("register_route"))
@@ -688,7 +684,7 @@ def register_route():
 
 @app.route("/logout")
 def logout_route():
-    for key in ["logged_in","user_id","user_email","access_token"]:
+    for key in ["logged_in", "user_id", "user_email", "access_token"]:
         session.pop(key, None)
     flash("Logged out successfully.", "info")
     return redirect(url_for("main_home"))
@@ -727,15 +723,15 @@ def restart():
     flash("Session restarted (NPC data cleared).", "info")
     return redirect(url_for("personalize"))
 
-@app.route("/personalize", methods=["GET","POST"])
+@app.route("/personalize", methods=["GET", "POST"])
 @login_required
 def personalize():
     if request.method == "POST" and "save_personalization" in request.form:
         session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
         session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
-        session["user_background"] = request.form.get("user_background","").strip()
+        session["user_background"] = request.form.get("user_background", "").strip()
         update_npc_info(request.form)
-        npc_gender = session.get("npc_gender","").lower()
+        npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
@@ -758,28 +754,28 @@ def personalize():
         return render_template("personalize.html",
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
-            user_age_options=["20","25","30","35","40","45"],
+            user_age_options=["20", "25", "30", "35", "40", "45"],
             npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20","25","30","35","40","45"],
-            npc_gender_options=["Female","Male","Non-binary","Other"],
+            npc_age_options=["20", "25", "30", "35", "40", "45"],
+            npc_gender_options=["Female", "Male", "Non-binary", "Other"],
             hair_style_options=HAIR_STYLE_OPTIONS,
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
-            current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
-            environment_options=["Cafe","Library","Gym","Beach","Park"],
-            encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
+            occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
+            current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
+            environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
+            encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
-@app.route("/mid_game_personalize", methods=["GET","POST"])
+@app.route("/mid_game_personalize", methods=["GET", "POST"])
 @login_required
 def mid_game_personalize():
     if request.method == "POST" and "update_npc" in request.form:
         update_npc_info(request.form)
-        npc_gender = session.get("npc_gender","").lower()
+        npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
@@ -790,37 +786,37 @@ def mid_game_personalize():
     return render_template("mid_game_personalize.html",
         title="Update Settings",
         npc_name_options=NPC_NAME_OPTIONS,
-        npc_age_options=["20","25","30","35","40","45"],
-        npc_gender_options=["Female","Male","Non-binary","Other"],
+        npc_age_options=["20", "25", "30", "35", "40", "45"],
+        npc_gender_options=["Female", "Male", "Non-binary", "Other"],
         hair_style_options=HAIR_STYLE_OPTIONS,
         body_type_options=BODY_TYPE_OPTIONS,
         hair_color_options=HAIR_COLOR_OPTIONS,
         npc_personality_options=NPC_PERSONALITY_OPTIONS,
         clothing_options=CLOTHING_OPTIONS,
-        occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
-        current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
-        environment_options=["Cafe","Library","Gym","Beach","Park"],
-        encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
+        occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
+        current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
+        environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
+        encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
         ethnicity_options=ETHNICITY_OPTIONS
     )
 
-@app.route("/interaction", methods=["GET","POST"])
+@app.route("/interaction", methods=["GET", "POST"])
 @login_required
 def interaction():
     if request.method == "GET":
-        affection = session.get("affectionScore",0.0)
-        trust = session.get("trustScore",5.0)
-        mood = session.get("npcMood","Neutral")
-        cstage = session.get("currentStage",1)
+        affection = session.get("affectionScore", 0.0)
+        trust = session.get("trustScore", 5.0)
+        mood = session.get("npcMood", "Neutral")
+        cstage = session.get("currentStage", 1)
         st_label = STAGE_INFO[cstage]["label"]
         st_desc = STAGE_INFO[cstage]["desc"]
-        nxt_thresh = session.get("nextStageThreshold",999)
-        stage_unlocks = session.get("stage_unlocks",{})
-        last_narration = session.get("narrationText","(No scene yet.)")
-        scene_prompt = session.get("scene_image_prompt","")
-        scene_url = session.get("scene_image_url",None)
-        seed_used = session.get("scene_image_seed",None)
-        interaction_log = session.get("interaction_log",[])
+        nxt_thresh = session.get("nextStageThreshold", 999)
+        stage_unlocks = session.get("stage_unlocks", {})
+        last_narration = session.get("narrationText", "(No scene yet.)")
+        scene_prompt = session.get("scene_image_prompt", "")
+        scene_url = session.get("scene_image_url", None)
+        seed_used = session.get("scene_image_seed", None)
+        interaction_log = session.get("interaction_log", [])
 
         return render_template("interaction.html",
             title="Interact with NPC",
@@ -838,26 +834,26 @@ def interaction():
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
             npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20","25","30","35","40","45"],
-            npc_gender_options=["Female","Male","Non-binary","Other"],
+            npc_age_options=["20", "25", "30", "35", "40", "45"],
+            npc_gender_options=["Female", "Male", "Non-binary", "Other"],
             hair_style_options=HAIR_STYLE_OPTIONS,
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
-            current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
-            environment_options=["Cafe","Library","Gym","Beach","Park"],
-            encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
+            occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
+            current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
+            environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
+            encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
             ethnicity_options=ETHNICITY_OPTIONS
         )
     else:
         if "submit_action" in request.form:
-            user_action = request.form.get("user_action","").strip()
-            affection = session.get("affectionScore",0.0)
-            trust = session.get("trustScore",5.0)
-            mood = session.get("npcMood","Neutral")
-            cstage = session.get("currentStage",1)
+            user_action = request.form.get("user_action", "").strip()
+            affection = session.get("affectionScore", 0.0)
+            trust = session.get("trustScore", 5.0)
+            mood = session.get("npcMood", "Neutral")
+            cstage = session.get("currentStage", 1)
             log_message(f"User: {user_action}")
 
             result_text = interpret_npc_state(
@@ -875,13 +871,13 @@ def interaction():
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
                     try:
-                        affect_delta = float(s.split(":",1)[1].strip())
+                        affect_delta = float(s.split(":", 1)[1].strip())
                     except:
                         affect_delta = 0.0
                 elif s.startswith("NARRATION:"):
-                    narration_txt = s.split(":",1)[1].strip()
+                    narration_txt = s.split(":", 1)[1].strip()
                 elif s.startswith("IMAGE_PROMPT:"):
-                    image_prompt = s.split(":",1)[1].strip()
+                    image_prompt = s.split(":", 1)[1].strip()
 
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
@@ -899,7 +895,7 @@ def interaction():
 
         elif "update_affection" in request.form:
             try:
-                new_val = float(request.form.get("affection_new","0.0").strip())
+                new_val = float(request.form.get("affection_new", "0.0").strip())
             except:
                 new_val = 0.0
             session["affectionScore"] = new_val
@@ -908,10 +904,10 @@ def interaction():
             return redirect(url_for("interaction"))
 
         elif "update_stage_unlocks" in request.form:
-            su = session.get("stage_unlocks",{})
-            for i in range(1,7):
+            su = session.get("stage_unlocks", {})
+            for i in range(1, 7):
                 key = f"stage_unlock_{i}"
-                su[i] = request.form.get(key,"").strip()
+                su[i] = request.form.get(key, "").strip()
             session["stage_unlocks"] = su
             log_message("SYSTEM: Stage unlock text updated mid-game.")
             return redirect(url_for("interaction"))
@@ -924,19 +920,19 @@ def interaction():
             return redirect(url_for("interaction"))
 
         elif "generate_image" in request.form:
-            user_supplied_prompt = request.form.get("scene_image_prompt","").strip()
+            user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
-            chosen_model = request.form.get("model_type","flux")
+            chosen_model = request.form.get("model_type", "flux")
             if chosen_model == "cyberpony":
-                chosen_scheduler = request.form.get("cyber_scheduler","K_EULER")
+                chosen_scheduler = request.form.get("cyber_scheduler", "K_EULER")
             elif chosen_model == "realistic":
-                chosen_scheduler = request.form.get("realistic_scheduler","EulerA")
+                chosen_scheduler = request.form.get("realistic_scheduler", "EulerA")
             else:
                 chosen_scheduler = None
             try:
-                steps = int(request.form.get("num_steps","60"))
+                steps = int(request.form.get("num_steps", "60"))
             except:
                 steps = 60
             handle_image_generation_from_prompt(
@@ -950,19 +946,19 @@ def interaction():
             return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
-            user_supplied_prompt = request.form.get("scene_image_prompt","").strip()
+            user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
-            chosen_model = request.form.get("model_type","flux")
+            chosen_model = request.form.get("model_type", "flux")
             if chosen_model == "cyberpony":
-                chosen_scheduler = request.form.get("cyber_scheduler","K_EULER")
+                chosen_scheduler = request.form.get("cyber_scheduler", "K_EULER")
             elif chosen_model == "realistic":
-                chosen_scheduler = request.form.get("realistic_scheduler","EulerA")
+                chosen_scheduler = request.form.get("realistic_scheduler", "EulerA")
             else:
                 chosen_scheduler = None
             try:
-                steps = int(request.form.get("num_steps","60"))
+                steps = int(request.form.get("num_steps", "60"))
             except:
                 steps = 60
             handle_image_generation_from_prompt(
@@ -997,7 +993,7 @@ def full_story():
 @app.route("/continue_erotica", methods=["POST"])
 @login_required
 def continue_erotica():
-    previous_text = request.form.get("previous_text","").strip()
+    previous_text = request.form.get("previous_text", "").strip()
     continue_prompt = f"""
 You are continuing an erotic story.
 Pick up exactly where this left off and continue
@@ -1048,19 +1044,19 @@ Now produce a single narrative (600-900 words), focusing on emotional + physical
     erotica_text = erotica_resp.text.strip()
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
-@app.route("/stage_unlocks", methods=["GET","POST"])
+@app.route("/stage_unlocks", methods=["GET", "POST"])
 @login_required
 def stage_unlocks():
     if request.method == "POST" and "update_stage_unlocks" in request.form:
-        su = session.get("stage_unlocks",{})
-        for i in range(1,7):
+        su = session.get("stage_unlocks", {})
+        for i in range(1, 7):
             key = f"stage_unlock_{i}"
-            su[i] = request.form.get(key,"").strip()
+            su[i] = request.form.get(key, "").strip()
         session["stage_unlocks"] = su
         log_message("SYSTEM: Stage unlock text updated.")
         return redirect(url_for("interaction"))
     return render_template("stage_unlocks.html",
-        stage_unlocks=session.get("stage_unlocks",{}),
+        stage_unlocks=session.get("stage_unlocks", {}),
         title="Stage Unlocks"
     )
 
