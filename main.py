@@ -418,6 +418,7 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
         "num_inference_steps": steps,
         "guidance_scale": 5,
         "clip_skip": 2,
+        "disable_safety_checker": True,
         "refine": "no_refiner",
         "lora_scale": 0.6,
         "num_outputs": 1,
