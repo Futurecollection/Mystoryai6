@@ -534,12 +534,8 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     # 2) Save the image to output.jpg
     _save_image(result)
 
-    # 3) If it's a string => store in session, else store None
-    if isinstance(result, str):
-        session["scene_image_url"] = result
-    else:
-        # It's a file-like object => can't store in session
-        session["scene_image_url"] = None
+    # 3) Always set the URL since we have a local file
+    session["scene_image_url"] = url_for('view_image')
 
     # 4) Store prompt & seed in session
     session["scene_image_prompt"] = prompt_text
