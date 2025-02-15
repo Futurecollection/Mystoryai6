@@ -392,7 +392,10 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
             "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
             replicate_input
         )
-        return result
+        # Return in consistent format for _save_image
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
     except Exception as e:
         print("[ERROR] Pony-SDXL call failed:", e)
         return None
@@ -430,7 +433,10 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
             "charlesmccarthy/cyberrealisticpony_v40:7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665",
             replicate_input
         )
-        return result
+        # Return in consistent format for _save_image
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
     except Exception as e:
         print("[ERROR] CyberRealisticPony call failed:", e)
         return None
