@@ -15,7 +15,7 @@ from supabase_session import SupabaseSessionInterface  # your custom file
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
-# 3) Replicate (using older syntax)
+# 3) Replicate
 import replicate
 
 # --------------------------------------------------------------------------
@@ -54,7 +54,6 @@ safety_settings = {
     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
-
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
@@ -118,7 +117,7 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
 # --------------------------------------------------------------------------
-# Utility Functions
+# Utility
 # --------------------------------------------------------------------------
 def log_message(msg: str):
     logs = session.get("interaction_log", [])
@@ -157,7 +156,10 @@ def check_stage_up_down(new_aff: float):
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
 def validate_age_content(text: str) -> bool:
-    age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "highschool", "high school", "18 year", "19 year"]
+    age_keywords = [
+        "teen", "teenage", "underage", "minor", "child",
+        "kid", "highschool", "high school", "18 year", "19 year"
+    ]
     return any(k in text.lower() for k in age_keywords)
 
 # --------------------------------------------------------------------------
@@ -194,10 +196,16 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 # --------------------------------------------------------------------------
-# interpret_npc_state => LLM (3-line output)
+# interpret_npc_state => LLM
 # --------------------------------------------------------------------------
-def interpret_npc_state(affection: float, trust: float, npc_mood: str,
-                        current_stage: int, last_user_action: str, full_history: str = "") -> str:
+def interpret_npc_state(
+    affection: float,
+    trust: float,
+    npc_mood: str,
+    current_stage: int,
+    last_user_action: str,
+    full_history: str = ""
+) -> str:
     """
     Produces exactly 3 lines:
       1) AFFECT_CHANGE_FINAL: ... (net affection shift)
@@ -230,10 +238,6 @@ For each user action, produce exactly 3 lines (no extra lines):
 Line 1 => AFFECT_CHANGE_FINAL: ... (net affection shift between -2.0 and +2.0)
 Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, dialogue, and actions)
 Line 3 => IMAGE_PROMPT: ... (a customized, structured image prompt)
-Using guidelines from the Pony Realism Compendium, dynamically tailor the image prompt based on the current scene and NPC details.
-For inspiration, your prompt might be similar to:
-"high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], [Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, [Detailed Action Description], taken by Canon R5, 85mm lens."
-Do not hard-code fixed adjectives; instead, customize dynamically from the context.
 
 Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
@@ -241,6 +245,7 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 """
+
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
     max_retries = 2
     for attempt in range(max_retries):
@@ -256,63 +261,14 @@ Background (do not contradict):
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
         except Exception as e:
             log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
+
     return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 IMAGE_PROMPT: (fallback)
 """
 
 # --------------------------------------------------------------------------
-# generate_image_prompt_from_interpret_input => single-line detailed prompt
-# --------------------------------------------------------------------------
-def generate_image_prompt_from_interpret_input() -> str:
-    """
-    Called when the user presses "generate_prompt". Uses the current context and outputs one line.
-    The prompt should be uniquely customized based on the current scene and NPC details.
-    For example, your output might look like:
-"high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], [Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, [Detailed Action Description], taken by Canon R5, 85mm lens."
-    Use the context to generate a unique, customized prompt.
-    """
-    prepare_history()
-    memory_summary = session.get("log_summary", "")
-    recent_lines = session.get("interaction_log", [])
-    combined_history = memory_summary + "\n" + "\n".join(recent_lines)
-    personalization = build_personalization_string()
-
-    system_instructions = f"""
-You are an assistant specialized in generating highly detailed and ultrarealistic image prompts for an AI image generation system.
-Using the context below and drawing inspiration from guidelines in the Pony Realism Compendium, generate a single-line image prompt that is uniquely customized.
-Your prompt should dynamically describe the NPC's appearance—including facial features, hair, body type, and clothing—and the scene's environment and detailed current action.
-For inspiration, your prompt might be similar to:
-"high quality, detailed, ultrarealistic photography of Cassie Cage (24 years old, American, with expressive features and dynamic wavy blonde hair, athletic build, wearing sleek lingerie) in a luxurious penthouse setting with dramatic volumetric lighting and dynamic action, taken by Canon R5, 85mm lens."
-Do not output template placeholders; fill in the details from the context.
-Output only one line, with no extra commentary.
-
-CONTEXT:
-{personalization}
-
-RECENT_LOG:
-{combined_history}
-"""
-    try:
-        resp = model.generate_content(
-            system_instructions,
-            generation_config={"temperature": 0.3, "max_output_tokens": 100},
-            safety_settings=safety_settings
-        )
-        if resp and resp.text.strip():
-            return resp.text.strip()
-        else:
-            return ("high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], "
-                    "[Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, "
-                    "[Detailed Action Description], taken by Canon R5, 85mm lens.")
-    except Exception as e:
-        log_message(f"[SYSTEM] generate_image_prompt_from_interpret_input() error: {str(e)}")
-        return ("high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], "
-                "[Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, "
-                "[Detailed Action Description], taken by Canon R5, 85mm lens.")
-
-# --------------------------------------------------------------------------
-# Flux-Schnell Image Generation (Older replicate usage)
+# Flux-Schnell
 # --------------------------------------------------------------------------
 def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     final_prompt = f"Portrait photo, {prompt}"
@@ -335,22 +291,17 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
         return None
 
 # --------------------------------------------------------------------------
-# Pony-SDXL Image Generation (New replicate model option)
+# Pony-SDXL
 # --------------------------------------------------------------------------
 def generate_pony_sdxl_image_safely(prompt: str, seed: int = None) -> str:
     """
-    Generates an image using the Pony-SDXL model from charlesmccarthy,
-    version b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a.
-    Uses 60 steps and the scheduler "DPM++ 2M SDE Karras" for high-quality output.
-    Additional settings include:
-      - Auto-prepending a positive prompt:
-        "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
-      - Negative prompt: "low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name,(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs,(mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
-      - Clip last layer set to -2.
-      - CFG scale set to 5.
+    Positive prompt auto-prepended:
+    score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)
+
+    Negative prompt is built in. CFG=5, steps=60, etc.
     """
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
-    full_prompt = auto_positive + " " + prompt
+    final_prompt = f"{auto_positive}, {prompt}"
 
     replicate_input = {
         "vae": "sdxl-vae-fp16-fix",
@@ -359,22 +310,24 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None) -> str:
         "steps": 60,
         "width": 1184,
         "height": 864,
-        "prompt": full_prompt,
+        "prompt": final_prompt,
         "cfg_scale": 5,
         "scheduler": "DPM++ 2M SDE Karras",
         "batch_size": 1,
         "guidance_rescale": 0.7,
         "prepend_preprompt": True,
-        "negative_prompt": ("low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, "
-                            "worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name,"
-                            "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
-                            "floating limbs,(mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"),
+        "negative_prompt": (
+            "low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, "
+            "worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name,"
+            "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
+            "floating limbs,(mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
+        ),
         "clip_last_layer": -2
     }
     if seed is not None:
         replicate_input["seed"] = seed
 
-    print(f"[DEBUG] replicate => PONY-SDXL prompt={full_prompt}, seed={seed}")
+    print(f"[DEBUG] replicate => PONY-SDXL prompt={final_prompt}, seed={seed}")
     try:
         result = replicate.run(
             "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
@@ -392,46 +345,49 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None) -> str:
         return None
 
 # --------------------------------------------------------------------------
-# CyberRealisticPony Image Generation (New model option)
+# CyberRealisticPony
 # --------------------------------------------------------------------------
 def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None) -> str:
     """
-    Generates an image using the CyberRealisticPony model from charlesmccarthy,
-    version: 7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665.
-    Uses the following parameters:
-      - width: 1024, height: 1024
-      - refine: "no_refiner"
-      - scheduler: "K_EULER"
-      - lora_scale: 0.6
-      - num_outputs: 1
-      - guidance_scale: 5 (default CFG scale)
-      - apply_watermark: True
-      - high_noise_frac: 0.8
-      - negative_prompt: "" (empty)
-      - prompt_strength: 0.8
-      - num_inference_steps: 50 
-      - disable_safety_checker: True
+    Positive prompt auto-prepended:
+    score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)
+
+    Negative prompt:
+    score_6, score_5, score_4, simplified, abstract, unrealistic, impressionistic,
+    low resolution, lowres, bad anatomy, bad hands, missing fingers, worst quality,
+    low quality, normal quality, cartoon, anime, drawing, sketch, illustration,
+    artificial, poor quality
+
+    DPM++ SDE, 50 steps, CFG=5, clip_skip=2 (passed if recognized).
     """
+    auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
+    final_prompt = f"{auto_positive}, {prompt}"
+
     replicate_input = {
         "width": 1024,
         "height": 1024,
-        "prompt": prompt,
+        "prompt": final_prompt,
+        "negative_prompt": (
+            "score_6, score_5, score_4, simplified, abstract, unrealistic, impressionistic, "
+            "low resolution, lowres, bad anatomy, bad hands, missing fingers, worst quality, "
+            "low quality, normal quality, cartoon, anime, drawing, sketch, illustration, "
+            "artificial, poor quality"
+        ),
+        "scheduler": "DPM++ SDE",
+        "num_inference_steps": 50,
+        "guidance_scale": 5,
+        "clip_skip": 2,  # Some models may ignore this if not implemented
         "refine": "no_refiner",
-        "scheduler": "K_EULER",
         "lora_scale": 0.6,
         "num_outputs": 1,
-        "guidance_scale": 5,
         "apply_watermark": True,
         "high_noise_frac": 0.8,
-        "negative_prompt": "",
-        "prompt_strength": 0.8,
-        "num_inference_steps": 50,
-        "disable_safety_checker": True
+        "prompt_strength": 0.8
     }
     if seed is not None:
         replicate_input["seed"] = seed
 
-    print(f"[DEBUG] replicate => CyberRealisticPony prompt={prompt}, seed={seed}")
+    print(f"[DEBUG] replicate => CyberRealisticPony prompt={final_prompt}, seed={seed}")
     try:
         result = replicate.run(
             "charlesmccarthy/cyberrealisticpony_v40:7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665",
@@ -453,8 +409,11 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None) -> s
 # --------------------------------------------------------------------------
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False, model_type: str = "flux"):
     """
-    Generates an image from the given prompt using the selected model.
-    model_type can be "flux", "pony", or "cyberpony".
+    Generates an image from the given prompt using the selected model:
+      - "flux"
+      - "pony"
+      - "cyberpony"
+
     No limit on generating multiple images per turn.
     """
     existing_seed = session.get("scene_image_seed")
@@ -711,9 +670,9 @@ def personalize():
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
             occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
-            current_situation_options=CURRENT_SITUATION_OPTIONS,
-            environment_options=ENVIRONMENT_OPTIONS,
-            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+            current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
+            environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
+            encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
@@ -741,9 +700,9 @@ def mid_game_personalize():
         npc_personality_options=NPC_PERSONALITY_OPTIONS,
         clothing_options=CLOTHING_OPTIONS,
         occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
-        current_situation_options=CURRENT_SITUATION_OPTIONS,
-        environment_options=ENVIRONMENT_OPTIONS,
-        encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+        current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
+        environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
+        encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
         ethnicity_options=ETHNICITY_OPTIONS
     )
 
@@ -789,9 +748,9 @@ def interaction():
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
             occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
-            current_situation_options=CURRENT_SITUATION_OPTIONS,
-            environment_options=ENVIRONMENT_OPTIONS,
-            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+            current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
+            environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
+            encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
             ethnicity_options=ETHNICITY_OPTIONS
         )
     else:
