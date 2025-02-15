@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Top navigation buttons -->
+<!-- Top Navigation -->
 <div class="row mb-3">
   <div class="col text-start">
     <a href="{{ url_for('full_story') }}" class="btn btn-info">Full Narration</a>
@@ -13,7 +13,7 @@
 
 <h1 style="color: #ff5789;">Interaction</h1>
 
-<!-- Display Scene / Narration from LLM -->
+<!-- Scene / Narration from LLM -->
 <div class="border p-3 mb-3" style="white-space: pre-line; background-color: #4a0d0d; color: #f8d0d0;">
   <strong>Scene:</strong> {{ npc_narration }}
 </div>
@@ -34,14 +34,13 @@
   <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
   <input type="text" class="form-control mb-2" name="user_action" placeholder="He quietly asks how she's doing...">
   <button type="submit" name="submit_action" class="btn btn-success">Send Move</button>
-  <div class="mt-2 p-3" style="background-color: #2a0d0a; border: 1px solid #ff5789; border-radius: 5px;">
+  <div class="mt-2 p-3" style="background-color: #2a0a0a; border: 1px solid #ff5789; border-radius: 5px;">
     <div style="color: #f8d0d0; font-size: 0.7em;">
       <strong>Tips:</strong><br>
-      Send an empty action to continue with the premade bio.<br>
-      Type "OOC" followed by instructions to guide the story.<br>
-      Example: "OOC more dialogue" or "OOC she gives me her number".<br>
-      Use "OOC" to fix/edit narration.<br>
-      E.g.: "OOC she actually has no plans this afternoon"
+      Send empty action to start premade bio or continue scene<br>
+      Type "OOC" followed by instructions to guide the story<br>
+      For example: "OOC more dialogue" or "OOC she gives me her number"<br>
+      Use "OOC" to fix/edit narration
     </div>
   </div>
 </form>
@@ -54,14 +53,25 @@
   <div class="mb-3">
     <button type="submit" name="generate_prompt" class="btn btn-info">Auto Generate Scene Prompt</button>
   </div>
+
   <textarea name="scene_image_prompt" rows="2" class="form-control" style="background-color: #4a0d0d; color: #f8d0d0;">{{ scene_image_prompt }}</textarea>
 
+  <!-- Model Selection Dropdown -->
   <div class="mt-2">
     <label class="form-label" style="color: #f8d0d0;">Choose Model:</label>
-    <select name="model_type" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="flux">Flux‑Schnell</option>
-      <option value="pony">Pony‑SDXL</option>
+    <select name="model_type" class="form-control mb-2" id="model_type" style="background-color: #4a0d0d; color: #f8d0d0;">
+      <option value="flux">Flux-Schnell</option>
+      <option value="pony">Pony-SDXL</option>
       <option value="cyberpony">CyberRealisticPony</option>
+    </select>
+  </div>
+
+  <!-- Cyber Scheduler Dropdown -->
+  <div class="mt-2" id="cyber_scheduler_div" style="display: none;">
+    <label class="form-label" style="color: #f8d0d0;">Choose Cyber Pony Scheduler:</label>
+    <select name="cyber_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
+      <option value="K_EULER_ANCESTRAL">K_EULER_ANCESTRAL</option>
+      <option value="dpmspp_2m">DPMS++ 2M</option>
     </select>
   </div>
 
@@ -93,7 +103,7 @@
 
 <!-- Stage Unlocks Button -->
 <div class="row mb-3">
-  <div class="col">
+  <div class="col-12">
     <a href="{{ url_for('stage_unlocks') }}" class="btn btn-warning">Edit Stage Unlocks</a>
   </div>
 </div>
@@ -102,11 +112,24 @@
 
 <!-- Mid-Game Personalization Button -->
 <div class="row mb-3">
-  <div class="col">
+  <div class="col-12">
     <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-warning">Update Character & Environment</a>
   </div>
 </div>
 
 <hr style="border-top: 1px solid #ff5789;">
 <a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">Restart Entire Story</a>
+
+<script>
+  // JavaScript to show/hide the cyber scheduler dropdown
+  document.getElementById('model_type').addEventListener('change', function() {
+    var model = this.value;
+    var schedulerDiv = document.getElementById('cyber_scheduler_div');
+    if (model === 'cyberpony') {
+      schedulerDiv.style.display = 'block';
+    } else {
+      schedulerDiv.style.display = 'none';
+    }
+  });
+</script>
 {% endblock %}
