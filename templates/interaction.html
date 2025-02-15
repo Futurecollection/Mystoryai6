@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Top Navigation Buttons -->
+<!-- Loading Spinner (hidden by default) -->
+<div id="loading" class="text-center" style="display:none; margin-bottom:10px;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<!-- Top Navigation -->
 <div class="row mb-3">
   <div class="col text-start">
     <a href="{{ url_for('full_story') }}" class="btn btn-info">Full Narration</a>
@@ -13,13 +20,13 @@
 
 <h1 style="color: #ff5789;">Interaction</h1>
 
-<!-- Display Scene -->
+<!-- Scene / Narration -->
 <div class="border p-3 mb-3" style="white-space: pre-line; background-color: #4a0d0d; color: #f8d0d0;">
   <strong>Scene:</strong> {{ npc_narration }}
 </div>
 
 <!-- USER ACTION FORM -->
-<form method="POST" class="mb-4">
+<form method="POST" class="mb-4" onsubmit="showLoading()">
   <!-- Quick Action Buttons -->
   <div class="mb-3">
     <button type="button" onclick="prefillAction('OOC: More dialogue')" class="btn btn-outline-info me-2">More Dialogue</button>
@@ -29,6 +36,9 @@
   <script>
     function prefillAction(text) {
       document.querySelector('input[name="user_action"]').value = text;
+    }
+    function showLoading() {
+      document.getElementById("loading").style.display = "block";
     }
   </script>
   <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
@@ -40,7 +50,7 @@
 
 <!-- SCENE IMAGE PROMPT FORM -->
 <h3 style="color: #ff5789;">Scene Image Prompt</h3>
-<form method="POST" class="mb-3">
+<form method="POST" class="mb-3" onsubmit="showLoading()">
   <div class="mb-3">
     <button type="submit" name="generate_prompt" class="btn btn-info">Auto Generate Scene Prompt</button>
   </div>
@@ -54,16 +64,34 @@
       <option value="flux">Flux-Schnell</option>
       <option value="pony">Pony-SDXL</option>
       <option value="cyberpony">CyberRealisticPony</option>
+      <option value="realistic">Realistic Vision v5.1</option>
     </select>
   </div>
 
-  <!-- Cyber Scheduler Dropdown (Only K_EULER_ANCESTRAL or KarrasDPM) -->
+  <!-- Cyber Scheduler Dropdown (Only for CyberRealisticPony) -->
   <div class="mt-2" id="cyber_scheduler_div" style="display: none;">
-    <label class="form-label" style="color: #f8d0d0;">Choose Cyber Pony Scheduler:</label>
+    <label class="form-label" style="color: #f8d0d0;">Cyber Pony Scheduler:</label>
     <select name="cyber_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="K_EULER_ANCESTRAL">K_EULER_ANCESTRAL</option>
+      <option value="K_EULER">K_EULER</option>
       <option value="KarrasDPM">KarrasDPM</option>
     </select>
+  </div>
+
+  <!-- Realistic Vision Scheduler Dropdown -->
+  <div class="mt-2" id="realistic_scheduler_div" style="display: none;">
+    <label class="form-label" style="color: #f8d0d0;">Realistic Vision Scheduler:</label>
+    <select name="realistic_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
+      <option value="EulerA">EulerA</option>
+      <option value="MultistepDPM-Solver">MultistepDPM-Solver</option>
+    </select>
+  </div>
+
+  <!-- Slider for Number of Steps (Only for Pony, CyberPony, Realistic) -->
+  <div class="mt-2" id="steps_div" style="display: none;">
+    <label class="form-label" style="color: #f8d0d0;">Number of Steps (20-100):</label>
+    <input type="range" class="form-range" min="20" max="100" name="num_steps" value="60" 
+           oninput="this.nextElementSibling.value = this.value">
+    <output>60</output>
   </div>
 
   <div class="mt-3">
@@ -84,7 +112,7 @@
 <hr style="border-top: 1px solid #ff5789;">
 
 <!-- AFFECTION OVERRIDE FORM -->
-<form method="POST" class="mb-4">
+<form method="POST" class="mb-4" onsubmit="showLoading()">
   <label class="form-label" style="color: #f8d0d0;">Override Affection Score:</label>
   <input type="number" step="0.1" class="form-control mb-2" name="affection_new" value="{{ affection_score }}">
   <button type="submit" name="update_affection" class="btn btn-info">Update Affection</button>
@@ -94,7 +122,7 @@
 
 <!-- Stage Unlocks Button -->
 <div class="row mb-3">
-  <div class="col">
+  <div class="col-12">
     <a href="{{ url_for('stage_unlocks') }}" class="btn btn-warning">Edit Stage Unlocks</a>
   </div>
 </div>
@@ -103,7 +131,7 @@
 
 <!-- Mid-Game Personalization Button -->
 <div class="row mb-3">
-  <div class="col">
+  <div class="col-12">
     <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-warning">Update Character & Environment</a>
   </div>
 </div>
@@ -112,16 +140,43 @@
 <a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">Restart Entire Story</a>
 
 <script>
-  // Show/hide the scheduler dropdown if user picks "cyberpony"
+  function showLoading() {
+    document.getElementById("loading").style.display = "block";
+  }
+
   document.getElementById('model_type').addEventListener('change', function() {
     var model = this.value;
-    var schedulerDiv = document.getElementById('cyber_scheduler_div');
-    if (model === 'cyberpony') {
-      schedulerDiv.style.display = 'block';
+    var stepsDiv = document.getElementById('steps_div');
+    var cyberDiv = document.getElementById('cyber_scheduler_div');
+    var realDiv = document.getElementById('realistic_scheduler_div');
+
+    if (model === 'pony' || model === 'cyberpony' || model === 'realistic') {
+      stepsDiv.style.display = 'block';
     } else {
-      schedulerDiv.style.display = 'none';
+      stepsDiv.style.display = 'none';
+    }
+
+    if (model === 'cyberpony') {
+      cyberDiv.style.display = 'block';
+    } else {
+      cyberDiv.style.display = 'none';
+    }
+
+    if (model === 'realistic') {
+      realDiv.style.display = 'block';
+    } else {
+      realDiv.style.display = 'none';
     }
   });
-</script>
 
+  // Trigger initial change event
+  document.getElementById('model_type').dispatchEvent(new Event('change'));
+
+  // Show spinner on any form submission
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
+      document.getElementById("loading").style.display = "block";
+    });
+  });
+</script>
 {% endblock %}
