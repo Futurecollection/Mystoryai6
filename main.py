@@ -365,7 +365,8 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
         "num_outputs": 1,
         "apply_watermark": True,
         "high_noise_frac": 0.8,
-        "prompt_strength": 0.8
+        "prompt_strength": 0.8,
+        "disable_safety_checker": True # Added here
     }
     if seed is not None:
         replicate_input["seed"] = seed
@@ -669,7 +670,7 @@ def mid_game_personalize():
         npc_name_options=NPC_NAME_OPTIONS,
         npc_age_options=["20", "25", "30", "35", "40", "45"],
         npc_gender_options=["Female", "Male", "Non-binary", "Other"],
-        hair_style_options=HAIR_STYLE_OPTIONS,
+        hairstyle_options=HAIR_STYLE_OPTIONS,
         body_type_options=BODY_TYPE_OPTIONS,
         hair_color_options=HAIR_COLOR_OPTIONS,
         npc_personality_options=NPC_PERSONALITY_OPTIONS,
