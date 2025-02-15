@@ -409,7 +409,8 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None) -> s
       - high_noise_frac: 0.8
       - negative_prompt: "" (empty)
       - prompt_strength: 0.8
-      - num_inference_steps: 50
+      - num_inference_steps: 50 
+      - disable_safety_checker: True
     """
     replicate_input = {
         "width": 1024,
@@ -424,7 +425,8 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None) -> s
         "high_noise_frac": 0.8,
         "negative_prompt": "",
         "prompt_strength": 0.8,
-        "num_inference_steps": 50
+        "num_inference_steps": 50,
+        "disable_safety_checker": True
     }
     if seed is not None:
         replicate_input["seed"] = seed
