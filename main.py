@@ -437,10 +437,14 @@ def generate_realistic_vision_image_safely(
     seed: int = 0,
     steps: int = 20,
     width: int = 512,
-    height: int = 728,
+    height: int = 768,
     guidance: float = 5.0,
     scheduler: str = "EulerA"
 ) -> str:
+    # Ensure dimensions are valid (must be multiples of 8)
+    width = (width // 8) * 8
+    height = (height // 8) * 8
+    
     negative_prompt_text = (
         "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), "
         "text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, "
@@ -454,9 +458,10 @@ def generate_realistic_vision_image_safely(
         "width": width,
         "height": height,
         "prompt": prompt,
-        "guidance": guidance,
+        "guidance_scale": guidance,  # Fixed parameter name
         "scheduler": scheduler,  # "EulerA" or "MultistepDPM-Solver"
-        "negative_prompt": negative_prompt_text
+        "negative_prompt": negative_prompt_text,
+        "num_outputs": 1
     }
     print(f"[DEBUG] replicate => RealisticVision prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, width={width}, height={height}")
     try:
