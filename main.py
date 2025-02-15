@@ -681,7 +681,7 @@ def register_route():
             return redirect(url_for("login_route"))
         except Exception as e:
             flash(f"Registration failed: {e}", "danger")
-            return redirect(url_for("register_route"))
+            return redirectreturn redirect(url_for("register_route"))
     return render_template("register.html", title="Register")
 
 @app.route("/logout")
@@ -857,6 +857,9 @@ def interaction():
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
             log_message(f"User: {user_action}")
+
+            # Clear previous image URL to avoid stale data
+            session["scene_image_url"] = None
 
             result_text = interpret_npc_state(
                 affection=affection,
