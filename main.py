@@ -118,7 +118,7 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
 # --------------------------------------------------------------------------
-# Utility Functions
+# Utility
 # --------------------------------------------------------------------------
 def log_message(msg: str):
     logs = session.get("interaction_log", [])
@@ -197,7 +197,7 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 # --------------------------------------------------------------------------
-# interpret_npc_state => LLM (3-line output)
+# interpret_npc_state => LLM
 # --------------------------------------------------------------------------
 def interpret_npc_state(
     affection: float,
@@ -209,9 +209,9 @@ def interpret_npc_state(
 ) -> str:
     """
     Produces exactly 3 lines:
-      1) AFFECT_CHANGE_FINAL: ... (net affection shift)
-      2) NARRATION: ... (200-300 words)
-      3) IMAGE_PROMPT: ... (a structured, detailed prompt)
+      1) AFFECT_CHANGE_FINAL: ...
+      2) NARRATION: ...
+      3) IMAGE_PROMPT: ...
     """
     prepare_history()
     memory_summary = session.get("log_summary", "")
@@ -267,54 +267,7 @@ IMAGE_PROMPT: (fallback)
 """
 
 # --------------------------------------------------------------------------
-# generate_image_prompt_from_interpret_input => single-line detailed prompt
-# --------------------------------------------------------------------------
-def generate_image_prompt_from_interpret_input() -> str:
-    """
-    Called when the user presses "generate_prompt". Uses the current context and outputs one line.
-    The prompt should be uniquely customized based on the current scene and NPC details.
-    """
-    prepare_history()
-    memory_summary = session.get("log_summary", "")
-    recent_lines = session.get("interaction_log", [])
-    combined_history = memory_summary + "\n" + "\n".join(recent_lines)
-    personalization = build_personalization_string()
-
-    system_instructions = f"""
-You are an assistant specialized in generating highly detailed and ultrarealistic image prompts for an AI image generation system.
-Using the context below and drawing inspiration from guidelines in the Pony Realism Compendium, generate a single-line image prompt that is uniquely customized.
-Your prompt should dynamically describe the NPC's appearance—including facial features, hair, body type, and clothing—and the scene's environment and detailed current action.
-For inspiration, your prompt might be similar to:
-"high quality, detailed, ultrarealistic photography of Cassie Cage (24 years old, American, with expressive features and dynamic wavy blonde hair, athletic build, wearing sleek lingerie) in a luxurious penthouse setting with dramatic volumetric lighting and dynamic action, taken by Canon R5, 85mm lens."
-Do not output template placeholders; fill in the details from the context.
-Output only one line, with no extra commentary.
-
-CONTEXT:
-{personalization}
-
-RECENT_LOG:
-{combined_history}
-"""
-    try:
-        resp = model.generate_content(
-            system_instructions,
-            generation_config={"temperature": 0.3, "max_output_tokens": 100},
-            safety_settings=safety_settings
-        )
-        if resp and resp.text.strip():
-            return resp.text.strip()
-        else:
-            return ("high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], "
-                    "[Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, "
-                    "[Detailed Action Description], taken by Canon R5, 85mm lens.")
-    except Exception as e:
-        log_message(f"[SYSTEM] generate_image_prompt_from_interpret_input() error: {str(e)}")
-        return ("high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], "
-                "[Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, "
-                "[Detailed Action Description], taken by Canon R5, 85mm lens.")
-
-# --------------------------------------------------------------------------
-# Flux-Schnell Image Generation
+# Flux-Schnell
 # --------------------------------------------------------------------------
 def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     final_prompt = f"Portrait photo, {prompt}"
@@ -337,7 +290,7 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
         return None
 
 # --------------------------------------------------------------------------
-# Pony-SDXL Image Generation
+# Pony-SDXL
 # --------------------------------------------------------------------------
 def generate_pony_sdxl_image_safely(prompt: str, seed: int = None) -> str:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
@@ -382,9 +335,14 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None) -> str:
         return None
 
 # --------------------------------------------------------------------------
-# CyberRealisticPony Image Generation
+# CyberRealisticPony
 # --------------------------------------------------------------------------
 def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, scheduler: str = "K_EULER_ANCESTRAL") -> str:
+    """
+    Only two valid schedulers:
+    - "K_EULER_ANCESTRAL"
+    - "KarrasDPM"
+    """
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
     negative_prompt_text = (
@@ -398,7 +356,7 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
         "height": 1024,
         "prompt": final_prompt,
         "negative_prompt": negative_prompt_text,
-        "scheduler": scheduler,    # Scheduler provided by user (e.g., "K_EULER_ANCESTRAL" or "dpmspp_2m")
+        "scheduler": scheduler,   # "K_EULER_ANCESTRAL" or "KarrasDPM"
         "num_inference_steps": 50,
         "guidance_scale": 5,
         "clip_skip": 2,
@@ -407,8 +365,7 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
         "num_outputs": 1,
         "apply_watermark": True,
         "high_noise_frac": 0.8,
-        "prompt_strength": 0.8,
-        "disable_safety_checker": True
+        "prompt_strength": 0.8
     }
     if seed is not None:
         replicate_input["seed"] = seed
@@ -443,8 +400,9 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     if model_type == "pony":
         url = generate_pony_sdxl_image_safely(prompt_text, seed=seed_used)
     elif model_type == "cyberpony":
-        # Use the provided scheduler if any; default to "K_EULER_ANCESTRAL"
-        url = generate_cyberrealisticpony_image_safely(prompt_text, seed=seed_used, scheduler=scheduler or "K_EULER_ANCESTRAL")
+        # Only "K_EULER_ANCESTRAL" or "KarrasDPM" are valid
+        chosen_sched = scheduler if scheduler in ["K_EULER_ANCESTRAL", "KarrasDPM"] else "K_EULER_ANCESTRAL"
+        url = generate_cyberrealisticpony_image_safely(prompt_text, seed=seed_used, scheduler=chosen_sched)
     else:
         url = generate_flux_image_safely(prompt_text, seed=seed_used)
 
@@ -458,7 +416,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     session["scene_image_seed"] = seed_used
 
     log_message(f"Scene Image Prompt => {prompt_text}")
-    log_message(f"Image seed={seed_used}, model={model_type}")
+    log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}")
     return url
 
 # --------------------------------------------------------------------------
@@ -477,7 +435,7 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Expanded Dropdown Lists
+# Dropdown Lists
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
     "John", "Michael", "David", "Chris", "James", "Alex",
@@ -848,12 +806,18 @@ def interaction():
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
             chosen_model = request.form.get("model_type", "flux")
-            # If using cyberpony, allow scheduler selection from a field "cyber_scheduler"
             if chosen_model == "cyberpony":
+                # Only two options: "K_EULER_ANCESTRAL" or "KarrasDPM"
                 chosen_scheduler = request.form.get("cyber_scheduler", "K_EULER_ANCESTRAL")
             else:
                 chosen_scheduler = None
-            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=False, model_type=chosen_model, scheduler=chosen_scheduler)
+
+            handle_image_generation_from_prompt(
+                prompt_text=user_supplied_prompt,
+                force_new_seed=False,
+                model_type=chosen_model,
+                scheduler=chosen_scheduler
+            )
             flash(f"Image generated successfully with model => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
 
@@ -867,7 +831,13 @@ def interaction():
                 chosen_scheduler = request.form.get("cyber_scheduler", "K_EULER_ANCESTRAL")
             else:
                 chosen_scheduler = None
-            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=True, model_type=chosen_model, scheduler=chosen_scheduler)
+
+            handle_image_generation_from_prompt(
+                prompt_text=user_supplied_prompt,
+                force_new_seed=True,
+                model_type=chosen_model,
+                scheduler=chosen_scheduler
+            )
             flash(f"New image generated with a new seed using model => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
         else:
