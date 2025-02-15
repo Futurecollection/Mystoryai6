@@ -15,7 +15,7 @@ from supabase_session import SupabaseSessionInterface  # your custom file
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
-# 3) Replicate (older style)
+# 3) Replicate (using older syntax)
 import replicate
 
 # --------------------------------------------------------------------------
@@ -48,7 +48,6 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
-# Safety settings => allowing explicit sexual content
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -56,7 +55,6 @@ safety_settings = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 
-# Common generation config
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
@@ -89,7 +87,6 @@ GENERATED_IMAGE_PATH = "output.jpg"
 # Summarization / Memory (Optional)
 # --------------------------------------------------------------------------
 def prepare_history():
-    """Summarize older lines if needed."""
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
         session["log_summary"] = ""
@@ -121,7 +118,7 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
 # --------------------------------------------------------------------------
-# Utility
+# Utility Functions
 # --------------------------------------------------------------------------
 def log_message(msg: str):
     logs = session.get("interaction_log", [])
@@ -160,7 +157,7 @@ def check_stage_up_down(new_aff: float):
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
 def validate_age_content(text: str) -> bool:
-    age_keywords = ["teen","teenage","underage","minor","child","kid","highschool","high school","18 year","19 year"]
+    age_keywords = ["teen", "teenage", "underage", "minor", "child", "kid", "highschool", "high school", "18 year", "19 year"]
     return any(k in text.lower() for k in age_keywords)
 
 # --------------------------------------------------------------------------
@@ -202,9 +199,10 @@ def build_personalization_string() -> str:
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str, full_history: str = "") -> str:
     """
-    1) AFFECT_CHANGE_FINAL: ...
-    2) NARRATION: ...
-    3) IMAGE_PROMPT: ...
+    Produces exactly 3 lines:
+      1) AFFECT_CHANGE_FINAL: ... (net affection shift)
+      2) NARRATION: ... (200-300 words)
+      3) IMAGE_PROMPT: ... (a structured, detailed prompt)
     """
     prepare_history()
     memory_summary = session.get("log_summary", "")
@@ -225,13 +223,17 @@ CRITICAL AGE RESTRICTION:
 - All characters must be explicitly adults over 20 years old.
 
 SPECIAL INSTRUCTIONS:
-1) If the user's message starts with "OOC", treat everything after it as a direct instruction for how you shape the next story beat or NPC response.
-2) The story must remain consenting, adult-only content, with no minors.
+1) If the user's message starts with "OOC", treat everything after it as direct instructions.
+2) The story must remain consenting and adult-only.
 
 For each user action, produce exactly 3 lines (no extra lines):
 Line 1 => AFFECT_CHANGE_FINAL: ... (net affection shift between -2.0 and +2.0)
 Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, dialogue, and actions)
-Line 3 => IMAGE_PROMPT: ... (short single-line describing NPC's appearance, ephemeral details)
+Line 3 => IMAGE_PROMPT: ... (a customized, structured image prompt)
+Using guidelines from the Pony Realism Compendium, dynamically tailor the image prompt based on the current scene and NPC details.
+For inspiration, your prompt might be similar to:
+"high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], [Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, [Detailed Action Description], taken by Canon R5, 85mm lens."
+Do not hard-code fixed adjectives; instead, customize dynamically from the context.
 
 Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
@@ -239,7 +241,6 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 """
-
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
     max_retries = 2
     for attempt in range(max_retries):
@@ -255,19 +256,21 @@ Background (do not contradict):
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
         except Exception as e:
             log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
-
     return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 IMAGE_PROMPT: (fallback)
 """
 
 # --------------------------------------------------------------------------
-# generate_image_prompt_from_interpret_input => single-line short prompt
+# generate_image_prompt_from_interpret_input => single-line detailed prompt
 # --------------------------------------------------------------------------
 def generate_image_prompt_from_interpret_input() -> str:
     """
-    Called if the user presses "generate_prompt" button. 
-    Returns a single-line short image prompt from the conversation context.
+    Called when the user presses "generate_prompt". Uses the current context and outputs one line.
+    The prompt should be uniquely customized based on the current scene and NPC details.
+    For example, your output might look like:
+"high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], [Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, [Detailed Action Description], taken by Canon R5, 85mm lens."
+    Use the context to generate a unique, customized prompt.
     """
     prepare_history()
     memory_summary = session.get("log_summary", "")
@@ -276,35 +279,41 @@ def generate_image_prompt_from_interpret_input() -> str:
     personalization = build_personalization_string()
 
     system_instructions = f"""
-You are an assistant specialized in generating short image prompts for an AI image generation system.
-Use the following context to produce a single-line prompt describing the NPC's key visual traits (age, gender, ethnicity, body type, hair color, hair style, clothing),
-plus any ephemeral scene details (like sweaty from running, hair messed by wind, etc.).
-Output only one line, no extra commentary.
+You are an assistant specialized in generating highly detailed and ultrarealistic image prompts for an AI image generation system.
+Using the context below and drawing inspiration from guidelines in the Pony Realism Compendium, generate a single-line image prompt that is uniquely customized.
+Your prompt should dynamically describe the NPC's appearance—including facial features, hair, body type, and clothing—and the scene's environment and detailed current action.
+For inspiration, your prompt might be similar to:
+"high quality, detailed, ultrarealistic photography of Cassie Cage (24 years old, American, with expressive features and dynamic wavy blonde hair, athletic build, wearing sleek lingerie) in a luxurious penthouse setting with dramatic volumetric lighting and dynamic action, taken by Canon R5, 85mm lens."
+Do not output template placeholders; fill in the details from the context.
+Output only one line, with no extra commentary.
 
 CONTEXT:
 {personalization}
+
 RECENT_LOG:
 {combined_history}
 """
     try:
         resp = model.generate_content(
             system_instructions,
-            generation_config={"temperature": 0.5, "max_output_tokens": 100},
+            generation_config={"temperature": 0.3, "max_output_tokens": 100},
             safety_settings=safety_settings
         )
         if resp and resp.text.strip():
             return resp.text.strip()
         else:
-            return "Short image prompt not available."
+            return ("high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], "
+                    "[Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, "
+                    "[Detailed Action Description], taken by Canon R5, 85mm lens.")
     except Exception as e:
         log_message(f"[SYSTEM] generate_image_prompt_from_interpret_input() error: {str(e)}")
-        return "Short image prompt not available."
+        return ("high quality, detailed, ultrarealistic photography of [NPC Name] ([Age] years old, [Ethnicity], "
+                "[Custom Hair Description], [Body Type], wearing [Custom Clothing]) in a [Scene Environment] setting, "
+                "[Detailed Action Description], taken by Canon R5, 85mm lens.")
 
 # --------------------------------------------------------------------------
-# Two replicate-based image generation functions (older style)
+# Flux-Schnell Image Generation (Older replicate usage)
 # --------------------------------------------------------------------------
-
-# 1) Flux-Schnell
 def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
@@ -316,9 +325,7 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     }
     if seed:
         replicate_input["seed"] = seed
-
     print(f"[DEBUG] replicate => FLUX prompt={final_prompt}, seed={seed}")
-    # older replicate => replicate.run("owner/model:tag", replicate_input)
     result = replicate.run("black-forest-labs/flux-schnell", replicate_input)
     if isinstance(result, list) and result:
         return str(result[-1])
@@ -327,13 +334,127 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> str:
     else:
         return None
 
+# --------------------------------------------------------------------------
+# Pony-SDXL Image Generation (New replicate model option)
+# --------------------------------------------------------------------------
+def generate_pony_sdxl_image_safely(prompt: str, seed: int = None) -> str:
+    """
+    Generates an image using the Pony-SDXL model from charlesmccarthy,
+    version b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a.
+    Uses 60 steps and the scheduler "DPM++ 2M SDE Karras" for high-quality output.
+    Additional settings include:
+      - Auto-prepending a positive prompt:
+        "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
+      - Negative prompt: "low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name,(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs,(mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
+      - Clip last layer set to -2.
+      - CFG scale set to 5.
+    """
+    auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
+    full_prompt = auto_positive + " " + prompt
 
+    replicate_input = {
+        "vae": "sdxl-vae-fp16-fix",
+        "seed": -1,
+        "model": "ponyRealism21.safetensors",
+        "steps": 60,
+        "width": 1184,
+        "height": 864,
+        "prompt": full_prompt,
+        "cfg_scale": 5,
+        "scheduler": "DPM++ 2M SDE Karras",
+        "batch_size": 1,
+        "guidance_rescale": 0.7,
+        "prepend_preprompt": True,
+        "negative_prompt": ("low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, "
+                            "worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name,"
+                            "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
+                            "floating limbs,(mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"),
+        "clip_last_layer": -2
+    }
+    if seed is not None:
+        replicate_input["seed"] = seed
 
-def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False, model_type: str = "flux"):
-    if session.get("image_generated_this_turn", False):
-        log_message("[SYSTEM] Attempted second image generation this turn, blocked.")
+    print(f"[DEBUG] replicate => PONY-SDXL prompt={full_prompt}, seed={seed}")
+    try:
+        result = replicate.run(
+            "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
+            replicate_input
+        )
+    except Exception as e:
+        print(f"[ERROR] Pony-SDXL call failed: {e}")
         return None
 
+    if isinstance(result, list) and result:
+        return str(result[-1])
+    elif isinstance(result, str):
+        return result
+    else:
+        return None
+
+# --------------------------------------------------------------------------
+# CyberRealisticPony Image Generation (New model option)
+# --------------------------------------------------------------------------
+def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None) -> str:
+    """
+    Generates an image using the CyberRealisticPony model from charlesmccarthy,
+    version: 7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665.
+    Uses the following parameters:
+      - width: 1024, height: 1024
+      - refine: "no_refiner"
+      - scheduler: "K_EULER"
+      - lora_scale: 0.6
+      - num_outputs: 1
+      - guidance_scale: 5 (default CFG scale)
+      - apply_watermark: True
+      - high_noise_frac: 0.8
+      - negative_prompt: "" (empty)
+      - prompt_strength: 0.8
+      - num_inference_steps: 50
+    """
+    replicate_input = {
+        "width": 1024,
+        "height": 1024,
+        "prompt": prompt,
+        "refine": "no_refiner",
+        "scheduler": "K_EULER",
+        "lora_scale": 0.6,
+        "num_outputs": 1,
+        "guidance_scale": 5,
+        "apply_watermark": True,
+        "high_noise_frac": 0.8,
+        "negative_prompt": "",
+        "prompt_strength": 0.8,
+        "num_inference_steps": 50
+    }
+    if seed is not None:
+        replicate_input["seed"] = seed
+
+    print(f"[DEBUG] replicate => CyberRealisticPony prompt={prompt}, seed={seed}")
+    try:
+        result = replicate.run(
+            "charlesmccarthy/cyberrealisticpony_v40:7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665",
+            replicate_input
+        )
+    except Exception as e:
+        print(f"[ERROR] CyberRealisticPony call failed: {e}")
+        return None
+
+    if isinstance(result, list) and result:
+        return str(result[-1])
+    elif isinstance(result, str):
+        return result
+    else:
+        return None
+
+# --------------------------------------------------------------------------
+# handle_image_generation_from_prompt => multi-model selection
+# --------------------------------------------------------------------------
+def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False, model_type: str = "flux"):
+    """
+    Generates an image from the given prompt using the selected model.
+    model_type can be "flux", "pony", or "cyberpony".
+    No limit on generating multiple images per turn.
+    """
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
         seed_used = existing_seed
@@ -342,7 +463,12 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         seed_used = random.randint(100000, 999999)
         log_message(f"SYSTEM: new seed => {seed_used}")
 
-    url = generate_flux_image_safely(prompt_text, seed=seed_used)
+    if model_type == "pony":
+        url = generate_pony_sdxl_image_safely(prompt_text, seed=seed_used)
+    elif model_type == "cyberpony":
+        url = generate_cyberrealisticpony_image_safely(prompt_text, seed=seed_used)
+    else:
+        url = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not url:
         log_message("[SYSTEM] replicate returned invalid URL or error.")
@@ -352,9 +478,9 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     session["scene_image_prompt"] = prompt_text
     session["scene_image_url"] = url
     session["scene_image_seed"] = seed_used
-    session["image_generated_this_turn"] = True
+
     log_message(f"Scene Image Prompt => {prompt_text}")
-    log_message(f"Image seed={seed_used}, model_type={model_type}")
+    log_message(f"Image seed={seed_used}, model={model_type}")
     return url
 
 # --------------------------------------------------------------------------
@@ -373,24 +499,81 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Sample Drop-down lists (Expand as needed)
+# Expanded Dropdown Lists
 # --------------------------------------------------------------------------
-USER_NAME_OPTIONS = ["John","Michael","David","Chris","James","Alex","Emily","Olivia","Sophia","Emma","Ava","Isabella"]
-NPC_NAME_OPTIONS = ["Lucy","Emily","Sarah","Lisa","Anna","Mia","Sophia","Olivia","Chloe","Isabella","Grace","Lily","Ella","Zoe","Emma"]
-HAIR_STYLE_OPTIONS = ["Short","Medium","Long","Bald","Pixie","Bob","Curly","Wavy","Braided","Updo","Ponytail","Messy bun","Side-swept bangs","Fishtail braid"]
-BODY_TYPE_OPTIONS = ["Athletic","Muscular","Average","Tall","Slim","Curvy","Petite","Voluptuous","Fit"]
-CLOTHING_OPTIONS = ["Red Dress","T-shirt & Jeans","Black Gown","Green Hoodie","Elegant Evening Gown","Casual Blouse & Skirt","Office Suit","Summer dress","Black mini skirt and white blouse","Leather Jacket and Shorts","Vintage Outfit","High-waisted trousers with a crop top"]
-ETHNICITY_OPTIONS = ["British","French","German","Italian","Spanish","Portuguese","Greek","Dutch","Swedish","Norwegian","Finnish","Danish","Polish","Russian","Ukrainian","Austrian","Swiss","Belgian","Czech","Slovak","Hungarian","Romanian","Bulgarian","Serbian","Croatian","Slovenian","Bosnian","Australian","New Zealander","Maori","Chinese","Japanese","Korean","Indian","Pakistani","Bangladeshi","Indonesian","Filipino","Thai","Vietnamese","Malaysian","Singaporean","American (Black)","American (White)","Hispanic","Latino","Middle Eastern","African","Other"]
-NPC_PERSONALITY_OPTIONS = ["Flirty","Passionate","Confident","Playful","Gentle","Seductive","Sensual","Provocative","Lascivious","Romantic","Erotic"]
-HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Auburn","Platinum Blonde","Jet Black","Chestnut"]
-CURRENT_SITUATION_OPTIONS = ["Recently Broke Up","Single & Looking","On Vacation","Working","In a relationship","Divorced"]
-ENVIRONMENT_OPTIONS = ["Cafe","Library","Gym","Beach","Park","Nightclub","Bar","Studio","Loft","Garden","Rooftop"]
-ENCOUNTER_CONTEXT_OPTIONS = ["First date","Accidental meeting","Group activity","Work event","Online Match","Blind date","Unexpected reunion","Romantic getaway","After-party","Private dinner","Secret meeting"]
+USER_NAME_OPTIONS = [
+    "John", "Michael", "David", "Chris", "James", "Alex",
+    "Emily", "Olivia", "Sophia", "Emma", "Ava", "Isabella",
+    "Liam", "Noah", "Ethan", "Mason", "Lucas", "Logan"
+]
+NPC_NAME_OPTIONS = [
+    "Lucy", "Emily", "Sarah", "Lisa", "Anna", "Mia", "Sophia",
+    "Olivia", "Chloe", "Isabella", "Grace", "Lily", "Ella", "Zoe", "Emma",
+    "Victoria", "Madison", "Natalie", "Jasmine", "Aurora", "Ruby", "Scarlett",
+    "Hazel", "Ivy", "Luna", "Penelope", "Stella"
+]
+HAIR_STYLE_OPTIONS = [
+    "Short", "Medium", "Long", "Bald", "Pixie", "Bob",
+    "Curly", "Wavy", "Braided", "Updo", "Ponytail", "Messy bun",
+    "Side-swept bangs", "Fishtail braid", "Sleek straight", "Layered",
+    "Curls", "Tousled", "Wavy bob", "Half-up half-down"
+]
+BODY_TYPE_OPTIONS = [
+    "Athletic", "Muscular", "Average", "Tall", "Slim",
+    "Curvy", "Petite", "Voluptuous", "Fit", "Lithe", "Hourglass",
+    "Elegant", "Graceful"
+]
+CLOTHING_OPTIONS = [
+    "Red Dress", "T-shirt & Jeans", "Black Gown", "Green Hoodie",
+    "Elegant Evening Gown", "Casual Blouse & Skirt", "Office Suit",
+    "Summer dress", "Black mini skirt and white blouse",
+    "Leather Jacket and Shorts", "Vintage Outfit",
+    "High-waisted trousers with a crop top", "Lace lingerie set",
+    "Silk robe", "Intimate chemise", "Bodysuit",
+    "Off-shoulder top with skirt", "Corset and thigh-high stockings"
+]
+ETHNICITY_OPTIONS = [
+    "British", "French", "German", "Italian", "Spanish", "Portuguese",
+    "Greek", "Dutch", "Swedish", "Norwegian", "Finnish", "Danish",
+    "Polish", "Russian", "Ukrainian", "Austrian", "Swiss", "Belgian",
+    "Czech", "Slovak", "Hungarian", "Romanian", "Bulgarian", "Serbian",
+    "Croatian", "Slovenian", "Bosnian", "Australian", "New Zealander",
+    "Maori", "Chinese", "Japanese", "Korean", "Indian", "Pakistani",
+    "Bangladeshi", "Indonesian", "Filipino", "Thai", "Vietnamese",
+    "Malaysian", "Singaporean", "American (Black)", "American (White)",
+    "Hispanic", "Latino", "Middle Eastern", "African", "Other"
+]
+NPC_PERSONALITY_OPTIONS = [
+    "Flirty", "Passionate", "Confident", "Playful", "Gentle",
+    "Seductive", "Sensual", "Provocative", "Lascivious", "Romantic",
+    "Erotic", "Alluring", "Mysterious", "Intense", "Charming", "Warm",
+    "Feminine", "Nurturing"
+]
+HAIR_COLOR_OPTIONS = [
+    "Blonde", "Brunette", "Black", "Red", "Auburn", "Platinum Blonde",
+    "Jet Black", "Chestnut", "Strawberry Blonde", "Honey Blonde",
+    "Caramel", "Golden"
+]
+CURRENT_SITUATION_OPTIONS = [
+    "Recently Broke Up", "Single & Looking", "On Vacation",
+    "Working", "In a Relationship", "Divorced", "Exploring new desires",
+    "Feeling liberated"
+]
+ENVIRONMENT_OPTIONS = [
+    "Cafe", "Library", "Gym", "Beach", "Park", "Nightclub", "Bar",
+    "Studio", "Loft", "Garden", "Rooftop", "Boutique hotel", "Luxury spa",
+    "Chic restaurant"
+]
+ENCOUNTER_CONTEXT_OPTIONS = [
+    "First Date", "Accidental Meeting", "Group Activity", "Work Event",
+    "Online Match", "Blind Date", "Unexpected Reunion", "Romantic Getaway",
+    "After-Party", "Private Dinner", "Secret Meeting", "Intimate Gathering",
+    "Spontaneous Encounter", "Cozy Evening"
+]
 
 # --------------------------------------------------------------------------
 # Routes
 # --------------------------------------------------------------------------
-
 @app.route("/")
 def main_home():
     return render_template("home.html", title="Destined Encounters")
@@ -399,11 +582,11 @@ def main_home():
 def about():
     return render_template("about.html", title="About/Help")
 
-@app.route("/login", methods=["GET","POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login_route():
     if request.method == "POST":
-        email = request.form.get("email","").strip()
-        password = request.form.get("password","").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
         if not email or not password:
             flash("Email and password are required", "danger")
             return redirect(url_for("login_route"))
@@ -427,11 +610,11 @@ def login_route():
             return redirect(url_for("login_route"))
     return render_template("login.html", title="Login")
 
-@app.route("/register", methods=["GET","POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register_route():
     if request.method == "POST":
-        email = request.form.get("email","").strip()
-        password = request.form.get("password","").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
         if not email or not password:
             flash("Email + password required", "danger")
             return redirect(url_for("register_route"))
@@ -446,7 +629,7 @@ def register_route():
 
 @app.route("/logout")
 def logout_route():
-    for key in ["logged_in","user_id","user_email","access_token"]:
+    for key in ["logged_in", "user_id", "user_email", "access_token"]:
         session.pop(key, None)
     flash("Logged out successfully.", "info")
     return redirect(url_for("main_home"))
@@ -485,15 +668,15 @@ def restart():
     flash("Session restarted (NPC data cleared).", "info")
     return redirect(url_for("personalize"))
 
-@app.route("/personalize", methods=["GET","POST"])
+@app.route("/personalize", methods=["GET", "POST"])
 @login_required
 def personalize():
     if request.method == "POST" and "save_personalization" in request.form:
-        session["user_name"] = merge_dd(request.form, "user_name","user_name_custom")
-        session["user_age"] = merge_dd(request.form, "user_age","user_age_custom")
-        session["user_background"] = request.form.get("user_background","").strip()
+        session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
+        session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
+        session["user_background"] = request.form.get("user_background", "").strip()
         update_npc_info(request.form)
-        npc_gender = session.get("npc_gender","").lower()
+        npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
@@ -509,7 +692,6 @@ def personalize():
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
-        session["image_generated_this_turn"] = False
         session["log_summary"] = ""
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
@@ -517,28 +699,28 @@ def personalize():
         return render_template("personalize.html",
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
-            user_age_options=["20","25","30","35","40","45"],
+            user_age_options=["20", "25", "30", "35", "40", "45"],
             npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20","25","30","35","40","45"],
-            npc_gender_options=["Female","Male","Non-binary","Other"],
+            npc_age_options=["20", "25", "30", "35", "40", "45"],
+            npc_gender_options=["Female", "Male", "Non-binary", "Other"],
             hair_style_options=HAIR_STYLE_OPTIONS,
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
+            occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
-@app.route("/mid_game_personalize", methods=["GET","POST"])
+@app.route("/mid_game_personalize", methods=["GET", "POST"])
 @login_required
 def mid_game_personalize():
     if request.method == "POST" and "update_npc" in request.form:
         update_npc_info(request.form)
-        npc_gender = session.get("npc_gender","").lower()
+        npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
@@ -549,21 +731,21 @@ def mid_game_personalize():
     return render_template("mid_game_personalize.html",
         title="Update Settings",
         npc_name_options=NPC_NAME_OPTIONS,
-        npc_age_options=["20","25","30","35","40","45"],
-        npc_gender_options=["Female","Male","Non-binary","Other"],
+        npc_age_options=["20", "25", "30", "35", "40", "45"],
+        npc_gender_options=["Female", "Male", "Non-binary", "Other"],
         hair_style_options=HAIR_STYLE_OPTIONS,
         body_type_options=BODY_TYPE_OPTIONS,
         hair_color_options=HAIR_COLOR_OPTIONS,
         npc_personality_options=NPC_PERSONALITY_OPTIONS,
         clothing_options=CLOTHING_OPTIONS,
-        occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
+        occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
         current_situation_options=CURRENT_SITUATION_OPTIONS,
         environment_options=ENVIRONMENT_OPTIONS,
         encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
         ethnicity_options=ETHNICITY_OPTIONS
     )
 
-@app.route("/interaction", methods=["GET","POST"])
+@app.route("/interaction", methods=["GET", "POST"])
 @login_required
 def interaction():
     if request.method == "GET":
@@ -579,8 +761,6 @@ def interaction():
         scene_prompt = session.get("scene_image_prompt", "")
         scene_url = session.get("scene_image_url", None)
         seed_used = session.get("scene_image_seed", None)
-        dice_val = session.get("dice_debug_roll", "(none)")
-        outcome_val = session.get("dice_debug_outcome", "(none)")
         interaction_log = session.get("interaction_log", [])
 
         return render_template("interaction.html",
@@ -596,25 +776,22 @@ def interaction():
             scene_image_prompt=scene_prompt,
             scene_image_url=scene_url,
             scene_image_seed=seed_used,
-            dice_roll_dbg=dice_val,
-            dice_outcome_dbg=outcome_val,
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
             npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20","25","30","35","40","45"],
-            npc_gender_options=["Female","Male","Non-binary","Other"],
+            npc_age_options=["20", "25", "30", "35", "40", "45"],
+            npc_gender_options=["Female", "Male", "Non-binary", "Other"],
             hair_style_options=HAIR_STYLE_OPTIONS,
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
+            occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
             ethnicity_options=ETHNICITY_OPTIONS
         )
-
     else:
         if "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip()
@@ -635,7 +812,6 @@ def interaction():
             affect_delta = 0.0
             narration_txt = ""
             image_prompt = ""
-
             for ln in result_text.split("\n"):
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
@@ -653,10 +829,8 @@ def interaction():
             check_stage_up_down(new_aff)
             session["narrationText"] = narration_txt
             session["scene_image_prompt"] = image_prompt
-
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
-            session["image_generated_this_turn"] = False
             return redirect(url_for("interaction"))
 
         elif "update_npc" in request.form:
@@ -695,9 +869,9 @@ def interaction():
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
-
-            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=False, model_type="flux")
-            flash("Image generated successfully.", "success")
+            chosen_model = request.form.get("model_type", "flux")
+            handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=False, model_type=chosen_model)
+            flash(f"Image generated successfully with model => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
 
         elif "new_seed" in request.form:
@@ -705,12 +879,10 @@ def interaction():
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
-
             chosen_model = request.form.get("model_type", "flux")
             handle_image_generation_from_prompt(user_supplied_prompt, force_new_seed=True, model_type=chosen_model)
-            flash(f"New image generated with a new seed (model={chosen_model}).", "success")
+            flash(f"New image generated with a new seed using model => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
-
         else:
             return "Invalid submission in /interaction", 400
 
@@ -766,7 +938,6 @@ def generate_erotica():
             story_parts.append(line.replace("User: ", "", 1))
     if not story_parts:
         return redirect(url_for("full_story"))
-
     full_narration = "\n".join(story_parts)
     erotica_prompt = f"""
 You are an author on an adult erotica forum.
@@ -786,7 +957,7 @@ Now produce a single narrative (600-900 words), focusing on emotional + physical
     erotica_text = erotica_resp.text.strip()
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
-@app.route("/stage_unlocks", methods=["GET","POST"])
+@app.route("/stage_unlocks", methods=["GET", "POST"])
 @login_required
 def stage_unlocks():
     if request.method == "POST" and "update_stage_unlocks" in request.form:
