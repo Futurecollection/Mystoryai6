@@ -461,17 +461,10 @@ def generate_realistic_vision_image_safely(
             replicate_input
         )
         # Check if result is a dict with an "output" key.
-        if isinstance(result, dict) and "output" in result:
-            return result["output"]
-        elif hasattr(result, "read"):
-            return result
-        elif isinstance(result, list) and result:
-            if isinstance(result[-1], str):
-                return result[-1]
-        elif isinstance(result, str):
-            return result
-        else:
-            return None
+        # Return full result object to let _save_image handle it
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
     except Exception as e:
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
@@ -524,12 +517,8 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
 
     _save_image(result)
 
-    if isinstance(result, dict) and "output" in result:
-        session["scene_image_url"] = result["output"]
-    elif isinstance(result, str):
-        session["scene_image_url"] = result
-    else:
-        session["scene_image_url"] = None
+    # Save URL to session after successful save
+    session["scene_image_url"] = url_for('view_image')
 
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
