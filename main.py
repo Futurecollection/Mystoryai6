@@ -407,7 +407,8 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
         "num_outputs": 1,
         "apply_watermark": True,
         "high_noise_frac": 0.8,
-        "prompt_strength": 0.8
+        "prompt_strength": 0.8,
+        "disable_safety_checker": True
     }
     if seed is not None:
         replicate_input["seed"] = seed
