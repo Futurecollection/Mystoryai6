@@ -33,6 +33,7 @@
     <button type="button" onclick="prefillAction('OOC: More sexually detailed')" class="btn btn-outline-danger me-2">More Sexual Details</button>
     <button type="button" onclick="prefillAction('OOC: More dirty talk')" class="btn btn-outline-warning">More Dirty Talk</button>
   </div>
+
   <script>
     function prefillAction(text) {
       document.querySelector('input[name="user_action"]').value = text;
@@ -41,6 +42,7 @@
       document.getElementById("loading").style.display = "block";
     }
   </script>
+
   <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
   <input type="text" class="form-control mb-2" name="user_action" placeholder="He quietly asks how she's doing...">
   <button type="submit" name="submit_action" class="btn btn-success">Send Move</button>
@@ -63,18 +65,7 @@
     <select name="model_type" id="model_type" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
       <option value="flux">Flux-Schnell</option>
       <option value="pony">Pony-SDXL</option>
-      <option value="cyberpony">CyberRealisticPony</option>
       <option value="realistic">Realistic Vision v5.1</option>
-      <option value="uber">Uber Realistic Merge</option>
-    </select>
-  </div>
-
-  <!-- Scheduler Dropdown for CyberRealisticPony -->
-  <div class="mt-2" id="cyber_scheduler_div" style="display: none;">
-    <label class="form-label" style="color: #f8d0d0;">Cyber Pony Scheduler:</label>
-    <select name="cyber_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="K_EULER">K_EULER</option>
-      <option value="KarrasDPM">KarrasDPM</option>
     </select>
   </div>
 
@@ -87,19 +78,11 @@
     </select>
   </div>
 
-  <!-- Scheduler Dropdown for Uber (new) -->
-  <div class="mt-2" id="uber_scheduler_div" style="display: none;">
-    <label class="form-label" style="color: #f8d0d0;">Uber Scheduler:</label>
-    <select name="scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="DPM++ 2M Karras">DPM++ 2M Karras</option>
-      <option value="Euler a">Euler a</option>
-    </select>
-  </div>
-
-  <!-- Steps Slider for Pony, CyberPony, Realistic, and Uber -->
+  <!-- Steps Slider (for Pony, Realistic) -->
   <div class="mt-2" id="steps_div" style="display: none;">
     <label class="form-label" style="color: #f8d0d0;">Number of Steps (20-100):</label>
-    <input type="range" class="form-range" min="20" max="100" name="num_steps" value="60" oninput="this.nextElementSibling.value = this.value">
+    <input type="range" class="form-range" min="20" max="100" name="num_steps" value="60"
+           oninput="this.nextElementSibling.value = this.value">
     <output>60</output>
   </div>
 
@@ -153,42 +136,27 @@
   document.getElementById('model_type').addEventListener('change', function() {
     var model = this.value;
     var stepsDiv = document.getElementById('steps_div');
-    var cyberDiv = document.getElementById('cyber_scheduler_div');
     var realisticDiv = document.getElementById('realistic_scheduler_div');
-    var uberDiv = document.getElementById('uber_scheduler_div');
 
-    if (model === 'flux') {
+    // Show steps range only if pony or realistic
+    if (model === 'pony' || model === 'realistic') {
+      stepsDiv.style.display = 'block';
+    } else {
       stepsDiv.style.display = 'none';
-      cyberDiv.style.display = 'none';
+    }
+
+    // Show realistic scheduler only for 'realistic'
+    if (model === 'realistic') {
+      realisticDiv.style.display = 'block';
+    } else {
       realisticDiv.style.display = 'none';
-      uberDiv.style.display = 'none';
-    } else if (model === 'uber') {
-      // For uber, show steps and the uber scheduler
-      stepsDiv.style.display = 'block';
-      uberDiv.style.display = 'block';
-      cyberDiv.style.display = 'none';
-      realisticDiv.style.display = 'none';
-    } else if (model === 'pony' || model === 'cyberpony' || model === 'realistic') {
-      stepsDiv.style.display = 'block';
-      if (model === 'cyberpony') {
-        cyberDiv.style.display = 'block';
-      } else {
-        cyberDiv.style.display = 'none';
-      }
-      if (model === 'realistic') {
-        realisticDiv.style.display = 'block';
-      } else {
-        realisticDiv.style.display = 'none';
-      }
-      // Hide uber scheduler for these models
-      uberDiv.style.display = 'none';
     }
   });
 
   // Trigger initial change event to set initial visibility
   document.getElementById('model_type').dispatchEvent(new Event('change'));
 
-  // Show spinner on any form submission
+  // Show the spinner on any form submission
   document.querySelectorAll('form').forEach(function(form) {
     form.addEventListener('submit', function() {
       document.getElementById("loading").style.display = "block";

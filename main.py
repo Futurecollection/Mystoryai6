@@ -234,10 +234,14 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 # --------------------------------------------------------------------------
-# interpret_npc_state => LLM (returns two lines: AFFECT and NARRATION)
+# interpret_npc_state => LLM
 # --------------------------------------------------------------------------
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
+    """
+    Produces exactly 2 lines: AFFECT_CHANGE_FINAL and NARRATION
+    Does not attempt to parse environment or lighting from the text.
+    """
     prepare_history()
     memory_summary = session.get("log_summary", "")
     recent_lines = session.get("interaction_log", [])
@@ -294,7 +298,7 @@ NARRATION: [System: no valid response from LLM, please try again]
     return result_text
 
 # --------------------------------------------------------------------------
-# Replicate Model Functions for Flux, Pony, CyberPony, Realistic
+# Replicate Model Functions
 # --------------------------------------------------------------------------
 def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
     final_prompt = f"Portrait photo, {prompt}"
@@ -322,7 +326,7 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
     final_prompt = f"{auto_positive}, {prompt}"
     replicate_input = {
         "vae": "sdxl-vae-fp16-fix",
-        "seed": -1,
+        "seed": -1 if seed is None else seed,
         "model": "ponyRealism21.safetensors",
         "steps": steps,
         "width": 1184,
@@ -334,15 +338,14 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         "guidance_rescale": 0.7,
         "prepend_preprompt": True,
         "negative_prompt": (
-            "low-res, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, "
-            "worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, "
+            "score_4, score_3, score_2, score_1, worst quality, bad hands, bad feet, "
+            "low-res, bad anatomy, text, error, missing fingers, extra digit, fewer digits, cropped, "
+            "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, "
             "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
             "floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
         ),
         "clip_last_layer": -2
     }
-    if seed:
-        replicate_input["seed"] = seed
     print(f"[DEBUG] replicate => PONY-SDXL prompt={final_prompt}, seed={seed}, steps={steps}")
     try:
         result = replicate.run(
@@ -354,48 +357,6 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         return None
     except Exception as e:
         print("[ERROR] Pony-SDXL call failed:", e)
-        return None
-
-def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None,
-                                             scheduler: str = "K_EULER", steps: int = 50) -> object:
-    auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
-    final_prompt = f"{auto_positive}, {prompt}"
-    negative_prompt_text = (
-        "score_6, score_5, score_4, simplified, abstract, unrealistic, impressionistic, "
-        "low resolution, lowres, bad anatomy, bad hands, missing fingers, worst quality, "
-        "low quality, normal quality, cartoon, anime, drawing, sketch, illustration, "
-        "artificial, poor quality"
-    )
-    replicate_input = {
-        "width": 1024,
-        "height": 1024,
-        "prompt": final_prompt,
-        "negative_prompt": negative_prompt_text,
-        "scheduler": scheduler,
-        "num_inference_steps": steps,
-        "guidance_scale": 5,
-        "clip_skip": 2,
-        "refine": "no_refiner",
-        "lora_scale": 0.6,
-        "num_outputs": 1,
-        "apply_watermark": True,
-        "high_noise_frac": 0.8,
-        "prompt_strength": 0.8,
-        "disable_safety_checker": True
-    }
-    if seed:
-        replicate_input["seed"] = seed
-    print(f"[DEBUG] replicate => CyberRealisticPony prompt={final_prompt}, seed={seed}, scheduler={scheduler}, steps={steps}")
-    try:
-        result = replicate.run(
-            "charlesmccarthy/cyberrealisticpony_v40:7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665",
-            replicate_input
-        )
-        if result:
-            return {"output": result[0] if isinstance(result, list) else result}
-        return None
-    except Exception as e:
-        print("[ERROR] CyberRealisticPony call failed:", e)
         return None
 
 def generate_realistic_vision_image_safely(
@@ -438,35 +399,7 @@ def generate_realistic_vision_image_safely(
         return None
 
 # --------------------------------------------------------------------------
-# New: generate_uber_image_safely using the provided JSON schema defaults
-# --------------------------------------------------------------------------
-def generate_uber_image_safely(prompt: str, seed: int = None, steps: int = 55,
-                               width: int = 512, height: int = 512,
-                               cfg_scale: float = 7, scheduler: str = "DPM++ 2M Karras",
-                               negative_prompt: str = "pubic hair not visible, animal ears, large breasts, large boobs, text, logo, ((big hands, un-detailed skin, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime)), ((ugly mouth, ugly eyes, missing teeth, crooked teeth, close up, cropped, out of frame)), worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck,(more than two arm per body:1.5), (more than two leg per body:1.5), (more than five fingers on one hand:1.5), multi arms, multi legs, bad arm anatomy, bad leg anatomy, bad hand anatomy, bad finger anatomy, bad detailed background, unclear architectural outline, non-linear background, elf-ears, hair crosses the screen border, obesity, fat, lowres, worst quality, low quality, blurry, mutated hands and fingers, disfigured, fused, cloned, duplicate, artist name, giantess, odd eyes, long fingers, long neck, watermarked") -> object:
-    replicate_input = {
-        "seed": seed if seed is not None else -1,
-        "model": "ductridev/uber-realistic-porn-merge-urpm",
-        "width": width,
-        "height": height,
-        "prompt": prompt,
-        "cfg_scale": cfg_scale,
-        "scheduler": scheduler,
-        "negative_prompt": negative_prompt,
-        "num_inference_steps": steps
-    }
-    print(f"[DEBUG] replicate => UBER prompt={prompt}, seed={seed}, steps={steps}")
-    try:
-        result = replicate.run("ductridev/uber-realistic-porn-merge-urpm", replicate_input)
-        if result:
-            return {"output": result[0] if isinstance(result, list) else result}
-        return None
-    except Exception as e:
-        print(f"[ERROR] Uber call failed: {e}")
-        return None
-
-# --------------------------------------------------------------------------
-# handle_image_generation_from_prompt => multi-model selection
+# handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None, steps: int = None):
@@ -481,16 +414,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     if model_type == "pony":
         steps = steps if steps is not None else 60
         result = generate_pony_sdxl_image_safely(prompt_text, seed=seed_used, steps=steps)
-    elif model_type == "cyberpony":
-        steps = steps if steps is not None else 50
-        valid_schedulers = ["K_EULER", "KarrasDPM"]
-        chosen_sched = scheduler if scheduler in valid_schedulers else "K_EULER"
-        result = generate_cyberrealisticpony_image_safely(
-            prompt=prompt_text,
-            seed=seed_used,
-            scheduler=chosen_sched,
-            steps=steps
-        )
     elif model_type == "realistic":
         steps_final = steps if steps is not None else 20
         valid_schedulers = ["EulerA", "MultistepDPM-Solver"]
@@ -504,19 +427,8 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             guidance=5.0,
             scheduler=chosen_sched
         )
-    elif model_type == "uber":
-        steps = steps if steps is not None else 55
-        # For uber, allow the user to adjust steps (via slider) as well.
-        result = generate_uber_image_safely(
-            prompt=prompt_text,
-            seed=seed_used,
-            steps=steps,
-            width=512,
-            height=512,
-            cfg_scale=7,
-            scheduler=scheduler if scheduler else "DPM++ 2M Karras"
-        )
     else:
+        # Default to Flux
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
@@ -622,32 +534,24 @@ ENCOUNTER_CONTEXT_OPTIONS = [
 ]
 
 # --------------------------------------------------------------------------
-# Expanded system prompts for image generation (using full narration and personalizations)
+# Expanded system prompts for image generation referencing the FULL narration
 # --------------------------------------------------------------------------
 FLUX_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
-Include the NPC's personal details (age, ethnicity, hair, clothing, etc.) along with the full recent narration to capture the scene's action and setting.
-Produce 1–3 lines describing the desired photograph. Avoid painting/anime references.
+Include the NPC's personal details (age, hair, clothing, etc.) plus a relevant portion of the last story narration to convey the scene's action or setting.
+You may produce 1–3 lines describing it. Use "photo" or "photograph" for realism, and avoid painting/anime references.
 """
 
 PONY_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a short image prompt for Pony SDXL.
-The code automatically adds "score_9, score_8_up, score_7_up, realistic," so do not include those tokens.
-Incorporate the NPC's personal details and the full recent narration to capture the scene.
-Output 1–3 lines of descriptive text.
-"""
-
-CYBERPONY_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant for CyberRealisticPony.
-The code automatically adds "score_9, score_8_up, score_7_up, realistic," so do not repeat them.
-Use the NPC's personal data and the full recent narration to generate a photorealistic image prompt.
-Output 1–3 lines of descriptive text.
+You are an AI assistant specializing in producing a short prompt for Pony SDXL, referencing the NPC's personal data 
+and the last story narration. The code automatically adds "score_9, score_8_up, score_7_up, realistic," 
+so do NOT include them. 1–3 lines is fine. Avoid painting/anime references.
 """
 
 REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant creating an image prompt for Realistic Vision (SD1.5).
-Start with "RAW photo," or "RAW photograph," and include the NPC's personal details and the full recent narration to capture the scene.
-Output 1–3 lines of descriptive text. Avoid painting/anime references.
+You are an AI assistant creating a prompt for Realistic Vision (SD1.5).
+Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data plus relevant story narration details. 
+Produce 1–3 lines. No negative prompt needed. Avoid painting/anime references.
 """
 
 def get_image_prompt_system_instructions(model_type: str) -> str:
@@ -656,23 +560,32 @@ def get_image_prompt_system_instructions(model_type: str) -> str:
         return FLUX_IMAGE_SYSTEM_PROMPT
     elif mt == "pony":
         return PONY_IMAGE_SYSTEM_PROMPT
-    elif mt == "cyberpony":
-        return CYBERPONY_IMAGE_SYSTEM_PROMPT
     elif mt == "realistic":
         return REALISTICVISION_IMAGE_SYSTEM_PROMPT
     else:
         return FLUX_IMAGE_SYSTEM_PROMPT
 
 def build_image_prompt_context_for_image() -> str:
+    """
+    Merges:
+      - NPC personal details
+      - The FULL or recent narration
+      - If user is storing environment in session, you can incorporate that too
+    """
     npc_name = session.get("npc_name", "Unknown")
     npc_age = session.get("npc_age", "?")
     npc_ethnicity = session.get("npc_ethnicity", "")
     hair_color = session.get("npc_hair_color", "")
     hair_style = session.get("npc_hair_style", "")
     clothing = session.get("npc_clothing", "")
-    personality = session.get("npc_personality", "")
-    body_type = session.get("npc_body_type", "")
-    narration = session.get("narrationText", "")
+    personality = session.get("npc_personality","")
+    body_type = session.get("npc_body_type","")
+
+    environment = session.get("environment", "")
+    lighting_info = session.get("lighting_info", "")
+
+    last_narration = session.get("narrationText","")
+
     context_str = f"""
 NPC Name: {npc_name}
 Age: {npc_age}
@@ -682,20 +595,25 @@ Hair: {hair_color} {hair_style}
 Clothing: {clothing}
 Personality: {personality}
 
-Recent Narration: {narration}
+ENVIRONMENT (optional): {environment}
+LIGHTING (optional): {lighting_info}
+
+LATEST NARRATION: {last_narration}
 """.strip()
+
     return context_str
 
 def generate_image_prompt_for_scene(model_type: str) -> str:
     context_data = build_image_prompt_context_for_image()
     system_instructions = get_image_prompt_system_instructions(model_type)
     final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
+
     try:
         chat = model.start_chat()
         resp = chat.send_message(
             final_message,
             safety_settings=safety_settings,
-            generation_config={"temperature": 0.5, "max_output_tokens": 512}
+            generation_config={"temperature":0.5, "max_output_tokens":512}
         )
         if resp and resp.text:
             return resp.text.strip()
@@ -896,6 +814,10 @@ def interaction():
         seed_used = session.get("scene_image_seed", None)
         interaction_log = session.get("interaction_log", [])
 
+        current_action = session.get("npc_current_action", "")
+        environment = session.get("environment", "")
+        lighting_info = session.get("lighting_info", "")
+
         return render_template("interaction.html",
             title="Interact with NPC",
             affection_score=affection,
@@ -910,14 +832,17 @@ def interaction():
             scene_image_url=scene_url,
             scene_image_seed=seed_used,
             interaction_log=interaction_log,
-            stage_unlocks=stage_unlocks
+            stage_unlocks=stage_unlocks,
+
+            npc_current_action=current_action,
+            environment=environment,
+            lighting_info=lighting_info
         )
     else:
         if "update_scene" in request.form:
-            # Manual update if desired (not auto-updated in this version)
-            session["npc_current_action"] = request.form.get("npc_current_action", "")
-            session["environment"] = request.form.get("environment", "")
-            session["lighting_info"] = request.form.get("lighting_info", "")
+            session["npc_current_action"] = request.form.get("npc_current_action","")
+            session["environment"] = request.form.get("environment","")
+            session["lighting_info"] = request.form.get("lighting_info","")
             flash("Scene updated!", "info")
             return redirect(url_for("interaction"))
 
@@ -929,7 +854,13 @@ def interaction():
             cstage = session.get("currentStage", 1)
             log_message(f"User: {user_action}")
 
-            result_text = interpret_npc_state(affection, trust, mood, cstage, user_action)
+            result_text = interpret_npc_state(
+                affection=affection,
+                trust=trust,
+                npc_mood=mood,
+                current_stage=cstage,
+                last_user_action=user_action
+            )
 
             affect_delta = 0.0
             narration_txt = ""
@@ -988,35 +919,22 @@ def interaction():
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
             chosen_model = request.form.get("model_type", "flux")
-            if chosen_model == "cyberpony":
-                chosen_scheduler = request.form.get("cyber_scheduler", "K_EULER")
-            elif chosen_model == "realistic":
+            # Removed any 'cyberpony' references
+            if chosen_model == "realistic":
                 chosen_scheduler = request.form.get("realistic_scheduler", "EulerA")
             else:
-                chosen_scheduler = request.form.get("scheduler", None)  # for uber, allow user-specified scheduler
+                chosen_scheduler = None
             try:
                 steps = int(request.form.get("num_steps", "60"))
             except:
                 steps = 60
-
-            if chosen_model == "uber":
-                result = generate_uber_image_safely(
-                    prompt=user_supplied_prompt,
-                    seed=None,
-                    steps=steps,
-                    width=512,
-                    height=512,
-                    cfg_scale=7,
-                    scheduler=chosen_scheduler if chosen_scheduler else "DPM++ 2M Karras"
-                )
-            else:
-                result = handle_image_generation_from_prompt(
-                    prompt_text=user_supplied_prompt,
-                    force_new_seed=False,
-                    model_type=chosen_model,
-                    scheduler=chosen_scheduler,
-                    steps=steps
-                )
+            handle_image_generation_from_prompt(
+                prompt_text=user_supplied_prompt,
+                force_new_seed=False,
+                model_type=chosen_model,
+                scheduler=chosen_scheduler,
+                steps=steps
+            )
             flash(f"Image generated successfully with model => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
 
@@ -1026,34 +944,22 @@ def interaction():
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
             chosen_model = request.form.get("model_type", "flux")
-            if chosen_model == "cyberpony":
-                chosen_scheduler = request.form.get("cyber_scheduler", "K_EULER")
-            elif chosen_model == "realistic":
+            # Removed any 'cyberpony' references
+            if chosen_model == "realistic":
                 chosen_scheduler = request.form.get("realistic_scheduler", "EulerA")
             else:
-                chosen_scheduler = request.form.get("scheduler", None)
+                chosen_scheduler = None
             try:
                 steps = int(request.form.get("num_steps", "60"))
             except:
                 steps = 60
-            if chosen_model == "uber":
-                result = generate_uber_image_safely(
-                    prompt=user_supplied_prompt,
-                    seed=random.randint(100000, 999999),
-                    steps=steps,
-                    width=512,
-                    height=512,
-                    cfg_scale=7,
-                    scheduler=chosen_scheduler if chosen_scheduler else "DPM++ 2M Karras"
-                )
-            else:
-                result = handle_image_generation_from_prompt(
-                    prompt_text=user_supplied_prompt,
-                    force_new_seed=True,
-                    model_type=chosen_model,
-                    scheduler=chosen_scheduler,
-                    steps=steps
-                )
+            handle_image_generation_from_prompt(
+                prompt_text=user_supplied_prompt,
+                force_new_seed=True,
+                model_type=chosen_model,
+                scheduler=chosen_scheduler,
+                steps=steps
+            )
             flash(f"New image generated with a new seed => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
         else:
