@@ -56,9 +56,6 @@ safety_settings = {
     HarmCategory.HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.SEXUAL: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.DANGEROUS: HarmBlockThreshold.BLOCK_NONE,
 }
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
