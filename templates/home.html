@@ -25,13 +25,12 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Start New Story</h5>
-          <p class="card-text">Create a fresh story with new characters and settings.
-
-{% if session.npc_name %}
-<div class="mt-3">
-  <a href="{{ url_for('interaction') }}" class="btn btn-success">Continue Existing Story</a>
-</div>
-{% endif %}</p>
+          <p class="card-text">Create a fresh story with new characters and settings.</p>
+          {% if session.npc_name %}
+          <div class="mt-3">
+            <a href="{{ url_for('interaction') }}" class="btn btn-success">Continue Existing Story</a>
+          </div>
+          {% endif %}
           <a href="{{ url_for('personalize') }}" class="btn btn-primary">Start New Story</a>
         </div>
       </div>
@@ -42,9 +41,13 @@
     <a href="{{ url_for('logout_route') }}" class="btn btn-danger">Logout</a>
   </p>
 {% else %}
-  <div class="mt-4">
-    <a href="{{ url_for('login_route') }}" class="btn btn-primary me-2">Login</a>
-    <a href="{{ url_for('register_route') }}" class="btn btn-success">Register</a>
+  <div class="row mt-4">
+    <div class="col-md-6 mb-3">
+      <a href="{{ url_for('login_route') }}" class="btn btn-primary">Login</a>
+    </div>
+    <div class="col-md-6 mb-3">
+      <a href="{{ url_for('register_route') }}" class="btn btn-success">Register</a>
+    </div>
   </div>
 {% endif %}
 {% endblock %}
