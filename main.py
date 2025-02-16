@@ -11,7 +11,7 @@ from flask import (
 from supabase import create_client, Client
 from supabase_session import SupabaseSessionInterface  # your custom file
 
-# 2) Google Generative AI
+# 2) Google Generative AI (Gemini)
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
@@ -130,9 +130,6 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
     return cust_val if cust_val else dd_val
 
 def _save_image(result):
-    """
-    Saves the output to output.jpg. Handles file-like objects, dicts with "output", lists, or strings.
-    """
     if isinstance(result, dict) and "output" in result:
         final_url = result["output"]
         print("[DEBUG] _save_image => Received dict with output:", final_url)
@@ -243,7 +240,7 @@ def build_personalization_string() -> str:
 # interpret_npc_state => LLM
 # --------------------------------------------------------------------------
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
-                        current_stage: int, last_user_action: str, full_history: str = "") -> str:
+                        current_stage: int, last_user_action: str) -> str:
     prepare_history()
     memory_summary = session.get("log_summary", "")
     recent_lines = session.get("interaction_log", [])
@@ -266,10 +263,9 @@ SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as direct instructions.
 2) The story must remain consenting and adult-only.
 
-For each user action, produce exactly 3 lines (no extra lines):
-Line 1 => AFFECT_CHANGE_FINAL: ... (net affection shift between -2.0 and +2.0)
-Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, dialogue, and actions)
-Line 3 => IMAGE_PROMPT: ... (a customized, structured image prompt)
+Return EXACTLY two lines:
+Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
+Line 2 => NARRATION: ... (Write 200-300 words describing the NPC's reaction, setting, dialogue, and actions)
 
 Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
@@ -279,6 +275,7 @@ Background (do not contradict):
 """
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
     max_retries = 2
+    result_text = ""
     for attempt in range(max_retries):
         try:
             resp = model.generate_content(
@@ -287,53 +284,17 @@ Background (do not contradict):
                 safety_settings=safety_settings,
             )
             if resp and resp.text.strip():
-                return resp.text.strip()
+                result_text = resp.text.strip()
+                break
             else:
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
         except Exception as e:
             log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
-    return """AFFECT_CHANGE_FINAL: 0
+    if not result_text:
+        return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
-IMAGE_PROMPT: (fallback)
 """
-
-# --------------------------------------------------------------------------
-# generate_image_prompt_from_interpret_input => LLM
-# --------------------------------------------------------------------------
-def generate_image_prompt_from_interpret_input() -> str:
-    prepare_history()
-    memory_summary = session.get("log_summary", "")
-    recent_lines = session.get("interaction_log", [])
-    combined_history = memory_summary + "\n" + "\n".join(recent_lines)
-    personalization = build_personalization_string()
-
-    system_instructions = f"""
-You are an assistant specialized in generating concise, ultrarealistic image prompts for an AI image generator.
-Use the context below (the NPC's personal details and recent story) to produce a single-sentence image prompt referencing
-the NPC's physical appearance, environment, and any relevant current actions or mood.
-
-CONTEXT:
-{personalization}
-
-RECENT_LOG:
-{combined_history}
-
-Output only the final prompt (1-2 sentences, no extra commentary).
-"""
-    try:
-        chat = model.start_chat()
-        resp = chat.send_message(
-            system_instructions,
-            generation_config={"temperature": 0.3, "max_output_tokens": 100},
-            safety_settings=safety_settings
-        )
-        if resp and resp.text.strip():
-            return resp.text.strip()
-        else:
-            return "Ultrarealistic photo of the NPC in the current environment."
-    except Exception as e:
-        log_message(f"[SYSTEM] generate_image_prompt_from_interpret_input error: {str(e)}")
-        return "Ultrarealistic photo of the NPC in the current environment."
+    return result_text
 
 # --------------------------------------------------------------------------
 # Replicate Model Functions
@@ -352,7 +313,6 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
     print(f"[DEBUG] replicate => FLUX prompt={final_prompt}, seed={seed}")
     try:
         result = replicate.run("black-forest-labs/flux-schnell", replicate_input)
-        # Return in consistent format for _save_image
         if result:
             return {"output": result[0] if isinstance(result, list) else result}
         return None
@@ -392,7 +352,6 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
             "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
             replicate_input
         )
-        # Return in consistent format for _save_image
         if result:
             return {"output": result[0] if isinstance(result, list) else result}
         return None
@@ -400,7 +359,8 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         print("[ERROR] Pony-SDXL call failed:", e)
         return None
 
-def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, scheduler: str = "K_EULER", steps: int = 50) -> object:
+def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None,
+                                             scheduler: str = "K_EULER", steps: int = 50) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
     negative_prompt_text = (
@@ -414,11 +374,10 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
         "height": 1024,
         "prompt": final_prompt,
         "negative_prompt": negative_prompt_text,
-        "scheduler": scheduler,   # either "K_EULER" or "KarrasDPM"
+        "scheduler": scheduler,
         "num_inference_steps": steps,
         "guidance_scale": 5,
         "clip_skip": 2,
-        "disable_safety_checker": True,
         "refine": "no_refiner",
         "lora_scale": 0.6,
         "num_outputs": 1,
@@ -434,7 +393,6 @@ def generate_cyberrealisticpony_image_safely(prompt: str, seed: int = None, sche
             "charlesmccarthy/cyberrealisticpony_v40:7dc5ff926d5948d6d85869ce8016e8f1ebe72377f7f67aecb3c9d9b9cfacf665",
             replicate_input
         )
-        # Return in consistent format for _save_image
         if result:
             return {"output": result[0] if isinstance(result, list) else result}
         return None
@@ -474,8 +432,6 @@ def generate_realistic_vision_image_safely(
             "lucataco/realistic-vision-v5.1:2c8e954decbf70b7607a4414e5785ef9e4de4b8c51d50fb8b8b349160e0ef6bb",
             replicate_input
         )
-        # Check if result is a dict with an "output" key.
-        # Return full result object to let _save_image handle it
         if result:
             return {"output": result[0] if isinstance(result, list) else result}
         return None
@@ -531,9 +487,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
 
     _save_image(result)
 
-    # Save URL to session after successful save
     session["scene_image_url"] = url_for('view_image')
-
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
 
@@ -557,7 +511,7 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Expanded Dropdown Lists
+# DropDown Lists for Personalize
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
     "John", "Michael", "David", "Chris", "James", "Alex",
@@ -630,6 +584,112 @@ ENCOUNTER_CONTEXT_OPTIONS = [
 ]
 
 # --------------------------------------------------------------------------
+# --------------- New: System Prompts for each model in code --------------
+# --------------------------------------------------------------------------
+FLUX_SYSTEM_PROMPT = """
+You are an AI assistant specializing in producing a concise, photorealistic image prompt
+for the 'Flux' diffusion model. Flux responds best to natural, descriptive English,
+as if writing a short photo caption.
+
+Guidelines:
+1. Always use “photo” or “photograph.”
+2. Describe subject (age, hair, clothing, expression), environment, lighting.
+3. Avoid painting/anime references. Purely photographic.
+4. Output a single short prompt, no negative prompt needed here.
+"""
+
+PONY_SDXL_SYSTEM_PROMPT = """
+You are an AI assistant specializing in producing a short prompt for 'Pony SDXL.'
+ - The code already prepends: score_9, score_8_up, score_7_up, realistic
+ - Negative prompts handled separately
+
+Guidelines:
+1. Focus on describing subject, environment, lighting.
+2. Avoid painting/anime references.
+3. Output only the body after tokens. 1–2 lines only.
+"""
+
+CYBERPONY_SYSTEM_PROMPT = """
+You are an AI assistant specializing in producing a short prompt for 'CyberRealisticPony.'
+ - The code already adds: score_9, score_8_up, score_7_up, realistic
+ - Negative prompts handled separately
+
+Guidelines:
+1. Keep it concise but specific about appearance, environment, lighting, mood.
+2. Avoid painting/anime references. Photorealistic only.
+3. 1–2 lines, no negative prompt needed.
+"""
+
+REALISTIC_VISION_SYSTEM_PROMPT = """
+You are an AI assistant specializing in crafting a short “Realistic Vision” prompt.
+ - Typically: "RAW photo," plus camera references, time-of-day, environment
+ - Negative prompts handled separately
+
+Guidelines:
+1. A single short prompt (1–2 sentences). Use “RAW photo,” plus any relevant descriptors.
+2. Avoid painting/anime references, keep it photographic.
+"""
+
+def get_image_system_prompt(model_type: str) -> str:
+    mt = model_type.lower()
+    if mt == "flux":
+        return FLUX_SYSTEM_PROMPT
+    elif mt == "pony":
+        return PONY_SDXL_SYSTEM_PROMPT
+    elif mt == "cyberpony":
+        return CYBERPONY_SYSTEM_PROMPT
+    elif mt == "realistic":
+        return REALISTIC_VISION_SYSTEM_PROMPT
+    else:
+        return FLUX_SYSTEM_PROMPT
+
+# --------------------------------------------------------------------------
+# build_image_prompt_context => merges session data
+# --------------------------------------------------------------------------
+def build_image_prompt_context() -> str:
+    npc_name = session.get("npc_name", "Unknown")
+    npc_age = session.get("npc_age", "?")
+    hair_color = session.get("npc_hair_color", "")
+    hair_style = session.get("npc_hair_style", "")
+    clothing = session.get("npc_clothing", "")
+    other_details = session.get("npc_other_appearance", "")  # optional
+
+    npc_action = session.get("npc_current_action", "")
+    environment = session.get("environment", "")
+    lighting_info = session.get("lighting_info", "")
+
+    context_str = f"""
+NPC Name: {npc_name}, Age: {npc_age}
+Appearance: {hair_color} {hair_style}, wearing {clothing}, {other_details}
+Action: {npc_action}
+Environment: {environment}
+Lighting: {lighting_info}
+""".strip()
+    return context_str
+
+# --------------------------------------------------------------------------
+# generate_image_prompt_for_scene => call Gemini with the chosen system prompt
+# --------------------------------------------------------------------------
+def generate_image_prompt_for_scene(model_type: str) -> str:
+    context_data = build_image_prompt_context()
+    system_instructions = get_image_system_prompt(model_type)
+    final_prompt_input = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
+
+    try:
+        chat = model.start_chat()
+        resp = chat.send_message(
+            final_prompt_input,
+            safety_settings=safety_settings,
+            generation_config=generation_config
+        )
+        if resp and resp.text:
+            return resp.text.strip()
+        else:
+            return "[LLM returned empty]"
+    except Exception as e:
+        return f"[Error calling LLM: {str(e)}]"
+
+# --------------------------------------------------------------------------
 # Routes
 # --------------------------------------------------------------------------
 @app.route("/")
@@ -682,7 +742,7 @@ def register_route():
             return redirect(url_for("login_route"))
         except Exception as e:
             flash(f"Registration failed: {e}", "danger")
-            return redirectreturn redirect(url_for("register_route"))
+            return redirect(url_for("register_route"))
     return render_template("register.html", title="Register")
 
 @app.route("/logout")
@@ -821,6 +881,11 @@ def interaction():
         seed_used = session.get("scene_image_seed", None)
         interaction_log = session.get("interaction_log", [])
 
+        # read these from session to display them
+        current_action = session.get("npc_current_action", "")
+        environment = session.get("environment", "")
+        lighting_info = session.get("lighting_info", "")
+
         return render_template("interaction.html",
             title="Interact with NPC",
             affection_score=affection,
@@ -836,21 +901,21 @@ def interaction():
             scene_image_seed=seed_used,
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
-            npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20", "25", "30", "35", "40", "45"],
-            npc_gender_options=["Female", "Male", "Non-binary", "Other"],
-            hair_style_options=HAIR_STYLE_OPTIONS,
-            body_type_options=BODY_TYPE_OPTIONS,
-            hair_color_options=HAIR_COLOR_OPTIONS,
-            npc_personality_options=NPC_PERSONALITY_OPTIONS,
-            clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
-            current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
-            environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
-            encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
-            ethnicity_options=ETHNICITY_OPTIONS
+
+            # pass the scene data so user can see it or update it
+            npc_current_action=current_action,
+            environment=environment,
+            lighting_info=lighting_info
         )
     else:
+        # if user updates scene
+        if "update_scene" in request.form:
+            session["npc_current_action"] = request.form.get("npc_current_action", "")
+            session["environment"] = request.form.get("environment", "")
+            session["lighting_info"] = request.form.get("lighting_info", "")
+            flash("Scene updated!", "info")
+            return redirect(url_for("interaction"))
+
         if "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip()
             affection = session.get("affectionScore", 0.0)
@@ -858,9 +923,6 @@ def interaction():
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
             log_message(f"User: {user_action}")
-
-            # Clear previous image URL to avoid stale data
-            session["scene_image_url"] = None
 
             result_text = interpret_npc_state(
                 affection=affection,
@@ -872,7 +934,6 @@ def interaction():
 
             affect_delta = 0.0
             narration_txt = ""
-            image_prompt = ""
             for ln in result_text.split("\n"):
                 s = ln.strip()
                 if s.startswith("AFFECT_CHANGE_FINAL:"):
@@ -882,14 +943,11 @@ def interaction():
                         affect_delta = 0.0
                 elif s.startswith("NARRATION:"):
                     narration_txt = s.split(":", 1)[1].strip()
-                elif s.startswith("IMAGE_PROMPT:"):
-                    image_prompt = s.split(":", 1)[1].strip()
 
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
             session["narrationText"] = narration_txt
-            session["scene_image_prompt"] = image_prompt
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
             return redirect(url_for("interaction"))
@@ -919,10 +977,11 @@ def interaction():
             return redirect(url_for("interaction"))
 
         elif "generate_prompt" in request.form:
-            prompt = generate_image_prompt_from_interpret_input()
-            session["scene_image_prompt"] = prompt
-            log_message(f"Generated image prompt: {prompt}")
-            flash("Short image prompt generated from current context. You can now edit it if needed.", "info")
+            # Example usage: call our new function to get an LLM-based prompt
+            chosen_model = request.form.get("model_type", "flux")
+            llm_prompt_text = generate_image_prompt_for_scene(chosen_model)
+            session["scene_image_prompt"] = llm_prompt_text
+            flash(f"Short image prompt generated from current context, model={chosen_model}.", "info")
             return redirect(url_for("interaction"))
 
         elif "generate_image" in request.form:
