@@ -1,216 +1,285 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>{{ title }}</title>
+  <!-- Example: If using Bootstrap, include it here -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> -->
+</head>
+<body>
+  <div class="container mt-4">
+    <h1>{{ title }}</h1>
 
-{% block content %}
-<!-- Loading Spinner (hidden by default) -->
-<div id="loading" class="text-center" style="display: none; margin-bottom: 10px;">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
+    <!-- Display some relationship stats -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>NPC Relationship Stats</h4>
+        <p><strong>Affection:</strong> {{ affection_score }}</p>
+        <p><strong>Trust:</strong> {{ trust_score }}</p>
+        <p><strong>Mood:</strong> {{ npc_mood }}</p>
+        <p><strong>Current Stage:</strong> {{ current_stage }} ({{ stage_label }})</p>
+        <p><em>{{ stage_desc }}</em></p>
+        <p><strong>Next Stage Threshold:</strong> {{ next_threshold }}</p>
+      </div>
+    </div>
+
+    <!-- Display last narration -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Last Narration</h4>
+        <p>{{ npc_narration }}</p>
+      </div>
+    </div>
+
+    <!-- User Action Form -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Submit an Action / Dialogue</h4>
+        <form method="POST">
+          <div class="mb-3">
+            <label for="user_action" class="form-label">Your Action / Dialogue</label>
+            <textarea id="user_action" name="user_action" class="form-control" rows="2" placeholder="Speak or act..."></textarea>
+          </div>
+          <button type="submit" name="submit_action" class="btn btn-primary">Submit Action</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Scene Updates (environment, lighting, NPC current action) -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Update Scene Details</h4>
+        <form method="POST">
+          <div class="mb-3">
+            <label for="npc_current_action" class="form-label">NPC Current Action</label>
+            <input
+              type="text"
+              class="form-control"
+              id="npc_current_action"
+              name="npc_current_action"
+              value="{{ npc_current_action }}"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="environment" class="form-label">Environment</label>
+            <input
+              type="text"
+              class="form-control"
+              id="environment"
+              name="environment"
+              value="{{ environment }}"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="lighting_info" class="form-label">Lighting Info</label>
+            <input
+              type="text"
+              class="form-control"
+              id="lighting_info"
+              name="lighting_info"
+              value="{{ lighting_info }}"
+            />
+          </div>
+          <button type="submit" name="update_scene" class="btn btn-secondary">Update Scene</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Image Generation Prompt (LLM) -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Generate Scene Prompt (LLM)</h4>
+        <form method="POST">
+          <!-- Hidden field so we know which button triggered -->
+          <input type="hidden" name="model_type" value="{{ last_model_choice }}" />
+          <button type="submit" name="generate_prompt" class="btn btn-info">
+            Auto-Generate Image Prompt from LLM
+          </button>
+        </form>
+        {% if scene_image_prompt %}
+          <div class="alert alert-success mt-3" role="alert">
+            <strong>Current Image Prompt:</strong><br/>
+            {{ scene_image_prompt }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Image Generation Form -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Generate Image</h4>
+        <form method="POST">
+          <div class="mb-3">
+            <label for="scene_image_prompt" class="form-label">Prompt to Send to Diffusion</label>
+            <textarea
+              id="scene_image_prompt"
+              name="scene_image_prompt"
+              class="form-control"
+              rows="2"
+            >{{ scene_image_prompt }}</textarea>
+          </div>
+
+          <!-- Model Choice -->
+          <div class="mb-3">
+            <label for="model_type" class="form-label">Model Choice</label>
+            <select class="form-select" id="model_type" name="model_type">
+              <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux</option>
+              <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony SDXL</option>
+              <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision</option>
+            </select>
+          </div>
+
+          <!-- Steps -->
+          <div class="mb-3">
+            <label for="num_steps" class="form-label">Number of Steps (min:10)</label>
+            <input
+              type="number"
+              class="form-control"
+              id="num_steps"
+              name="num_steps"
+              min="10"
+              max="100"
+              value="{{ last_num_steps }}"
+            />
+          </div>
+
+          <!-- Pony-SDXL Sampler + CFG Scale -->
+          <div class="mb-3" id="pony-opts" style="display: block;">
+            <label for="pony_scheduler" class="form-label">Pony Scheduler</label>
+            <select class="form-select" id="pony_scheduler" name="pony_scheduler">
+              <option {% if pony_scheduler=='DPM++ 2M SDE Karras' %}selected{% endif %}>DPM++ 2M SDE Karras</option>
+              <option {% if pony_scheduler=='DPM++ SDE Karras' %}selected{% endif %}>DPM++ SDE Karras</option>
+              <option {% if pony_scheduler=='DPM++ 3M SDE Karras' %}selected{% endif %}>DPM++ 3M SDE Karras</option>
+              <option {% if pony_scheduler=='DPM++ 2S a Karras' %}selected{% endif %}>DPM++ 2S a Karras</option>
+              <option {% if pony_scheduler=='DPM2 a' %}selected{% endif %}>DPM2 a</option>
+              <option {% if pony_scheduler=='Euler a' %}selected{% endif %}>Euler a</option>
+            </select>
+
+            <label for="pony_cfg_scale" class="form-label mt-2">Pony CFG Scale</label>
+            <input
+              type="number"
+              step="0.1"
+              class="form-control"
+              id="pony_cfg_scale"
+              name="pony_cfg_scale"
+              value="{{ pony_cfg_scale }}"
+            />
+          </div>
+
+          <!-- Realistic Vision Sampler + Guidance Scale -->
+          <div class="mb-3" id="realistic-opts" style="display: block;">
+            <label for="realistic_scheduler" class="form-label">Realistic Scheduler</label>
+            <select class="form-select" id="realistic_scheduler" name="realistic_scheduler">
+              <option value="EulerA" {% if realistic_scheduler=='EulerA' %}selected{% endif %}>EulerA</option>
+              <option value="MultistepDPM-Solver" {% if realistic_scheduler=='MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
+            </select>
+
+            <label for="realistic_cfg_scale" class="form-label mt-2">Realistic Guidance Scale</label>
+            <input
+              type="number"
+              step="0.1"
+              class="form-control"
+              id="realistic_cfg_scale"
+              name="realistic_cfg_scale"
+              value="{{ realistic_cfg_scale }}"
+            />
+          </div>
+
+          <!-- Checkboxes/Buttons for generating image -->
+          <button type="submit" name="generate_image" class="btn btn-success mt-3">
+            Generate Image
+          </button>
+
+          <button type="submit" name="new_seed" class="btn btn-outline-secondary mt-3">
+            Generate w/ New Seed
+          </button>
+        </form>
+
+        <!-- Display the newly generated image right below the form -->
+        {% if scene_image_url %}
+          <hr/>
+          <h5>Latest Generated Image</h5>
+          <p><small>Seed: {{ scene_image_seed }}</small></p>
+          <img src="{{ scene_image_url }}" alt="Generated Image" style="max-width: 400px;"/>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Manual Affection Adjust (optional) -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Manually Adjust Affection</h4>
+        <form method="POST">
+          <div class="input-group">
+            <input
+              type="number"
+              step="0.1"
+              class="form-control"
+              name="affection_new"
+              placeholder="New affection (e.g., 5.0)"
+            />
+            <button type="submit" name="update_affection" class="btn btn-warning">
+              Update
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Links to other actions -->
+    <div class="d-flex gap-3">
+      <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-secondary">Mid-Game Personalize</a>
+      <a href="{{ url_for('stage_unlocks') }}" class="btn btn-info">Stage Unlocks</a>
+      <a href="{{ url_for('full_story') }}" class="btn btn-primary">View Full Story</a>
+      <a href="{{ url_for('restart') }}" class="btn btn-danger">Restart Session</a>
+    </div>
+
+    <!-- Interaction Log (Optional) -->
+    <div class="card mt-3">
+      <div class="card-body">
+        <h4>Interaction Log</h4>
+        {% if interaction_log %}
+          <ul>
+            {% for item in interaction_log %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p><em>No interactions yet.</em></p>
+        {% endif %}
+      </div>
+    </div>
+
   </div>
-</div>
 
-<!-- Top Navigation -->
-<div class="row mb-3">
-  <div class="col text-start">
-    <a href="{{ url_for('full_story') }}" class="btn btn-info">Full Narration</a>
-  </div>
-  <div class="col text-end">
-    <a href="{{ url_for('logout_route') }}" class="btn btn-danger">Logout</a>
-  </div>
-</div>
+  <!-- Example: If using Bootstrap JS, include it here -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
 
-<h1 style="color: #ff5789;">Interaction</h1>
-
-<!-- Scene / Narration Display -->
-<div class="border p-3 mb-3" style="white-space: pre-line; background-color: #4a0d0d; color: #f8d0d0;">
-  <strong>Scene:</strong> {{ npc_narration }}
-</div>
-
-<!-- USER ACTION FORM -->
-<form method="POST" class="mb-4" onsubmit="showLoading()">
-  <!-- Quick Action Buttons -->
-  <div class="mb-3">
-    <button type="button" onclick="prefillAction('OOC: More dialogue')" class="btn btn-outline-info me-2">More Dialogue</button>
-    <button type="button" onclick="prefillAction('OOC: More sexually detailed')" class="btn btn-outline-danger me-2">More Sexual Details</button>
-    <button type="button" onclick="prefillAction('OOC: More dirty talk')" class="btn btn-outline-warning">More Dirty Talk</button>
-  </div>
-
+  <!-- Optional: If you want to auto-hide Pony vs. Realistic fields using JS -->
   <script>
-    function prefillAction(text) {
-      document.querySelector('input[name="user_action"]').value = text;
+    const modelSelect = document.getElementById('model_type');
+    const ponyOpts = document.getElementById('pony-opts');
+    const realOpts = document.getElementById('realistic-opts');
+
+    function updateModelUI() {
+      const modelVal = modelSelect.value;
+      if (modelVal === 'pony') {
+        ponyOpts.style.display = 'block';
+        realOpts.style.display = 'none';
+      } else if (modelVal === 'realistic') {
+        ponyOpts.style.display = 'none';
+        realOpts.style.display = 'block';
+      } else {
+        // flux
+        ponyOpts.style.display = 'none';
+        realOpts.style.display = 'none';
+      }
     }
-    function showLoading() {
-      document.getElementById("loading").style.display = "block";
-    }
+
+    modelSelect.addEventListener('change', updateModelUI);
+    // Run on page load:
+    updateModelUI();
   </script>
-
-  <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
-  <input type="text" class="form-control mb-2" name="user_action" placeholder="He quietly asks how she's doing...">
-  <button type="submit" name="submit_action" class="btn btn-success">Send Move</button>
-</form>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<!-- SCENE IMAGE PROMPT FORM -->
-<h3 style="color: #ff5789;">Scene Image Prompt</h3>
-<form method="POST" class="mb-3" onsubmit="showLoading()">
-  <div class="mb-3">
-    <button type="submit" name="generate_prompt" class="btn btn-info">Auto Generate Scene Prompt</button>
-  </div>
-
-  <textarea name="scene_image_prompt" rows="2" class="form-control" style="background-color: #4a0d0d; color: #f8d0d0;">{{ scene_image_prompt }}</textarea>
-
-  <!-- Model Selection -->
-  <div class="mt-2">
-    <label class="form-label" style="color: #f8d0d0;">Choose Model:</label>
-    <select name="model_type" id="model_type" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="flux" 
-        {% if last_model_choice == 'flux' %}selected{% endif %}>Flux-Schnell</option>
-      <option value="pony"
-        {% if last_model_choice == 'pony' %}selected{% endif %}>Pony-SDXL</option>
-      <option value="realistic"
-        {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision v5.1</option>
-    </select>
-  </div>
-
-  <!-- Pony Sampler + CFG -->
-  <div class="mt-2" id="pony_div" style="display: none;">
-    <label class="form-label" style="color: #f8d0d0;">Pony Sampler:</label>
-    <select name="pony_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="DPM++ SDE Karras" 
-        {% if pony_scheduler == 'DPM++ SDE Karras' %}selected{% endif %}>DPM++ SDE Karras</option>
-      <option value="DPM++ 3M SDE Karras" 
-        {% if pony_scheduler == 'DPM++ 3M SDE Karras' %}selected{% endif %}>DPM++ 3M SDE Karras</option>
-      <option value="DPM++ 2M SDE Karras" 
-        {% if pony_scheduler == 'DPM++ 2M SDE Karras' %}selected{% endif %}>DPM++ 2M SDE Karras</option>
-      <option value="DPM++ 2S a Karras" 
-        {% if pony_scheduler == 'DPM++ 2S a Karras' %}selected{% endif %}>DPM++ 2S a Karras</option>
-      <option value="DPM2 a" 
-        {% if pony_scheduler == 'DPM2 a' %}selected{% endif %}>DPM2 a</option>
-      <option value="Euler a" 
-        {% if pony_scheduler == 'Euler a' %}selected{% endif %}>Euler a</option>
-    </select>
-
-    <label class="form-label" style="color: #f8d0d0;">Pony CFG Scale (1–20):</label>
-    <input type="number" step="0.5" min="1" max="20" name="pony_cfg_scale"
-           class="form-control mb-2"
-           style="background-color: #4a0d0d; color: #f8d0d0;"
-           value="{{ pony_cfg_scale|default(5.0) }}">
-  </div>
-
-  <!-- Realistic Vision Scheduler + CFG -->
-  <div class="mt-2" id="realistic_scheduler_div" style="display: none;">
-    <label class="form-label" style="color: #f8d0d0;">Realistic Vision Scheduler:</label>
-    <select name="realistic_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="EulerA"
-        {% if realistic_scheduler == 'EulerA' %}selected{% endif %}>EulerA</option>
-      <option value="MultistepDPM-Solver"
-        {% if realistic_scheduler == 'MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
-    </select>
-
-    <label class="form-label" style="color: #f8d0d0;">Realistic CFG Scale (1–20):</label>
-    <input type="number" step="0.5" min="1" max="20" name="realistic_cfg_scale"
-           class="form-control mb-2"
-           style="background-color: #4a0d0d; color: #f8d0d0;"
-           value="{{ realistic_cfg_scale|default(5.0) }}">
-  </div>
-
-  <!-- Steps Slider (for Pony, Realistic) -->
-  <div class="mt-2" id="steps_div" style="display: none;">
-    <label class="form-label" style="color: #f8d0d0;">Number of Steps (20-100):</label>
-    <input type="range" class="form-range" min="20" max="100" name="num_steps" value="60"
-           oninput="this.nextElementSibling.value = this.value">
-    <output>60</output>
-  </div>
-
-  <div class="mt-3">
-    <button type="submit" name="generate_image" class="btn btn-primary me-2">Generate Scene Image</button>
-    <button type="submit" name="new_seed" class="btn btn-warning">New Seed</button>
-  </div>
-</form>
-
-{% if scene_image_url %}
-  <hr style="border-top: 1px solid #ff5789;">
-  <h4 style="color: #ff5789;">Generated Scene Image</h4>
-  <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
-  {% if scene_image_seed %}
-    <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
-  {% endif %}
-{% endif %}
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<!-- AFFECTION OVERRIDE FORM -->
-<form method="POST" class="mb-4" onsubmit="showLoading()">
-  <label class="form-label" style="color: #f8d0d0;">Override Affection Score:</label>
-  <input type="number" step="0.1" class="form-control mb-2" name="affection_new" value="{{ affection_score }}">
-  <button type="submit" name="update_affection" class="btn btn-info">Update Affection</button>
-</form>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<!-- Stage Unlocks Button -->
-<div class="row mb-3">
-  <div class="col-12">
-    <a href="{{ url_for('stage_unlocks') }}" class="btn btn-warning">Edit Stage Unlocks</a>
-  </div>
-</div>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<!-- Mid-Game Personalization Button -->
-<div class="row mb-3">
-  <div class="col-12">
-    <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-warning">Update Character & Environment</a>
-  </div>
-</div>
-
-<hr style="border-top: 1px solid #ff5789;">
-<a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">Restart Entire Story</a>
-
-<script>
-  function toggleVisibilityForModel(model) {
-    var stepsDiv = document.getElementById('steps_div');
-    var ponyDiv = document.getElementById('pony_div');
-    var realisticDiv = document.getElementById('realistic_scheduler_div');
-
-    // Steps range visible only if pony or realistic
-    if (model === 'pony' || model === 'realistic') {
-      stepsDiv.style.display = 'block';
-    } else {
-      stepsDiv.style.display = 'none';
-    }
-
-    // Pony options only if model === 'pony'
-    if (model === 'pony') {
-      ponyDiv.style.display = 'block';
-    } else {
-      ponyDiv.style.display = 'none';
-    }
-
-    // Realistic only if model === 'realistic'
-    if (model === 'realistic') {
-      realisticDiv.style.display = 'block';
-    } else {
-      realisticDiv.style.display = 'none';
-    }
-  }
-
-  document.getElementById('model_type').addEventListener('change', function() {
-    toggleVisibilityForModel(this.value);
-  });
-
-  // Trigger initial change event to set initial visibility
-  toggleVisibilityForModel(document.getElementById('model_type').value);
-
-  function showLoading() {
-    document.getElementById("loading").style.display = "block";
-  }
-
-  // Show spinner on any form submission
-  document.querySelectorAll('form').forEach(function(form) {
-    form.addEventListener('submit', function() {
-      showLoading();
-    });
-  });
-</script>
-{% endblock %}
+</body>
+</html>
