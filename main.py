@@ -707,7 +707,7 @@ def register_route():
     return render_template("register.html", title="Register")
 
 @app.route("/logout")
-deflogout_route():
+def logout_route():
     for key in ["logged_in", "user_id", "user_email", "access_token"]:
         session.pop(key, None)
     flash("Logged out successfully.", "info")
