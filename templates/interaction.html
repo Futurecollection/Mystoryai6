@@ -63,19 +63,55 @@
   <div class="mt-2">
     <label class="form-label" style="color: #f8d0d0;">Choose Model:</label>
     <select name="model_type" id="model_type" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="flux">Flux-Schnell</option>
-      <option value="pony">Pony-SDXL</option>
-      <option value="realistic">Realistic Vision v5.1</option>
+      <option value="flux" 
+        {% if last_model_choice == 'flux' %}selected{% endif %}>Flux-Schnell</option>
+      <option value="pony"
+        {% if last_model_choice == 'pony' %}selected{% endif %}>Pony-SDXL</option>
+      <option value="realistic"
+        {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision v5.1</option>
     </select>
   </div>
 
-  <!-- Scheduler Dropdown for Realistic Vision -->
+  <!-- Pony Sampler + CFG -->
+  <div class="mt-2" id="pony_div" style="display: none;">
+    <label class="form-label" style="color: #f8d0d0;">Pony Sampler:</label>
+    <select name="pony_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
+      <option value="DPM++ SDE Karras" 
+        {% if pony_scheduler == 'DPM++ SDE Karras' %}selected{% endif %}>DPM++ SDE Karras</option>
+      <option value="DPM++ 3M SDE Karras" 
+        {% if pony_scheduler == 'DPM++ 3M SDE Karras' %}selected{% endif %}>DPM++ 3M SDE Karras</option>
+      <option value="DPM++ 2M SDE Karras" 
+        {% if pony_scheduler == 'DPM++ 2M SDE Karras' %}selected{% endif %}>DPM++ 2M SDE Karras</option>
+      <option value="DPM++ 2S a Karras" 
+        {% if pony_scheduler == 'DPM++ 2S a Karras' %}selected{% endif %}>DPM++ 2S a Karras</option>
+      <option value="DPM2 a" 
+        {% if pony_scheduler == 'DPM2 a' %}selected{% endif %}>DPM2 a</option>
+      <option value="Euler a" 
+        {% if pony_scheduler == 'Euler a' %}selected{% endif %}>Euler a</option>
+    </select>
+
+    <label class="form-label" style="color: #f8d0d0;">Pony CFG Scale (1–20):</label>
+    <input type="number" step="0.5" min="1" max="20" name="pony_cfg_scale"
+           class="form-control mb-2"
+           style="background-color: #4a0d0d; color: #f8d0d0;"
+           value="{{ pony_cfg_scale|default(5.0) }}">
+  </div>
+
+  <!-- Realistic Vision Scheduler + CFG -->
   <div class="mt-2" id="realistic_scheduler_div" style="display: none;">
     <label class="form-label" style="color: #f8d0d0;">Realistic Vision Scheduler:</label>
     <select name="realistic_scheduler" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="EulerA">EulerA</option>
-      <option value="MultistepDPM-Solver">MultistepDPM-Solver</option>
+      <option value="EulerA"
+        {% if realistic_scheduler == 'EulerA' %}selected{% endif %}>EulerA</option>
+      <option value="MultistepDPM-Solver"
+        {% if realistic_scheduler == 'MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
     </select>
+
+    <label class="form-label" style="color: #f8d0d0;">Realistic CFG Scale (1–20):</label>
+    <input type="number" step="0.5" min="1" max="20" name="realistic_cfg_scale"
+           class="form-control mb-2"
+           style="background-color: #4a0d0d; color: #f8d0d0;"
+           value="{{ realistic_cfg_scale|default(5.0) }}">
   </div>
 
   <!-- Steps Slider (for Pony, Realistic) -->
@@ -132,34 +168,48 @@
 <a href="{{ url_for('restart') }}" class="btn btn-outline-secondary">Restart Entire Story</a>
 
 <script>
-  // Toggle additional fields based on selected model
-  document.getElementById('model_type').addEventListener('change', function() {
-    var model = this.value;
+  function toggleVisibilityForModel(model) {
     var stepsDiv = document.getElementById('steps_div');
+    var ponyDiv = document.getElementById('pony_div');
     var realisticDiv = document.getElementById('realistic_scheduler_div');
 
-    // Show steps range only if pony or realistic
+    // Steps range visible only if pony or realistic
     if (model === 'pony' || model === 'realistic') {
       stepsDiv.style.display = 'block';
     } else {
       stepsDiv.style.display = 'none';
     }
 
-    // Show realistic scheduler only for 'realistic'
+    // Pony options only if model === 'pony'
+    if (model === 'pony') {
+      ponyDiv.style.display = 'block';
+    } else {
+      ponyDiv.style.display = 'none';
+    }
+
+    // Realistic only if model === 'realistic'
     if (model === 'realistic') {
       realisticDiv.style.display = 'block';
     } else {
       realisticDiv.style.display = 'none';
     }
+  }
+
+  document.getElementById('model_type').addEventListener('change', function() {
+    toggleVisibilityForModel(this.value);
   });
 
   // Trigger initial change event to set initial visibility
-  document.getElementById('model_type').dispatchEvent(new Event('change'));
+  toggleVisibilityForModel(document.getElementById('model_type').value);
 
-  // Show the spinner on any form submission
+  function showLoading() {
+    document.getElementById("loading").style.display = "block";
+  }
+
+  // Show spinner on any form submission
   document.querySelectorAll('form').forEach(function(form) {
     form.addEventListener('submit', function() {
-      document.getElementById("loading").style.display = "block";
+      showLoading();
     });
   });
 </script>
