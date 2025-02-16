@@ -49,7 +49,7 @@ def login_required(f):
 # --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 safety_settings = {
     HarmCategory.HATE: HarmBlockThreshold.BLOCK_NONE,
