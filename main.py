@@ -1,6 +1,7 @@
 import os
 import random
 import requests
+import time
 from functools import wraps
 from flask import (
     Flask, request, render_template,
@@ -608,19 +609,28 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
     system_instructions = get_image_prompt_system_instructions(model_type)
     final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
 
-    try:
-        chat = model.start_chat()
-        resp = chat.send_message(
-            final_message,
-            safety_settings=safety_settings,
-            generation_config={"temperature":0.5, "max_output_tokens":512}
-        )
-        if resp and resp.text:
-            return resp.text.strip()
-        else:
-            return "[LLM returned empty]"
-    except Exception as e:
-        return f"[Error calling LLM: {str(e)}]"
+    max_retries = 3
+    retry_delay = 2  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            chat = model.start_chat()
+            resp = chat.send_message(
+                final_message,
+                safety_settings=safety_settings,
+                generation_config={"temperature":0.5, "max_output_tokens":512}
+            )
+            if resp and resp.text:
+                return resp.text.strip()
+            else:
+                return "[LLM returned empty]"
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                continue
+            if "429" in str(e):
+                return "[API quota exceeded. Please try again in a few minutes.]"
+            return f"[Error calling LLM: {str(e)}]"
 
 # --------------------------------------------------------------------------
 # Routes
