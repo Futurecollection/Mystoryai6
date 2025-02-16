@@ -49,12 +49,24 @@ genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
 # You allow all categories:
-safety_settings = {
-    HarmCategory.HATE: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.SEXUAL: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.DANGEROUS: HarmBlockThreshold.BLOCK_NONE,
-}
+safety_settings = [
+    {
+        "category": HarmCategory.HATE,
+        "threshold": HarmBlockThreshold.BLOCK_NONE
+    },
+    {
+        "category": HarmCategory.HARASSMENT,
+        "threshold": HarmBlockThreshold.BLOCK_NONE
+    },
+    {
+        "category": HarmCategory.SEXUAL,
+        "threshold": HarmBlockThreshold.BLOCK_NONE
+    },
+    {
+        "category": HarmCategory.DANGEROUS,
+        "threshold": HarmBlockThreshold.BLOCK_NONE
+    }
+]
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
