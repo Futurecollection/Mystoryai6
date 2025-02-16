@@ -611,6 +611,7 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
 
     max_retries = 3
     retry_delay = 2  # seconds
+    last_error = None
     
     for attempt in range(max_retries):
         try:
@@ -622,15 +623,21 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
             )
             if resp and resp.text:
                 return resp.text.strip()
-            else:
-                return "[LLM returned empty]"
+            continue  # If empty response, try again
         except Exception as e:
-            if attempt < max_retries - 1:
+            last_error = e
+            if "429" in str(e):  # Rate limit hit
+                time.sleep(retry_delay * (attempt + 1))  # Exponential backoff
+                continue
+            if attempt < max_retries - 1:  # Other errors
                 time.sleep(retry_delay)
                 continue
-            if "429" in str(e):
-                return "[API quota exceeded. Please try again in a few minutes.]"
-            return f"[Error calling LLM: {str(e)}]"
+            break  # Give up after max retries
+    
+    # If we get here, all retries failed
+    if last_error and "429" in str(last_error):
+        return "[API quota exceeded. Please try again in a few minutes.]"
+    return f"[Error generating image prompt: {str(last_error) if last_error else 'Empty response'}]"
 
 # --------------------------------------------------------------------------
 # Routes
