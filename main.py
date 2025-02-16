@@ -50,10 +50,10 @@ genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
 safety_settings = {
-    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HATE: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.SEXUAL: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.DANGEROUS: HarmBlockThreshold.BLOCK_NONE,
 }
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
