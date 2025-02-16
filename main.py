@@ -140,13 +140,11 @@ def _save_image(result):
         except Exception as e:
             print("[ERROR] _save_image => Error downloading from output key:", e)
         return
-
     if hasattr(result, "read"):
         print("[DEBUG] _save_image => File-like object received.")
         with open(GENERATED_IMAGE_PATH, "wb") as f:
             f.write(result.read())
         return
-
     if isinstance(result, list) and result:
         final_item = result[-1]
         if isinstance(final_item, str):
@@ -162,7 +160,6 @@ def _save_image(result):
         else:
             print("[ERROR] _save_image => List item is not a string:", final_item)
             return
-
     if isinstance(result, str):
         print("[DEBUG] _save_image => Received string:", result)
         try:
@@ -241,6 +238,10 @@ def build_personalization_string() -> str:
 # --------------------------------------------------------------------------
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
+    """
+    Produces exactly 2 lines: AFFECT_CHANGE_FINAL and NARRATION
+    Does not attempt to parse environment or lighting from the text.
+    """
     prepare_history()
     memory_summary = session.get("log_summary", "")
     recent_lines = session.get("interaction_log", [])
@@ -265,7 +266,7 @@ SPECIAL INSTRUCTIONS:
 
 Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
-Line 2 => NARRATION: ... (Write 200-300 words describing the NPC's reaction, setting, dialogue, and actions)
+Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, dialogue, and actions)
 
 Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
@@ -440,7 +441,7 @@ def generate_realistic_vision_image_safely(
         return None
 
 # --------------------------------------------------------------------------
-# handle_image_generation_from_prompt => multi-model selection
+# handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None, steps: int = None):
@@ -511,176 +512,168 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# DropDown Lists for Personalize
+# Example Data for personalization
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
-    "John", "Michael", "David", "Chris", "James", "Alex",
-    "Emily", "Olivia", "Sophia", "Emma", "Ava", "Isabella",
-    "Liam", "Noah", "Ethan", "Mason", "Lucas", "Logan"
+    "John","Michael","David","Chris","James","Alex",
+    "Emily","Olivia","Sophia","Emma","Ava","Isabella",
+    "Liam","Noah","Ethan","Mason","Lucas","Logan"
 ]
 NPC_NAME_OPTIONS = [
-    "Lucy", "Emily", "Sarah", "Lisa", "Anna", "Mia", "Sophia",
-    "Olivia", "Chloe", "Isabella", "Grace", "Lily", "Ella", "Zoe", "Emma",
-    "Victoria", "Madison", "Natalie", "Jasmine", "Aurora", "Ruby", "Scarlett",
-    "Hazel", "Ivy", "Luna", "Penelope", "Stella"
+    "Lucy","Emily","Sarah","Lisa","Anna","Mia","Sophia",
+    "Olivia","Chloe","Isabella","Grace","Lily","Ella","Zoe","Emma",
+    "Victoria","Madison","Natalie","Jasmine","Aurora","Ruby","Scarlett",
+    "Hazel","Ivy","Luna","Penelope","Stella"
 ]
 HAIR_STYLE_OPTIONS = [
-    "Short", "Medium", "Long", "Bald", "Pixie", "Bob",
-    "Curly", "Wavy", "Braided", "Updo", "Ponytail", "Messy bun",
-    "Side-swept bangs", "Fishtail braid", "Sleek straight", "Layered",
-    "Curls", "Tousled", "Wavy bob", "Half-up half-down"
+    "Short","Medium","Long","Bald","Pixie","Bob",
+    "Curly","Wavy","Braided","Updo","Ponytail","Messy bun",
+    "Side-swept bangs","Fishtail braid","Sleek straight","Layered",
+    "Curls","Tousled","Wavy bob","Half-up half-down"
 ]
 BODY_TYPE_OPTIONS = [
-    "Athletic", "Muscular", "Average", "Tall", "Slim",
-    "Curvy", "Petite", "Voluptuous", "Fit", "Lithe", "Hourglass",
-    "Elegant", "Graceful"
+    "Athletic","Muscular","Average","Tall","Slim",
+    "Curvy","Petite","Voluptuous","Fit","Lithe","Hourglass",
+    "Elegant","Graceful"
 ]
 CLOTHING_OPTIONS = [
-    "Red Dress", "T-shirt & Jeans", "Black Gown", "Green Hoodie",
-    "Elegant Evening Gown", "Casual Blouse & Skirt", "Office Suit",
-    "Summer dress", "Black mini skirt and white blouse",
-    "Leather Jacket and Shorts", "Vintage Outfit",
-    "High-waisted trousers with a crop top", "Lace lingerie set",
-    "Silk robe", "Intimate chemise", "Bodysuit",
-    "Off-shoulder top with skirt", "Corset and thigh-high stockings"
+    "Red Dress","T-shirt & Jeans","Black Gown","Green Hoodie",
+    "Elegant Evening Gown","Casual Blouse & Skirt","Office Suit",
+    "Summer dress","Black mini skirt and white blouse",
+    "Leather Jacket and Shorts","Vintage Outfit",
+    "High-waisted trousers with a crop top","Lace lingerie set",
+    "Silk robe","Intimate chemise","Bodysuit",
+    "Off-shoulder top with skirt","Corset and thigh-high stockings"
 ]
 ETHNICITY_OPTIONS = [
-    "British", "French", "German", "Italian", "Spanish", "Portuguese",
-    "Greek", "Dutch", "Swedish", "Norwegian", "Finnish", "Danish",
-    "Polish", "Russian", "Ukrainian", "Austrian", "Swiss", "Belgian",
-    "Czech", "Slovak", "Hungarian", "Romanian", "Bulgarian", "Serbian",
-    "Croatian", "Slovenian", "Bosnian", "Australian", "New Zealander",
-    "Maori", "Chinese", "Japanese", "Korean", "Indian", "Pakistani",
-    "Bangladeshi", "Indonesian", "Filipino", "Thai", "Vietnamese",
-    "Malaysian", "Singaporean", "American (Black)", "American (White)",
-    "Hispanic", "Latino", "Middle Eastern", "African", "Other"
+    "British","French","German","Italian","Spanish","Portuguese",
+    "Greek","Dutch","Swedish","Norwegian","Finnish","Danish",
+    "Polish","Russian","Ukrainian","Austrian","Swiss","Belgian",
+    "Czech","Slovak","Hungarian","Romanian","Bulgarian","Serbian",
+    "Croatian","Slovenian","Bosnian","Australian","New Zealander",
+    "Maori","Chinese","Japanese","Korean","Indian","Pakistani",
+    "Bangladeshi","Indonesian","Filipino","Thai","Vietnamese",
+    "Malaysian","Singaporean","American (Black)","American (White)",
+    "Hispanic","Latino","Middle Eastern","African","Other"
 ]
 NPC_PERSONALITY_OPTIONS = [
-    "Flirty", "Passionate", "Confident", "Playful", "Gentle",
-    "Seductive", "Sensual", "Provocative", "Lascivious", "Romantic",
-    "Erotic", "Alluring", "Mysterious", "Intense", "Charming", "Warm",
-    "Feminine", "Nurturing"
+    "Flirty","Passionate","Confident","Playful","Gentle",
+    "Seductive","Sensual","Provocative","Lascivious","Romantic",
+    "Erotic","Alluring","Mysterious","Intense","Charming","Warm",
+    "Feminine","Nurturing"
 ]
 HAIR_COLOR_OPTIONS = [
-    "Blonde", "Brunette", "Black", "Red", "Auburn", "Platinum Blonde",
-    "Jet Black", "Chestnut", "Strawberry Blonde", "Honey Blonde",
-    "Caramel", "Golden"
+    "Blonde","Brunette","Black","Red","Auburn","Platinum Blonde",
+    "Jet Black","Chestnut","Strawberry Blonde","Honey Blonde",
+    "Caramel","Golden"
 ]
 CURRENT_SITUATION_OPTIONS = [
-    "Recently Broke Up", "Single & Looking", "On Vacation",
-    "Working", "In a Relationship", "Divorced", "Exploring new desires",
+    "Recently Broke Up","Single & Looking","On Vacation",
+    "Working","In a Relationship","Divorced","Exploring new desires",
     "Feeling liberated"
 ]
 ENVIRONMENT_OPTIONS = [
-    "Cafe", "Library", "Gym", "Beach", "Park", "Nightclub", "Bar",
-    "Studio", "Loft", "Garden", "Rooftop", "Boutique hotel", "Luxury spa",
+    "Cafe","Library","Gym","Beach","Park","Nightclub","Bar",
+    "Studio","Loft","Garden","Rooftop","Boutique hotel","Luxury spa",
     "Chic restaurant"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-    "First Date", "Accidental Meeting", "Group Activity", "Work Event",
-    "Online Match", "Blind Date", "Unexpected Reunion", "Romantic Getaway",
-    "After-Party", "Private Dinner", "Secret Meeting", "Intimate Gathering",
-    "Spontaneous Encounter", "Cozy Evening"
+    "First Date","Accidental Meeting","Group Activity","Work Event",
+    "Online Match","Blind Date","Unexpected Reunion","Romantic Getaway",
+    "After-Party","Private Dinner","Secret Meeting","Intimate Gathering",
+    "Spontaneous Encounter","Cozy Evening"
 ]
 
 # --------------------------------------------------------------------------
-# --------------- New: System Prompts for each model in code --------------
+# Expanded system prompts for image generation referencing the FULL narration
 # --------------------------------------------------------------------------
-FLUX_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a concise, photorealistic image prompt
-for the 'Flux' diffusion model. Flux responds best to natural, descriptive English,
-as if writing a short photo caption.
-
-Guidelines:
-1. Always use “photo” or “photograph.”
-2. Describe subject (age, hair, clothing, expression), environment, lighting.
-3. Avoid painting/anime references. Purely photographic.
-4. Output a single short prompt, no negative prompt needed here.
+FLUX_IMAGE_SYSTEM_PROMPT = """
+You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
+Include the NPC's personal details (age, hair, clothing, etc.) plus a relevant portion of the last story narration to convey the scene's action or setting.
+You may produce 1–3 lines describing it. Use "photo" or "photograph" for realism, and avoid painting/anime references.
 """
 
-PONY_SDXL_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a short prompt for 'Pony SDXL.'
- - The code already prepends: score_9, score_8_up, score_7_up, realistic
- - Negative prompts handled separately
-
-Guidelines:
-1. Focus on describing subject, environment, lighting.
-2. Avoid painting/anime references.
-3. Output only the body after tokens. 1–2 lines only.
+PONY_IMAGE_SYSTEM_PROMPT = """
+You are an AI assistant specializing in producing a short prompt for Pony SDXL, referencing the NPC's personal data 
+and the last story narration. The code automatically adds "score_9, score_8_up, score_7_up, realistic," 
+so do NOT include them. 1–3 lines is fine. Avoid painting/anime references.
 """
 
-CYBERPONY_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a short prompt for 'CyberRealisticPony.'
- - The code already adds: score_9, score_8_up, score_7_up, realistic
- - Negative prompts handled separately
-
-Guidelines:
-1. Keep it concise but specific about appearance, environment, lighting, mood.
-2. Avoid painting/anime references. Photorealistic only.
-3. 1–2 lines, no negative prompt needed.
+CYBERPONY_IMAGE_SYSTEM_PROMPT = """
+You are an AI assistant for CyberRealisticPony. The code adds "score_9, score_8_up, score_7_up, realistic," 
+so do not repeat them. Incorporate the NPC's personal details plus relevant action or setting from the last narration. 
+1–3 lines, purely photorealistic.
 """
 
-REALISTIC_VISION_SYSTEM_PROMPT = """
-You are an AI assistant specializing in crafting a short “Realistic Vision” prompt.
- - Typically: "RAW photo," plus camera references, time-of-day, environment
- - Negative prompts handled separately
-
-Guidelines:
-1. A single short prompt (1–2 sentences). Use “RAW photo,” plus any relevant descriptors.
-2. Avoid painting/anime references, keep it photographic.
+REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
+You are an AI assistant creating a prompt for Realistic Vision (SD1.5).
+Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data plus relevant story narration details. 
+Produce 1–3 lines. No negative prompt needed. Avoid painting/anime references.
 """
 
-def get_image_system_prompt(model_type: str) -> str:
+def get_image_prompt_system_instructions(model_type: str) -> str:
     mt = model_type.lower()
     if mt == "flux":
-        return FLUX_SYSTEM_PROMPT
+        return FLUX_IMAGE_SYSTEM_PROMPT
     elif mt == "pony":
-        return PONY_SDXL_SYSTEM_PROMPT
+        return PONY_IMAGE_SYSTEM_PROMPT
     elif mt == "cyberpony":
-        return CYBERPONY_SYSTEM_PROMPT
+        return CYBERPONY_IMAGE_SYSTEM_PROMPT
     elif mt == "realistic":
-        return REALISTIC_VISION_SYSTEM_PROMPT
+        return REALISTICVISION_IMAGE_SYSTEM_PROMPT
     else:
-        return FLUX_SYSTEM_PROMPT
+        return FLUX_IMAGE_SYSTEM_PROMPT
 
-# --------------------------------------------------------------------------
-# build_image_prompt_context => merges session data
-# --------------------------------------------------------------------------
-def build_image_prompt_context() -> str:
+def build_image_prompt_context_for_image() -> str:
+    """
+    Merges:
+      - NPC personal details
+      - The FULL or recent narration
+      - If user is storing environment in session, you can incorporate that too
+    """
     npc_name = session.get("npc_name", "Unknown")
     npc_age = session.get("npc_age", "?")
+    npc_ethnicity = session.get("npc_ethnicity", "")
     hair_color = session.get("npc_hair_color", "")
     hair_style = session.get("npc_hair_style", "")
     clothing = session.get("npc_clothing", "")
-    other_details = session.get("npc_other_appearance", "")  # optional
+    personality = session.get("npc_personality","")
+    body_type = session.get("npc_body_type","")
 
-    npc_action = session.get("npc_current_action", "")
+    # If you want to show environment or lighting anyway:
     environment = session.get("environment", "")
     lighting_info = session.get("lighting_info", "")
 
+    last_narration = session.get("narrationText","")
+
     context_str = f"""
-NPC Name: {npc_name}, Age: {npc_age}
-Appearance: {hair_color} {hair_style}, wearing {clothing}, {other_details}
-Action: {npc_action}
-Environment: {environment}
-Lighting: {lighting_info}
+NPC Name: {npc_name}
+Age: {npc_age}
+Ethnicity: {npc_ethnicity}
+Body Type: {body_type}
+Hair: {hair_color} {hair_style}
+Clothing: {clothing}
+Personality: {personality}
+
+ENVIRONMENT (optional): {environment}
+LIGHTING (optional): {lighting_info}
+
+LATEST NARRATION: {last_narration}
 """.strip()
+
     return context_str
 
-# --------------------------------------------------------------------------
-# generate_image_prompt_for_scene => call Gemini with the chosen system prompt
-# --------------------------------------------------------------------------
 def generate_image_prompt_for_scene(model_type: str) -> str:
-    context_data = build_image_prompt_context()
-    system_instructions = get_image_system_prompt(model_type)
-    final_prompt_input = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
+    context_data = build_image_prompt_context_for_image()
+    system_instructions = get_image_prompt_system_instructions(model_type)
+    final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
 
     try:
         chat = model.start_chat()
         resp = chat.send_message(
-            final_prompt_input,
+            final_message,
             safety_settings=safety_settings,
-            generation_config=generation_config
+            generation_config={"temperature":0.5, "max_output_tokens":512}
         )
         if resp and resp.text:
             return resp.text.strip()
@@ -817,19 +810,19 @@ def personalize():
         return render_template("personalize.html",
             title="Personalizations",
             user_name_options=USER_NAME_OPTIONS,
-            user_age_options=["20", "25", "30", "35", "40", "45"],
+            user_age_options=["20","25","30","35","40","45"],
             npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20", "25", "30", "35", "40", "45"],
-            npc_gender_options=["Female", "Male", "Non-binary", "Other"],
+            npc_age_options=["20","25","30","35","40","45"],
+            npc_gender_options=["Female","Male","Non-binary","Other"],
             hair_style_options=HAIR_STYLE_OPTIONS,
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
-            current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
-            environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
-            encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
+            occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
+            current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
+            environment_options=["Cafe","Library","Gym","Beach","Park"],
+            encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
@@ -849,17 +842,17 @@ def mid_game_personalize():
     return render_template("mid_game_personalize.html",
         title="Update Settings",
         npc_name_options=NPC_NAME_OPTIONS,
-        npc_age_options=["20", "25", "30", "35", "40", "45"],
-        npc_gender_options=["Female", "Male", "Non-binary", "Other"],
+        npc_age_options=["20","25","30","35","40","45"],
+        npc_gender_options=["Female","Male","Non-binary","Other"],
         hair_style_options=HAIR_STYLE_OPTIONS,
         body_type_options=BODY_TYPE_OPTIONS,
         hair_color_options=HAIR_COLOR_OPTIONS,
         npc_personality_options=NPC_PERSONALITY_OPTIONS,
         clothing_options=CLOTHING_OPTIONS,
-        occupation_options=["College Student", "Teacher", "Artist", "Doctor", "Chef", "Engineer"],
-        current_situation_options=["Recently Broke Up", "Single & Looking", "On Vacation", "Working", "In a Relationship", "Divorced"],
-        environment_options=["Cafe", "Library", "Gym", "Beach", "Park"],
-        encounter_context_options=["First date", "Accidental meeting", "Group activity", "Work event", "Online Match"],
+        occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
+        current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
+        environment_options=["Cafe","Library","Gym","Beach","Park"],
+        encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
         ethnicity_options=ETHNICITY_OPTIONS
     )
 
@@ -881,7 +874,7 @@ def interaction():
         seed_used = session.get("scene_image_seed", None)
         interaction_log = session.get("interaction_log", [])
 
-        # read these from session to display them
+        # If user manually sets environment or lighting, we can show them:
         current_action = session.get("npc_current_action", "")
         environment = session.get("environment", "")
         lighting_info = session.get("lighting_info", "")
@@ -902,17 +895,16 @@ def interaction():
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
 
-            # pass the scene data so user can see it or update it
             npc_current_action=current_action,
             environment=environment,
             lighting_info=lighting_info
         )
     else:
-        # if user updates scene
         if "update_scene" in request.form:
-            session["npc_current_action"] = request.form.get("npc_current_action", "")
-            session["environment"] = request.form.get("environment", "")
-            session["lighting_info"] = request.form.get("lighting_info", "")
+            # Let user manually store environment or lighting
+            session["npc_current_action"] = request.form.get("npc_current_action","")
+            session["environment"] = request.form.get("environment","")
+            session["lighting_info"] = request.form.get("lighting_info","")
             flash("Scene updated!", "info")
             return redirect(url_for("interaction"))
 
@@ -924,6 +916,7 @@ def interaction():
             cstage = session.get("currentStage", 1)
             log_message(f"User: {user_action}")
 
+            # interpret_npc_state => 2 lines: AFFECT + NARRATION
             result_text = interpret_npc_state(
                 affection=affection,
                 trust=trust,
@@ -977,11 +970,10 @@ def interaction():
             return redirect(url_for("interaction"))
 
         elif "generate_prompt" in request.form:
-            # Example usage: call our new function to get an LLM-based prompt
             chosen_model = request.form.get("model_type", "flux")
             llm_prompt_text = generate_image_prompt_for_scene(chosen_model)
             session["scene_image_prompt"] = llm_prompt_text
-            flash(f"Short image prompt generated from current context, model={chosen_model}.", "info")
+            flash(f"Scene prompt from LLM => {chosen_model}", "info")
             return redirect(url_for("interaction"))
 
         elif "generate_image" in request.form:
@@ -1033,7 +1025,7 @@ def interaction():
                 scheduler=chosen_scheduler,
                 steps=steps
             )
-            flash(f"New image generated with a new seed using model => {chosen_model}.", "success")
+            flash(f"New image generated with a new seed => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
         else:
             return "Invalid submission in /interaction", 400
