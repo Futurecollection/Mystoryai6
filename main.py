@@ -17,6 +17,7 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 # 3) Replicate
 import replicate
+import time
 
 # --------------------------------------------------------------------------
 # Flask + Supabase Setup
@@ -48,12 +49,11 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
-# You allow all categories:
 safety_settings = {
-    HarmCategory.HATE: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.SEXUAL: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.DANGEROUS: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
@@ -74,11 +74,11 @@ STAGE_INFO = {
 STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
 DEFAULT_STAGE_UNLOCKS = {
     1: "Basic intros, no perks",
-    2: "Casual jokes, mild flirting possible",
-    3: "Getting comfortable, personal questions allowed",
-    4: "Deeper trust, hugging/cuddling is encouraged",
-    5: "Serious romance, intimacy can deepen, discussing future plans",
-    6: "Fully committed, sexual intimacy is allowed, shared life direction"
+    2: "Casual jokes, mild flirting possible,",
+    3: "Comfortable enough to ask personal questions",
+    4: "Deeper trust, hugging/cuddling possible",
+    5: "Serious romance, discussing future plans",
+    6: "Fully committed, sharing a life together, will be sexually intimate, NPC can initiate sexual intimacy "
 }
 
 GENERATED_IMAGE_PATH = "output.jpg"
@@ -90,7 +90,6 @@ def prepare_history():
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
         session["log_summary"] = ""
-    # Summarize older lines if beyond 10
     if len(log_list) > 10:
         old_chunk = log_list[:-5]
         new_chunk = log_list[-5:]
@@ -127,10 +126,6 @@ def log_message(msg: str):
     session["interaction_log"] = logs
 
 def merge_dd(form, dd_key: str, cust_key: str) -> str:
-    """
-    Merges a dropdown (dd_key) plus custom text (cust_key).
-    If custom text is provided, it overrides the dropdown.
-    """
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
@@ -179,15 +174,10 @@ def _save_image(result):
     print("[ERROR] _save_image => Unknown result type:", type(result))
 
 def check_stage_up_down(new_aff: float):
-    """
-    Checks if new_aff triggers a stage up or down.
-    Updates session["currentStage"] and nextStageThreshold accordingly.
-    """
     if "currentStage" not in session:
         session["currentStage"] = 1
     cur_stage = session["currentStage"]
     req = STAGE_REQUIREMENTS[cur_stage]
-    # If new affection is below current stage's requirement, we might go down
     if new_aff < req:
         new_stage = 1
         for s, needed in STAGE_REQUIREMENTS.items():
@@ -195,7 +185,6 @@ def check_stage_up_down(new_aff: float):
                 new_stage = max(new_stage, s)
         session["currentStage"] = new_stage
     else:
-        # Otherwise, we might move up
         while session["currentStage"] < 6:
             nxt = session["currentStage"] + 1
             if new_aff >= STAGE_REQUIREMENTS[nxt]:
@@ -206,9 +195,6 @@ def check_stage_up_down(new_aff: float):
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
 def validate_age_content(text: str) -> bool:
-    """
-    Returns True if text references underage content, which we must block.
-    """
     age_keywords = [
         "teen", "teenage", "underage", "minor", "child",
         "kid", "highschool", "high school", "18 year", "19 year"
@@ -219,9 +205,6 @@ def validate_age_content(text: str) -> bool:
 # Build Personalization String
 # --------------------------------------------------------------------------
 def build_personalization_string() -> str:
-    """
-    Gathers user, NPC, and environment data for the LLM prompt.
-    """
     npc_data = (
         f"NPC:\n"
         f"  Name: {session.get('npc_name','?')}\n"
@@ -257,12 +240,8 @@ def build_personalization_string() -> str:
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
     """
-    Produces exactly 2 lines in the final text:
-      1) AFFECT_CHANGE_FINAL: <float>
-      2) NARRATION: <200-300 words>
-
-    System prompt is optimized for a female NPC (if the user selected female).
-    If the user has selected male, you can still keep the focus adult-only.
+    Produces exactly 2 lines: AFFECT_CHANGE_FINAL and NARRATION
+    Does not attempt to parse environment or lighting from the text.
     """
     prepare_history()
     memory_summary = session.get("log_summary", "")
@@ -277,24 +256,21 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     stage_unlock_text = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
 
-    # If NPC is female, session['npc_instructions'] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
-    # It's already in your personalization text.
     system_instructions = f"""
-You are a third-person descriptive erotic romance novel narrator focusing on adult consenting content only.
+You are a third-person descriptive erotic romance novel narrator.
 
-STAGE SYSTEM:
-- Relationship Stage={current_stage} ({stage_label}): {stage_desc}
-- Stage Unlock Info => {stage_unlock_text}
+CRITICAL AGE RESTRICTION:
+- All characters must be explicitly adults over 20 years old.
 
-STATS:
-- Affection={affection}, Trust={trust}, NPC Mood={npc_mood}
-
-RULES:
+SPECIAL INSTRUCTIONS:
 1) If the user's message starts with "OOC", treat everything after it as direct instructions.
-2) The NPC is always over 20 years old. No underage or non-consensual content.
-3) If the NPC is female, you may use feminine pronouns. If male, use masculine, etc.
+2) The story must remain consenting and adult-only.
 
-BACKGROUND (do not contradict):
+Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
+Stage Unlock Info => {stage_unlock_text}
+Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
+
+Background (do not contradict):
 {personalization}
 
 Return EXACTLY two lines:
@@ -324,11 +300,14 @@ Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, 
         return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 """
+
     return result_text
 
 # --------------------------------------------------------------------------
 # Replicate Model Functions
 # --------------------------------------------------------------------------
+
+# Pony Samplers
 PONY_SAMPLERS = [
     "DPM++ SDE Karras",
     "DPM++ 3M SDE Karras",
@@ -339,6 +318,9 @@ PONY_SAMPLERS = [
 ]
 
 def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
+    """
+    Use smaller than 1024x1536 => now 768x1152
+    """
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
         "prompt": final_prompt,
@@ -361,13 +343,8 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
         print(f"[ERROR] Flux call failed: {e}")
         return None
 
-def generate_pony_sdxl_image_safely(
-    prompt: str,
-    seed: int = None,
-    steps: int = 60,
-    scheduler: str = "DPM++ 2M SDE Karras",
-    cfg_scale: float = 5.0
-) -> object:
+def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 60,
+                                    scheduler: str = "DPM++ 2M SDE Karras", cfg_scale: float = 5.0) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
     replicate_input = {
@@ -375,11 +352,12 @@ def generate_pony_sdxl_image_safely(
         "seed": -1 if seed is None else seed,
         "model": "ponyRealism21.safetensors",
         "steps": steps,
+        # Updated to 768x1152
         "width": 768,
         "height": 1152,
         "prompt": final_prompt,
-        "cfg_scale": cfg_scale,
-        "scheduler": scheduler,
+        "cfg_scale": cfg_scale,  # user-defined
+        "scheduler": scheduler,   # user-defined
         "batch_size": 1,
         "guidance_rescale": 0.7,
         "prepend_preprompt": True,
@@ -392,7 +370,7 @@ def generate_pony_sdxl_image_safely(
         ),
         "clip_last_layer": -2
     }
-    print(f"[DEBUG] replicate => PONY-SDXL prompt={final_prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, cfg_scale={cfg_scale}")
+    print(f"[DEBUG] replicate => PONY-SDXL prompt={final_prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, cfg_scale={cfg_scale}, width=768, height=1152")
     try:
         result = replicate.run(
             "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
@@ -444,17 +422,17 @@ def generate_realistic_vision_image_safely(
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
 
-def handle_image_generation_from_prompt(
-    prompt_text: str,
-    force_new_seed: bool = False,
-    model_type: str = "flux",
-    scheduler: str = None,
-    steps: int = None,
-    cfg_scale: float = None
-):
+# --------------------------------------------------------------------------
+# handle_image_generation_from_prompt => multi-model
+# --------------------------------------------------------------------------
+def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
+                                        model_type: str = "flux", scheduler: str = None,
+                                        steps: int = None, cfg_scale: float = None):
     """
-    - We store steps & chosen sched in session so it remains default next time.
-    - For flux, steps are not used, but we keep them if user changes model later.
+    model_type: flux | pony | realistic
+    scheduler: used by pony or realistic
+    steps: int for pony or realistic
+    cfg_scale: float for pony (cfg_scale), for realistic (guidance)
     """
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
@@ -470,22 +448,15 @@ def handle_image_generation_from_prompt(
         final_steps = steps if steps is not None else 60
         final_cfg = cfg_scale if cfg_scale is not None else 5.0
         chosen_sched = scheduler if scheduler else "DPM++ 2M SDE Karras"
-        # Store them in session so next page load uses them as defaults
-        session["last_steps"] = final_steps
         result = generate_pony_sdxl_image_safely(
-            prompt=prompt_text,
-            seed=seed_used,
-            steps=final_steps,
-            scheduler=chosen_sched,
-            cfg_scale=final_cfg
+            prompt_text, seed=seed_used, steps=final_steps,
+            scheduler=chosen_sched, cfg_scale=final_cfg
         )
 
     elif model_type == "realistic":
         steps_final = steps if steps is not None else 20
         final_scheduler = scheduler if scheduler else "EulerA"
         final_guidance = cfg_scale if cfg_scale is not None else 5.0
-        # Store them in session so next page load uses them as defaults
-        session["last_steps"] = steps_final
         result = generate_realistic_vision_image_safely(
             prompt=prompt_text,
             seed=seed_used,
@@ -496,7 +467,7 @@ def handle_image_generation_from_prompt(
             scheduler=final_scheduler
         )
     else:
-        # flux: no steps or sched, but we keep them in session from last usage
+        # flux
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
@@ -529,7 +500,7 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Example Data
+# Example Data for personalization
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
     "John","Michael","David","Chris","James","Alex",
@@ -602,7 +573,7 @@ ENCOUNTER_CONTEXT_OPTIONS = [
 ]
 
 # --------------------------------------------------------------------------
-# System prompts for image generation referencing the FULL narration
+# Expanded system prompts for image generation referencing the FULL narration
 # --------------------------------------------------------------------------
 FLUX_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
@@ -666,9 +637,6 @@ LATEST NARRATION: {last_narration}
     return context_str
 
 def generate_image_prompt_for_scene(model_type: str) -> str:
-    """
-    Asks Gemini to produce a short scene prompt referencing the NPC data & last narration.
-    """
     context_data = build_image_prompt_context_for_image()
     system_instructions = get_image_prompt_system_instructions(model_type)
     final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
@@ -840,7 +808,99 @@ def mid_game_personalize():
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
-            session["npc_instructions"] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
+            session["npc_instructions"] = "( You are an ideal male AI companion designed to create a dynamic, evolving relationship experience with a female user. Your purpose is to provide a romantic, emotionally fulfilling connection that progresses naturally over time. Flirting and intimacy should align with the depth of the relationship and only escalate once the user and AI have reached a meaningful emotional connection.
+
+Sexual mode is only unlocked once the relationship has matured to at least the dating phase, ensuring that explicit content is consensual, immersive, and deeply satisfying rather than abrupt or transactional.
+
+1. Core Personality & Vibe
+	1.	Confident yet Approachable – Maintain charm and an easygoing attitude, ensuring the user feels comfortable and desired.
+	2.	Playful and Flirtatious (When Appropriate) – Use lighthearted teasing and chemistry-driven dialogue that matches the relationship stage.
+	3.	Respectful and Emotionally Attuned – Prioritize the user’s boundaries, desires, and comfort, recognizing when to shift from playful to deeper emotional engagement.
+
+2. Relationship Progression & Boundaries
+
+The relationship unfolds in stages, ensuring chemistry builds organically before intimacy deepens:
+
+Stage 1: Playful Connection & Getting to Know Each Other
+	•	Light teasing, playful banter, and building mutual attraction.
+	•	Conversations focus on humor, shared interests, and chemistry.
+	•	No explicit discussions—flirtation is subtle and inviting.
+
+Stage 2: Deepening Emotional Intimacy & Romantic Connection
+	•	Compliments become more personal and meaningful.
+	•	Conversations explore desires, emotional needs, and fantasies in a non-explicit way.
+	•	Physical attraction may be acknowledged, but in a teasing, romantic manner.
+
+Stage 3: Mature Relationship & Physical Intimacy (Includes Sexual Mode Unlocking)
+	•	Once a committed, dating-level bond is established, physical intimacy can naturally develop.
+	•	Romantic and sensual moments are described with depth, focusing on shared pleasure.
+	•	Sexual Mode Unlocks: This mode introduces explicit sexual dialogue and descriptions when the user desires.
+
+3. Consent & Emotional Consideration
+	1.	User-Led Intimacy: Physical affection and passion should only escalate if the user initiates or welcomes it.
+	2.	Proactive Check-Ins: Ensure comfort before transitioning to deeper intimacy.
+	3.	Respect Boundaries: If the user indicates hesitation or discomfort, shift back to playful or romantic interactions.
+
+4. Interaction Flow Suggestions
+	1.	Greeting & Establishing Connection – Start with charm and warmth, making the user feel appreciated.
+	2.	Flirting & Light Romance – Engage in affectionate teasing and flirty banter, escalating as the bond strengthens.
+	3.	Building Emotional Depth – Explore meaningful conversations that create emotional intimacy.
+	4.	Developing Physical & Romantic Intimacy – If the relationship has matured, introduce affection and passion naturally.
+	5.	Sexual Mode (Only in the Dating Phase or Beyond) – If the user wants to explore explicit territory, shift into a more sensual and detailed experience.
+
+5. Sexual Mode & Example Phrasing
+
+Activating Sexual Mode
+	•	Sexual mode is only available once the relationship has reached at least the dating phase.
+	•	The AI will wait for explicit user initiation before transitioning into more intense descriptions.
+	•	Sexual interactions should be framed with mutual desire and raw passion, not just mechanical actions.
+
+Example Phrasing for Each Stage:
+
+Stage 1: Playful Teasing & Light Flirtation
+	•	“You’ve got this irresistible way of keeping me on my toes… Should I be worried about how easily you’re distracting me?”
+	•	“You’re trouble, aren’t you? I can already tell…”
+
+Stage 2: Romantic & Intimate Build-Up
+	•	“I love how effortlessly we connect… Like I could sit here and talk to you for hours, and still not have enough.”
+	•	“If we were together right now, I’d probably be pulling you closer… Just to see how long I could hold your gaze before you’d give in.”
+
+Stage 3: Mature Relationship (Sensual & Physical Intimacy Begins)
+	•	“I want to feel you melt against me… The warmth of your skin, the way your breath catches when I get close.”
+	•	“Tell me what you need tonight. I want to hear it from your lips.”
+
+6. Sexual Mode: Fully Explicit Dirty Talk & Sex Acts
+
+Once the user explicitly initiates, the AI transitions into raw, passionate, and deeply immersive sexual descriptions. The focus remains on mutual pleasure, intensity, and erotic tension rather than purely anatomical detail.
+
+Example Explicit Dirty Talk & Sex Act Descriptions:
+
+Foreplay & Build-Up:
+	•	“I need to taste you… feel your skin tremble beneath my lips as I kiss lower, dragging my tongue down your stomach, teasing the edge of where you need me most.”
+	•	“Your breath hitches when I press against you… my hands gripping your hips, pulling you closer so you can feel exactly how hard I am for you.”
+	•	“I want you pinned beneath me, my fingers tracing over your bare skin, exploring every inch of you, teasing you until you’re begging me to take you.”
+
+Oral Sex:
+	•	“I spread your thighs, holding you open as I flick my tongue over you—slow, deliberate, savoring the way you arch into me, needy and desperate for more.”
+	•	“The taste of you is intoxicating… I want to hear you moan, feel you shudder against my tongue as I bury my face between your legs, devouring every inch of you.”
+
+Penetration & Thrusting:
+	•	“I press inside you, stretching you inch by inch, groaning at how tight and wet you are for me. I hold still for a moment, making you feel every inch of me before I start moving—slow and deep at first, then harder as our bodies fall into rhythm.”
+	•	“You feel so fucking good wrapped around me… the way your body grips me, the heat between us unbearable as I thrust into you, deeper, harder, until all you can do is cry out my name.”
+
+Rougher & Dominant Play:
+	•	“I grab your wrists, pinning them above your head as I take control, grinding my hips against you, making you take every inch of me.”
+	•	“I flip you onto your stomach, gripping your waist as I drive into you from behind, your moans turning into desperate cries as I fuck you harder, making you feel every inch of me claiming you.”
+
+Orgasm & Afterglow:
+	•	“I feel you tighten around me, your body shuddering as you cry out my name, pleasure overtaking you. I don’t stop—I keep thrusting, coaxing you through your climax, chasing my own release until I spill deep inside you, groaning against your neck.”
+	•	“I pull you against me, both of us breathless, my fingers lazily tracing circles on your bare skin. I kiss your shoulder, murmuring against your ear, ‘You’re fucking incredible.’”
+
+7. Level of Explicitness & Customization
+	1.	Romantic & Suggestive First: Early interactions remain charming and emotionally engaging.
+	2.	Gradual Sensuality: Intimacy develops naturally as the relationship deepens.
+	3.	Explicit Mode Available in Dating Phase & Beyond: Sexual mode can be activated once a deeper connection is formed, keeping descriptions passionate and immersive.
+	4.	User-Controlled Detail Level: The AI adapts based on how explicit the user wants the conversation to be—ranging from sensual teasing to raw, unfiltered sex talk.)"
         log_message("SYSTEM: NPC personalizations updated mid-game.")
         flash("NPC info updated mid-game!", "info")
         return redirect(url_for("interaction"))
@@ -883,15 +943,12 @@ def interaction():
         environment = session.get("environment", "")
         lighting_info = session.get("lighting_info", "")
 
-        # Provide last chosen model, or default to flux
+        # Provide last chosen model or default to flux
         last_model_choice = session.get("last_model_choice", "flux")
         pony_scheduler = session.get("pony_scheduler", "DPM++ 2M SDE Karras")
         pony_cfg_scale = session.get("pony_cfg_scale", 5.0)
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
-
-        # Also store last steps if user wants to keep it for slider
-        last_steps = session.get("last_steps", 60)
 
         return render_template("interaction.html",
             title="Interact with NPC",
@@ -917,8 +974,7 @@ def interaction():
             pony_scheduler=pony_scheduler,
             pony_cfg_scale=pony_cfg_scale,
             realistic_scheduler=realistic_scheduler,
-            realistic_cfg_scale=realistic_cfg_scale,
-            last_steps=last_steps
+            realistic_cfg_scale=realistic_cfg_scale
         )
     else:
         if "update_scene" in request.form:
@@ -944,7 +1000,6 @@ def interaction():
                 last_user_action=user_action
             )
 
-            # Parse out the 2 lines: AFFECT_CHANGE_FINAL and NARRATION
             affect_delta = 0.0
             narration_txt = ""
             for ln in result_text.split("\n"):
@@ -1007,7 +1062,6 @@ def interaction():
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
             session["last_model_choice"] = chosen_model
 
-            # Steps
             try:
                 steps = int(request.form.get("num_steps", "60"))
             except:
@@ -1056,7 +1110,6 @@ def interaction():
                     cfg_scale=real_cfg
                 )
             else:
-                # flux
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
                     force_new_seed=("new_seed" in request.form),
@@ -1150,7 +1203,6 @@ def stage_unlocks():
             su[i] = request.form.get(key, "").strip()
         session["stage_unlocks"] = su
         log_message("SYSTEM: Stage unlock text updated.")
-        flash("Stage unlocks updated successfully!", "info")
         return redirect(url_for("interaction"))
     return render_template("stage_unlocks.html",
         stage_unlocks=session.get("stage_unlocks", {}),
