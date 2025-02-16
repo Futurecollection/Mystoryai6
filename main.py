@@ -46,7 +46,7 @@ def login_required(f):
 # --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
+model = genai.GenerativeModel("models/gemini-2.0-flash-lite-preview-02-05")
 
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
