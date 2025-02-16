@@ -51,11 +51,12 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
 
+# Update safety settings for Gemini 2.0
 safety_settings = {
-    HarmCategory.HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    genai.types.HarmCategory.HARASSMENT: genai.types.HarmBlockThreshold.BLOCK_NONE,
+    genai.types.HarmCategory.HATE_SPEECH: genai.types.HarmBlockThreshold.BLOCK_NONE,
+    genai.types.HarmCategory.SEXUALLY_EXPLICIT: genai.types.HarmBlockThreshold.BLOCK_NONE,
+    genai.types.HarmCategory.DANGEROUS_CONTENT: genai.types.HarmBlockThreshold.BLOCK_NONE,
 }
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
