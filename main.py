@@ -17,7 +17,6 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 # 3) Replicate
 import replicate
-import time
 
 # --------------------------------------------------------------------------
 # Flask + Supabase Setup
@@ -49,11 +48,12 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
+# You allow all categories:
 safety_settings = {
-    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HATE: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.SEXUAL: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.DANGEROUS: HarmBlockThreshold.BLOCK_NONE,
 }
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
@@ -74,11 +74,11 @@ STAGE_INFO = {
 STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
 DEFAULT_STAGE_UNLOCKS = {
     1: "Basic intros, no perks",
-    2: "Casual jokes, mild flirting possible,",
-    3: "Comfortable enough to ask personal questions",
-    4: "Deeper trust, hugging/cuddling possible",
-    5: "Serious romance, discussing future plans",
-    6: "Fully committed, sharing a life together, will be sexually intimate, NPC can initiate sexual intimacy "
+    2: "Casual jokes, mild flirting possible",
+    3: "Getting comfortable, personal questions allowed",
+    4: "Deeper trust, hugging/cuddling is encouraged",
+    5: "Serious romance, intimacy can deepen, discussing future plans",
+    6: "Fully committed, sexual intimacy is allowed, shared life direction"
 }
 
 GENERATED_IMAGE_PATH = "output.jpg"
@@ -90,6 +90,7 @@ def prepare_history():
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
         session["log_summary"] = ""
+    # Summarize older lines if beyond 10
     if len(log_list) > 10:
         old_chunk = log_list[:-5]
         new_chunk = log_list[-5:]
@@ -126,6 +127,10 @@ def log_message(msg: str):
     session["interaction_log"] = logs
 
 def merge_dd(form, dd_key: str, cust_key: str) -> str:
+    """
+    Merges a dropdown (dd_key) plus custom text (cust_key).
+    If custom text is provided, it overrides the dropdown.
+    """
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
@@ -174,10 +179,15 @@ def _save_image(result):
     print("[ERROR] _save_image => Unknown result type:", type(result))
 
 def check_stage_up_down(new_aff: float):
+    """
+    Checks if new_aff triggers a stage up or down.
+    Updates session["currentStage"] and nextStageThreshold accordingly.
+    """
     if "currentStage" not in session:
         session["currentStage"] = 1
     cur_stage = session["currentStage"]
     req = STAGE_REQUIREMENTS[cur_stage]
+    # If new affection is below current stage's requirement, we might go down
     if new_aff < req:
         new_stage = 1
         for s, needed in STAGE_REQUIREMENTS.items():
@@ -185,6 +195,7 @@ def check_stage_up_down(new_aff: float):
                 new_stage = max(new_stage, s)
         session["currentStage"] = new_stage
     else:
+        # Otherwise, we might move up
         while session["currentStage"] < 6:
             nxt = session["currentStage"] + 1
             if new_aff >= STAGE_REQUIREMENTS[nxt]:
@@ -195,6 +206,9 @@ def check_stage_up_down(new_aff: float):
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
 def validate_age_content(text: str) -> bool:
+    """
+    Returns True if text references underage content, which we must block.
+    """
     age_keywords = [
         "teen", "teenage", "underage", "minor", "child",
         "kid", "highschool", "high school", "18 year", "19 year"
@@ -205,6 +219,9 @@ def validate_age_content(text: str) -> bool:
 # Build Personalization String
 # --------------------------------------------------------------------------
 def build_personalization_string() -> str:
+    """
+    Gathers user, NPC, and environment data for the LLM prompt.
+    """
     npc_data = (
         f"NPC:\n"
         f"  Name: {session.get('npc_name','?')}\n"
@@ -240,8 +257,12 @@ def build_personalization_string() -> str:
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
     """
-    Produces exactly 2 lines: AFFECT_CHANGE_FINAL and NARRATION
-    Does not attempt to parse environment or lighting from the text.
+    Produces exactly 2 lines in the final text:
+      1) AFFECT_CHANGE_FINAL: <float>
+      2) NARRATION: <200-300 words>
+
+    System prompt is optimized for a female NPC (if the user selected female).
+    If the user has selected male, you can still keep the focus adult-only.
     """
     prepare_history()
     memory_summary = session.get("log_summary", "")
@@ -253,28 +274,34 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
 
     stage_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
     stage_desc = STAGE_INFO.get(current_stage, {}).get("desc", "No desc")
+    stage_unlock_text = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
 
+    # If NPC is female, session['npc_instructions'] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
+    # It's already in your personalization text.
     system_instructions = f"""
-You are a third-person descriptive erotic romance novel narrator.
+You are a third-person descriptive erotic romance novel narrator focusing on adult consenting content only.
 
-CRITICAL AGE RESTRICTION:
-- All characters must be explicitly adults over 20 years old.
+STAGE SYSTEM:
+- Relationship Stage={current_stage} ({stage_label}): {stage_desc}
+- Stage Unlock Info => {stage_unlock_text}
 
-SPECIAL INSTRUCTIONS:
+STATS:
+- Affection={affection}, Trust={trust}, NPC Mood={npc_mood}
+
+RULES:
 1) If the user's message starts with "OOC", treat everything after it as direct instructions.
-2) The story must remain consenting and adult-only.
+2) The NPC is always over 20 years old. No underage or non-consensual content.
+3) If the NPC is female, you may use feminine pronouns. If male, use masculine, etc.
+
+BACKGROUND (do not contradict):
+{personalization}
 
 Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
 Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, dialogue, and actions)
-
-Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
-Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
-
-Background (do not contradict):
-{personalization}
 """
+
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
     max_retries = 2
     result_text = ""
@@ -292,6 +319,7 @@ Background (do not contradict):
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
         except Exception as e:
             log_message(f"[SYSTEM] Generation attempt {attempt+1} error: {str(e)}")
+
     if not result_text:
         return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
@@ -301,8 +329,6 @@ NARRATION: [System: no valid response from LLM, please try again]
 # --------------------------------------------------------------------------
 # Replicate Model Functions
 # --------------------------------------------------------------------------
-
-# Pony Samplers
 PONY_SAMPLERS = [
     "DPM++ SDE Karras",
     "DPM++ 3M SDE Karras",
@@ -313,9 +339,6 @@ PONY_SAMPLERS = [
 ]
 
 def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
-    """
-    Use a large resolution for flux-schnell (if supported).
-    """
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
         "prompt": final_prompt,
@@ -323,12 +346,12 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
         "safety_tolerance": 6,
         "disable_safety_checker": True,
         "output_quality": 100,
-        "width": 1024,
-        "height": 1536
+        "width": 768,
+        "height": 1152
     }
     if seed:
         replicate_input["seed"] = seed
-    print(f"[DEBUG] replicate => FLUX prompt={final_prompt}, seed={seed}, width=1024, height=1536")
+    print(f"[DEBUG] replicate => FLUX prompt={final_prompt}, seed={seed}, width=768, height=1152")
     try:
         result = replicate.run("black-forest-labs/flux-schnell", replicate_input)
         if result:
@@ -338,8 +361,13 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
         print(f"[ERROR] Flux call failed: {e}")
         return None
 
-def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 60,
-                                    scheduler: str = "DPM++ 2M SDE Karras", cfg_scale: float = 5.0) -> object:
+def generate_pony_sdxl_image_safely(
+    prompt: str,
+    seed: int = None,
+    steps: int = 60,
+    scheduler: str = "DPM++ 2M SDE Karras",
+    cfg_scale: float = 5.0
+) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
     replicate_input = {
@@ -347,12 +375,11 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         "seed": -1 if seed is None else seed,
         "model": "ponyRealism21.safetensors",
         "steps": steps,
-        # Updated to bigger
-        "width": 1024,
-        "height": 1536,
+        "width": 768,
+        "height": 1152,
         "prompt": final_prompt,
-        "cfg_scale": cfg_scale,  # user-defined
-        "scheduler": scheduler,   # user-defined
+        "cfg_scale": cfg_scale,
+        "scheduler": scheduler,
         "batch_size": 1,
         "guidance_rescale": 0.7,
         "prepend_preprompt": True,
@@ -365,7 +392,7 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         ),
         "clip_last_layer": -2
     }
-    print(f"[DEBUG] replicate => PONY-SDXL prompt={final_prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, cfg_scale={cfg_scale}, width=1024, height=1536")
+    print(f"[DEBUG] replicate => PONY-SDXL prompt={final_prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, cfg_scale={cfg_scale}")
     try:
         result = replicate.run(
             "charlesmccarthy/pony-sdxl:b070dedae81324788c3c933a5d9e1270093dc74636214b9815dae044b4b3a58a",
@@ -382,8 +409,8 @@ def generate_realistic_vision_image_safely(
     prompt: str,
     seed: int = 0,
     steps: int = 20,
-    width: int = 1024,
-    height: int = 1536,
+    width: int = 768,
+    height: int = 1152,
     guidance: float = 5.0,
     scheduler: str = "EulerA"
 ) -> object:
@@ -404,7 +431,7 @@ def generate_realistic_vision_image_safely(
         "scheduler": scheduler,
         "negative_prompt": negative_prompt_text
     }
-    print(f"[DEBUG] replicate => RealisticVision prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance={guidance}, width=1024, height=1536")
+    print(f"[DEBUG] replicate => RealisticVision prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance={guidance}, width=768, height=1152")
     try:
         result = replicate.run(
             "lucataco/realistic-vision-v5.1:2c8e954decbf70b7607a4414e5785ef9e4de4b8c51d50fb8b8b349160e0ef6bb",
@@ -417,17 +444,17 @@ def generate_realistic_vision_image_safely(
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
 
-# --------------------------------------------------------------------------
-# handle_image_generation_from_prompt => multi-model
-# --------------------------------------------------------------------------
-def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
-                                        model_type: str = "flux", scheduler: str = None,
-                                        steps: int = None, cfg_scale: float = None):
+def handle_image_generation_from_prompt(
+    prompt_text: str,
+    force_new_seed: bool = False,
+    model_type: str = "flux",
+    scheduler: str = None,
+    steps: int = None,
+    cfg_scale: float = None
+):
     """
-    model_type: flux | pony | realistic
-    scheduler: used by pony or realistic
-    steps: int for pony or realistic
-    cfg_scale: float for pony (cfg_scale), for realistic (guidance)
+    - We store steps & chosen sched in session so it remains default next time.
+    - For flux, steps are not used, but we keep them if user changes model later.
     """
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
@@ -443,26 +470,33 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         final_steps = steps if steps is not None else 60
         final_cfg = cfg_scale if cfg_scale is not None else 5.0
         chosen_sched = scheduler if scheduler else "DPM++ 2M SDE Karras"
+        # Store them in session so next page load uses them as defaults
+        session["last_steps"] = final_steps
         result = generate_pony_sdxl_image_safely(
-            prompt_text, seed=seed_used, steps=final_steps,
-            scheduler=chosen_sched, cfg_scale=final_cfg
+            prompt=prompt_text,
+            seed=seed_used,
+            steps=final_steps,
+            scheduler=chosen_sched,
+            cfg_scale=final_cfg
         )
 
     elif model_type == "realistic":
         steps_final = steps if steps is not None else 20
         final_scheduler = scheduler if scheduler else "EulerA"
         final_guidance = cfg_scale if cfg_scale is not None else 5.0
+        # Store them in session so next page load uses them as defaults
+        session["last_steps"] = steps_final
         result = generate_realistic_vision_image_safely(
             prompt=prompt_text,
             seed=seed_used,
             steps=steps_final,
-            width=1024,
-            height=1536,
+            width=768,
+            height=1152,
             guidance=final_guidance,
             scheduler=final_scheduler
         )
     else:
-        # flux
+        # flux: no steps or sched, but we keep them in session from last usage
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
@@ -495,7 +529,7 @@ def update_npc_info(form):
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
-# Example Data for personalization
+# Example Data
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
     "John","Michael","David","Chris","James","Alex",
@@ -568,7 +602,7 @@ ENCOUNTER_CONTEXT_OPTIONS = [
 ]
 
 # --------------------------------------------------------------------------
-# Expanded system prompts for image generation referencing the FULL narration
+# System prompts for image generation referencing the FULL narration
 # --------------------------------------------------------------------------
 FLUX_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
@@ -632,6 +666,9 @@ LATEST NARRATION: {last_narration}
     return context_str
 
 def generate_image_prompt_for_scene(model_type: str) -> str:
+    """
+    Asks Gemini to produce a short scene prompt referencing the NPC data & last narration.
+    """
     context_data = build_image_prompt_context_for_image()
     system_instructions = get_image_prompt_system_instructions(model_type)
     final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
@@ -846,12 +883,15 @@ def interaction():
         environment = session.get("environment", "")
         lighting_info = session.get("lighting_info", "")
 
-        # Provide last chosen model or default to flux
+        # Provide last chosen model, or default to flux
         last_model_choice = session.get("last_model_choice", "flux")
         pony_scheduler = session.get("pony_scheduler", "DPM++ 2M SDE Karras")
         pony_cfg_scale = session.get("pony_cfg_scale", 5.0)
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
+
+        # Also store last steps if user wants to keep it for slider
+        last_steps = session.get("last_steps", 60)
 
         return render_template("interaction.html",
             title="Interact with NPC",
@@ -877,7 +917,8 @@ def interaction():
             pony_scheduler=pony_scheduler,
             pony_cfg_scale=pony_cfg_scale,
             realistic_scheduler=realistic_scheduler,
-            realistic_cfg_scale=realistic_cfg_scale
+            realistic_cfg_scale=realistic_cfg_scale,
+            last_steps=last_steps
         )
     else:
         if "update_scene" in request.form:
@@ -903,6 +944,7 @@ def interaction():
                 last_user_action=user_action
             )
 
+            # Parse out the 2 lines: AFFECT_CHANGE_FINAL and NARRATION
             affect_delta = 0.0
             narration_txt = ""
             for ln in result_text.split("\n"):
@@ -965,6 +1007,7 @@ def interaction():
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
             session["last_model_choice"] = chosen_model
 
+            # Steps
             try:
                 steps = int(request.form.get("num_steps", "60"))
             except:
@@ -1013,6 +1056,7 @@ def interaction():
                     cfg_scale=real_cfg
                 )
             else:
+                # flux
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
                     force_new_seed=("new_seed" in request.form),
@@ -1106,6 +1150,7 @@ def stage_unlocks():
             su[i] = request.form.get(key, "").strip()
         session["stage_unlocks"] = su
         log_message("SYSTEM: Stage unlock text updated.")
+        flash("Stage unlocks updated successfully!", "info")
         return redirect(url_for("interaction"))
     return render_template("stage_unlocks.html",
         stage_unlocks=session.get("stage_unlocks", {}),
