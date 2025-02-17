@@ -279,9 +279,7 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     if not last_user_action.strip():
         last_user_action = "OOC: Continue the scene"
 
-    stage_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
-    stage_desc = STAGE_INFO.get(current_stage, {}).get("desc", "No desc")
-    stage_unlock_text = session.get("stage_unlocks", {}).get(current_stage, "")
+    stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
 
     system_instructions = f"""
@@ -309,8 +307,7 @@ SPECIAL INSTRUCTIONS:
 3) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
    (e.g., 😛) rather than describing them in words.
 
-Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
-Stage Unlock Info => {stage_unlock_text}
+Relationship Stage={current_stage} ({stage_desc})
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 
 Background (do not contradict):
@@ -938,7 +935,6 @@ def interaction():
             trust_score=trust,
             npc_mood=mood,
             current_stage=cstage,
-            stage_label=st_label,
             stage_desc=st_desc,
             next_threshold=nxt_thresh,
             npc_narration=last_narration,
@@ -1183,7 +1179,7 @@ def stage_unlocks():
 
     # Grab current stage + label so we can show them in the template
     current_stage = session.get("currentStage", 1)
-    st_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
+    #st_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
 
     if request.method == "POST" and "update_stage_unlocks" in request.form:
         su = session.get("stage_unlocks", {})
@@ -1197,7 +1193,7 @@ def stage_unlocks():
     return render_template("stage_unlocks.html",
         stage_unlocks=session["stage_unlocks"],
         current_stage=current_stage,
-        stage_label=st_label,
+        #stage_label=st_label,
         title="Stage Unlocks"
     )
 
