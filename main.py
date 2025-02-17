@@ -97,6 +97,7 @@ def prepare_history():
         session["log_summary"] += "\n" + summary_text
         session["interaction_log"] = new_chunk
 
+@retry_with_backoff(retries=3, backoff_in_seconds=1)
 def summarize_lines(lines):
     text_to_summarize = "\n".join(lines)
     summary_prompt = f"""
@@ -251,6 +252,7 @@ def build_personalization_string() -> str:
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
 # --------------------------------------------------------------------------
+@retry_with_backoff(retries=3, backoff_in_seconds=1)
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
     """
@@ -664,6 +666,7 @@ LATEST NARRATION: {last_narration}
 
     return context_str
 
+@retry_with_backoff(retries=3, backoff_in_seconds=1)
 def generate_image_prompt_for_scene(model_type: str) -> str:
     context_data = build_image_prompt_context_for_image()
     system_instructions = get_image_prompt_system_instructions(model_type)
