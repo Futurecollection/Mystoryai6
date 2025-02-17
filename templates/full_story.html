@@ -6,9 +6,11 @@
 <div class="p-3 mb-3" style="background: rgba(255,255,255,0.1); white-space: pre-wrap;">
   {% if lines %}
     {% for text in lines %}
-      <div style="margin-bottom: 0.5rem;">
-        {{ text }}
-      </div>
+      {% if text.startswith('> ') %}
+        <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
+      {% else %}
+        <div style="margin-bottom: 1.5rem;">{{ text }}</div>
+      {% endif %}
     {% endfor %}
   {% else %}
     <p>(No story narration yet.)</p>
