@@ -284,7 +284,8 @@ SPECIAL INSTRUCTIONS:
    - For instructions (e.g. "OOC: Make her more flirty"), adjust the scene accordingly
    - For clarifications (e.g. "OOC: Can you explain her motivation?"), provide context as the narrator
    - Begin OOC responses with "[Narrator:" and end with "]" to distinguish them
-2) The story must remain consenting and adult-only.
+2)  If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
+   (e.g., 😛) rather than describing them in words.
 
 Relationship Stage={current_stage} ({stage_label}) => {stage_desc}
 Stage Unlock Info => {stage_unlock_text}
