@@ -75,12 +75,20 @@ class SupabaseSessionInterface(SessionInterface):
         # Otherwise, upsert the session record in DB
         expiry = datetime.utcnow() + self.session_lifetime
         session_data = dict(session)
-
-        self.supabase.table(self.table_name).upsert({
-            "session_id": session.session_id,
-            "data": session_data,
-            "expiry": expiry.isoformat()
-        }).execute()
+        
+        # Remove large data that can be stored elsewhere
+        if 'interaction_log' in session_data:
+            session_data['interaction_log'] = session_data['interaction_log'][-10:]  # Keep only last 10 entries
+        
+        try:
+            self.supabase.table(self.table_name).upsert({
+                "session_id": session.session_id,
+                "data": session_data,
+                "expiry": expiry.isoformat()
+            }).execute()
+        except Exception as e:
+            print(f"Session save error: {e}")
+            # Still set cookie even if DB save fails
 
         # Set a small cookie with only the session_id
         response.set_cookie(
