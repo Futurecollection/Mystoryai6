@@ -101,12 +101,7 @@ def prepare_history():
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
         session["log_summary"] = ""
-    if len(log_list) > 40:  # Increased threshold 
-        old_chunk = log_list[:-20]  # Keep last 20
-        new_chunk = log_list[-20:]  # Keep last 20
-        summary_text = summarize_lines(old_chunk)
-        session["log_summary"] += "\n" + summary_text
-        session["interaction_log"] = new_chunk
+    # Keep the full log, no trimming
 
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
 def summarize_lines(lines):
