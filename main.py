@@ -1146,7 +1146,7 @@ Now continue the story:
 @app.route("/generate_erotica", methods=["POST"])
 @login_required
 def generate_erotica():
-    logs = session.get("interaction_log", [])
+    logs = session.get("full_story_log", [])
     story_parts = []
     for line in logs:
         if line.startswith("NARRATION => "):
