@@ -73,12 +73,12 @@ STAGE_INFO = {
 }
 STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
 DEFAULT_STAGE_UNLOCKS = {
-    1: "Basic intros, no perks",
-    2: "Casual jokes, mild flirting possible",
-    3: "Comfortable enough to ask personal questions",
-    4: "Deeper trust, hugging/cuddling possible",
-    5: "Serious romance, discussing future plans",
-    6: "Fully committed, sharing a life together, will be sexually intimate"
+    1: "Playful Connection & Getting to Know Each Other - Light teasing, playful banter, building mutual attraction. No explicit discussions.",
+    2: "Deepening Chemistry - Compliments become more personal, exploring shared interests. Flirtation is subtle and inviting.",
+    3: "Growing Emotional Intimacy - Conversations explore desires and emotional needs. Physical attraction acknowledged, light sensual tension.",
+    4: "Romantic & Physical Connection - Deep trust established. Romantic and sensual moments, including passionate encounters and intimate exploration.",
+    5: "Mature Dating Phase - Strong emotional bond formed. Full romantic and physical intimacy, with explicit content when user initiates.",
+    6: "Committed Relationship - Complete emotional and physical intimacy. Focus on deep passion and mutual pleasure in all interactions."
 }
 
 GENERATED_IMAGE_PATH = "output.jpg"
