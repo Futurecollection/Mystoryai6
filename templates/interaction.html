@@ -25,6 +25,15 @@
   <strong>Scene:</strong> {{ npc_narration }}
 </div>
 
+{% if scene_image_url %}
+  <div class="mb-4 text-center">
+    <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
+    {% if scene_image_seed %}
+      <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
+    {% endif %}
+  </div>
+{% endif %}
+
 <!-- USER ACTION FORM -->
 <form method="POST" class="mb-4" onsubmit="showLoading()">
   <!-- Quick Action Buttons -->
@@ -128,14 +137,7 @@
   </div>
 </form>
 
-{% if scene_image_url %}
-  <hr style="border-top: 1px solid #ff5789;">
-  <h4 style="color: #ff5789;">Generated Scene Image</h4>
-  <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
-  {% if scene_image_seed %}
-    <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
-  {% endif %}
-{% endif %}
+
 
 <hr style="border-top: 1px solid #ff5789;">
 
