@@ -101,7 +101,16 @@ def prepare_history():
     log_list = session.get("interaction_log", [])
     if "log_summary" not in session:
         session["log_summary"] = ""
-    # Keep the full log, no trimming
+    
+    if len(log_list) > 10:  # Keep last 10 for interaction display
+        old_chunk = log_list[:-10]  # Everything except last 10
+        new_chunk = log_list[-10:]  # Last 10 entries
+        summary_text = summarize_lines(old_chunk)
+        session["log_summary"] = summary_text
+        session["interaction_log"] = new_chunk
+        session["full_story_log"] = log_list  # Keep complete log for full story view
+    else:
+        session["full_story_log"] = log_list  # Store full log even when short
 
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
 def summarize_lines(lines):
@@ -1102,7 +1111,7 @@ def view_image():
 @app.route("/full_story")
 @login_required
 def full_story():
-    logs = session.get("interaction_log", [])
+    logs = session.get("full_story_log", [])
     story_lines = []
     for line in logs:
         if line.startswith("NARRATION => "):
