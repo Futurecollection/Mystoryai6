@@ -1,11 +1,30 @@
 import os
 import random
 import requests
+import time
 from functools import wraps
 from flask import (
     Flask, request, render_template,
     session, redirect, url_for, send_file, flash
 )
+
+def retry_with_backoff(retries=3, backoff_in_seconds=1):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            x = 0
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if x == retries:
+                        raise e
+                    sleep = (backoff_in_seconds * 2 ** x)
+                    time.sleep(sleep)
+                    x += 1
+            return None
+        return wrapper
+    return decorator
 
 # 1) Supabase + custom session
 from supabase import create_client, Client
