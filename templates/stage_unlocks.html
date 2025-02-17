@@ -5,11 +5,17 @@
   <div class="card-body" style="color: #f8d0d0;">
     <h1>Stage Unlocks</h1>
 
+    <!-- Show the user which stage they are currently in -->
+    <div class="alert alert-info" style="background-color:#5a2e2e;color:#fff;">
+      You are currently at Stage {{ current_stage }} ({{ stage_label }})
+    </div>
+
     <form method="POST" class="mb-4">
       {% for i in range(1,7) %}
         <label>Stage {{ i }} Unlock Text:</label>
-        <textarea class="form-control mb-2" rows="2" 
-                  name="stage_unlock_{{ i }}">{{ stage_unlocks[i] }}</textarea>
+        <textarea class="form-control mb-2" rows="2" name="stage_unlock_{{ i }}">
+          {{ stage_unlocks[i] }}
+        </textarea>
       {% endfor %}
       <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
         Save Stage Unlocks

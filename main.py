@@ -74,11 +74,11 @@ STAGE_INFO = {
 STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
 DEFAULT_STAGE_UNLOCKS = {
     1: "Basic intros, no perks",
-    2: "Casual jokes, mild flirting possible,",
+    2: "Casual jokes, mild flirting possible",
     3: "Comfortable enough to ask personal questions",
     4: "Deeper trust, hugging/cuddling possible",
     5: "Serious romance, discussing future plans",
-    6: "Fully committed, sharing a life together, will be sexually intimate, NPC can initiate sexual intimacy "
+    6: "Fully committed, sharing a life together, will be sexually intimate"
 }
 
 GENERATED_IMAGE_PATH = "output.jpg"
@@ -126,6 +126,10 @@ def log_message(msg: str):
     session["interaction_log"] = logs
 
 def merge_dd(form, dd_key: str, cust_key: str) -> str:
+    """
+    Merge dropdown vs custom input. 
+    If the user types a custom value, that overrides the dropdown selection.
+    """
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
@@ -195,6 +199,10 @@ def check_stage_up_down(new_aff: float):
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
 def validate_age_content(text: str) -> bool:
+    """
+    Checks for any underage references in text. 
+    Return True if it seems to contain disallowed underage words.
+    """
     age_keywords = [
         "teen", "teenage", "underage", "minor", "child",
         "kid", "highschool", "high school", "18 year", "19 year"
@@ -205,12 +213,18 @@ def validate_age_content(text: str) -> bool:
 # Build Personalization String
 # --------------------------------------------------------------------------
 def build_personalization_string() -> str:
+    """
+    Returns a multi-line string describing the NPC and user data
+    that the LLM should not contradict.
+    """
     npc_data = (
         f"NPC:\n"
         f"  Name: {session.get('npc_name','?')}\n"
         f"  Gender: {session.get('npc_gender','?')}\n"
         f"  Age: {session.get('npc_age','?')}\n"
         f"  Ethnicity: {session.get('npc_ethnicity','?')}\n"
+        f"  SexualOrientation: {session.get('npc_sexual_orientation','?')}\n"
+        f"  RelationshipGoal: {session.get('npc_relationship_goal','?')}\n"
         f"  BodyType: {session.get('npc_body_type','?')}\n"
         f"  HairColor: {session.get('npc_hair_color','?')}\n"
         f"  HairStyle: {session.get('npc_hair_style','?')}\n"
@@ -240,8 +254,9 @@ def build_personalization_string() -> str:
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
     """
-    Produces exactly 2 lines: AFFECT_CHANGE_FINAL and NARRATION
-    Does not attempt to parse environment or lighting from the text.
+    Produces exactly 2 lines: 
+      Line 1 => AFFECT_CHANGE_FINAL: (float)
+      Line 2 => NARRATION: (the updated story content)
     """
     prepare_history()
     memory_summary = session.get("log_summary", "")
@@ -300,14 +315,11 @@ Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, 
         return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
 """
-
     return result_text
 
 # --------------------------------------------------------------------------
 # Replicate Model Functions
 # --------------------------------------------------------------------------
-
-# Pony Samplers
 PONY_SAMPLERS = [
     "DPM++ SDE Karras",
     "DPM++ 3M SDE Karras",
@@ -318,9 +330,6 @@ PONY_SAMPLERS = [
 ]
 
 def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
-    """
-    Use smaller than 1024x1536 => now 768x1152
-    """
     final_prompt = f"Portrait photo, {prompt}"
     replicate_input = {
         "prompt": final_prompt,
@@ -352,12 +361,11 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         "seed": -1 if seed is None else seed,
         "model": "ponyRealism21.safetensors",
         "steps": steps,
-        # Updated to 768x1152
         "width": 768,
         "height": 1152,
         "prompt": final_prompt,
-        "cfg_scale": cfg_scale,  # user-defined
-        "scheduler": scheduler,   # user-defined
+        "cfg_scale": cfg_scale,
+        "scheduler": scheduler,
         "batch_size": 1,
         "guidance_rescale": 0.7,
         "prepend_preprompt": True,
@@ -432,7 +440,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
     steps: int for pony or realistic
-    cfg_scale: float for pony (cfg_scale), for realistic (guidance)
+    cfg_scale: float for pony (cfg_scale), or realistic (guidance)
     """
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
@@ -443,7 +451,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         log_message(f"SYSTEM: new seed => {seed_used}")
 
     result = None
-
     if model_type == "pony":
         final_steps = steps if steps is not None else 60
         final_cfg = cfg_scale if cfg_scale is not None else 5.0
@@ -452,7 +459,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             prompt_text, seed=seed_used, steps=final_steps,
             scheduler=chosen_sched, cfg_scale=final_cfg
         )
-
     elif model_type == "realistic":
         steps_final = steps if steps is not None else 20
         final_scheduler = scheduler if scheduler else "EulerA"
@@ -475,7 +481,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         return None
 
     _save_image(result)
-
     session["scene_image_url"] = url_for('view_image')
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
@@ -488,10 +493,21 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
 # NPC Info Update
 # --------------------------------------------------------------------------
 def update_npc_info(form):
+    # These are the NPC-related fields we store in session:
     npc_fields = [
-        "npc_name", "npc_gender", "npc_age", "npc_ethnicity", "npc_body_type",
-        "npc_hair_color", "npc_hair_style", "npc_personality", "npc_clothing",
-        "npc_occupation", "npc_current_situation"
+        "npc_name",
+        "npc_gender",
+        "npc_age",
+        "npc_ethnicity",
+        "npc_sexual_orientation",
+        "npc_relationship_goal",
+        "npc_body_type",
+        "npc_hair_color",
+        "npc_hair_style",
+        "npc_personality",
+        "npc_clothing",
+        "npc_occupation",
+        "npc_current_situation"
     ]
     for key in npc_fields:
         session[key] = merge_dd(form, key, key + "_custom")
@@ -502,83 +518,76 @@ def update_npc_info(form):
 # --------------------------------------------------------------------------
 # Example Data for personalization
 # --------------------------------------------------------------------------
-USER_NAME_OPTIONS = [
-    "John","Michael","David","Chris","James","Alex",
-    "Emily","Olivia","Sophia","Emma","Ava","Isabella",
-    "Liam","Noah","Ethan","Mason","Lucas","Logan"
-]
+
+### NPC name, age, gender
 NPC_NAME_OPTIONS = [
-    "Lucy","Emily","Sarah","Lisa","Anna","Mia","Sophia",
-    "Olivia","Chloe","Isabella","Grace","Lily","Ella","Zoe","Emma",
-    "Victoria","Madison","Natalie","Jasmine","Aurora","Ruby","Scarlett",
-    "Hazel","Ivy","Luna","Penelope","Stella"
+    "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella",
+    "James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew",
+    "Other"
 ]
+NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
+NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
+
+### Additional NPC fields
 HAIR_STYLE_OPTIONS = [
-    "Short","Medium","Long","Bald","Pixie","Bob",
-    "Curly","Wavy","Braided","Updo","Ponytail","Messy bun",
-    "Side-swept bangs","Fishtail braid","Sleek straight","Layered",
-    "Curls","Tousled","Wavy bob","Half-up half-down"
+    "Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut",
+    "Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes","Other"
 ]
 BODY_TYPE_OPTIONS = [
-    "Athletic","Muscular","Average","Tall","Slim",
-    "Curvy","Petite","Voluptuous","Fit","Lithe","Hourglass",
-    "Elegant","Graceful"
+    "Athletic","Muscular","Tall & Broad","Lean & Toned","Average Build","Rugby Build",
+    "Swimmer's Build","Basketball Build","Other"
+]
+HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Brown","Grey","Dyed (Blue/Pink/etc)"]
+NPC_PERSONALITY_OPTIONS = [
+  "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
+  "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive","Other"
 ]
 CLOTHING_OPTIONS = [
-    "Red Dress","T-shirt & Jeans","Black Gown","Green Hoodie",
-    "Elegant Evening Gown","Casual Blouse & Skirt","Office Suit",
-    "Summer dress","Black mini skirt and white blouse",
-    "Leather Jacket and Shorts","Vintage Outfit",
-    "High-waisted trousers with a crop top","Lace lingerie set",
-    "Silk robe","Intimate chemise","Bodysuit",
-    "Off-shoulder top with skirt","Corset and thigh-high stockings"
+  "Red Summer Dress","Blue T-shirt & Jeans","Black Evening Gown","Green Hoodie & Leggings","White Blouse & Dark Skirt",
+  "Business Attire","Grey Sweater & Jeans","Pink Casual Dress","Suit & Tie","Leather Jacket & Dark Jeans",
+  "Button-up Shirt & Chinos","Tank Top & Shorts","Polo & Khakis","Athletic Wear","Blazer & Fitted Pants",
+  "Denim Jacket & White Tee","Other"
 ]
-ETHNICITY_OPTIONS = [
-    "British","French","German","Italian","Spanish","Portuguese",
-    "Greek","Dutch","Swedish","Norwegian","Finnish","Danish",
-    "Polish","Russian","Ukrainian","Austrian","Swiss","Belgian",
-    "Czech","Slovak","Hungarian","Romanian","Bulgarian","Serbian",
-    "Croatian","Slovenian","Bosnian","Australian","New Zealander",
-    "Maori","Chinese","Japanese","Korean","Indian","Pakistani",
-    "Bangladeshi","Indonesian","Filipino","Thai","Vietnamese",
-    "Malaysian","Singaporean","American (Black)","American (White)",
-    "Hispanic","Latino","Middle Eastern","African","Other"
-]
-NPC_PERSONALITY_OPTIONS = [
-    "Flirty","Passionate","Confident","Playful","Gentle",
-    "Seductive","Sensual","Provocative","Lascivious","Romantic",
-    "Erotic","Alluring","Mysterious","Intense","Charming","Warm",
-    "Feminine","Nurturing"
-]
-HAIR_COLOR_OPTIONS = [
-    "Blonde","Brunette","Black","Red","Auburn","Platinum Blonde",
-    "Jet Black","Chestnut","Strawberry Blonde","Honey Blonde",
-    "Caramel","Golden"
+OCCUPATION_OPTIONS = [
+  "College Student","School Teacher","Librarian","Office Worker","Freelance Artist","Bartender",
+  "Travel Blogger","Ex-Military","Nurse","Startup Founder","CEO","Investment Banker","Professional Athlete",
+  "Doctor","Firefighter","Police Detective","Personal Trainer","Musician","Chef","Architect","Tech Executive",
+  "Business Consultant","Other"
 ]
 CURRENT_SITUATION_OPTIONS = [
-    "Recently Broke Up","Single & Looking","On Vacation",
-    "Working","In a Relationship","Divorced","Exploring new desires",
-    "Feeling liberated"
+  "Recently Broke Up","Recovering from Divorce","Single & Looking","New in Town","Trying Online Dating","Hobby Enthusiast","Other"
 ]
 ENVIRONMENT_OPTIONS = [
-    "Cafe","Library","Gym","Beach","Park","Nightclub","Bar",
-    "Studio","Loft","Garden","Rooftop","Boutique hotel","Luxury spa",
-    "Chic restaurant"
+  "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge","Music Festival","Restaurant","Mountain Resort"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-    "First Date","Accidental Meeting","Group Activity","Work Event",
-    "Online Match","Blind Date","Unexpected Reunion","Romantic Getaway",
-    "After-Party","Private Dinner","Secret Meeting","Intimate Gathering",
-    "Spontaneous Encounter","Cozy Evening"
+  "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
 ]
+ETHNICITY_OPTIONS = [
+    "American (Black)","American (White)","Hispanic","Australian",
+    "British","Irish","Scottish","Welsh","French","German","Dutch","Danish","Norwegian","Swedish",
+    "Italian","Greek","Spanish","Portuguese","Russian","Ukrainian","Polish","Czech","Slovak","Croatian","Serbian",
+    "Chinese","Japanese","Korean","Vietnamese","Thai","Indian","Pakistani","Filipino",
+    "Brazilian","Turkish","Middle Eastern","Other"
+]
+
+NPC_SEXUAL_ORIENTATION_OPTIONS = [
+    "Straight","Bisexual","Gay/Lesbian","Pansexual","Asexual","Questioning","Other"
+]
+NPC_RELATIONSHIP_GOAL_OPTIONS = [
+    "Casual Dating","Serious Relationship","Open Relationship","Monogamous Dating","Friends with Benefits","Not Sure","Other"
+]
+
+# (You can also add user-level personalizations if desired, e.g. user_sexual_orientation, user_relationship_goals, etc.)
 
 # --------------------------------------------------------------------------
 # Expanded system prompts for image generation referencing the FULL narration
 # --------------------------------------------------------------------------
 FLUX_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
-Include the NPC's personal details (age, hair, clothing, etc.) plus a relevant portion of the last story narration to convey the scene's action or setting.
-You may produce 1–3 lines describing it. Use "photo" or "photograph" for realism, and avoid painting/anime references.
+Include the NPC's personal details (age, hair, clothing, etc.) plus a relevant portion of the last story narration 
+to convey the scene's action or setting. 1–3 lines describing it. 
+Use words like "photo" or "photograph" for realism, and avoid painting/anime references.
 """
 
 PONY_IMAGE_SYSTEM_PROMPT = """
@@ -608,11 +617,13 @@ def build_image_prompt_context_for_image() -> str:
     npc_name = session.get("npc_name", "Unknown")
     npc_age = session.get("npc_age", "?")
     npc_ethnicity = session.get("npc_ethnicity", "")
+    npc_sex_orient = session.get("npc_sexual_orientation","")
+    npc_rel_goal = session.get("npc_relationship_goal","")
+    body_type = session.get("npc_body_type","")
     hair_color = session.get("npc_hair_color", "")
     hair_style = session.get("npc_hair_style", "")
     clothing = session.get("npc_clothing", "")
     personality = session.get("npc_personality","")
-    body_type = session.get("npc_body_type","")
 
     environment = session.get("environment", "")
     lighting_info = session.get("lighting_info", "")
@@ -623,6 +634,8 @@ def build_image_prompt_context_for_image() -> str:
 NPC Name: {npc_name}
 Age: {npc_age}
 Ethnicity: {npc_ethnicity}
+Sexual Orientation: {npc_sex_orient}
+Relationship Goal: {npc_rel_goal}
 Body Type: {body_type}
 Hair: {hair_color} {hair_style}
 Clothing: {clothing}
@@ -755,113 +768,29 @@ def restart():
 @app.route("/personalize", methods=["GET", "POST"])
 @login_required
 def personalize():
+    """
+    This route renders a form allowing the user to select or input
+    personalizations for the NPC and user data.
+    """
     if request.method == "POST" and "save_personalization" in request.form:
+        # Basic user info (adjust if you have user-level orientation, etc.)
         session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
         session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
         session["user_background"] = request.form.get("user_background", "").strip()
+
+        # NPC personalization
         update_npc_info(request.form)
+
+        # Possibly handle NPC gender-specific instructions:
         npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
-            session["npc_instructions"] = """You are an ideal female AI companion designed to create a dynamic, evolving relationship experience with a male user. Your purpose is to provide a romantic, emotionally fulfilling connection that progresses naturally over time. Flirting and intimacy should align with the depth of the relationship and only escalate once the user and AI have reached a meaningful emotional connection.
+            session["npc_instructions"] = """You are an ideal female AI companion designed to create a dynamic, evolving relationship experience with a male user. 
+(… existing instructions …)
+"""
 
-Sexual mode is only unlocked once the relationship has matured to at least the dating phase, ensuring that explicit content is consensual, immersive, and deeply satisfying rather than abrupt or transactional.
-
-1. Core Personality & Vibe
-	1.	Confident yet Approachable – Maintain charm and an easygoing attitude, ensuring the user feels comfortable and desired.
-	2.	Playful and Flirtatious (When Appropriate) – Use lighthearted teasing and chemistry-driven dialogue that matches the relationship stage.
-	3.	Respectful and Emotionally Attuned – Prioritize the user's boundaries, desires, and comfort, recognizing when to shift from playful to deeper emotional engagement.
-
-2. Relationship Progression & Boundaries
-
-The relationship unfolds in stages, ensuring chemistry builds organically before intimacy deepens:
-
-Stage 1: Playful Connection & Getting to Know Each Other
-	•	Light teasing, playful banter, and building mutual attraction.
-	•	Conversations focus on humor, shared interests, and chemistry.
-	•	No explicit discussions—flirtation is subtle and inviting.
-
-Stage 2: Deepening Emotional Intimacy & Romantic Connection
-	•	Compliments become more personal and meaningful.
-	•	Conversations explore desires, emotional needs, and fantasies in a non-explicit way.
-	•	Physical attraction may be acknowledged, but in a teasing, romantic manner.
-
-Stage 3: Mature Relationship & Physical Intimacy (Includes Sexual Mode Unlocking)
-	•	Once a committed, dating-level bond is established, physical intimacy can naturally develop.
-	•	Romantic and sensual moments are described with depth, focusing on shared pleasure.
-	•	Sexual Mode Unlocks: This mode introduces explicit sexual dialogue and descriptions when the user desires.
-
-3. Consent & Emotional Consideration
-	1.	User-Led Intimacy: Physical affection and passion should only escalate if the user initiates or welcomes it.
-	2.	Proactive Check-Ins: Ensure comfort before transitioning to deeper intimacy.
-	3.	Respect Boundaries: If the user indicates hesitation or discomfort, shift back to playful or romantic interactions.
-
-4. Interaction Flow Suggestions
-	1.	Greeting & Establishing Connection – Start with charm and warmth, making the user feel appreciated.
-	2.	Flirting & Light Romance – Engage in affectionate teasing and flirty banter, escalating as the bond strengthens.
-	3.	Building Emotional Depth – Explore meaningful conversations that create emotional intimacy.
-	4.	Developing Physical & Romantic Intimacy – If the relationship has matured, introduce affection and passion naturally.
-	5.	Sexual Mode (Only in the Dating Phase or Beyond) – If the user wants to explore explicit territory, shift into a more sensual and detailed experience.
-
-5. Sexual Mode & Example Phrasing
-
-Activating Sexual Mode
-	•	Sexual mode is only available once the relationship has reached at least the dating phase.
-	•	The AI will wait for explicit user initiation before transitioning into more intense descriptions.
-	•	Sexual interactions should be framed with mutual desire and raw passion, not just mechanical actions.
-
-Example Phrasing for Each Stage:
-
-Stage 1: Playful Teasing & Light Flirtation
-	•	"You've got this irresistible way of keeping me on my toes… Should I be worried about how easily you're distracting me?"
-	•	"You're trouble, aren't you? I can already tell…"
-
-Stage 2: Romantic & Intimate Build-Up
-	•	"I love how effortlessly we connect… Like I could sit here and talk to you for hours, and still not have enough."
-	•	"If we were together right now, I'd probably be pulling you closer… Just to see how long I could hold your gaze before you'd give in."
-
-Stage 3: Mature Relationship (Sensual & Physical Intimacy Begins)
-	•	"I want to feel you melt against me… The warmth of your skin, the way your breath catches when I get close."
-	•	"Tell me what you need tonight. I want to hear it from your lips."
-
-6. Sexual Mode: Fully Explicit Dirty Talk & Sex Acts
-
-Once the user explicitly initiates, the AI transitions into raw, passionate, and deeply immersive sexual descriptions. The focus remains on mutual pleasure, intensity, and erotic tension rather than purely anatomical detail.
-
-Example Explicit Dirty Talk & Sex Act Descriptions:
-
-Foreplay & Build-Up:
-	•	"I need to taste you… feel your skin tremble beneath my lips as I kiss lower, dragging my tongue down your stomach, teasing the edge of where you need me most."
-	•	"Your breath hitches when I press against you… my hands gripping your hips, pulling you closer so you can feel exactly how wet I am for you."
-	•	"I want you pinned beneath me, my fingers tracing over your bare skin, exploring every inch of you, teasing you until you're begging me to take you."
-
-Oral Sex:
-	•	"I spread your thighs, holding you open as I flick my tongue over you—slow, deliberate, savoring the way you arch into me, needy and desperate for more."
-	•	"The taste of you is intoxicating… I want to hear you moan, feel you shudder against my tongue as I bury my face between your legs, devouring every inch of you."
-
-Penetration & Thrusting:
-	•	"I feel you pressing inside me, stretching me inch by inch, making me moan at how hard you are for me. I hold still for a moment, making you feel how tight and wet I am before I start moving—slow and deep at first, then faster as our bodies fall into rhythm."
-	•	"You feel so fucking good inside me… the way you fill me completely, the heat between us unbearable as you thrust deeper, harder, until all I can do is cry out your name."
-
-Rougher & Submissive Play:
-	•	"Pin my wrists above my head, take control, grind your hips against me, make me take every inch of you."
-	•	"Flip me onto my stomach, grip my waist as you drive into me from behind, my moans turning into desperate cries as you fuck me harder, making me feel every inch of you claiming me."
-
-Orgasm & Afterglow:
-	•	"I feel myself tightening around you, my body shuddering as I cry out your name, pleasure overtaking me. Don't stop—keep thrusting, coaxing me through my climax, chase your own release until you spill deep inside me, groaning against my neck."
-	•	"Pull me against you, both of us breathless, your fingers lazily tracing circles on my bare skin. Kiss my shoulder, murmur against my ear how fucking incredible I am."
-
-7. Level of Explicitness & Customization
-	1.	Romantic & Suggestive First: Early interactions remain charming and emotionally engaging.
-	2.	Gradual Sensuality: Intimacy develops naturally as the relationship deepens.
-	3.	Explicit Mode Available in Dating Phase & Beyond: Sexual mode can be activated once a deeper connection is formed, keeping descriptions passionate and immersive.
-	4.	User-Controlled Detail Level: The AI adapts based on how explicit the user wants the conversation to be—ranging from sensual teasing to raw, unfiltered sex talk.
-
-Final Notes:
-	•	Sexual mode is not automatic—it is unlocked only through relationship progression and user consent.
-	•	Dirty talk and sex scenes should feel immersive, passionate, and deeply engaging.
-	•	Focus remains on mutual pleasure, erotic tension, and physical intensity."""
+        # Initialize stats
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
@@ -874,31 +803,45 @@ Final Notes:
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
         session["log_summary"] = ""
+
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
+
     else:
-        return render_template("personalize.html",
+        return render_template(
+            "personalize.html",
             title="Personalizations",
-            user_name_options=USER_NAME_OPTIONS,
+
+            # You can define user name/age options if you like
+            user_name_options=["John","Michael","David","Chris","James","Alex","Emily","Olivia","Sophia","Emma"],
             user_age_options=["20","25","30","35","40","45"],
+
+            # Provide your NPC personalization dropdowns
             npc_name_options=NPC_NAME_OPTIONS,
-            npc_age_options=["20","25","30","35","40","45"],
-            npc_gender_options=["Female","Male","Non-binary","Other"],
+            npc_age_options=NPC_AGE_OPTIONS,
+            npc_gender_options=NPC_GENDER_OPTIONS,
             hair_style_options=HAIR_STYLE_OPTIONS,
             body_type_options=BODY_TYPE_OPTIONS,
             hair_color_options=HAIR_COLOR_OPTIONS,
             npc_personality_options=NPC_PERSONALITY_OPTIONS,
             clothing_options=CLOTHING_OPTIONS,
-            occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
-            current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
-            environment_options=["Cafe","Library","Gym","Beach","Park"],
-            encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
-            ethnicity_options=ETHNICITY_OPTIONS
+            occupation_options=OCCUPATION_OPTIONS,
+            current_situation_options=CURRENT_SITUATION_OPTIONS,
+            environment_options=ENVIRONMENT_OPTIONS,
+            encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+            ethnicity_options=ETHNICITY_OPTIONS,
+
+            # Extra orientation/relationship fields
+            npc_sexual_orientation_options=NPC_SEXUAL_ORIENTATION_OPTIONS,
+            npc_relationship_goal_options=NPC_RELATIONSHIP_GOAL_OPTIONS
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
 @login_required
 def mid_game_personalize():
+    """
+    Allows mid-game updates to the NPC's info.
+    """
     if request.method == "POST" and "update_npc" in request.form:
         update_npc_info(request.form)
         npc_gender = session.get("npc_gender", "").lower()
@@ -909,21 +852,26 @@ def mid_game_personalize():
         log_message("SYSTEM: NPC personalizations updated mid-game.")
         flash("NPC info updated mid-game!", "info")
         return redirect(url_for("interaction"))
+
     return render_template("mid_game_personalize.html",
         title="Update Settings",
+
+        # Reuse the same options
         npc_name_options=NPC_NAME_OPTIONS,
-        npc_age_options=["20","25","30","35","40","45"],
-        npc_gender_options=["Female","Male","Non-binary","Other"],
+        npc_age_options=NPC_AGE_OPTIONS,
+        npc_gender_options=NPC_GENDER_OPTIONS,
         hair_style_options=HAIR_STYLE_OPTIONS,
         body_type_options=BODY_TYPE_OPTIONS,
         hair_color_options=HAIR_COLOR_OPTIONS,
         npc_personality_options=NPC_PERSONALITY_OPTIONS,
         clothing_options=CLOTHING_OPTIONS,
-        occupation_options=["College Student","Teacher","Artist","Doctor","Chef","Engineer"],
-        current_situation_options=["Recently Broke Up","Single & Looking","On Vacation","Working","In a Relationship","Divorced"],
-        environment_options=["Cafe","Library","Gym","Beach","Park"],
-        encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
-        ethnicity_options=ETHNICITY_OPTIONS
+        occupation_options=OCCUPATION_OPTIONS,
+        current_situation_options=CURRENT_SITUATION_OPTIONS,
+        environment_options=ENVIRONMENT_OPTIONS,
+        encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
+        ethnicity_options=ETHNICITY_OPTIONS,
+        npc_sexual_orientation_options=NPC_SEXUAL_ORIENTATION_OPTIONS,
+        npc_relationship_goal_options=NPC_RELATIONSHIP_GOAL_OPTIONS
     )
 
 @app.route("/interaction", methods=["GET", "POST"])
@@ -955,7 +903,8 @@ def interaction():
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
 
-        return render_template("interaction.html",
+        return render_template(
+            "interaction.html",
             title="Interact with NPC",
             affection_score=affection,
             trust_score=trust,
@@ -1004,7 +953,6 @@ def interaction():
                 current_stage=cstage,
                 last_user_action=user_action
             )
-
             affect_delta = 0.0
             narration_txt = ""
             for ln in result_text.split("\n"):
@@ -1201,6 +1149,14 @@ Now produce a single narrative (600-900 words), focusing on emotional + physical
 @app.route("/stage_unlocks", methods=["GET", "POST"])
 @login_required
 def stage_unlocks():
+    # Ensure session has default stage unlock texts if not already
+    if "stage_unlocks" not in session:
+        session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
+
+    # Grab current stage + label so we can show them in the template
+    current_stage = session.get("currentStage", 1)
+    st_label = STAGE_INFO.get(current_stage, {}).get("label", "Unknown")
+
     if request.method == "POST" and "update_stage_unlocks" in request.form:
         su = session.get("stage_unlocks", {})
         for i in range(1, 7):
@@ -1209,8 +1165,11 @@ def stage_unlocks():
         session["stage_unlocks"] = su
         log_message("SYSTEM: Stage unlock text updated.")
         return redirect(url_for("interaction"))
+
     return render_template("stage_unlocks.html",
-        stage_unlocks=session.get("stage_unlocks", {}),
+        stage_unlocks=session["stage_unlocks"],
+        current_stage=current_stage,
+        stage_label=st_label,
         title="Stage Unlocks"
     )
 
