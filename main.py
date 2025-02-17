@@ -82,14 +82,6 @@ replicate.client.api_token = REPLICATE_API_TOKEN
 # --------------------------------------------------------------------------
 # Stage Info
 # --------------------------------------------------------------------------
-STAGE_INFO = {
-    1: {"label": "Strangers", "desc": "They barely know each other."},
-    2: {"label": "Casual Acquaintances", "desc": "Superficial chatting, no real depth yet."},
-    3: {"label": "Comfortable", "desc": "Sharing moderate personal info, plan small outings."},
-    4: {"label": "Close", "desc": "Frequent contact, emotional trust, safe time alone together."},
-    5: {"label": "Serious Potential", "desc": "Openly affectionate, discussing future possibilities."},
-    6: {"label": "Committed Relationship", "desc": "Life partners with strong devotion, shared long-term goals, can be sexually intimate."}
-}
 STAGE_REQUIREMENTS = {1: 0, 2: 2, 3: 5, 4: 9, 5: 15, 6: 20}
 DEFAULT_STAGE_UNLOCKS = {
     1: "Playful Connection & Getting to Know Each Other - Light teasing, playful banter, building mutual attraction. No explicit discussions.",
@@ -917,12 +909,11 @@ def interaction():
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
         trust = session.get("trustScore", 5.0)
-        mood = session.get("npcMood", "Neutral")
+        mood = session.get("npcMood", "Neutral") 
         cstage = session.get("currentStage", 1)
-        st_label = STAGE_INFO[cstage]["label"]
-        st_desc = STAGE_INFO[cstage]["desc"]
+        stage_unlocks = session.get("stage_unlocks", DEFAULT_STAGE_UNLOCKS)
+        st_desc = stage_unlocks.get(cstage, "Unknown stage")
         nxt_thresh = session.get("nextStageThreshold", 999)
-        stage_unlocks = session.get("stage_unlocks", {})
         last_narration = session.get("narrationText", "(No scene yet.)")
         scene_prompt = session.get("scene_image_prompt", "")
         scene_url = session.get("scene_image_url", None)
