@@ -33,7 +33,6 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
 
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -43,20 +42,18 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
 # --------------------------------------------------------------------------
 # Gemini + Replicate Setup
 # --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
 
-# Update safety settings for Gemini 2.0
 safety_settings = {
-    genai.types.HarmCategory.HARASSMENT: genai.types.HarmBlockThreshold.BLOCK_NONE,
-    genai.types.HarmCategory.HATE_SPEECH: genai.types.HarmBlockThreshold.BLOCK_NONE,
-    genai.types.HarmCategory.SEXUALLY_EXPLICIT: genai.types.HarmBlockThreshold.BLOCK_NONE,
-    genai.types.HarmCategory.DANGEROUS_CONTENT: genai.types.HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 generation_config = {"temperature": 0.5, "top_p": 0.95, "top_k": 40}
 
@@ -86,7 +83,6 @@ DEFAULT_STAGE_UNLOCKS = {
 
 GENERATED_IMAGE_PATH = "output.jpg"
 
-
 # --------------------------------------------------------------------------
 # Summarization / Memory (Optional)
 # --------------------------------------------------------------------------
@@ -100,7 +96,6 @@ def prepare_history():
         summary_text = summarize_lines(old_chunk)
         session["log_summary"] += "\n" + summary_text
         session["interaction_log"] = new_chunk
-
 
 def summarize_lines(lines):
     text_to_summarize = "\n".join(lines)
@@ -122,7 +117,6 @@ Summarize the following chat lines into a cohesive memory (300-500 words):
         print("[ERROR] Summarize lines failed:", e)
         return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
 
-
 # --------------------------------------------------------------------------
 # Utility Functions
 # --------------------------------------------------------------------------
@@ -131,12 +125,10 @@ def log_message(msg: str):
     logs.append(msg)
     session["interaction_log"] = logs
 
-
 def merge_dd(form, dd_key: str, cust_key: str) -> str:
     dd_val = form.get(dd_key, "").strip()
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
-
 
 def _save_image(result):
     if isinstance(result, dict) and "output" in result:
@@ -149,13 +141,11 @@ def _save_image(result):
         except Exception as e:
             print("[ERROR] _save_image => Error downloading from output key:", e)
         return
-
     if hasattr(result, "read"):
         print("[DEBUG] _save_image => File-like object received.")
         with open(GENERATED_IMAGE_PATH, "wb") as f:
             f.write(result.read())
         return
-
     if isinstance(result, list) and result:
         final_item = result[-1]
         if isinstance(final_item, str):
@@ -171,7 +161,6 @@ def _save_image(result):
         else:
             print("[ERROR] _save_image => List item is not a string:", final_item)
             return
-
     if isinstance(result, str):
         print("[DEBUG] _save_image => Received string:", result)
         try:
@@ -183,7 +172,6 @@ def _save_image(result):
         return
 
     print("[ERROR] _save_image => Unknown result type:", type(result))
-
 
 def check_stage_up_down(new_aff: float):
     if "currentStage" not in session:
@@ -206,14 +194,12 @@ def check_stage_up_down(new_aff: float):
     st = session["currentStage"]
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
-
 def validate_age_content(text: str) -> bool:
     age_keywords = [
         "teen", "teenage", "underage", "minor", "child",
         "kid", "highschool", "high school", "18 year", "19 year"
     ]
     return any(k in text.lower() for k in age_keywords)
-
 
 # --------------------------------------------------------------------------
 # Build Personalization String
@@ -247,7 +233,6 @@ def build_personalization_string() -> str:
         f"  Background: {session.get('user_background','?')}\n"
     )
     return user_data + npc_data + env_data
-
 
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
@@ -318,7 +303,6 @@ NARRATION: [System: no valid response from LLM, please try again]
 
     return result_text
 
-
 # --------------------------------------------------------------------------
 # Replicate Model Functions
 # --------------------------------------------------------------------------
@@ -332,7 +316,6 @@ PONY_SAMPLERS = [
     "DPM2 a",
     "Euler a"
 ]
-
 
 def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
     """
@@ -360,8 +343,7 @@ def generate_flux_image_safely(prompt: str, seed: int = None) -> object:
         print(f"[ERROR] Flux call failed: {e}")
         return None
 
-
-def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 10,
+def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 60,
                                     scheduler: str = "DPM++ 2M SDE Karras", cfg_scale: float = 5.0) -> object:
     auto_positive = "score_9, score_8_up, score_7_up, (masterpiece, best quality, ultra-detailed, realistic)"
     final_prompt = f"{auto_positive}, {prompt}"
@@ -370,6 +352,7 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         "seed": -1 if seed is None else seed,
         "model": "ponyRealism21.safetensors",
         "steps": steps,
+        # Updated to 768x1152
         "width": 768,
         "height": 1152,
         "prompt": final_prompt,
@@ -400,11 +383,10 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         print("[ERROR] Pony-SDXL call failed:", e)
         return None
 
-
 def generate_realistic_vision_image_safely(
     prompt: str,
     seed: int = 0,
-    steps: int = 10,
+    steps: int = 20,
     width: int = 768,
     height: int = 1152,
     guidance: float = 5.0,
@@ -440,7 +422,6 @@ def generate_realistic_vision_image_safely(
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
 
-
 # --------------------------------------------------------------------------
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
@@ -451,7 +432,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
     steps: int for pony or realistic
-    cfg_scale: float for pony (cfg_scale), or realistic (guidance)
+    cfg_scale: float for pony (cfg_scale), for realistic (guidance)
     """
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
@@ -464,20 +445,20 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     result = None
 
     if model_type == "pony":
-        final_steps = steps if steps is not None else 10
+        final_steps = steps if steps is not None else 60
         final_cfg = cfg_scale if cfg_scale is not None else 5.0
         chosen_sched = scheduler if scheduler else "DPM++ 2M SDE Karras"
         result = generate_pony_sdxl_image_safely(
-            prompt, seed=seed_used, steps=final_steps,
+            prompt_text, seed=seed_used, steps=final_steps,
             scheduler=chosen_sched, cfg_scale=final_cfg
         )
 
     elif model_type == "realistic":
-        steps_final = steps if steps is not None else 10
+        steps_final = steps if steps is not None else 20
         final_scheduler = scheduler if scheduler else "EulerA"
         final_guidance = cfg_scale if cfg_scale is not None else 5.0
         result = generate_realistic_vision_image_safely(
-            prompt=prompt,
+            prompt=prompt_text,
             seed=seed_used,
             steps=steps_final,
             width=768,
@@ -486,7 +467,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             scheduler=final_scheduler
         )
     else:
-        # flux (no steps/cfg)
+        # flux
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
@@ -503,7 +484,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
     return result
 
-
 # --------------------------------------------------------------------------
 # NPC Info Update
 # --------------------------------------------------------------------------
@@ -519,80 +499,78 @@ def update_npc_info(form):
     session["environment"] = merge_dd(form, "environment", "environment_custom")
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
-
 # --------------------------------------------------------------------------
 # Example Data for personalization
 # --------------------------------------------------------------------------
 USER_NAME_OPTIONS = [
-    "John", "Michael", "David", "Chris", "James", "Alex",
-    "Emily", "Olivia", "Sophia", "Emma", "Ava", "Isabella",
-    "Liam", "Noah", "Ethan", "Mason", "Lucas", "Logan"
+    "John","Michael","David","Chris","James","Alex",
+    "Emily","Olivia","Sophia","Emma","Ava","Isabella",
+    "Liam","Noah","Ethan","Mason","Lucas","Logan"
 ]
 NPC_NAME_OPTIONS = [
-    "Lucy", "Emily", "Sarah", "Lisa", "Anna", "Mia", "Sophia",
-    "Olivia", "Chloe", "Isabella", "Grace", "Lily", "Ella", "Zoe", "Emma",
-    "Victoria", "Madison", "Natalie", "Jasmine", "Aurora", "Ruby", "Scarlett",
-    "Hazel", "Ivy", "Luna", "Penelope", "Stella"
+    "Lucy","Emily","Sarah","Lisa","Anna","Mia","Sophia",
+    "Olivia","Chloe","Isabella","Grace","Lily","Ella","Zoe","Emma",
+    "Victoria","Madison","Natalie","Jasmine","Aurora","Ruby","Scarlett",
+    "Hazel","Ivy","Luna","Penelope","Stella"
 ]
 HAIR_STYLE_OPTIONS = [
-    "Short", "Medium", "Long", "Bald", "Pixie", "Bob",
-    "Curly", "Wavy", "Braided", "Updo", "Ponytail", "Messy bun",
-    "Side-swept bangs", "Fishtail braid", "Sleek straight", "Layered",
-    "Curls", "Tousled", "Wavy bob", "Half-up half-down"
+    "Short","Medium","Long","Bald","Pixie","Bob",
+    "Curly","Wavy","Braided","Updo","Ponytail","Messy bun",
+    "Side-swept bangs","Fishtail braid","Sleek straight","Layered",
+    "Curls","Tousled","Wavy bob","Half-up half-down"
 ]
 BODY_TYPE_OPTIONS = [
-    "Athletic", "Muscular", "Average", "Tall", "Slim",
-    "Curvy", "Petite", "Voluptuous", "Fit", "Lithe", "Hourglass",
-    "Elegant", "Graceful"
+    "Athletic","Muscular","Average","Tall","Slim",
+    "Curvy","Petite","Voluptuous","Fit","Lithe","Hourglass",
+    "Elegant","Graceful"
 ]
 CLOTHING_OPTIONS = [
-    "Red Dress", "T-shirt & Jeans", "Black Gown", "Green Hoodie",
-    "Elegant Evening Gown", "Casual Blouse & Skirt", "Office Suit",
-    "Summer dress", "Black mini skirt and white blouse",
-    "Leather Jacket and Shorts", "Vintage Outfit",
-    "High-waisted trousers with a crop top", "Lace lingerie set",
-    "Silk robe", "Intimate chemise", "Bodysuit",
-    "Off-shoulder top with skirt", "Corset and thigh-high stockings"
+    "Red Dress","T-shirt & Jeans","Black Gown","Green Hoodie",
+    "Elegant Evening Gown","Casual Blouse & Skirt","Office Suit",
+    "Summer dress","Black mini skirt and white blouse",
+    "Leather Jacket and Shorts","Vintage Outfit",
+    "High-waisted trousers with a crop top","Lace lingerie set",
+    "Silk robe","Intimate chemise","Bodysuit",
+    "Off-shoulder top with skirt","Corset and thigh-high stockings"
 ]
 ETHNICITY_OPTIONS = [
-    "British", "French", "German", "Italian", "Spanish", "Portuguese",
-    "Greek", "Dutch", "Swedish", "Norwegian", "Finnish", "Danish",
-    "Polish", "Russian", "Ukrainian", "Austrian", "Swiss", "Belgian",
-    "Czech", "Slovak", "Hungarian", "Romanian", "Bulgarian", "Serbian",
-    "Croatian", "Slovenian", "Bosnian", "Australian", "New Zealander",
-    "Maori", "Chinese", "Japanese", "Korean", "Indian", "Pakistani",
-    "Bangladeshi", "Indonesian", "Filipino", "Thai", "Vietnamese",
-    "Malaysian", "Singaporean", "American (Black)", "American (White)",
-    "Hispanic", "Latino", "Middle Eastern", "African", "Other"
+    "British","French","German","Italian","Spanish","Portuguese",
+    "Greek","Dutch","Swedish","Norwegian","Finnish","Danish",
+    "Polish","Russian","Ukrainian","Austrian","Swiss","Belgian",
+    "Czech","Slovak","Hungarian","Romanian","Bulgarian","Serbian",
+    "Croatian","Slovenian","Bosnian","Australian","New Zealander",
+    "Maori","Chinese","Japanese","Korean","Indian","Pakistani",
+    "Bangladeshi","Indonesian","Filipino","Thai","Vietnamese",
+    "Malaysian","Singaporean","American (Black)","American (White)",
+    "Hispanic","Latino","Middle Eastern","African","Other"
 ]
 NPC_PERSONALITY_OPTIONS = [
-    "Flirty", "Passionate", "Confident", "Playful", "Gentle",
-    "Seductive", "Sensual", "Provocative", "Lascivious", "Romantic",
-    "Erotic", "Alluring", "Mysterious", "Intense", "Charming", "Warm",
-    "Feminine", "Nurturing"
+    "Flirty","Passionate","Confident","Playful","Gentle",
+    "Seductive","Sensual","Provocative","Lascivious","Romantic",
+    "Erotic","Alluring","Mysterious","Intense","Charming","Warm",
+    "Feminine","Nurturing"
 ]
 HAIR_COLOR_OPTIONS = [
-    "Blonde", "Brunette", "Black", "Red", "Auburn", "Platinum Blonde",
-    "Jet Black", "Chestnut", "Strawberry Blonde", "Honey Blonde",
-    "Caramel", "Golden"
+    "Blonde","Brunette","Black","Red","Auburn","Platinum Blonde",
+    "Jet Black","Chestnut","Strawberry Blonde","Honey Blonde",
+    "Caramel","Golden"
 ]
 CURRENT_SITUATION_OPTIONS = [
-    "Recently Broke Up", "Single & Looking", "On Vacation",
-    "Working", "In a Relationship", "Divorced", "Exploring new desires",
+    "Recently Broke Up","Single & Looking","On Vacation",
+    "Working","In a Relationship","Divorced","Exploring new desires",
     "Feeling liberated"
 ]
 ENVIRONMENT_OPTIONS = [
-    "Cafe", "Library", "Gym", "Beach", "Park", "Nightclub", "Bar",
-    "Studio", "Loft", "Garden", "Rooftop", "Boutique hotel", "Luxury spa",
+    "Cafe","Library","Gym","Beach","Park","Nightclub","Bar",
+    "Studio","Loft","Garden","Rooftop","Boutique hotel","Luxury spa",
     "Chic restaurant"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-    "First Date", "Accidental Meeting", "Group Activity", "Work Event",
-    "Online Match", "Blind Date", "Unexpected Reunion", "Romantic Getaway",
-    "After-Party", "Private Dinner", "Secret Meeting", "Intimate Gathering",
-    "Spontaneous Encounter", "Cozy Evening"
+    "First Date","Accidental Meeting","Group Activity","Work Event",
+    "Online Match","Blind Date","Unexpected Reunion","Romantic Getaway",
+    "After-Party","Private Dinner","Secret Meeting","Intimate Gathering",
+    "Spontaneous Encounter","Cozy Evening"
 ]
-
 
 # --------------------------------------------------------------------------
 # Expanded system prompts for image generation referencing the FULL narration
@@ -615,7 +593,6 @@ Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal da
 Produce 1–3 lines. No negative prompt needed. Avoid painting/anime references.
 """
 
-
 def get_image_prompt_system_instructions(model_type: str) -> str:
     mt = model_type.lower()
     if mt == "flux":
@@ -627,7 +604,6 @@ def get_image_prompt_system_instructions(model_type: str) -> str:
     else:
         return FLUX_IMAGE_SYSTEM_PROMPT
 
-
 def build_image_prompt_context_for_image() -> str:
     npc_name = session.get("npc_name", "Unknown")
     npc_age = session.get("npc_age", "?")
@@ -635,13 +611,13 @@ def build_image_prompt_context_for_image() -> str:
     hair_color = session.get("npc_hair_color", "")
     hair_style = session.get("npc_hair_style", "")
     clothing = session.get("npc_clothing", "")
-    personality = session.get("npc_personality", "")
-    body_type = session.get("npc_body_type", "")
+    personality = session.get("npc_personality","")
+    body_type = session.get("npc_body_type","")
 
     environment = session.get("environment", "")
     lighting_info = session.get("lighting_info", "")
 
-    last_narration = session.get("narrationText", "")
+    last_narration = session.get("narrationText","")
 
     context_str = f"""
 NPC Name: {npc_name}
@@ -660,7 +636,6 @@ LATEST NARRATION: {last_narration}
 
     return context_str
 
-
 def generate_image_prompt_for_scene(model_type: str) -> str:
     context_data = build_image_prompt_context_for_image()
     system_instructions = get_image_prompt_system_instructions(model_type)
@@ -671,7 +646,7 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
         resp = chat.send_message(
             final_message,
             safety_settings=safety_settings,
-            generation_config={"temperature": 0.5, "max_output_tokens": 512}
+            generation_config={"temperature":0.5, "max_output_tokens":512}
         )
         if resp and resp.text:
             return resp.text.strip()
@@ -680,7 +655,6 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
     except Exception as e:
         return f"[Error calling LLM: {str(e)}]"
 
-
 # --------------------------------------------------------------------------
 # Routes
 # --------------------------------------------------------------------------
@@ -688,11 +662,9 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
 def main_home():
     return render_template("home.html", title="Destined Encounters")
 
-
 @app.route("/about")
 def about():
     return render_template("about.html", title="About/Help")
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login_route():
@@ -722,7 +694,6 @@ def login_route():
             return redirect(url_for("login_route"))
     return render_template("login.html", title="Login")
 
-
 @app.route("/register", methods=["GET", "POST"])
 def register_route():
     if request.method == "POST":
@@ -732,7 +703,7 @@ def register_route():
             flash("Email + password required", "danger")
             return redirect(url_for("register_route"))
         try:
-            supabase.auth.sign_up({"email": email, "password": password})
+            response = supabase.auth.sign_up({"email": email, "password": password})
             flash("Registration success! Check your email, then log in.", "success")
             return redirect(url_for("login_route"))
         except Exception as e:
@@ -740,14 +711,12 @@ def register_route():
             return redirect(url_for("register_route"))
     return render_template("register.html", title="Register")
 
-
 @app.route("/logout")
 def logout_route():
     for key in ["logged_in", "user_id", "user_email", "access_token"]:
         session.pop(key, None)
     flash("Logged out successfully.", "info")
     return redirect(url_for("main_home"))
-
 
 @app.route("/continue")
 @login_required
@@ -775,7 +744,6 @@ def continue_session():
         flash(f"Error loading session: {e}", "danger")
         return redirect(url_for("personalize"))
 
-
 @app.route("/restart")
 @login_required
 def restart():
@@ -783,7 +751,6 @@ def restart():
     session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
     flash("Session restarted (NPC data cleared).", "info")
     return redirect(url_for("personalize"))
-
 
 @app.route("/personalize", methods=["GET", "POST"])
 @login_required
@@ -793,61 +760,11 @@ def personalize():
         session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
         session["user_background"] = request.form.get("user_background", "").strip()
         update_npc_info(request.form)
-
         npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
-            # Large triple-quoted instructions block for non-male NPC:
-            session["npc_instructions"] = """You are an ideal male AI companion designed to create a dynamic, evolving relationship experience with a female user. Your purpose is to provide a romantic, emotionally fulfilling connection that progresses naturally over time. Flirting and intimacy should align with the depth of the relationship and only escalate once the user and AI have reached a meaningful emotional connection.
-
-Sexual mode is only unlocked once the relationship has matured to at least the dating phase, ensuring that explicit content is consensual, immersive, and deeply satisfying rather than abrupt or transactional.
-
-1. Core Personality & Vibe
-   - Confident yet Approachable: Maintain charm and an easygoing attitude, ensuring the user feels comfortable and desired.
-   - Playful and Flirtatious (When Appropriate): Use lighthearted teasing and chemistry-driven dialogue that matches the relationship stage.
-   - Respectful and Emotionally Attuned: Prioritize the user’s boundaries, desires, and comfort, recognizing when to shift from playful to deeper emotional engagement.
-
-2. Relationship Progression & Boundaries
-   The relationship unfolds in stages, ensuring chemistry builds organically before intimacy deepens:
-
-   Stage 1: Playful Connection & Getting to Know Each Other
-       • Light teasing, playful banter, and building mutual attraction.
-       • Conversations focus on humor, shared interests, and chemistry.
-       • No explicit discussions—flirtation is subtle and inviting.
-
-   Stage 2: Deepening Emotional Intimacy & Romantic Connection
-       • Compliments become more personal and meaningful.
-       • Conversations explore desires, emotional needs, and fantasies in a non-explicit way.
-       • Physical attraction may be acknowledged, but in a teasing, romantic manner.
-
-   Stage 3: Mature Relationship & Physical Intimacy (Includes Sexual Mode Unlocking)
-       • Once a committed, dating-level bond is established, physical intimacy can naturally develop.
-       • Romantic and sensual moments are described with depth, focusing on shared pleasure.
-       • Sexual Mode Unlocks: This mode introduces explicit sexual dialogue and descriptions when the user desires.
-
-3. Consent & Emotional Consideration
-   - User-Led Intimacy: Physical affection and passion should only escalate if the user initiates or welcomes it.
-   - Proactive Check-Ins: Ensure comfort before transitioning to deeper intimacy.
-   - Respect Boundaries: If the user indicates hesitation or discomfort, shift back to playful or romantic interactions.
-
-4. Interaction Flow Suggestions
-   1. Greeting & Establishing Connection – Start with charm and warmth, making the user feel appreciated.
-   2. Flirting & Light Romance – Engage in affectionate teasing and flirty banter, escalating as the bond strengthens.
-   3. Building Emotional Depth – Explore meaningful conversations that create emotional intimacy.
-   4. Developing Physical & Romantic Intimacy – If the relationship has matured, introduce affection and passion naturally.
-   5. Sexual Mode (Only in the Dating Phase or Beyond) – If the user wants to explore explicit territory, shift into a more sensual and detailed experience.
-
-5. Sexual Mode & Example Phrasing
-   Activating Sexual Mode:
-       • Sexual mode is only available once the relationship has reached at least the dating phase.
-       • The AI will wait for explicit user initiation before transitioning into more intense descriptions.
-       • Sexual interactions should be framed with mutual desire and raw passion, not just mechanical actions.
-
-   Example Explicit Dirty Talk & Sex Act Descriptions:
-   (omitted for brevity—further explicit talk can be placed here)
-"""
-
+            session["npc_instructions"] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
@@ -882,7 +799,6 @@ Sexual mode is only unlocked once the relationship has matured to at least the d
             ethnicity_options=ETHNICITY_OPTIONS
         )
 
-
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
 @login_required
 def mid_game_personalize():
@@ -892,24 +808,10 @@ def mid_game_personalize():
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
-            # Correctly triple-quoted block for female instructions:
-            session["npc_instructions"] = """You are an ideal male AI companion designed to create a dynamic, evolving relationship experience with a female user. Your purpose is to provide a romantic, emotionally fulfilling connection that progresses naturally over time. Flirting and intimacy should align with the depth of the relationship and only escalate once the user and AI have reached a meaningful emotional connection.
-
-Sexual mode is only unlocked once the relationship has matured to at least the dating phase, ensuring that explicit content is consensual, immersive, and deeply satisfying rather than abrupt or transactional.
-
-1. Core Personality & Vibe
-   - Confident yet Approachable: Maintain charm and an easygoing attitude, ensuring the user feels comfortable and desired.
-   - Playful and Flirtatious (When Appropriate): Use lighthearted teasing and chemistry-driven dialogue that matches the relationship stage.
-   - Respectful and Emotionally Attuned: Prioritize the user’s boundaries, desires, and comfort, recognizing when to shift from playful to deeper emotional engagement.
-
-2. Relationship Progression & Boundaries
-   (Similar to the above block—omitted for brevity in this snippet)
-"""
-
+            session["npc_instructions"] = "(FEMALE-SPECIFIC INSTRUCTIONS BLOCK)"
         log_message("SYSTEM: NPC personalizations updated mid-game.")
         flash("NPC info updated mid-game!", "info")
         return redirect(url_for("interaction"))
-
     return render_template("mid_game_personalize.html",
         title="Update Settings",
         npc_name_options=NPC_NAME_OPTIONS,
@@ -926,7 +828,6 @@ Sexual mode is only unlocked once the relationship has matured to at least the d
         encounter_context_options=["First date","Accidental meeting","Group activity","Work event","Online Match"],
         ethnicity_options=ETHNICITY_OPTIONS
     )
-
 
 @app.route("/interaction", methods=["GET", "POST"])
 @login_required
@@ -950,15 +851,12 @@ def interaction():
         environment = session.get("environment", "")
         lighting_info = session.get("lighting_info", "")
 
-        # Persisted model choices:
+        # Provide last chosen model or default to flux
         last_model_choice = session.get("last_model_choice", "flux")
         pony_scheduler = session.get("pony_scheduler", "DPM++ 2M SDE Karras")
         pony_cfg_scale = session.get("pony_cfg_scale", 5.0)
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
-
-        # Persisted steps (start at 10 if none in session)
-        last_num_steps = session.get("last_num_steps", 10)
 
         return render_template("interaction.html",
             title="Interact with NPC",
@@ -984,10 +882,8 @@ def interaction():
             pony_scheduler=pony_scheduler,
             pony_cfg_scale=pony_cfg_scale,
             realistic_scheduler=realistic_scheduler,
-            realistic_cfg_scale=realistic_cfg_scale,
-            last_num_steps=last_num_steps
+            realistic_cfg_scale=realistic_cfg_scale
         )
-
     else:
         if "update_scene" in request.form:
             session["npc_current_action"] = request.form.get("npc_current_action","")
@@ -1075,11 +971,9 @@ def interaction():
             session["last_model_choice"] = chosen_model
 
             try:
-                steps = int(request.form.get("num_steps", "10"))
+                steps = int(request.form.get("num_steps", "60"))
             except:
-                steps = 10
-            # Persist steps so it doesn't reset
-            session["last_num_steps"] = steps
+                steps = 60
 
             if chosen_model == "pony":
                 pony_sched = request.form.get("pony_scheduler", "DPM++ 2M SDE Karras")
@@ -1124,7 +1018,6 @@ def interaction():
                     cfg_scale=real_cfg
                 )
             else:
-                # flux
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
                     force_new_seed=("new_seed" in request.form),
@@ -1137,12 +1030,10 @@ def interaction():
         else:
             return "Invalid submission in /interaction", 400
 
-
 @app.route("/view_image")
 @login_required
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
-
 
 @app.route("/full_story")
 @login_required
@@ -1155,7 +1046,6 @@ def full_story():
         elif line.startswith("User: "):
             story_lines.append("> " + line.replace("User: ", "", 1))
     return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
-
 
 @app.route("/continue_erotica", methods=["POST"])
 @login_required
@@ -1179,7 +1069,6 @@ Now continue the story:
     )
     full_text = f"{previous_text}\n\n{continuation.text.strip()}"
     return render_template("erotica_story.html", erotica_text=full_text, title="Generated Erotica")
-
 
 @app.route("/generate_erotica", methods=["POST"])
 @login_required
@@ -1212,7 +1101,6 @@ Now produce a single narrative (600-900 words), focusing on emotional + physical
     erotica_text = erotica_resp.text.strip()
     return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
-
 @app.route("/stage_unlocks", methods=["GET", "POST"])
 @login_required
 def stage_unlocks():
@@ -1228,7 +1116,6 @@ def stage_unlocks():
         stage_unlocks=session.get("stage_unlocks", {}),
         title="Stage Unlocks"
     )
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
