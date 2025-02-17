@@ -25,15 +25,6 @@
   <strong>Scene:</strong> {{ npc_narration }}
 </div>
 
-{% if scene_image_url %}
-  <div class="mb-4 text-center">
-    <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
-    {% if scene_image_seed %}
-      <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
-    {% endif %}
-  </div>
-{% endif %}
-
 <!-- USER ACTION FORM -->
 <form method="POST" class="mb-4" onsubmit="showLoading()">
   <!-- Quick Action Buttons -->
@@ -56,6 +47,15 @@
   <input type="text" class="form-control mb-2" name="user_action" placeholder="He quietly asks how she's doing...">
   <button type="submit" name="submit_action" class="btn btn-success">Send Move</button>
 </form>
+
+{% if scene_image_url %}
+  <div class="mb-4 mt-4 text-center">
+    <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
+    {% if scene_image_seed %}
+      <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
+    {% endif %}
+  </div>
+{% endif %}
 
 <hr style="border-top: 1px solid #ff5789;">
 
