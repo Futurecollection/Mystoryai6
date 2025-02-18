@@ -723,6 +723,7 @@ def login_route():
                 return redirect(url_for("login_route"))
             user = response.user
             user_id = user.id
+            session.clear()  # Clear any old session data
             session.update({
                 "logged_in": True,
                 "user_id": user_id,
@@ -730,7 +731,7 @@ def login_route():
                 "access_token": response.session.access_token
             })
             flash("Logged in successfully!", "success")
-            return redirect(url_for("main_home"))
+            return redirect(url_for("personalize"))  # Redirect to personalize page instead
         except Exception as e:
             flash(f"Login failed: {e}", "danger")
             return redirect(url_for("login_route"))
