@@ -98,40 +98,10 @@ GENERATED_IMAGE_PATH = "output.jpg"
 # Summarization / Memory (Optional)
 # --------------------------------------------------------------------------
 def prepare_history():
-    log_list = session.get("interaction_log", [])
-    if "log_summary" not in session:
-        session["log_summary"] = ""
-    
-    if len(log_list) > 10:  # Keep last 10 for interaction display
-        old_chunk = log_list[:-10]  # Everything except last 10
-        new_chunk = log_list[-10:]  # Last 10 entries
-        summary_text = summarize_lines(old_chunk)
-        session["log_summary"] = summary_text
-        session["interaction_log"] = new_chunk
-        session["full_story_log"] = log_list  # Keep complete log for full story view
-    else:
-        session["full_story_log"] = log_list  # Store full log even when short
-
-@retry_with_backoff(retries=3, backoff_in_seconds=1)
-def summarize_lines(lines):
-    text_to_summarize = "\n".join(lines)
-    summary_prompt = f"""
-You are a summarizing assistant.
-Summarize the following chat lines into a cohesive memory (300-500 words):
-
-{text_to_summarize}
-"""
-    try:
-        chat = model.start_chat()
-        resp = chat.send_message(
-            summary_prompt,
-            safety_settings=safety_settings,
-            generation_config={"temperature": 0.7, "max_output_tokens": 1024}
-        )
-        return "[Memory Summary]: " + resp.text.strip()
-    except Exception as e:
-        print("[ERROR] Summarize lines failed:", e)
-        return "[Memory Summary Failed. Original lines:]\n" + text_to_summarize
+    # Simply ensure the interaction_log exists
+    if "interaction_log" not in session:
+        session["interaction_log"] = []
+    session["full_story_log"] = session["interaction_log"]
 
 # --------------------------------------------------------------------------
 # Utility Functions
@@ -276,9 +246,8 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
       Line 2 => NARRATION: (the updated story content)
     """
     prepare_history()
-    memory_summary = session.get("log_summary", "")
-    recent_lines = session.get("interaction_log", [])
-    combined_history = memory_summary + "\n" + "\n".join(recent_lines)
+    conversation_history = session.get("interaction_log", [])
+    combined_history = "\n".join(conversation_history)
 
     if not last_user_action.strip():
         last_user_action = "OOC: Continue the scene"
