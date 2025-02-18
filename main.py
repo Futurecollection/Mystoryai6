@@ -723,7 +723,6 @@ def login_route():
                 return redirect(url_for("login_route"))
             user = response.user
             user_id = user.id
-            session.clear()  # Clear any old session data
             session.update({
                 "logged_in": True,
                 "user_id": user_id,
@@ -731,7 +730,7 @@ def login_route():
                 "access_token": response.session.access_token
             })
             flash("Logged in successfully!", "success")
-            return redirect(url_for("personalize"))  # Redirect to personalize page instead
+            return redirect(url_for("main_home"))
         except Exception as e:
             flash(f"Login failed: {e}", "danger")
             return redirect(url_for("login_route"))
@@ -781,15 +780,6 @@ def continue_session():
         session_data = row.get("data", {})
         for k, v in session_data.items():
             session[k] = v
-        
-        # Ensure logs are properly initialized
-        if "interaction_log" not in session:
-            session["interaction_log"] = []
-        if "full_story_log" not in session:
-            session["full_story_log"] = session.get("interaction_log", []).copy()
-        if "log_summary" not in session:
-            session["log_summary"] = ""
-            
         flash("Saved session loaded from database!", "success")
         return redirect(url_for("interaction"))
     except Exception as e:
