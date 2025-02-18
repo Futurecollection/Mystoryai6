@@ -780,6 +780,15 @@ def continue_session():
         session_data = row.get("data", {})
         for k, v in session_data.items():
             session[k] = v
+        
+        # Ensure logs are properly initialized
+        if "interaction_log" not in session:
+            session["interaction_log"] = []
+        if "full_story_log" not in session:
+            session["full_story_log"] = session.get("interaction_log", []).copy()
+        if "log_summary" not in session:
+            session["log_summary"] = ""
+            
         flash("Saved session loaded from database!", "success")
         return redirect(url_for("interaction"))
     except Exception as e:
