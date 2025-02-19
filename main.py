@@ -647,15 +647,10 @@ LATEST NARRATION: {last_narration}
     return context_str
 
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
-def generate_image_prompt_for_scene(model_type: str, build_on_previous: bool = False) -> str:
+def generate_image_prompt_for_scene(model_type: str) -> str:
     context_data = build_image_prompt_context_for_image()
     system_instructions = get_image_prompt_system_instructions(model_type)
-    
-    previous_prompt = session.get("previous_prompt", "")
-    if build_on_previous and previous_prompt:
-        final_message = f"{system_instructions}\n\nPREVIOUS PROMPT:\n{previous_prompt}\n\nCONTEXT:\n{context_data}\n\nBuild upon and enhance the previous prompt while incorporating the current context."
-    else:
-        final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
+    final_message = f"{system_instructions}\n\nCONTEXT:\n{context_data}"
 
     try:
         chat = model.start_chat()
@@ -1089,21 +1084,13 @@ def interaction():
             log_message("SYSTEM: Stage unlock text updated mid-game.")
             return redirect(url_for("interaction"))
 
-        elif "generate_prompt" in request.form or "build_on_prompt" in request.form:
+        elif "generate_prompt" in request.form:
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
             session["last_model_choice"] = chosen_model
 
-            # Store current prompt as previous before generating new one
-            current_prompt = session.get("scene_image_prompt")
-            if current_prompt:
-                session["previous_prompt"] = current_prompt
-
-            build_on_previous = "build_on_prompt" in request.form
-            llm_prompt_text = generate_image_prompt_for_scene(chosen_model, build_on_previous)
+            llm_prompt_text = generate_image_prompt_for_scene(chosen_model)
             session["scene_image_prompt"] = llm_prompt_text
-            
-            action = "built on previous" if build_on_previous else "generated new"
-            flash(f"Scene prompt {action} with {chosen_model}", "info")
+            flash(f"Scene prompt from LLM => {chosen_model}", "info")
             return redirect(url_for("interaction"))
 
         elif "generate_image" in request.form or "new_seed" in request.form:

@@ -63,16 +63,10 @@
 <h3 style="color: #ff5789;">Scene Image Prompt</h3>
 <form method="POST" class="mb-3" onsubmit="showLoading()">
   <div class="mb-3">
-    <button type="submit" name="generate_prompt" class="btn btn-info me-2">Auto Generate Scene Prompt</button>
-    <button type="submit" name="build_on_prompt" class="btn btn-warning">Build on Previous Prompt</button>
+    <button type="submit" name="generate_prompt" class="btn btn-info">Auto Generate Scene Prompt</button>
   </div>
 
   <textarea name="scene_image_prompt" rows="2" class="form-control" style="background-color: #4a0d0d; color: #f8d0d0;">{{ scene_image_prompt }}</textarea>
-  {% if previous_prompt %}
-    <div class="mt-2" style="color: #f8d0d0;">
-      <small>Previous prompt: {{ previous_prompt }}</small>
-    </div>
-  {% endif %}
 
   <!-- Model Selection -->
   <div class="mt-2">
