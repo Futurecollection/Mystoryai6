@@ -1219,18 +1219,32 @@ def full_story():
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
     custom_prompt = request.form.get("continue_prompt", "").strip()
+    
+    # Get the original narration context
+    logs = session.get("full_story_log", [])
+    story_parts = []
+    for line in logs:
+        if line.startswith("NARRATION => "):
+            story_parts.append(line.replace("NARRATION => ", "", 1))
+        elif line.startswith("User: "):
+            story_parts.append(line.replace("User: ", "", 1))
+    full_narration = "\n".join(story_parts)
+    
     continue_prompt = f"""
-You are continuing an erotic story.
-Pick up exactly where this left off and continue
-the scene for another 600-900 words.
+You are continuing an erotic story based on the following roleplay narration.
+The story should expand on and continue from the previous text, maintaining
+the same tone and intensity while incorporating context from the original narration.
 
-PREVIOUS TEXT:
+ORIGINAL NARRATION:
+{full_narration}
+
+PREVIOUS EROTIC TEXT:
 {previous_text}
 
 CUSTOM INSTRUCTIONS:
 {custom_prompt if custom_prompt else "Focus on natural progression and emotional depth."}
 
-Now continue the story:
+Now continue the story from where it left off:
 """
     chat = model.start_chat()
     continuation = chat.send_message(
