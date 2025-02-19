@@ -1068,14 +1068,6 @@ def interaction():
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
             session["narrationText"] = narration_txt
-            
-            # If there's a current image, save it with the narration
-            if os.path.exists(GENERATED_IMAGE_PATH):
-                import base64
-                with open(GENERATED_IMAGE_PATH, 'rb') as f:
-                    img_data = base64.b64encode(f.read()).decode('utf-8')
-                log_message(f"SCENE_IMAGE => {img_data}")
-            
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
             return redirect(url_for("interaction"))
@@ -1199,12 +1191,6 @@ def interaction():
                 "image_data": img_data
             })
             session["saved_images"] = saved_images
-            
-            # Also add to full story log
-            full_story_log = session.get("full_story_log", [])
-            full_story_log.append(f"SCENE_IMAGE => {img_data}")
-            session["full_story_log"] = full_story_log
-            
             flash("Image saved to gallery!", "success")
             return redirect(url_for("interaction"))
 
