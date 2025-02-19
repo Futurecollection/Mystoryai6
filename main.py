@@ -1220,7 +1220,18 @@ def generate_erotica():
         return redirect(url_for("full_story"))
     
     custom_prompt = request.form.get("erotica_prompt", "").strip()
+    use_previous = request.form.get("use_previous_prompt") == "on"
+    previous_prompt = session.get("last_erotica_prompt", "")
+    
     full_narration = "\n".join(story_parts)
+    
+    if use_previous and previous_prompt:
+        combined_prompt = f"{previous_prompt}\n\nAdditional instructions:\n{custom_prompt}"
+    else:
+        combined_prompt = custom_prompt
+    
+    session["last_erotica_prompt"] = combined_prompt
+    
     erotica_prompt = f"""
 You are an author on an adult erotica forum.
 Rewrite the scenario below into a detailed erotic short story from the user's perspective.
@@ -1229,7 +1240,7 @@ STORY LOG:
 {full_narration}
 
 CUSTOM INSTRUCTIONS:
-{custom_prompt if custom_prompt else "Focus on emotional connection and physical details."}
+{combined_prompt if combined_prompt else "Focus on emotional connection and physical details."}
 
 Now produce a single narrative (600-900 words), incorporating the custom instructions above.
 """
