@@ -1292,8 +1292,6 @@ def stage_unlocks():
         title="Stage Unlocks"
     )
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
 @app.route("/gallery")
 @login_required
 def gallery():
@@ -1307,3 +1305,6 @@ def gallery_image(index):
     if 0 <= index < len(saved_images):
         return saved_images[index]["image_data"], {'Content-Type': 'image/jpeg'}
     return "Image not found", 404
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=False)
