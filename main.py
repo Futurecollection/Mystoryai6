@@ -1282,8 +1282,19 @@ def generate_erotica():
     session["last_erotica_prompt"] = combined_prompt
     
     erotica_prompt = f"""
-You are an author on an adult erotica forum.
+You are an author on r/eroticliterature or r/gonewildstories.
 Rewrite the scenario below into a detailed erotic short story from the user's perspective.
+Create rich, vivid descriptions of both characters based on their actions and personalities.
+For the user's character, imagine and include physical details that fit naturally with
+their actions and dialogue (appearance, body language, sensations, etc).
+
+Key requirements:
+- Write in first-person from user's POV
+- Create detailed physical descriptions of both the user and NPC
+- Include the user's thoughts, feelings, and physical sensations
+- Maintain all original dialogue and key events
+- Use sensual tone with emotional and physical details
+- If user details aren't explicit in the story, create fitting descriptions based on their actions
 
 STORY LOG:
 {full_narration}
