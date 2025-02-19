@@ -50,7 +50,9 @@
 
 {% if scene_image_url %}
   <div class="mb-4 mt-4 text-center">
-    <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
+    {% if session.get('last_image_index') is not none %}
+      <img src="{{ url_for('view_image', index=session.get('last_image_index'), t=range(1000, 9999) | random) }}" alt="Scene Image" style="max-width: 60%;">
+    {% endif %}
     {% if scene_image_seed %}
       <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
     {% endif %}
