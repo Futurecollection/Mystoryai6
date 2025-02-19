@@ -1173,13 +1173,18 @@ def interaction():
 def view_image(index):
     image_path = f"images/scene_{index}.jpg"
     if os.path.exists(image_path):
-        return send_file(image_path, mimetype="image/jpeg")
+        return send_file(image_path, mimetype="image/jpeg", cache_timeout=0)
     return "Image not found", 404
 
 @app.route("/view_image")
 @login_required
 def view_latest_image():
-    return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
+    last_index = session.get('last_image_index')
+    if last_index is not None:
+        image_path = f"images/scene_{last_index}.jpg"
+        if os.path.exists(image_path):
+            return send_file(image_path, mimetype="image/jpeg", cache_timeout=0)
+    return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg", cache_timeout=0)
 
 @app.route("/full_story")
 @login_required
