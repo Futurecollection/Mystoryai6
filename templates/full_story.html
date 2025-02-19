@@ -6,7 +6,11 @@
 <div class="p-3 mb-3" style="background: rgba(255,255,255,0.1); white-space: pre-wrap;">
   {% if lines %}
     {% for text in lines %}
-      {% if text.startswith('> ') %}
+      {% if text.startswith('SCENE_IMAGE => ') %}
+        <div class="text-center mb-4">
+          <img src="data:image/jpeg;base64,{{ text[14:] }}" alt="Scene Image" style="max-width: 60%;">
+        </div>
+      {% elif text.startswith('> ') %}
         <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
       {% else %}
         <div style="margin-bottom: 1.5rem;">{{ text }}</div>
