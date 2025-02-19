@@ -1219,37 +1219,18 @@ def full_story():
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
     custom_prompt = request.form.get("continue_prompt", "").strip()
-    
-    # Get relevant NPC info for context
-    npc_name = session.get("npc_name", "the woman")
-    npc_desc = f"""
-Name: {npc_name}
-Age: {session.get('npc_age', '?')}
-Body: {session.get('npc_body_type', '?')}
-Hair: {session.get('npc_hair_color', '?')} {session.get('npc_hair_style', '?')}
-Wearing: {session.get('npc_clothing', '?')}
-"""
-
     continue_prompt = f"""
-You are a talented erotic romance author. Continue this intimate scene, maintaining all character details
-and picking up exactly where the text left off. Write 600-900 words of continuation.
+You are continuing an erotic story.
+Pick up exactly where this left off and continue
+the scene for another 600-900 words.
 
-CHARACTER INFO:
-{npc_desc}
-
-PREVIOUS SCENE TEXT:
+PREVIOUS TEXT:
 {previous_text}
 
-WRITING GUIDELINES:
-- Stay consistent with the established tone, mood and level of explicitness
-- Focus on both physical and emotional sensations
-- Use natural dialogue that fits the characters
-- Build tension and passion organically
+CUSTOM INSTRUCTIONS:
+{custom_prompt if custom_prompt else "Focus on natural progression and emotional depth."}
 
-ADDITIONAL INSTRUCTIONS:
-{custom_prompt if custom_prompt else "Focus on natural progression and deep emotional/physical connection."}
-
-Now continue the intimate scene from exactly where it left off:
+Now continue the story:
 """
     chat = model.start_chat()
     continuation = chat.send_message(
