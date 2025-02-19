@@ -479,11 +479,13 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         return None
 
     _save_image(result)
-    session["scene_image_url"] = url_for('view_image')
+    image_url = url_for('view_image')
+    session["scene_image_url"] = image_url
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
 
     log_message(f"Scene Image Prompt => {prompt_text}")
+    log_message(f"IMAGE_URL => {image_url}")
     log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
     return result
 
