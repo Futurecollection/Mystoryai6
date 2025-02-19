@@ -120,7 +120,7 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
 
-def _save_image(result):
+def _save_image(result, save_path=GENERATED_IMAGE_PATH):
     if isinstance(result, dict) and "output" in result:
         final_url = result["output"]
         print("[DEBUG] _save_image => Received dict with output:", final_url)
@@ -478,12 +478,14 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         log_message("[SYSTEM] replicate returned invalid or empty result.")
         return None
 
-    _save_image(result)
-    current_index = len(session.get("interaction_log", [])) 
+    current_index = len(session.get("interaction_log", []))
+    os.makedirs("images", exist_ok=True)
+    image_path = f"images/scene_{current_index}.jpg"
+    _save_image(result, image_path)
     image_key = f"scene_image_{current_index}"
-    image_url = url_for('view_image', timestamp=int(time.time()))  # Add timestamp to prevent caching
+    image_url = url_for('view_image', index=current_index, timestamp=int(time.time()))
     session[image_key] = image_url
-    session['last_image_index'] = current_index  # Store the last image index
+    session['last_image_index'] = current_index
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
 
@@ -1166,9 +1168,17 @@ def interaction():
         else:
             return "Invalid submission in /interaction", 400
 
+@app.route("/view_image/<int:index>")
+@login_required
+def view_image(index):
+    image_path = f"images/scene_{index}.jpg"
+    if os.path.exists(image_path):
+        return send_file(image_path, mimetype="image/jpeg")
+    return "Image not found", 404
+
 @app.route("/view_image")
 @login_required
-def view_image():
+def view_latest_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
 @app.route("/full_story")

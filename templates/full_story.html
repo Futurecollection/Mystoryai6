@@ -14,7 +14,7 @@
           {% with img_key = 'scene_image_' ~ (loop.index0 + 1) %}
           {% if session.get(img_key) %}
           <div class="text-center mb-4 mt-2">
-            <img src="{{ session.get(img_key) }}" alt="Scene Image" style="max-width: 60%;">
+            <img src="{{ session.get(img_key) }}{% if session.get(img_key) and '?' not in session.get(img_key) %}?t={{ range(1000, 9999) | random }}{% endif %}" alt="Scene Image" style="max-width: 60%;">
           </div>
           {% endif %}
           {% endwith %}
