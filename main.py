@@ -481,7 +481,9 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     _save_image(result)
     current_index = len(session.get("interaction_log", [])) 
     image_key = f"scene_image_{current_index}"
-    session[image_key] = url_for('view_image')
+    image_url = url_for('view_image', timestamp=int(time.time()))  # Add timestamp to prevent caching
+    session[image_key] = image_url
+    session['last_image_index'] = current_index  # Store the last image index
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
 
