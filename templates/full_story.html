@@ -8,7 +8,7 @@
     {% for text in lines %}
       {% if text.startswith('SCENE_IMAGE => ') %}
         <div class="text-center mb-4">
-          <img src="data:image/jpeg;base64,{{ text[14:] }}" alt="Scene Image" style="max-width: 60%;">
+          <img src="data:image/jpeg;base64,{{ text[13:] }}" alt="Scene Image" style="max-width: 60%;">
         </div>
       {% elif text.startswith('> ') %}
         <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
