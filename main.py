@@ -1199,6 +1199,12 @@ def interaction():
                 "image_data": img_data
             })
             session["saved_images"] = saved_images
+            
+            # Also add to full story log
+            full_story_log = session.get("full_story_log", [])
+            full_story_log.append(f"SCENE_IMAGE => {img_data}")
+            session["full_story_log"] = full_story_log
+            
             flash("Image saved to gallery!", "success")
             return redirect(url_for("interaction"))
 
