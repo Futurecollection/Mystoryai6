@@ -1296,6 +1296,11 @@ Key requirements:
 - Use sensual tone with emotional and physical details
 - If user details aren't explicit in the story, create fitting descriptions based on their actions
 
+Now produce a single detailed erotica story (600-900 words) that brings both characters fully to life.
+Allowed Explicitness:
+* You may describe sexual acts in graphic detail, provided they depict consensual adult activity
+* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact
+
 STORY LOG:
 {full_narration}
 
