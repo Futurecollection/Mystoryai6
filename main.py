@@ -1171,6 +1171,24 @@ def interaction():
             flash(f"Image generated successfully with model => {chosen_model}.", "success")
             return redirect(url_for("interaction"))
 
+        elif "save_to_gallery" in request.form:
+            # Make sure we have a current image and prompt
+            if not os.path.exists(GENERATED_IMAGE_PATH):
+                flash("No image to save!", "warning")
+                return redirect(url_for("interaction"))
+                
+            saved_images = session.get("saved_images", [])
+            saved_images.append({
+                "prompt": session.get("scene_image_prompt", ""),
+                "seed": session.get("scene_image_seed"),
+                "model": session.get("last_model_choice", "flux"),
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "image_data": open(GENERATED_IMAGE_PATH, 'rb').read()
+            })
+            session["saved_images"] = saved_images
+            flash("Image saved to gallery!", "success")
+            return redirect(url_for("interaction"))
+
         else:
             return "Invalid submission in /interaction", 400
 
