@@ -1183,6 +1183,7 @@ def full_story():
 @login_required
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
+    custom_prompt = request.form.get("continue_prompt", "").strip()
     continue_prompt = f"""
 You are continuing an erotic story.
 Pick up exactly where this left off and continue
@@ -1190,6 +1191,9 @@ the scene for another 600-900 words.
 
 PREVIOUS TEXT:
 {previous_text}
+
+CUSTOM INSTRUCTIONS:
+{custom_prompt if custom_prompt else "Focus on natural progression and emotional depth."}
 
 Now continue the story:
 """
@@ -1214,6 +1218,8 @@ def generate_erotica():
             story_parts.append(line.replace("User: ", "", 1))
     if not story_parts:
         return redirect(url_for("full_story"))
+    
+    custom_prompt = request.form.get("erotica_prompt", "").strip()
     full_narration = "\n".join(story_parts)
     erotica_prompt = f"""
 You are an author on an adult erotica forum.
@@ -1222,7 +1228,10 @@ Rewrite the scenario below into a detailed erotic short story from the user's pe
 STORY LOG:
 {full_narration}
 
-Now produce a single narrative (600-900 words), focusing on emotional + physical details.
+CUSTOM INSTRUCTIONS:
+{custom_prompt if custom_prompt else "Focus on emotional connection and physical details."}
+
+Now produce a single narrative (600-900 words), incorporating the custom instructions above.
 """
     chat = model.start_chat()
     erotica_resp = chat.send_message(

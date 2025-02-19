@@ -17,8 +17,13 @@
   {% endif %}
 </div>
 
-<!-- Button => calls POST /generate_erotica -->
-<form method="POST" action="{{ url_for('generate_erotica') }}">
+<!-- Form for erotica generation with prompt -->
+<form method="POST" action="{{ url_for('generate_erotica') }}" class="mb-3">
+  <div class="mb-2">
+    <label class="form-label">Custom Instructions (optional):</label>
+    <textarea name="erotica_prompt" class="form-control" rows="2" 
+              placeholder="E.g.: Make it more romantic, focus on emotional connection, etc."></textarea>
+  </div>
   <button type="submit" class="btn btn-danger">Generate Erotica</button>
 </form>
 

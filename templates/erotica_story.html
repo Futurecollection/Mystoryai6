@@ -7,10 +7,29 @@
   {{ erotica_text }}
 </div>
 
-<form method="POST" action="{{ url_for('continue_erotica') }}" class="mb-3">
-  <input type="hidden" name="previous_text" value="{{ erotica_text }}">
-  <button type="submit" class="btn btn-danger me-2">Continue Story</button>
-</form>
+<div class="row mb-3">
+  <div class="col-md-6">
+    <form method="POST" action="{{ url_for('continue_erotica') }}" class="mb-2">
+      <div class="mb-2">
+        <label class="form-label">Additional Instructions (optional):</label>
+        <textarea name="continue_prompt" class="form-control" rows="2" 
+                  placeholder="E.g.: Make it more intense, focus on dialogue, etc."></textarea>
+      </div>
+      <input type="hidden" name="previous_text" value="{{ erotica_text }}">
+      <button type="submit" class="btn btn-danger me-2">Continue Story</button>
+    </form>
+  </div>
+  <div class="col-md-6">
+    <form method="POST" action="{{ url_for('generate_erotica') }}" class="mb-2">
+      <div class="mb-2">
+        <label class="form-label">Regenerate with Instructions:</label>
+        <textarea name="erotica_prompt" class="form-control" rows="2" 
+                  placeholder="E.g.: Make it more romantic, focus on emotions, etc."></textarea>
+      </div>
+      <button type="submit" class="btn btn-warning">Regenerate Story</button>
+    </form>
+  </div>
+</div>
 
 <a href="{{ url_for('full_story') }}" class="btn btn-secondary me-2">
   Back to Full Story
