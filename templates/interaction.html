@@ -55,6 +55,9 @@
     {% if scene_image_seed %}
       <p class="mt-2" style="color: #f8d0d0;">Seed: {{ scene_image_seed }}</p>
     {% endif %}
+    <form method="POST" class="mt-2">
+      <button type="submit" name="save_to_gallery" class="btn btn-success">Save to Gallery</button>
+    </form>
   </div>
 {% endif %}
 
@@ -138,11 +141,7 @@
   </div>
 </form>
 
-{% if scene_image_url %}
-<form method="POST" class="mt-2 mb-2">
-    <button type="submit" name="save_to_gallery" class="btn btn-success">Save to Gallery</button>
-</form>
-{% endif %}
+
 
 
 
