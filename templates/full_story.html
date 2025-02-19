@@ -9,16 +9,7 @@
       {% if text.startswith('> ') %}
         <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
       {% else %}
-        <div style="margin-bottom: 1.5rem;">
-          {{ text }}
-          {% with img_key = 'scene_image_' ~ (loop.index0 + 1) %}
-          {% if session.get(img_key) %}
-          <div class="text-center mb-4 mt-2">
-            <img src="{{ url_for('view_image', index=loop.index0 + 1, t=range(1000, 9999) | random) }}" alt="Scene Image" style="max-width: 60%;">
-          </div>
-          {% endif %}
-          {% endwith %}
-        </div>
+        <div style="margin-bottom: 1.5rem;">{{ text }}</div>
       {% endif %}
     {% endfor %}
   {% else %}
