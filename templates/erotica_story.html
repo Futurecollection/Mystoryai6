@@ -21,6 +21,12 @@
   </div>
   <div class="col-md-6">
     <form method="POST" action="{{ url_for('generate_erotica') }}" class="mb-2">
+      {% if session.get('last_erotica_prompt') %}
+      <div class="mb-2 p-2" style="background-color: #5a2e2e; border-radius: 5px;">
+        <label class="form-label">Previous Prompt:</label>
+        <div style="color: #f8d0d0;">{{ session.get('last_erotica_prompt') }}</div>
+      </div>
+      {% endif %}
       <div class="mb-2">
         <label class="form-label">Regenerate with Instructions:</label>
         <textarea name="erotica_prompt" class="form-control" rows="2" 
