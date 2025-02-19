@@ -11,7 +11,7 @@
         <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
       {% elif text.startswith('IMAGE_URL => ') %}
         <div class="text-center mb-4">
-          <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
+          <img src="{{ text[12:] }}" alt="Scene Image" style="max-width: 60%;">
         </div>
       {% else %}
         <div style="margin-bottom: 1.5rem;">{{ text }}</div>
