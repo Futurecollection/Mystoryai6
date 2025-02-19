@@ -1,0 +1,30 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 style="color: #ff5789;">Image Gallery</h1>
+    
+    {% if images %}
+        <div class="row">
+        {% for image in images %}
+            <div class="col-md-4 mb-4">
+                <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+                    <img src="{{ url_for('gallery_image', index=loop.index0) }}" class="card-img-top" alt="Generated Image">
+                    <div class="card-body" style="color: #f8d0d0;">
+                        <p><strong>Prompt:</strong> {{ image.prompt }}</p>
+                        <p><strong>Seed:</strong> {{ image.seed }}</p>
+                        <p><strong>Model:</strong> {{ image.model }}</p>
+                        <p><small>Generated: {{ image.timestamp }}</small></p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #f8d0d0;">No saved images yet.</p>
+    {% endif %}
+    
+    <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Back to Story</a>
+</div>
+{% endblock %}

@@ -433,7 +433,8 @@ def generate_realistic_vision_image_safely(
 # --------------------------------------------------------------------------
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None,
-                                        steps: int = None, cfg_scale: float = None):
+                                        steps: int = None, cfg_scale: float = None,
+                                        save_to_gallery: bool = False):
     """
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
@@ -482,6 +483,17 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     session["scene_image_url"] = url_for('view_image')
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
+
+    if save_to_gallery:
+        saved_images = session.get("saved_images", [])
+        saved_images.append({
+            "prompt": prompt_text,
+            "seed": seed_used,
+            "model": model_type,
+            "timestamp": datetime.now().isoformat(),
+            "image_data": open(GENERATED_IMAGE_PATH, 'rb').read()
+        })
+        session["saved_images"] = saved_images
 
     log_message(f"Scene Image Prompt => {prompt_text}")
     log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
@@ -1282,3 +1294,16 @@ def stage_unlocks():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
+@app.route("/gallery")
+@login_required
+def gallery():
+    saved_images = session.get("saved_images", [])
+    return render_template("gallery.html", images=saved_images)
+
+@app.route("/gallery_image/<int:index>")
+@login_required
+def gallery_image(index):
+    saved_images = session.get("saved_images", [])
+    if 0 <= index < len(saved_images):
+        return saved_images[index]["image_data"], {'Content-Type': 'image/jpeg'}
+    return "Image not found", 404
