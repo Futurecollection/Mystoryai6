@@ -1279,7 +1279,8 @@ def generate_erotica():
     use_previous = request.form.get("use_previous_prompt") == "on"
     previous_prompt = session.get("last_erotica_prompt", "")
     
-    full_narration = "\n".join(story_parts)
+    # Join all parts in chronological order to maintain story flow
+    full_narration = "\n".join(narration_only)
     
     if use_previous and previous_prompt:
         combined_prompt = f"{previous_prompt}\n\nAdditional instructions:\n{custom_prompt}"
