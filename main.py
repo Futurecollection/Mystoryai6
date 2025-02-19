@@ -1178,12 +1178,17 @@ def interaction():
                 return redirect(url_for("interaction"))
                 
             saved_images = session.get("saved_images", [])
+            # Convert binary image data to base64 for JSON serialization
+            import base64
+            with open(GENERATED_IMAGE_PATH, 'rb') as f:
+                img_data = base64.b64encode(f.read()).decode('utf-8')
+            
             saved_images.append({
                 "prompt": session.get("scene_image_prompt", ""),
                 "seed": session.get("scene_image_seed"),
                 "model": session.get("last_model_choice", "flux"),
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "image_data": open(GENERATED_IMAGE_PATH, 'rb').read()
+                "image_data": img_data
             })
             session["saved_images"] = saved_images
             flash("Image saved to gallery!", "success")
@@ -1320,8 +1325,10 @@ def gallery():
 @login_required
 def gallery_image(index):
     saved_images = session.get("saved_images", [])
+    import base64
     if 0 <= index < len(saved_images):
-        return saved_images[index]["image_data"], {'Content-Type': 'image/jpeg'}
+        img_data = base64.b64decode(saved_images[index]["image_data"])
+        return img_data, {'Content-Type': 'image/jpeg'}
     return "Image not found", 404
 
 if __name__ == "__main__":
