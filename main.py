@@ -1331,5 +1331,15 @@ def gallery_image(index):
         return img_data, {'Content-Type': 'image/jpeg'}
     return "Image not found", 404
 
+@app.route("/delete_gallery_image/<int:index>")
+@login_required
+def delete_gallery_image(index):
+    saved_images = session.get("saved_images", [])
+    if 0 <= index < len(saved_images):
+        saved_images.pop(index)
+        session["saved_images"] = saved_images
+        flash("Image deleted successfully!", "success")
+    return redirect(url_for("gallery"))
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
