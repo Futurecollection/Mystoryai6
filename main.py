@@ -1258,14 +1258,20 @@ Now continue the story from where it left off:
 @app.route("/generate_erotica", methods=["POST"])
 @login_required
 def generate_erotica():
-    logs = session.get("full_story_log", [])
+    interaction_log = session.get("interaction_log", [])
     story_parts = []
-    for line in logs:
+    narration_only = []
+    
+    # Get all narration from the beginning
+    for line in interaction_log:
         if line.startswith("NARRATION => "):
-            story_parts.append(line.replace("NARRATION => ", "", 1))
+            narration = line.replace("NARRATION => ", "", 1)
+            story_parts.append(narration)
+            narration_only.append(narration)
         elif line.startswith("User: "):
             story_parts.append(line.replace("User: ", "", 1))
-    if not story_parts:
+            
+    if not narration_only:
         return redirect(url_for("full_story"))
     
     custom_prompt = request.form.get("erotica_prompt", "").strip()
