@@ -1258,12 +1258,13 @@ Now continue the story from where it left off:
 @app.route("/generate_erotica", methods=["POST"])
 @login_required
 def generate_erotica():
-    interaction_log = session.get("interaction_log", [])
+    # Get the full story log instead of interaction log
+    logs = session.get("full_story_log", [])
     story_parts = []
     narration_only = []
     
     # Get all narration from the beginning
-    for line in interaction_log:
+    for line in logs:
         if line.startswith("NARRATION => "):
             narration = line.replace("NARRATION => ", "", 1)
             story_parts.append(narration)
