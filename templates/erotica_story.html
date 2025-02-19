@@ -5,6 +5,11 @@
 
 <div class="p-3 mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789; color: #f8d0d0; white-space: pre-wrap;">
   {{ erotica_text }}
+  {% if session.get('scene_image_url') %}
+  <div class="text-center mt-4">
+    <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
+  </div>
+  {% endif %}
 </div>
 
 <div class="row mb-3">

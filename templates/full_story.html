@@ -10,6 +10,11 @@
         <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
       {% else %}
         <div style="margin-bottom: 1.5rem;">{{ text }}</div>
+        {% if session.get('scene_image_url') and loop.index == lines|length %}
+        <div class="text-center mb-4">
+          <img src="{{ url_for('view_image') }}" alt="Scene Image" style="max-width: 60%;">
+        </div>
+        {% endif %}
       {% endif %}
     {% endfor %}
   {% else %}
