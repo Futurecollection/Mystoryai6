@@ -1298,7 +1298,7 @@ For the user's character, imagine and include physical details that fit naturall
 their actions and dialogue (appearance, body language, sensations, etc).
 
 Key requirements:
-- Write in first-person from user's POV
+- Write in first-person from USERS POV
 - Create detailed physical descriptions of both the user and NPC 
 - Include the user's thoughts, feelings, and physical sensations
 - Maintain all original dialogue and key events
