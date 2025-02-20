@@ -1,0 +1,56 @@
+@app.route("/generate_erotica", methods=["POST"])
+def generate_erotica():
+    # Gets interaction log and extracts story parts
+    logs = session.get("interaction_log", [])
+    story_parts = []
+    for line in logs:
+        if line.startswith("NARRATION => "):
+            text = line.replace("NARRATION => ", "", 1)
+            story_parts.append(text)
+        elif line.startswith("User: "):
+            text = line.replace("User: ", "", 1)
+            story_parts.append(text)
+
+    full_narration = "\n".join(story_parts)
+
+    # Prompt engineering for erotica generation
+    erotica_prompt = f"""
+    You are an author on r/eroticliterature.
+    Rewrite the scenario below into a detailed erotic short story from user's POV.
+    Create rich descriptions of both characters based on their actions.
+    Include user's thoughts, feelings, and physical sensations.
+    [Full prompt details...]
+    """
+
+    # Generate erotica using Google's Gemini model
+    chat = model.start_chat()
+    erotica_resp = chat.send_message(
+        erotica_prompt,
+        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
+        safety_settings=safety_settings
+    )
+
+    # Render template with generated text
+    return render_template("erotica_story.html", erotica_text=erotica_resp.text.strip())
+
+@app.route("/continue_erotica", methods=["POST"]) 
+def continue_erotica():
+    # Gets previous text and generates continuation
+    previous_text = request.form.get("previous_text", "").strip()
+    
+    continue_prompt = f"""
+    Continue an erotic story. Pick up where this left off:
+    {previous_text}
+    [Prompt details...]
+    """
+
+    chat = model.start_chat()
+    continuation = chat.send_message(
+        continue_prompt,
+        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
+        safety_settings=safety_settings
+    )
+
+    # Combines previous + new text
+    full_text = f"{previous_text}\n\n{continuation.text.strip()}"
+    return render_template("erotica_story.html", erotica_text=full_text)
