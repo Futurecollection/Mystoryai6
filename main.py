@@ -595,20 +595,23 @@ NPC_RELATIONSHIP_GOAL_OPTIONS = [
 # --------------------------------------------------------------------------
 FLUX_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
-Include the NPC's personal details (age, hair, clothing, etc.) and descriptions to convey the scene's action or setting. 1–3 lines describing it. 
+Include the NPC's personal details (age, hair, clothing, ethnicity etc.) and descriptions to convey the scene's action or setting. 1–3 lines describing it. 
 Use words like "photo" or "photograph" for realism, and avoid painting/anime references.
+Respond with only the photorealistic scene description for the Flux model. 
+Do not include any prefixes, explanations or additional text.
 """
 
 PONY_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a short prompt for Pony SDXL, referencing the NPC's personal data 
+You are an AI assistant specializing in producing a short prompt for Pony SDXL, Start with "a photo of" and then incoporate the NPC's personal data. Include the NPC's personal details (age, hair, clothing,ethnicity etc.) and descriptions. 
 and the last story narration. The code automatically adds "score_9, score_8_up, score_7_up, realistic," 
 so do NOT include them. 1–3 lines is fine. Avoid painting/anime references.
+
 """
 
 REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant creating a prompt for Realistic Vision (SD1.5).
-Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data plus relevant story narration details. 
-Produce 1–3 lines. No negative prompt needed. Avoid painting/anime references.
+Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data like the NPC's personal details (age, hair, clothing, ethnicity, etc.) and descriptions plus relevant story narration details. 
+ 
 """
 
 def get_image_prompt_system_instructions(model_type: str) -> str:
