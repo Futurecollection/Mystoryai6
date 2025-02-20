@@ -1214,116 +1214,75 @@ def full_story():
             story_lines.append("> " + line.replace("User: ", "", 1))
     return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
 
+def generate_erotica_text(narration: str, custom_prompt: str = "", previous_text: str = "") -> str:
+    """Generate or continue erotic story based on narration"""
+    base_prompt = """
+You are an author on r/eroticliterature or r/gonewildstories writing a detailed erotic story.
+Tell the story chronologically with rich, vivid descriptions of both characters.
+Include physical details, emotions, and sensations that fit naturally with the actions and dialogue.
+
+Key requirements:
+- Write in first-person from USER'S POV
+- Create detailed physical descriptions of both characters
+- Include thoughts, feelings, and physical sensations
+- Maintain all original dialogue and key events
+- Use sensual tone with emotional and physical details
+
+Allowed Explicitness:
+* You may describe sexual acts in graphic detail (consensual adult activity only)
+* You may include language depicting nudity, arousal, orgasm, and explicit contact
+"""
+    
+    if previous_text:
+        prompt = f"{base_prompt}\n\nPREVIOUS TEXT:\n{previous_text}\n\nCONTINUE THE STORY WITH:\n{narration}"
+    else:
+        prompt = f"{base_prompt}\n\nSTORY TO ADAPT:\n{narration}"
+        
+    if custom_prompt:
+        prompt += f"\n\nCUSTOM INSTRUCTIONS:\n{custom_prompt}"
+        
+    chat = model.start_chat()
+    response = chat.send_message(
+        prompt,
+        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
+        safety_settings=safety_settings
+    )
+    return response.text.strip()
+
+@app.route("/generate_erotica", methods=["POST"])
+@login_required
+def generate_erotica():
+    logs = session.get("full_story_log", [])
+    narration = "\n".join(
+        line.replace("NARRATION => ", "").replace("User: ", "> ")
+        for line in logs 
+        if line.startswith(("NARRATION => ", "User: "))
+    )
+    
+    if not narration:
+        return redirect(url_for("full_story"))
+        
+    custom_prompt = request.form.get("erotica_prompt", "").strip()
+    erotica_text = generate_erotica_text(narration, custom_prompt)
+    return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
+
 @app.route("/continue_erotica", methods=["POST"])
 @login_required
 def continue_erotica():
     previous_text = request.form.get("previous_text", "").strip()
     custom_prompt = request.form.get("continue_prompt", "").strip()
     
-    # Get the original narration context
     logs = session.get("full_story_log", [])
-    story_parts = []
-    for line in logs:
-        if line.startswith("NARRATION => "):
-            story_parts.append(line.replace("NARRATION => ", "", 1))
-        elif line.startswith("User: "):
-            story_parts.append(line.replace("User: ", "", 1))
-    full_narration = "\n".join(story_parts)
-    
-    continue_prompt = f"""
-You are continuing an erotic story based on the following roleplay narration.
-The story should expand on and continue from the previous text, maintaining
-the same tone and intensity while incorporating context from the original narration.
-
-ORIGINAL NARRATION:
-{full_narration}
-
-PREVIOUS EROTIC TEXT:
-{previous_text}
-
-CUSTOM INSTRUCTIONS:
-{custom_prompt if custom_prompt else "Focus on natural progression and emotional depth."}
-
-Now continue the story from where it left off:
-"""
-    chat = model.start_chat()
-    continuation = chat.send_message(
-        continue_prompt,
-        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
-        safety_settings=safety_settings
+    latest_narration = next(
+        (line.replace("NARRATION => ", "") 
+         for line in reversed(logs) 
+         if line.startswith("NARRATION => ")),
+        ""
     )
-    full_text = f"{previous_text}\n\n{continuation.text.strip()}"
+    
+    continuation = generate_erotica_text(latest_narration, custom_prompt, previous_text)
+    full_text = f"{previous_text}\n\n{continuation}"
     return render_template("erotica_story.html", erotica_text=full_text, title="Generated Erotica")
-
-@app.route("/generate_erotica", methods=["POST"])
-@login_required
-def generate_erotica():
-    # Get the full story log instead of interaction log
-    logs = session.get("full_story_log", [])
-    story_parts = []
-    narration_only = []
-    
-    # Get all narration from the beginning
-    for line in logs:
-        if line.startswith("NARRATION => "):
-            narration = line.replace("NARRATION => ", "", 1)
-            story_parts.append(narration)
-            narration_only.append(narration)
-        elif line.startswith("User: "):
-            story_parts.append(line.replace("User: ", "", 1))
-            
-    if not narration_only:
-        return redirect(url_for("full_story"))
-    
-    custom_prompt = request.form.get("erotica_prompt", "").strip()
-    use_previous = request.form.get("use_previous_prompt") == "on"
-    previous_prompt = session.get("last_erotica_prompt", "")
-    
-    # Join all parts in chronological order to maintain story flow
-    full_narration = "\n".join(narration_only)
-    
-    if use_previous and previous_prompt:
-        combined_prompt = f"{previous_prompt}\n\nAdditional instructions:\n{custom_prompt}"
-    else:
-        combined_prompt = custom_prompt
-    
-    session["last_erotica_prompt"] = combined_prompt
-    
-    erotica_prompt = f"""
-You are an author on r/eroticliterature or r/gonewildstories.
-Rewrite the scenario below into a detailed erotic short story from the user's perspective, 
-telling the story chronologically from the very beginning through each event and interaction.
-Create rich, vivid descriptions of both characters based on their actions and personalities.
-For the user's character, imagine and include physical details that fit naturally with
-their actions and dialogue (appearance, body language, sensations, etc).
-
-Key requirements:
-- Write in first-person from USERS POV
-- Create detailed physical descriptions of both the user and NPC 
-- Include the user's thoughts, feelings, and physical sensations
-- Maintain all original dialogue and key events
-- Use sensual tone with emotional and physical details
-- If user details aren't explicit in the story, create fitting descriptions based on their actions
-
-STORY LOG:
-{full_narration}
-
-CUSTOM INSTRUCTIONS:
-{combined_prompt}
-
-Now produce a single detailed erotica story that brings both characters fully to life.
-Allowed Explicitness:
-* You may describe sexual acts in graphic detail, provided they depict consensual adult activity
-* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact
-"""
-    chat = model.start_chat()
-    erotica_resp = chat.send_message(
-        erotica_prompt,
-        generation_config={"temperature": 0.8, "max_output_tokens": 1500},
-        safety_settings=safety_settings
-    )
-    erotica_text = erotica_resp.text.strip()
-    return render_template("erotica_story.html", erotica_text=erotica_text, title="Generated Erotica")
 
 @app.route("/stage_unlocks", methods=["GET", "POST"])
 @login_required
