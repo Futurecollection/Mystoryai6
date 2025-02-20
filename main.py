@@ -841,9 +841,24 @@ def continue_session():
 @app.route("/restart")
 @login_required
 def restart():
+    # Store login data
+    user_id = session.get("user_id")
+    user_email = session.get("user_email")
+    access_token = session.get("access_token")
+    logged_in = session.get("logged_in")
+    
+    # Clear session
     session.clear()
+    
+    # Restore login data
+    session["user_id"] = user_id
+    session["user_email"] = user_email
+    session["access_token"] = access_token
+    session["logged_in"] = logged_in
+    
+    # Reset story defaults
     session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
-    flash("Session restarted (NPC data cleared).", "info")
+    flash("Story restarted! You can create new characters.", "info")
     return redirect(url_for("personalize"))
 
 @app.route("/personalize", methods=["GET", "POST"])
