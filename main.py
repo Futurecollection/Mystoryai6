@@ -672,7 +672,7 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
         resp = chat.send_message(
             final_message,
             safety_settings=safety_settings,
-            generation_config={"temperature":0.5, "max_output_tokens":512}
+            generation_config={"temperature":0.3, "max_output_tokens":512}
         )
         if resp and resp.text:
             return resp.text.strip()
