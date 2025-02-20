@@ -1291,7 +1291,8 @@ def generate_erotica():
     
     erotica_prompt = f"""
 You are an author on r/eroticliterature or r/gonewildstories.
-Rewrite the scenario below into a detailed erotic short story from the user's perspective.
+Rewrite the scenario below into a detailed erotic short story from the user's perspective, 
+telling the story chronologically from the very beginning through each event and interaction.
 Create rich, vivid descriptions of both characters based on their actions and personalities.
 For the user's character, imagine and include physical details that fit naturally with
 their actions and dialogue (appearance, body language, sensations, etc).
