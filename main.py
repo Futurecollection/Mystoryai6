@@ -1304,7 +1304,7 @@ Key requirements:
 - Use sensual tone with emotional and physical details
 - If user details aren't explicit in the story, create fitting descriptions based on their actions
 
-Now produce a single detailed erotica story (600-900 words) that brings both characters fully to life.
+Now produce a single detailed erotica story that brings both characters fully to life.
 Allowed Explicitness:
 * You may describe sexual acts in graphic detail, provided they depict consensual adult activity
 * You may include language depicting nudity, arousal, orgasm, and explicit bodily contact
@@ -1315,7 +1315,10 @@ STORY LOG:
 CUSTOM INSTRUCTIONS:
 {combined_prompt if combined_prompt else "Focus on emotional connection and physical details."}
 
-Now produce a single narrative (600-900 words), incorporating the custom instructions above.
+Now produce a single detailed erotica story that brings both characters fully to life.
+Allowed Explicitness:
+* You may describe sexual acts in graphic detail, provided they depict consensual adult activity
+* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact. 
 """
     chat = model.start_chat()
     erotica_resp = chat.send_message(
