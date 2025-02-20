@@ -74,15 +74,7 @@
 
   <!-- Model Selection -->
   <div class="mt-2">
-    <label class="form-label" style="color: #f8d0d0;">Choose Model:</label>
-    <select name="model_type" id="model_type" class="form-control mb-2" style="background-color: #4a0d0d; color: #f8d0d0;">
-      <option value="flux" 
-        {% if last_model_choice == 'flux' %}selected{% endif %}>Flux-Schnell</option>
-      <option value="pony"
-        {% if last_model_choice == 'pony' %}selected{% endif %}>Pony-SDXL</option>
-      <option value="realistic"
-        {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision v5.1</option>
-    </select>
+    <input type="hidden" name="model_type" value="pony">
   </div>
 
   <!-- Pony Sampler + CFG -->
