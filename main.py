@@ -1301,12 +1301,10 @@ def generate_erotica():
         flash("No narration to rewrite.", "danger")
         return redirect(url_for("full_story"))
 
-    # If we haven't chunked yet, do it now
-    if "erotica_chunks" not in session:
-        # chunk_size can be adjusted to avoid token limit
-        session["erotica_chunks"] = chunk_text(full_narration, chunk_size=3000)
-        session["current_chunk_index"] = 0
-        session["erotica_text_so_far"] = ""
+    # Reset chunks and text when regenerating
+    session["erotica_chunks"] = chunk_text(full_narration, chunk_size=3000)
+    session["current_chunk_index"] = 0
+    session["erotica_text_so_far"] = ""
 
     # If we're out of chunks, just show existing
     i = session["current_chunk_index"]
