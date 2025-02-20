@@ -1298,27 +1298,22 @@ their actions and dialogue (appearance, body language, sensations, etc).
 
 Key requirements:
 - Write in first-person from user's POV
-- Create detailed physical descriptions of both the user and NPC
+- Create detailed physical descriptions of both the user and NPC 
 - Include the user's thoughts, feelings, and physical sensations
 - Maintain all original dialogue and key events
 - Use sensual tone with emotional and physical details
 - If user details aren't explicit in the story, create fitting descriptions based on their actions
 
-Now produce a single detailed erotica story that brings both characters fully to life.
-Allowed Explicitness:
-* You may describe sexual acts in graphic detail, provided they depict consensual adult activity
-* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact
-
 STORY LOG:
 {full_narration}
 
 CUSTOM INSTRUCTIONS:
-{combined_prompt if combined_prompt else "Focus on emotional connection and physical details."}
+{combined_prompt}
 
 Now produce a single detailed erotica story that brings both characters fully to life.
 Allowed Explicitness:
 * You may describe sexual acts in graphic detail, provided they depict consensual adult activity
-* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact. 
+* You may include language depicting nudity, arousal, orgasm, and explicit bodily contact
 """
     chat = model.start_chat()
     erotica_resp = chat.send_message(
