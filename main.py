@@ -1199,12 +1199,15 @@ def interaction():
 
         elif "generate_image" in request.form or "new_seed" in request.form:
             user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
+            # Store original prompt for comparison
+            original_prompt = session.get("scene_image_prompt", "")
+            
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
                 
-            # Check for underage content
-            if validate_age_content(user_supplied_prompt):
+            # Check for underage content in both original and possibly edited prompt
+            if validate_age_content(user_supplied_prompt) or (original_prompt and validate_age_content(original_prompt)):
                 flash("Image generation blocked - detected potential underage content.", "danger")
                 return redirect(url_for("interaction"))
 
