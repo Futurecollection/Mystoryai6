@@ -1237,13 +1237,13 @@ def interaction():
             # Comprehensive age validation before proceeding
             is_blocked, reason = validate_age_content(user_supplied_prompt)
             if is_blocked:
-                flash(f"🚫 IMAGE BLOCKED: {reason}", "danger")
+                session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
                 return redirect(url_for("interaction"))
 
             if original_prompt:
                 is_blocked, reason = validate_age_content(original_prompt)
                 if is_blocked:
-                    flash(f"🚫 IMAGE BLOCKED: {reason}", "danger")
+                    session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
                     return redirect(url_for("interaction"))
 
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
