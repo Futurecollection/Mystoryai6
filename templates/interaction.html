@@ -67,7 +67,7 @@
 <div class="mb-2" style="color: #ff5789;">
   Images Generated: {{ session.get('image_gen_count', 0) }}/5 
   {% if session.get('image_gen_count', 0) >= 5 %}
-    <span class="text-warning">(Limit reached - restart story for more)</span>
+    <span class="text-warning">(Image generation limit reached)</span>
   {% endif %}
 </div>
 
