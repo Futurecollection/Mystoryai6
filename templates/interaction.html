@@ -63,6 +63,14 @@
 
 <hr style="border-top: 1px solid #ff5789;">
 
+<!-- Image Generation Counter -->
+<div class="mb-2" style="color: #ff5789;">
+  Images Generated: {{ session.get('image_gen_count', 0) }}/5 
+  {% if session.get('image_gen_count', 0) >= 5 %}
+    <span class="text-warning">(Limit reached - restart story for more)</span>
+  {% endif %}
+</div>
+
 <!-- SCENE IMAGE PROMPT FORM -->
 <h3 style="color: #ff5789;">Scene Image Prompt</h3>
 <form method="POST" class="mb-3" onsubmit="showLoading()">
