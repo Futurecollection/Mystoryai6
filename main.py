@@ -467,7 +467,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     # Double check for underage content right before generation
     if validate_age_content(prompt_text):
         log_message("[SYSTEM] Blocked image generation due to potential underage content")
-        flash("Image generation blocked - detected potential underage content.", "danger")
+        flash("🚫 IMAGE BLOCKED: Detected potential underage content. All characters must be 20+ years old.", "danger")
         return None
     """
     model_type: flux | pony | realistic
@@ -1233,11 +1233,11 @@ def interaction():
 
             # Comprehensive age validation before proceeding
             if validate_age_content(user_supplied_prompt):
-                flash("Image generation blocked - detected potential underage content in prompt.", "danger")
+                flash("🚫 IMAGE BLOCKED: Detected potential underage content in your prompt. All characters must be 20+ years old.", "danger")
                 return redirect(url_for("interaction"))
 
             if original_prompt and validate_age_content(original_prompt):
-                flash("Image generation blocked - detected potential underage content in original prompt.", "danger")
+                flash("🚫 IMAGE BLOCKED: Detected potential underage content in original prompt. All characters must be 20+ years old.", "danger")
                 return redirect(url_for("interaction"))
 
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
