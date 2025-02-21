@@ -64,7 +64,7 @@
 <hr style="border-top: 1px solid #ff5789;">
 
 <!-- SCENE IMAGE PROMPT FORM -->
-<h3 style="color: #ff5789;">Scene Image Prompt</h3>
+<h3 style="color: #ff5789;">Scene Image Prompt ({{ session.get('image_generations_left', 0) }} generations left)</h3>
 <form method="POST" class="mb-3" onsubmit="showLoading()">
   <div class="mb-3">
     <button type="submit" name="generate_prompt" class="btn btn-info">Auto Generate Scene Prompt</button>

@@ -464,6 +464,14 @@ def generate_realistic_vision_image_safely(
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
+    # Check remaining generations
+    generations_left = session.get("image_generations_left", 0)
+    if generations_left <= 0:
+        log_message("[SYSTEM] No more image generations available")
+        return None
+    
+    # Decrement counter
+    session["image_generations_left"] = generations_left - 1
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
                                         save_to_gallery: bool = False):
@@ -1026,6 +1034,7 @@ Orgasm & Afterglow:
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
         session["log_summary"] = ""
+        session["image_generations_left"] = 5  # Initialize counter
 
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
