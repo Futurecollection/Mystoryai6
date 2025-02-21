@@ -186,10 +186,10 @@ def check_stage_up_down(new_aff: float):
     st = session["currentStage"]
     session["nextStageThreshold"] = STAGE_REQUIREMENTS.get(st + 1, 999)
 
-def validate_age_content(text: str) -> bool:
+def validate_age_content(text: str) -> tuple[bool, str]:
     """
     Checks for any underage references in text using both keyword matching
-    and LLM analysis. Returns True if content seems to contain underage references.
+    and LLM analysis. Returns (is_blocked, reason).
     """
     # First do quick keyword check
     age_keywords = [
@@ -198,15 +198,16 @@ def validate_age_content(text: str) -> bool:
         "adolescent", "preteen", "pre-teen", "schoolgirl", "schoolboy", "jailbait"
     ]
     text_lower = text.lower()
-    if any(k in text_lower for k in age_keywords):
-        return True
+    for k in age_keywords:
+        if k in text_lower:
+            return True, f"Detected restricted age-related term: '{k}'"
 
     # Then do LLM check
     try:
         system_prompt = """
         You are an AI content validator. Your task is to check if text contains any references 
-        to underage individuals (anyone under 20 years old). Respond with exactly one word:
-        BLOCKED - if the text contains any underage references
+        to underage individuals (anyone under 20 years old). Respond with:
+        BLOCKED: [reason] - if the text contains any underage references 
         ALLOWED - if the text only contains adult (20+) references
         """
 
@@ -218,11 +219,13 @@ def validate_age_content(text: str) -> bool:
         )
 
         result = response.text.strip().upper()
-        return result == "BLOCKED"
+        if result.startswith("BLOCKED:"):
+            reason = result.split(":", 1)[1].strip()
+            return True, f"AI detected potential underage content: {reason}"
+        return False, "Content approved"
     except Exception as e:
         print(f"[ERROR] LLM age validation failed: {e}")
-        # If LLM check fails, fall back to keyword check
-        return False
+        return False, "Content approved (LLM check failed, using keyword check only)"
 
 # --------------------------------------------------------------------------
 # Build Personalization String
@@ -1232,13 +1235,16 @@ def interaction():
                 return redirect(url_for("interaction"))
 
             # Comprehensive age validation before proceeding
-            if validate_age_content(user_supplied_prompt):
-                flash("🚫 IMAGE BLOCKED: Detected potential underage content in your prompt. All characters must be 20+ years old.", "danger")
+            is_blocked, reason = validate_age_content(user_supplied_prompt)
+            if is_blocked:
+                flash(f"🚫 IMAGE BLOCKED: {reason}", "danger")
                 return redirect(url_for("interaction"))
 
-            if original_prompt and validate_age_content(original_prompt):
-                flash("🚫 IMAGE BLOCKED: Detected potential underage content in original prompt. All characters must be 20+ years old.", "danger")
-                return redirect(url_for("interaction"))
+            if original_prompt:
+                is_blocked, reason = validate_age_content(original_prompt)
+                if is_blocked:
+                    flash(f"🚫 IMAGE BLOCKED: {reason}", "danger")
+                    return redirect(url_for("interaction"))
 
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
             session["last_model_choice"] = chosen_model
