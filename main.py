@@ -192,10 +192,12 @@ def validate_age_content(text: str) -> bool:
     Return True if it seems to contain disallowed underage words.
     """
     age_keywords = [
-        "teen", "teenage", "underage", "minor", "child",
-        "kid", "highschool", "high school", "18 year", "19 year"
+        "teen", "teenage", "underage", "minor", "child", "young", "youth",
+        "kid", "highschool", "high school", "18 year", "19 year", "juvenile",
+        "adolescent", "preteen", "pre-teen", "schoolgirl", "schoolboy", "jailbait"
     ]
-    return any(k in text.lower() for k in age_keywords)
+    text_lower = text.lower()
+    return any(k in text_lower for k in age_keywords)
 
 # --------------------------------------------------------------------------
 # Build Personalization String
@@ -433,17 +435,6 @@ def generate_realistic_vision_image_safely(
 # --------------------------------------------------------------------------
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
-def validate_age_content(text: str) -> bool:
-    """
-    Checks for any underage references in text.
-    Return True if it seems to contain disallowed underage words.
-    """
-    age_keywords = [
-        "teen", "teenage", "underage", "minor", "child",
-        "kid", "highschool", "high school", "18 year", "19 year"
-    ]
-    return any(k in text.lower() for k in age_keywords)
-
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
