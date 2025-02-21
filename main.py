@@ -321,8 +321,8 @@ Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, 
             )
             if resp and resp.text.strip():
                 result_text = resp.text.strip()
-                b
-                update_npc_biography(session.get('npc_id', ''), result_text.strip())reak
+                update_npc_biography(session.get('npc_id', ''), result_text.strip())
+                break
             else:
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
         except Exception as e:
