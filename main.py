@@ -467,17 +467,18 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
                                         save_to_gallery: bool = False):
-    # Double check for underage content right before generation
-    if validate_age_content(prompt_text):
-        log_message("[SYSTEM] Blocked image generation due to potential underage content")
-        flash("🚫 IMAGE BLOCKED: Detected potential underage content. All characters must be 20+ years old.", "danger")
-        return redirect(url_for("interaction"))
     """
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
     steps: int for pony or realistic
     cfg_scale: float for pony (cfg_scale), or realistic (guidance)
     """
+    # Validate age content
+    is_blocked, reason = validate_age_content(prompt_text)
+    if is_blocked:
+        log_message("[SYSTEM] Blocked image generation due to potential underage content")
+        session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
+        return None
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
         seed_used = existing_seed
@@ -1233,18 +1234,6 @@ def interaction():
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
-
-            # Comprehensive age validation before proceeding
-            is_blocked, reason = validate_age_content(user_supplied_prompt)
-            if is_blocked:
-                session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
-                return redirect(url_for("interaction"))
-
-            if original_prompt:
-                is_blocked, reason = validate_age_content(original_prompt)
-                if is_blocked:
-                    session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
-                    return redirect(url_for("interaction"))
 
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
             session["last_model_choice"] = chosen_model
