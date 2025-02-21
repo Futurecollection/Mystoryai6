@@ -467,6 +467,11 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
                                         save_to_gallery: bool = False):
+    # Check image generation limit
+    gen_count = session.get("image_gen_count", 0)
+    if gen_count >= 5:
+        log_message("[SYSTEM] Image generation limit reached (5 per story)")
+        return None
     """
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
@@ -521,6 +526,9 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     session["scene_image_url"] = url_for('view_image')
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
+    
+    # Increment generation counter
+    session["image_gen_count"] = session.get("image_gen_count", 0) + 1
 
     if save_to_gallery:
         saved_images = session.get("saved_images", [])
@@ -895,6 +903,7 @@ def restart():
 
     # Reset story defaults
     session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
+    session["image_gen_count"] = 0  # Reset image generation counter
     flash("Story restarted! You can create new characters.", "info")
     return redirect(url_for("personalize"))
 
