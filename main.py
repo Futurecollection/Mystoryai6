@@ -188,16 +188,41 @@ def check_stage_up_down(new_aff: float):
 
 def validate_age_content(text: str) -> bool:
     """
-    Checks for any underage references in text.
-    Return True if it seems to contain disallowed underage words.
+    Checks for any underage references in text using both keyword matching
+    and LLM analysis. Returns True if content seems to contain underage references.
     """
+    # First do quick keyword check
     age_keywords = [
         "teen", "teenage", "underage", "minor", "child", "young", "youth",
         "kid", "highschool", "high school", "18 year", "19 year", "juvenile",
         "adolescent", "preteen", "pre-teen", "schoolgirl", "schoolboy", "jailbait"
     ]
     text_lower = text.lower()
-    return any(k in text_lower for k in age_keywords)
+    if any(k in text_lower for k in age_keywords):
+        return True
+        
+    # Then do LLM check
+    try:
+        system_prompt = """
+        You are an AI content validator. Your task is to check if text contains any references 
+        to underage individuals (anyone under 20 years old). Respond with exactly one word:
+        BLOCKED - if the text contains any underage references
+        ALLOWED - if the text only contains adult (20+) references
+        """
+        
+        chat = model.start_chat()
+        response = chat.send_message(
+            f"{system_prompt}\n\nTEXT TO CHECK: {text}",
+            generation_config={"temperature": 0.1},
+            safety_settings=safety_settings
+        )
+        
+        result = response.text.strip().upper()
+        return result == "BLOCKED"
+    except Exception as e:
+        print(f"[ERROR] LLM age validation failed: {e}")
+        # If LLM check fails, fall back to keyword check
+        return False
 
 # --------------------------------------------------------------------------
 # Build Personalization String
