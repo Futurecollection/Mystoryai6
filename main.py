@@ -200,7 +200,7 @@ def validate_age_content(text: str) -> bool:
     text_lower = text.lower()
     if any(k in text_lower for k in age_keywords):
         return True
-        
+
     # Then do LLM check
     try:
         system_prompt = """
@@ -209,14 +209,14 @@ def validate_age_content(text: str) -> bool:
         BLOCKED - if the text contains any underage references
         ALLOWED - if the text only contains adult (20+) references
         """
-        
+
         chat = model.start_chat()
         response = chat.send_message(
             f"{system_prompt}\n\nTEXT TO CHECK: {text}",
             generation_config={"temperature": 0.1},
             safety_settings=safety_settings
         )
-        
+
         result = response.text.strip().upper()
         return result == "BLOCKED"
     except Exception as e:
@@ -468,7 +468,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     if validate_age_content(prompt_text):
         log_message("[SYSTEM] Blocked image generation due to potential underage content")
         flash("🚫 IMAGE BLOCKED: Detected potential underage content. All characters must be 20+ years old.", "danger")
-        return None
+        return redirect(url_for("interaction"))
     """
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
@@ -641,7 +641,7 @@ You are an AI assistant specializing in producing a short prompt for a Stable Di
 REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant creating a prompt for Realistic Vision (SD1.5).
 Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data like the NPC's personal details (age, hair, clothing, etc.) and descriptions plus relevant story narration details. 
- 
+
 """
 
 def get_image_prompt_system_instructions(model_type: str) -> str:
@@ -879,16 +879,16 @@ def restart():
     user_email = session.get("user_email")
     access_token = session.get("access_token")
     logged_in = session.get("logged_in")
-    
+
     # Clear session
     session.clear()
-    
+
     # Restore login data
     session["user_id"] = user_id
     session["user_email"] = user_email
     session["access_token"] = access_token
     session["logged_in"] = logged_in
-    
+
     # Reset story defaults
     session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
     flash("Story restarted! You can create new characters.", "info")
@@ -1226,7 +1226,7 @@ def interaction():
         elif "generate_image" in request.form or "new_seed" in request.form:
             user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
             original_prompt = session.get("scene_image_prompt", "")
-            
+
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
@@ -1386,7 +1386,7 @@ def generate_erotica():
         previous_text=previous_text
     )
     # Append to erotica so far
-    updated_erotica = previous_text + "\n\n" + new_rewrite if previous_text else new_rewrite
+    updated_erotica = previous_text + "\n\n"+ new_rewrite if previous_text else new_rewrite
     session["erotica_text_so_far"] = updated_erotica
     session["current_chunk_index"] = i + 1
 
