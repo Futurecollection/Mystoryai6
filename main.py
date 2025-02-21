@@ -197,17 +197,7 @@ def validate_age_content(text: str) -> bool:
     ]
     return any(k in text.lower() for k in age_keywords)
 
-#
-
-def update_npc_biography(npc_id, entry):
-    """
-    Updates the NPC's biography with a new entry.
-    """
-    if 'npc_biography' not in session:
-        session['npc_biography'] = {}
-    if npc_id not in session['npc_biography']:
-        session['npc_biography'][npc_id] = []
-    session['npc_biography'][npc_id].append(entry)--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Build Personalization String
 # --------------------------------------------------------------------------
 def build_personalization_string() -> str:
@@ -215,8 +205,6 @@ def build_personalization_string() -> str:
     Returns a multi-line string describing the NPC and user data
     that the LLM should not contradict.
     """
-    biography = session.get('npc_biography', {}).get(session.get('npc_id', ''), [])
-    
     npc_data = (
         f"NPC:\n"
         f"  Name: {session.get('npc_name','?')}\n"
@@ -235,10 +223,6 @@ def build_personalization_string() -> str:
         f"  Instructions: {session.get('npc_instructions','')}\n"
         f"  Backstory: {session.get('npc_backstory','')}\n"
     )
-
-    if biography:
-        npc_data += "Biography:\n" + "\n".join(biography) + "\n"
-
     env_data = (
         f"ENVIRONMENT:\n"
         f"  Location: {session.get('environment','?')}\n"
@@ -321,7 +305,6 @@ Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, 
             )
             if resp and resp.text.strip():
                 result_text = resp.text.strip()
-                update_npc_biography(session.get('npc_id', ''), result_text.strip())
                 break
             else:
                 log_message(f"[SYSTEM] LLM returned empty text on attempt {attempt+1}")
@@ -619,9 +602,9 @@ Do not include any prefixes, explanations or additional text.
 """
 
 PONY_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a short prompt for Pony SDXL, Start with "a photo of" and then incoporate the NPC's personal data. Include the NPC's personal details (age, hair, clothing, etc.) and descriptions. use short descriptions rather than long wordy description. separate each variable with a comma. 
+You are an AI assistant specializing in producing a short prompt for Pony SDXL, Start with "a photo of" and then incoporate the NPC's personal data. Include the NPC's personal details (age, hair, clothing, etc.) and descriptions. 
 and the last story narration. The code automatically adds "score_9, score_8_up, score_7_up, realistic," 
-so do NOT include them. 1–3 lines is fine. 
+so do NOT include them. 1–3 lines is fine. Avoid painting/anime references.
 
 """
 
@@ -774,12 +757,10 @@ Allowed Explicitness:
 # --------------------------------------------------------------------------
 @app.route("/")
 def main_home():
-    return 
-:@app.route('/biography')
-    def biography():
-        npc_id = session.get('npc_id', '')
-        biography_entries = session.get('npc_biography', {}).get(npc_id, [])
-        return render_template('biography.html', biography=biography_entries)
+    return render_template("home.html", title="Destined Encounters")
+
+@app.route("/about")
+def about():
     return render_template("about.html", title="About/Help")
 
 @app.route("/login", methods=["GET", "POST"])
