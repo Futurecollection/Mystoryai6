@@ -215,6 +215,8 @@ def build_personalization_string() -> str:
     Returns a multi-line string describing the NPC and user data
     that the LLM should not contradict.
     """
+    biography = session.get('npc_biography', {}).get(session.get('npc_id', ''), [])
+    
     npc_data = (
         f"NPC:\n"
         f"  Name: {session.get('npc_name','?')}\n"
@@ -233,11 +235,12 @@ def build_personalization_string() -> str:
         f"  Instructions: {session.get('npc_instructions','')}\n"
         f"  Backstory: {session.get('npc_backstory','')}\n"
     )
+
+    if biography:
+        npc_data += "Biography:\n" + "\n".join(biography) + "\n"
+
     env_data = (
         f"ENVIRONMENT:\n"
-        biography = session['npc_biography'].get(session.get('npc_id', ''), [])
-        if biography:
-            npc_data += "\nBiography:\n" + "\n".join(biography) + "\n"
         f"  Location: {session.get('environment','?')}\n"
         f"  EncounterContext: {session.get('encounter_context','?')}\n"
     )
