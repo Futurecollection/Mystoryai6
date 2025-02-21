@@ -433,10 +433,25 @@ def generate_realistic_vision_image_safely(
 # --------------------------------------------------------------------------
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
+def validate_age_content(text: str) -> bool:
+    """
+    Checks for any underage references in text.
+    Return True if it seems to contain disallowed underage words.
+    """
+    age_keywords = [
+        "teen", "teenage", "underage", "minor", "child",
+        "kid", "highschool", "high school", "18 year", "19 year"
+    ]
+    return any(k in text.lower() for k in age_keywords)
+
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
                                         save_to_gallery: bool = False):
+    # Check for underage content first
+    if validate_age_content(prompt_text):
+        log_message("[SYSTEM] Blocked image generation due to potential underage content")
+        return None
     """
     model_type: flux | pony | realistic
     scheduler: used by pony or realistic
@@ -1195,6 +1210,11 @@ def interaction():
             user_supplied_prompt = request.form.get("scene_image_prompt", "").strip()
             if not user_supplied_prompt:
                 flash("No image prompt provided.", "danger")
+                return redirect(url_for("interaction"))
+                
+            # Check for underage content
+            if validate_age_content(user_supplied_prompt):
+                flash("Image generation blocked - detected potential underage content.", "danger")
                 return redirect(url_for("interaction"))
 
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
