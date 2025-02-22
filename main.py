@@ -1255,7 +1255,7 @@ def interaction():
                     narration_txt = s.split(":", 1)[1].strip()
 
             # Make separate LLM call for thoughts and memories
-            thoughts_txt, memory_txt = process_npc_thoughts(last_user_action, narration_txt)
+            thoughts_txt, memory_txt = process_npc_thoughts(user_action, narration_txt)
 
             # Update NPC thought records
             session["npcPrivateThoughts"] = thoughts_txt
