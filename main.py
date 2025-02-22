@@ -313,11 +313,22 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     conversation_history = session.get("interaction_log", [])
     combined_history = "\n".join(conversation_history)
 
+    # Get previous thoughts and memories
+    prev_thoughts = session.get("npcPrivateThoughts", "(none)")
+    prev_memories = session.get("npcBehavior", "(none)")
+
     if not last_user_action.strip():
         last_user_action = "OOC: Continue the scene"
 
     stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
+
+    # Add thoughts/memories context
+    personalization += f"""
+PREVIOUS THOUGHTS & MEMORIES:
+Previous Thoughts: {prev_thoughts}
+Previous Memories: {prev_memories}
+"""
 
     system_instructions = f"""
 You are a third-person descriptive erotic romance novel narrator.
