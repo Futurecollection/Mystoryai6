@@ -1255,11 +1255,18 @@ def interaction():
                     narration_txt = s.split(":", 1)[1].strip()
 
             # Make separate LLM call for thoughts and memories
-            thoughts_txt, memory_txt = process_npc_thoughts(user_action, narration_txt)
+            new_thoughts, new_memory = process_npc_thoughts(user_action, narration_txt)
 
-            # Update NPC thought records
-            session["npcPrivateThoughts"] = thoughts_txt
-            session["npcBehavior"] = memory_txt
+            # Accumulate thoughts and memories
+            prev_thoughts = session.get("npcPrivateThoughts", "")
+            prev_memories = session.get("npcBehavior", "")
+            
+            updated_thoughts = f"{prev_thoughts}\n• {new_thoughts}" if prev_thoughts else new_thoughts
+            updated_memories = f"{prev_memories}\n• {new_memory}" if prev_memories else new_memory
+            
+            # Update session with accumulated history
+            session["npcPrivateThoughts"] = updated_thoughts
+            session["npcBehavior"] = updated_memories
 
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
