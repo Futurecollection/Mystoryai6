@@ -1201,6 +1201,12 @@ def interaction():
             session["narrationText"] = narration_txt
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
+            
+            # Auto-generate scene prompt after each action
+            model_type = session.get("last_model_choice", "flux")
+            prompt_text = generate_image_prompt_for_scene(model_type)
+            session["scene_image_prompt"] = prompt_text
+            
             return redirect(url_for("interaction"))
 
         elif "update_npc" in request.form:
