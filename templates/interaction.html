@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Loading Spinner (hidden by default) -->
+<div id="loading" class="text-center" style="display: none; margin-bottom: 10px;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
 <!-- Top Navigation -->
 <div class="row mb-3">
   <div class="col text-start">
@@ -66,29 +73,8 @@
 
 <!-- SCENE IMAGE PROMPT FORM -->
 <h3 style="color: #ff5789;">Scene Image Prompt</h3>
-
-<!-- Loading Spinner (hidden by default) -->
-<div id="loading" class="text-center mb-3" style="display: none;">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-  <div class="mt-2" style="color: #f8d0d0; font-weight: bold;">
-    Generating image... This may take around 30 seconds.
-  </div>
-</div>
-
-<form method="POST" class="mb-3">
+<form method="POST" class="mb-3" onsubmit="showLoading()">
   <textarea name="scene_image_prompt" rows="2" class="form-control" style="background-color: #4a0d0d; color: #f8d0d0;">{{ scene_image_prompt }}</textarea>
-
-  <!-- Loading Message for Image Generation -->
-  <div id="imageLoading" class="text-center mb-3 mt-2" style="display: none; padding: 15px; background-color: #2a0808; border: 2px solid #ff5789; border-radius: 8px;">
-    <div class="spinner-border text-primary mb-2" style="width: 3rem; height: 3rem;" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <div style="color: #ff5789; font-size: 1.2em; font-weight: bold;">
-      Generating image... This may take around 30 seconds.
-    </div>
-  </div>
 
   <!-- Model Selection -->
   <div class="mt-2">
@@ -220,10 +206,14 @@
   // Trigger initial change event to set initial visibility
   toggleVisibilityForModel(document.getElementById('model_type').value);
 
-  // Show loading only for image generation
-  document.querySelectorAll('button[name="generate_image"], button[name="new_seed"]').forEach(function(button) {
-    button.addEventListener('click', function() {
-      document.getElementById("imageLoading").style.display = "block";
+  function showLoading() {
+    document.getElementById("loading").style.display = "block";
+  }
+
+  // Show spinner on any form submission
+  document.querySelectorAll('form').forEach(function(form) {
+    form.addEventListener('submit', function() {
+      showLoading();
     });
   });
 </script>
