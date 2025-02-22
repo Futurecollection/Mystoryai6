@@ -843,7 +843,7 @@ def register_route():
             return redirect(url_for("register_route"))
         try:
             response = supabase.auth.sign_up({"email": email, "password": password})
-            flash("Registration success! Check your email, then log in.", "success")
+            flash("Registration successful! You can now log in.", "success")
             return redirect(url_for("login_route"))
         except Exception as e:
             flash(f"Registration failed: {e}", "danger")
