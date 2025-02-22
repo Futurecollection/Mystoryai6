@@ -46,7 +46,13 @@
 
   <label class="form-label" style="color: #f8d0d0;">Your Move (in-game):</label>
   <input type="text" class="form-control mb-2" name="user_action" placeholder="He quietly asks how she's doing...">
-  <button type="submit" name="submit_action" class="btn btn-success">Send Move</button>
+  <button type="submit" name="submit_action" class="btn btn-success" onclick="showLoading()">Send Move</button>
+  <div id="moveLoading" style="display: none; margin-top: 10px; color: #ff5789;">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <span class="ms-2">Generating scene... Please wait.</span>
+  </div>
 </form>
 
 {% if scene_image_url %}
