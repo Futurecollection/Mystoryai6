@@ -272,12 +272,19 @@ def build_personalization_string() -> str:
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a separate LLM call to process NPC thoughts and memories"""
-    system_prompt = """
-You are analyzing an NPC's internal thoughts and memories during an interaction.
+    npc_name = session.get('npc_name', '?')
+    prev_thoughts = session.get("npcPrivateThoughts", "(none)")
+    prev_memories = session.get("npcBehavior", "(none)")
+
+    system_prompt = f"""
+You are analyzing {npc_name}'s internal thoughts and memories during an interaction.
 Focus on their emotional state, private reactions, and key memories to store.
 
+Previous thoughts: {prev_thoughts}
+Previous memories: {prev_memories}
+
 Return EXACTLY two lines:
-Line 1 => PRIVATE_THOUGHTS: ... (NPC's internal thoughts and feelings)
+Line 1 => PRIVATE_THOUGHTS: ... ({npc_name}'s current thoughts and feelings, considering their history)
 Line 2 => MEMORY_UPDATE: ... (key events and feelings to remember)
 """
     context = f"""
