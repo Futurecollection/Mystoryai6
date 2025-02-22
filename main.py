@@ -270,12 +270,44 @@ def build_personalization_string() -> str:
 # interpret_npc_state => LLM
 # --------------------------------------------------------------------------
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
+def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
+    """Makes a separate LLM call to process NPC thoughts and memories"""
+    system_prompt = """
+You are analyzing an NPC's internal thoughts and memories during an interaction.
+Focus on their emotional state, private reactions, and key memories to store.
+
+Return EXACTLY two lines:
+Line 1 => PRIVATE_THOUGHTS: ... (NPC's internal thoughts and feelings)
+Line 2 => MEMORY_UPDATE: ... (key events and feelings to remember)
+"""
+    context = f"""
+LAST USER ACTION: {last_user_action}
+SCENE NARRATION: {narration}
+"""
+    chat = model.start_chat()
+    response = chat.send_message(
+        f"{system_prompt}\n\n{context}",
+        generation_config={"temperature": 0.7},
+        safety_settings=safety_settings
+    )
+
+    thoughts = ""
+    memory = ""
+    for ln in response.text.strip().split("\n"):
+        if ln.startswith("PRIVATE_THOUGHTS:"):
+            thoughts = ln.split(":", 1)[1].strip()
+        elif ln.startswith("MEMORY_UPDATE:"):
+            memory = ln.split(":", 1)[1].strip()
+    return thoughts, memory
+
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
     """
-    Produces exactly 2 lines:
+    Produces exactly 4 lines:
       Line 1 => AFFECT_CHANGE_FINAL: (float)
       Line 2 => NARRATION: (the updated story content)
+      Line 3 => PRIVATE_THOUGHTS: (NPC's internal thoughts/feelings)
+      Line 4 => MEMORY_UPDATE: (key events/feelings to remember)
     """
     prepare_history()
     conversation_history = session.get("interaction_log", [])
@@ -318,9 +350,11 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 
-Return EXACTLY two lines:
+Return EXACTLY four lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
 Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, dialogue, and actions)
+Line 3 => PRIVATE_THOUGHTS: ... (NPC's internal thoughts/feelings)
+Line 4 => MEMORY_UPDATE: ... (key events and feelings to remember)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
@@ -344,8 +378,33 @@ Line 2 => NARRATION: ... (200-300 words describing the NPC's reaction, setting, 
     if not result_text:
         return """AFFECT_CHANGE_FINAL: 0
 NARRATION: [System: no valid response from LLM, please try again]
+PRIVATE_THOUGHTS: (System Error)
+MEMORY_UPDATE: (System Error)
 """
-    return result_text
+    affect_delta = 0.0
+    narration_txt = ""
+    for ln in result_text.split("\n"):
+        s = ln.strip()
+        if s.startswith("AFFECT_CHANGE_FINAL:"):
+            try:
+                affect_delta = float(s.split(":", 1)[1].strip())
+            except:
+                affect_delta = 0.0
+        elif s.startswith("NARRATION:"):
+            narration_txt = s.split(":", 1)[1].strip()
+
+    # Make separate LLM call for thoughts and memories
+    thoughts_txt, memory_txt = process_npc_thoughts(last_user_action, narration_txt)
+
+    # Update NPC thought records
+    session["npcPrivateThoughts"] = thoughts_txt
+    session["npcBehavior"] = memory_txt
+
+
+    return f"""AFFECT_CHANGE_FINAL: {affect_delta}
+NARRATION: {narration_txt}
+PRIVATE_THOUGHTS: {thoughts_txt}
+MEMORY_UPDATE: {memory_txt}"""
 
 # --------------------------------------------------------------------------
 # Replicate Model Functions
@@ -526,7 +585,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
     session["scene_image_url"] = url_for('view_image')
     session["scene_image_prompt"] = prompt_text
     session["scene_image_seed"] = seed_used
-    
+
     # Increment generation counter
     session["image_gen_count"] = session.get("image_gen_count", 0) + 1
 
@@ -638,7 +697,7 @@ NPC_RELATIONSHIP_GOAL_OPTIONS = [
 # Expanded system prompts for image generation referencing the FULL narration
 # --------------------------------------------------------------------------
 FLUX_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a photorealistic image prompt for the 'Flux' diffusion model.
+You are an AI assistant specializing in producing a photorealistic image promptfor the 'Flux' diffusion model.
 Include the NPC's personal details (age, hair, clothing, etc.) and descriptions to convey the scene's action or setting and environment. 
 Use words like "photo" or "photograph" for realism, and avoid painting/anime references.
 Respond with only the photorealistic scene description for the Flux model. 
@@ -1195,18 +1254,25 @@ def interaction():
                 elif s.startswith("NARRATION:"):
                     narration_txt = s.split(":", 1)[1].strip()
 
+            # Make separate LLM call for thoughts and memories
+            thoughts_txt, memory_txt = process_npc_thoughts(last_user_action, narration_txt)
+
+            # Update NPC thought records
+            session["npcPrivateThoughts"] = thoughts_txt
+            session["npcBehavior"] = memory_txt
+
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
             check_stage_up_down(new_aff)
             session["narrationText"] = narration_txt
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
-            
+
             # Auto-generate scene prompt after each action
             model_type = session.get("last_model_choice", "flux")
             prompt_text = generate_image_prompt_for_scene(model_type)
             session["scene_image_prompt"] = prompt_text
-            
+
             return redirect(url_for("interaction"))
 
         elif "update_npc" in request.form:
