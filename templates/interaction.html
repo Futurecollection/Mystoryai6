@@ -26,6 +26,16 @@
   <strong>Scene:</strong> {{ npc_narration }}
 </div>
 
+<div class="card mt-3">
+  <div class="card-header">
+    <h5>NPC Private Thoughts & Memories</h5>
+  </div>
+  <div class="card-body">
+    <p><strong>Private Thoughts:</strong> {{ session.get('npcPrivateThoughts', '(none)') }}</p>
+    <p><strong>Memory Update:</strong> {{ session.get('npcBehavior', '(none)') }}</p>
+  </div>
+</div>
+
 <!-- USER ACTION FORM -->
 <form method="POST" class="mb-4" onsubmit="showLoading()">
   <!-- Quick Action Buttons -->
