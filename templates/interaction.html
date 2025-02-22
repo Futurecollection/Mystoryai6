@@ -80,12 +80,12 @@
 <form method="POST" class="mb-3">
   <textarea name="scene_image_prompt" rows="2" class="form-control" style="background-color: #4a0d0d; color: #f8d0d0;">{{ scene_image_prompt }}</textarea>
 
-  <!-- Loading Spinner (hidden by default) -->
-  <div id="imageLoading" class="text-center mb-3 mt-2" style="display: none;">
-    <div class="spinner-border text-primary" role="status">
+  <!-- Loading Message for Image Generation -->
+  <div id="imageLoading" class="text-center mb-3 mt-2" style="display: none; padding: 15px; background-color: #2a0808; border: 2px solid #ff5789; border-radius: 8px;">
+    <div class="spinner-border text-primary mb-2" style="width: 3rem; height: 3rem;" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
-    <div class="mt-2" style="color: #f8d0d0; font-weight: bold;">
+    <div style="color: #ff5789; font-size: 1.2em; font-weight: bold;">
       Generating image... This may take around 30 seconds.
     </div>
   </div>
