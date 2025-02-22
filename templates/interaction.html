@@ -144,9 +144,27 @@
 </form>
 
 <script>
+// Unified loading functions
 function showImageLoading() {
   document.getElementById('imageLoading').style.display = 'block';
 }
+
+function showLoading() {
+  document.getElementById('loading').style.display = 'block';
+}
+
+// Add event listeners to all forms when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle all forms
+  document.querySelectorAll('form').forEach(function(form) {
+    form.addEventListener('submit', function() {
+      showLoading();
+      if (form.querySelector('[name="generate_image"]') || form.querySelector('[name="new_seed"]')) {
+        showImageLoading();
+      }
+    });
+  });
+});
 </script>
 
 
