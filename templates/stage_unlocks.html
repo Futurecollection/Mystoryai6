@@ -10,13 +10,6 @@
       You are currently at Stage {{ current_stage }}
     </div>
 
-    <!-- Affection Override Form -->
-    <form method="POST" class="mb-4">
-      <label class="form-label">Override Affection Score:</label>
-      <input type="number" step="0.1" class="form-control mb-2" name="affection_new" value="{{ affection_score }}" required>
-      <button type="submit" name="update_affection" value="true" class="btn btn-info mb-4">Update Affection</button>
-    </form>
-
     <form method="POST" class="mb-4">
       {% for i in range(1,7) %}
         <label>Stage {{ i }} Unlock Text:</label>
