@@ -1,7 +1,33 @@
+
 {% extends "base.html" %}
 {% block content %}
   <div class="container mt-4">
-    <h2>Manually Update NPC Internal State</h2>
+    <h2>NPC Internal State</h2>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-info text-white">
+            Current Private Thoughts
+          </div>
+          <div class="card-body">
+            <p class="card-text">{{ session.get('npcPrivateThoughts', '(none)') | safe }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-warning">
+            Current Significant Memories
+          </div>
+          <div class="card-body">
+            <p class="card-text">{{ session.get('npcBehavior', '(none)') | safe }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <form method="POST" action="{{ url_for('manual_npc_update') }}">
       <div class="mb-3">
         <label for="new_text" class="form-label">Add Text to NPC's Internal State:</label>
@@ -17,7 +43,7 @@
       </div>
 
       <button type="submit" class="btn btn-primary">Update NPC State</button>
-      <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Cancel</a>
+      <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Back to Story</a>
     </form>
   </div>
 {% endblock %}
