@@ -274,7 +274,6 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     """Makes a separate LLM call to process NPC thoughts and memories,
        focusing on only significant/pivotal new knowledge or changes.
     """
-
     npc_name = session.get('npc_name', '?')
     prev_thoughts = session.get("npcPrivateThoughts", "(none)")
     prev_memories = session.get("npcBehavior", "(none)")
@@ -444,7 +443,6 @@ MEMORY_UPDATE: (System Error)
     # Only append memory if it's not trivial or blank
     memory_txt_lower = memory_txt.strip().lower()
     if memory_txt_lower.startswith("(no significant update)") or not memory_txt_lower:
-        # skip appending
         updated_memories = existing_memories
     else:
         if existing_memories.strip().lower() == "(none)":
@@ -1460,7 +1458,9 @@ def full_story():
         if line.startswith("NARRATION => "):
             story_lines.append(line.replace("NARRATION => ", "", 1))
         elif line.startswith("User: "):
-            story_lines.append("> " + line.replace("User: ", "", 1))
+            lines.append("> " + line.replace("User: ", "", 1))
+        else:
+            lines.append(line)
     return render_template("full_story.html", lines=story_lines, title="Full Story So Far")
 
 # --------------------------------------------------------------------------
@@ -1609,6 +1609,43 @@ def delete_gallery_image(index):
         session["saved_images"] = saved_images
         flash("Image deleted successfully!", "success")
     return redirect(url_for("gallery"))
+
+# --------------------------------------------------------------------------
+# NEW ROUTE: Manually append to NPC memory/thoughts
+# --------------------------------------------------------------------------
+@app.route("/manual_npc_update", methods=["GET", "POST"])
+@login_required
+def manual_npc_update():
+    """
+    Lets the user manually append text to the NPC's private thoughts or memories.
+    """
+    if request.method == "POST":
+        new_text = request.form.get("new_text", "").strip()
+        target = request.form.get("target", "thoughts")  # either "thoughts" or "memories"
+
+        if not new_text:
+            flash("No text provided to update NPC internal state.", "warning")
+            return redirect(url_for("manual_npc_update"))
+
+        if target == "memories":
+            existing_memories = session.get("npcBehavior", "")
+            if existing_memories.strip().lower() == "(none)":
+                session["npcBehavior"] = new_text
+            else:
+                session["npcBehavior"] = existing_memories + f"\n• {new_text}"
+            flash("Memory updated successfully!", "success")
+        else:
+            existing_thoughts = session.get("npcPrivateThoughts", "")
+            if existing_thoughts.strip().lower() == "(none)":
+                session["npcPrivateThoughts"] = new_text
+            else:
+                session["npcPrivateThoughts"] = existing_thoughts + f"\n• {new_text}"
+            flash("Private thoughts updated successfully!", "success")
+
+        return redirect(url_for("interaction"))
+    else:
+        return render_template("manual_npc_update.html", title="Manual NPC Update")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
