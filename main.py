@@ -860,7 +860,7 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
 # --------------------------------------------------------------------------
 # CHUNK-BASED EROTICA GENERATION
 # --------------------------------------------------------------------------
-def chunk_text(text: str, words_per_chunk: int = 1000) -> list:
+def chunk_text(text: str, words_per_chunk: int = 3000) -> list:
     """
     Splits a large text into a list of smaller chunks, each containing up to words_per_chunk words.
     """
