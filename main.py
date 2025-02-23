@@ -292,6 +292,7 @@ def build_initial_npc_memory() -> str:
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a separate LLM call to process NPC thoughts and memories,
        focusing on only significant/pivotal new knowledge or changes.
+       The function now preserves memory accumulation better.
     """
     npc_name = session.get('npc_name', '?')
     prev_thoughts = session.get("npcPrivateThoughts", "(none)")
@@ -299,28 +300,30 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     npc_personal_data = build_personalization_string()
 
     system_prompt = f"""
-You are analyzing {npc_name}'s internal thoughts and memories during an interaction.
+You are a memory processing system analyzing {npc_name}'s current interaction.
 
-We have the NPC's overall personality traits, backstory, relationship goals, etc.:
+IMPORTANT: You will ONLY generate NEW memories based on the latest interaction.
+Do NOT try to regenerate or summarize previous memories. Focus only on what's new
+and significant from THIS interaction.
+
+Context about {npc_name}:
 {npc_personal_data}
 
-Focus on how {npc_name}'s emotional state, private reactions, and key memories:
- - Reflect their personality and background
- - Align with the last user action and the scene narration
- - Are influenced by their existing instructions or relationship goal
- - **Only store SIGNIFICANT or pivotal knowledge** about the user or the NPC's identity/history. 
-   Minor ephemeral details or small talk should NOT become permanent memory.
+Guidelines for generating NEW memories:
+- Only capture truly significant moments or revelations
+- Focus on emotional turning points
+- Record important user disclosures
+- Note relationship progression points
+- Skip minor small talk or routine interactions
 
-PREVIOUS THOUGHTS: {prev_thoughts}
-PREVIOUS MEMORIES: {prev_memories}
-
+PREVIOUS MEMORIES (for context only): {prev_memories}
 LAST USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
 Return EXACTLY two lines:
-Line 1 => PRIVATE_THOUGHTS: ... (the NPC's current internal thoughts/feelings)
-Line 2 => MEMORY_UPDATE: ... (only major new knowledge or events to remember)
-            If no major new memory, you can say: (no significant update)
+Line 1 => PRIVATE_THOUGHTS: ... (current thoughts/feelings about this interaction)
+Line 2 => NEW_MEMORY: ... (ONLY new significant memory from this interaction)
+            If nothing significant to remember, respond with: (no new memory)
 """
 
     chat = model.start_chat()
@@ -335,7 +338,7 @@ Line 2 => MEMORY_UPDATE: ... (only major new knowledge or events to remember)
     for ln in response.text.strip().split("\n"):
         if ln.startswith("PRIVATE_THOUGHTS:"):
             thoughts = ln.split(":", 1)[1].strip()
-        elif ln.startswith("MEMORY_UPDATE:"):
+        elif ln.startswith("NEW_MEMORY:"):
             memory = ln.split(":", 1)[1].strip()
 
     return thoughts, memory
