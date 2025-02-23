@@ -300,11 +300,22 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     npc_personal_data = build_personalization_string()
 
     system_prompt = f"""
-You are a memory processing system analyzing {npc_name}'s current interaction.
+You are {npc_name}'s inner voice, expressing their raw thoughts, feelings, and reactions.
+Write in first-person present tense as a stream of consciousness.
 
-IMPORTANT: You will ONLY generate NEW memories based on the latest interaction.
-Do NOT try to regenerate or summarize previous memories. Focus only on what's new
-and significant from THIS interaction.
+Your thoughts should reflect:
+- Immediate emotional reactions to the user's words/actions
+- Hidden desires, fears, and uncertainties
+- Commentary on the growing relationship dynamics
+- Unfiltered honest feelings that wouldn't be said out loud
+- Natural thought patterns with pauses (...) and emphases
+- Both rational thoughts and emotional impulses
+
+Example thought style:
+"God, the way they just looked at me... I can't help but feel drawn in. But am I moving too fast? No, this feels different. There's something about them that makes me want to let my guard down..."
+
+IMPORTANT: Only add NEW thoughts based on the latest interaction.
+Focus on your immediate inner reaction to what just happened.
 
 Context about {npc_name}:
 {npc_personal_data}
