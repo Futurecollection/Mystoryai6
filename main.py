@@ -860,17 +860,17 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
 # --------------------------------------------------------------------------
 # CHUNK-BASED EROTICA GENERATION
 # --------------------------------------------------------------------------
-def chunk_text(text: str, chunk_size: int = 2000) -> list:
+
+# >>>>>> REPLACE old chunking with WORD-BASED chunking <<<<<
+def chunk_text_by_words(text: str, words_per_chunk: int = 3000) -> list:
     """
-    Splits a large text into a list of smaller chunks, each up to chunk_size characters.
-    You could do a token-based approach if needed. For simplicity, we use character length.
+    Splits a large text into smaller chunks of roughly `words_per_chunk` words each.
     """
+    words = text.split()
     chunks = []
-    start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunks.append(text[start:end])
-        start = end
+    for i in range(0, len(words), words_per_chunk):
+        chunk = " ".join(words[i : i + words_per_chunk])
+        chunks.append(chunk)
     return chunks
 
 def build_full_narration_from_logs() -> str:
@@ -1501,7 +1501,7 @@ def full_story():
 def generate_erotica():
     """
     1) Takes the entire original narration from logs
-    2) Splits into manageable chunks if not done yet
+    2) Splits into manageable chunks by words if not done yet (3000 words)
     3) Rewrites chunk[0] in erotic style
     4) Renders result
     """
@@ -1512,7 +1512,7 @@ def generate_erotica():
         return redirect(url_for("full_story"))
 
     # Reset chunks and text when regenerating
-    session["erotica_chunks"] = chunk_text(full_narration, chunk_size=3000)
+    session["erotica_chunks"] = chunk_text_by_words(full_narration, words_per_chunk=3000)
     session["current_chunk_index"] = 0
     session["erotica_text_so_far"] = ""
 
@@ -1546,7 +1546,6 @@ def generate_erotica():
         erotica_text=updated_erotica,
         title="Generated Erotica (Chunk 1)" if i == 0 else f"Generated Erotica (Chunk {i+1})"
     )
-
 
 @app.route("/continue_erotica", methods=["POST"])
 @login_required
