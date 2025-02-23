@@ -1,36 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-  <h2>NPC Internal State</h2>
-  <div class="row">
-    <div class="col-md-6">
-      <label for="current_thoughts" class="form-label">Current Private Thoughts:</label>
-      <textarea id="current_thoughts" class="form-control" rows="6" readonly>{{ current_thoughts }}</textarea>
-    </div>
-    <div class="col-md-6">
-      <label for="current_memories" class="form-label">Current Significant Memories:</label>
-      <textarea id="current_memories" class="form-control" rows="6" readonly>{{ current_memories }}</textarea>
-    </div>
+  <div class="container mt-4">
+    <h2>Manually Update NPC Internal State</h2>
+    <form method="POST" action="{{ url_for('manual_npc_update') }}">
+      <div class="mb-3">
+        <label for="new_text" class="form-label">Add Text to NPC's Internal State:</label>
+        <textarea name="new_text" id="new_text" rows="4" class="form-control" placeholder="Write your addition here..."></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="target" class="form-label">Update which field?</label>
+        <select name="target" id="target" class="form-select">
+          <option value="thoughts">Private Thoughts</option>
+          <option value="memories">Significant Memories</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Update NPC State</button>
+      <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Cancel</a>
+    </form>
   </div>
-
-  <hr>
-  <h4 class="mt-3">Add to NPC Internal State</h4>
-  <form method="POST" action="{{ url_for('manual_npc_update') }}">
-    <div class="mb-3">
-      <label for="new_text" class="form-label">New Entry:</label>
-      <textarea name="new_text" id="new_text" rows="3" class="form-control" placeholder="Write new line here..."></textarea>
-    </div>
-
-    <div class="mb-3">
-      <label for="target" class="form-label">Add this to:</label>
-      <select name="target" id="target" class="form-select">
-        <option value="thoughts">Private Thoughts</option>
-        <option value="memories">Significant Memories</option>
-      </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Update</button>
-    <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Return to Interaction</a>
-  </form>
-</div>
 {% endblock %}
