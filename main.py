@@ -860,16 +860,17 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
 # --------------------------------------------------------------------------
 # CHUNK-BASED EROTICA GENERATION
 # --------------------------------------------------------------------------
-def chunk_text(text: str, chunk_size: int = 2000) -> list:
+def chunk_text(text: str, words_per_chunk: int = 1000) -> list:
     """
-    Splits a large text into a list of smaller chunks, each up to chunk_size characters.
-    You could do a token-based approach if needed. For simplicity, we use character length.
+    Splits a large text into a list of smaller chunks, each containing up to words_per_chunk words.
     """
+    words = text.split()
     chunks = []
     start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunks.append(text[start:end])
+    while start < len(words):
+        end = start + words_per_chunk
+        chunk = ' '.join(words[start:end])
+        chunks.append(chunk)
         start = end
     return chunks
 
