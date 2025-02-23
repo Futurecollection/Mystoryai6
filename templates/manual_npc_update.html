@@ -1,45 +1,23 @@
-
 {% extends "base.html" %}
 {% block content %}
-<h1>Manual NPC Update</h1>
+  <div class="container mt-4">
+    <h2>Manually Update NPC Internal State</h2>
+    <form method="POST" action="{{ url_for('manual_npc_update') }}">
+      <div class="mb-3">
+        <label for="new_text" class="form-label">Add Text to NPC's Internal State:</label>
+        <textarea name="new_text" id="new_text" rows="4" class="form-control" placeholder="Write your addition here..."></textarea>
+      </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+      <div class="mb-3">
+        <label for="target" class="form-label">Update which field?</label>
+        <select name="target" id="target" class="form-select">
+          <option value="thoughts">Private Thoughts</option>
+          <option value="memories">Significant Memories</option>
+        </select>
+      </div>
 
-<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-body">
-    <h3 style="color: #ff5789;">Current NPC State</h3>
-    <div class="mb-3">
-      <h4 style="color: #ff9fa3;">Private Thoughts</h4>
-      <p style="white-space: pre-line;">{{ session.get('npcPrivateThoughts', '(none)') }}</p>
-    </div>
-    <div class="mb-3">
-      <h4 style="color: #ff9fa3;">Memories</h4>
-      <p style="white-space: pre-line;">{{ session.get('npcBehavior', '(none)') }}</p>
-    </div>
+      <button type="submit" class="btn btn-primary">Update NPC State</button>
+      <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Cancel</a>
+    </form>
   </div>
-</div>
-
-<form method="POST" class="mb-4">
-  <div class="mb-3">
-    <label for="new_text" class="form-label" style="color: #ff5789;">New Entry</label>
-    <textarea name="new_text" id="new_text" class="form-control" rows="4" style="background-color: #2a0a0a; color: #f8d0d0;" required></textarea>
-  </div>
-  
-  <div class="mb-3">
-    <label class="form-label" style="color: #ff5789;">Add To:</label>
-    <select name="target" class="form-select" style="background-color: #2a0a0a; color: #f8d0d0;">
-      <option value="thoughts">Private Thoughts</option>
-      <option value="memories">Memories</option>
-    </select>
-  </div>
-
-  <button type="submit" class="btn btn-primary">Add Entry</button>
-  <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Back to Story</a>
-</form>
 {% endblock %}
