@@ -2,72 +2,48 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="container mt-4">
-    <h2 class="mb-4" style="color: #ff9fa3;">NPC Internal State Editor</h2>
+    <h2>NPC Internal State</h2>
 
     <div class="row mb-4">
       <div class="col-md-6">
-        <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-          <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0;">
-            <i class="bi bi-brain"></i> Current Private Thoughts
+        <div class="card">
+          <div class="card-header bg-info text-white">
+            Current Private Thoughts
           </div>
-          <div class="card-body" style="color: #f8d0d0;">
-            <div class="p-3" style="background-color: #3b0b0b; border-radius: 5px; min-height: 150px;">
-              {{ session.get('npcPrivateThoughts', '(none)') | safe }}
-            </div>
+          <div class="card-body">
+            <p class="card-text">{{ session.get('npcPrivateThoughts', '(none)') | safe }}</p>
           </div>
         </div>
       </div>
 
       <div class="col-md-6">
-        <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-          <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0;">
-            <i class="bi bi-journal-text"></i> Current Significant Memories
+        <div class="card">
+          <div class="card-header bg-warning">
+            Current Significant Memories
           </div>
-          <div class="card-body" style="color: #f8d0d0;">
-            <div class="p-3" style="background-color: #3b0b0b; border-radius: 5px; min-height: 150px;">
-              {{ session.get('npcBehavior', '(none)') | safe }}
-            </div>
+          <div class="card-body">
+            <p class="card-text">{{ session.get('npcBehavior', '(none)') | safe }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0;">
-        <i class="bi bi-pencil-square"></i> Add to NPC's Internal State
+    <form method="POST" action="{{ url_for('manual_npc_update') }}">
+      <div class="mb-3">
+        <label for="new_text" class="form-label">Add Text to NPC's Internal State:</label>
+        <textarea name="new_text" id="new_text" rows="4" class="form-control" placeholder="Write your addition here..."></textarea>
       </div>
-      <div class="card-body">
-        <form method="POST" action="{{ url_for('manual_npc_update') }}">
-          <div class="mb-3">
-            <label for="new_text" class="form-label" style="color: #f8d0d0;">New Text:</label>
-            <textarea name="new_text" id="new_text" rows="4" class="form-control" 
-                      style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;"
-                      placeholder="Write your addition here..."></textarea>
-          </div>
 
-          <div class="mb-3">
-            <label for="target" class="form-label" style="color: #f8d0d0;">Update which field?</label>
-            <select name="target" id="target" class="form-select" 
-                    style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-              <option value="thoughts">Private Thoughts</option>
-              <option value="memories">Significant Memories</option>
-            </select>
-          </div>
-
-          <div class="d-flex justify-content-between">
-            <button type="submit" class="btn" style="background-color: #ff5789; color: white;">
-              <i class="bi bi-check-circle"></i> Update NPC State
-            </button>
-            <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
-              <i class="bi bi-arrow-left"></i> Back to Story
-            </a>
-          </div>
-        </form>
+      <div class="mb-3">
+        <label for="target" class="form-label">Update which field?</label>
+        <select name="target" id="target" class="form-select">
+          <option value="thoughts">Private Thoughts</option>
+          <option value="memories">Significant Memories</option>
+        </select>
       </div>
-    </div>
-    
-    <div class="alert" style="background-color: #5f1c1c; color: #f8d0d0; border: none;">
-      <p class="mb-0"><strong>Tips:</strong> Use this page to manually add to your NPC's internal state. Private thoughts represent what they're thinking but not saying, while significant memories are key events they'll remember.</p>
-    </div>
+
+      <button type="submit" class="btn btn-primary">Update NPC State</button>
+      <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Back to Story</a>
+    </form>
   </div>
 {% endblock %}
