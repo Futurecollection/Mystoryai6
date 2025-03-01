@@ -681,7 +681,7 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
             "low-res, bad anatomy, text, error, missing fingers, extra digit, fewer digits, cropped, "
             "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, "
             "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
-            "floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
+            "floating limbs, (mutated hands and fingers:14), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
         ),
         "clip_last_layer": -2
     }
@@ -1440,7 +1440,8 @@ def interaction():
             pony_scheduler=pony_scheduler,
             pony_cfg_scale=pony_cfg_scale,
             realistic_scheduler=realistic_scheduler,
-            realistic_cfg_scale=realistic_cfg_scale
+            realistic_cfg_scale=realistic_cfg_scale,
+            interaction_mode=session.get("interaction_mode", "narrative")
         )
     else:
         if "update_scene" in request.form:
@@ -1448,6 +1449,14 @@ def interaction():
             session["environment"] = request.form.get("environment","")
             session["lighting_info"] = request.form.get("lighting_info","")
             flash("Scene updated!", "info")
+            return redirect(url_for("interaction"))
+
+        elif "toggle_mode" in request.form:
+            current_mode = session.get("interaction_mode", "narrative")
+            new_mode = "dialogue" if current_mode == "narrative" else "narrative"
+            session["interaction_mode"] = new_mode
+            mode_name = "Dialogue Mode" if new_mode == "dialogue" else "Narrative Mode"
+            flash(f"Switched to {mode_name}!", "info")
             return redirect(url_for("interaction"))
 
         elif "submit_action" in request.form:
