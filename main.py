@@ -765,35 +765,15 @@ MEMORY_UPDATE: (System Error)
     if memory_txt_lower and not (memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower):
         # Significant update - integrate into biography
         if existing_memories.strip().lower() == "(none)":
-            updated_memories = build_initial_npc_memory() + f"\n\n## New Revelations\n### {timestamp}\n{memory_txt}"
+            updated_memories = build_initial_npc_memory() + f"\n\n## New Information\n### {timestamp}\n{memory_txt}"
         else:
-            # More flexible approach that doesn't rely as heavily on rigid section headers
+            # Simpler, more flexible approach without rigid sections
             if memory_txt.strip().startswith('#'):
                 # This is a complete biography replacement
                 updated_memories = memory_txt
             else:
-                # Check if we already have a section for new information
-                if "## New Revelations" in existing_memories:
-                    # Add to the existing revelations section
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                elif "## Character Evolution" in existing_memories:
-                    # Use the existing Character Evolution section
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                elif "## New Information" in existing_memories:
-                    # Use the existing New Information section
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                elif "## Relationship Development" in existing_memories:
-                    # Check if this is relationship related information
-                    if "relationship" in memory_txt_lower or "feelings" in memory_txt_lower or "connection" in memory_txt_lower:
-                        # Add to relationship development
-                        parts = existing_memories.split("## Relationship Development", 1)
-                        updated_memories = f"{parts[0]}## Relationship Development{parts[1]}\n\n• **{timestamp}**: {memory_txt}"
-                    else:
-                        # Add a new section for this information
-                        updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
-                else:
-                    # No appropriate section found, add a new revelations section
-                    updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
+                # Simply add the new information with a timestamp
+                updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
                 
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
@@ -2069,26 +2049,62 @@ def manual_npc_update():
         target = request.form.get("target", "thoughts")  # "thoughts" or "memories" or "reset_bio"
 
         if target == "reset_bio":
-            # Create a simplified free-form biography structure 
+            # Create a minimal free-form biography structure
             npc_name = session.get('npc_name', 'Character')
             basic_info = f"""# {npc_name}'s Biography
-            
+
 {npc_name} is a {session.get('npc_age', '')} year old {session.get('npc_ethnicity', '')} {session.get('npc_gender', '')}.
 
-## Personal Background
-(Character's background story and key life events)
-
-## Personality & Traits
-(Character's personality, quirks, values, and defining traits)
-
-## Relationship Development
-(How the relationship with the user is evolving)
 """
             session["npcBehavior"] = basic_info
-            flash("Biography reset to a free-form template. Please add details to personalize it.", "success")
+            flash("Biography reset to a minimal template. You can now build it however you want.", "success")
+            return redirect(url_for("manual_npc_update"))
+            
+        if target == "rewrite_bio":
+            # Use LLM to rewrite the biography, consolidating all info into a cohesive text
+            existing_memories = session.get("npcBehavior", "")
+            
+            if existing_memories.strip().lower() == "(none)":
+                flash("No biography exists to rewrite yet.", "warning")
+                return redirect(url_for("manual_npc_update"))
+                
+            try:
+                # Make an LLM call to consolidate the biography
+                if GEMINI_API_KEY:
+                    prompt = f"""
+                    Rewrite the following character biography into a cohesive, well-organized text.
+                    - Consolidate all the separate updates and new information sections
+                    - Remove redundancies and organize the information logically
+                    - Keep all important character details
+                    - Maintain a consistent narrative voice
+                    - Do not add any new information that isn't present in the original
+                    - Retain markdown formatting for headings if present
+                    - You may organize the content differently if it improves readability
+                    
+                    CURRENT BIOGRAPHY WITH ACCUMULATED UPDATES:
+                    {existing_memories}
+                    """
+                    
+                    chat = model.start_chat()
+                    response = chat.send_message(
+                        prompt,
+                        generation_config={"temperature": 0.3, "max_output_tokens": 4096},
+                        safety_settings=safety_settings
+                    )
+                    
+                    if response and response.text:
+                        session["npcBehavior"] = response.text.strip()
+                        flash("Biography successfully consolidated and rewritten!", "success")
+                    else:
+                        flash("Error: Could not rewrite biography.", "danger")
+                else:
+                    flash("Error: LLM API key not configured for biography rewriting.", "danger")
+            except Exception as e:
+                flash(f"Error rewriting biography: {str(e)}", "danger")
+                
             return redirect(url_for("manual_npc_update"))
 
-        if not new_text and target != "reset_bio":
+        if not new_text and target not in ["reset_bio", "rewrite_bio"]:
             flash("No text provided to update NPC internal state.", "warning")
             return redirect(url_for("manual_npc_update"))
 
@@ -2107,8 +2123,8 @@ def manual_npc_update():
                     # Looks like a complete biography replacement
                     session["npcBehavior"] = new_text
                 else:
-                    # Add as an update with timestamp
-                    session["npcBehavior"] = f"{existing_memories}\n\n### Update [{timestamp}]\n{new_text}"
+                    # Add as an update with timestamp - simpler format without rigid structure
+                    session["npcBehavior"] = f"{existing_memories}\n\n### New Information [{timestamp}]\n{new_text}"
             
             flash("Biography updated successfully!", "success")
         

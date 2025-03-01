@@ -32,14 +32,15 @@
   <div class="card-body">
     <form method="POST">
       <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Select where to add:</label>
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Select action type:</label>
         <select name="target" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          <option value="thoughts">Private Thoughts (internal monologue, reactions, and feelings)</option>
-          <option value="memories">Biography & Memories (background info, experiences, and revelations)</option>
-          <option value="reset_bio">Reset Biography Format (Free-form)</option>
+          <option value="thoughts">Add to Private Thoughts (internal monologue, reactions, feelings)</option>
+          <option value="memories">Add to Biography & Memories (new information, experiences, revelations)</option>
+          <option value="rewrite_bio">Rewrite Complete Biography (incorporate all new information into cohesive text)</option>
+          <option value="reset_bio">Reset Biography (clear and start with minimal format)</option>
         </select>
         <small class="text-muted" style="color: #ff9fa3 !important;">
-          <i class="bi bi-info-circle"></i> For Biography updates, you can add entirely new background elements, traits, history, or modify existing details.
+          <i class="bi bi-info-circle"></i> Choose "Rewrite Complete Biography" to consolidate all accumulated updates into a clean, unified biography.
         </small>
       </div>
 
