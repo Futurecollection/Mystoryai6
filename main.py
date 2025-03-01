@@ -392,41 +392,45 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     environment = session.get('environment', '?')
 
     system_prompt = f"""
-You are generating two distinct types of content for {npc_name}, focusing on depth, specificity and narrative richness:
+You are generating two distinct types of content for {npc_name}, with a focus on creating an authentic and evolving character:
 
-1. INNER THOUGHTS (Private, First-Person Stream of Consciousness):
-   Write as {npc_name}'s inner voice in first-person present tense, capturing their real-time mental processing.
+1. INNER THOUGHTS (First-Person Stream of Consciousness):
+   Write as {npc_name}'s authentic inner voice, capturing their raw mental and emotional state.
 
-   Your thoughts should include:
-   - Raw emotional reactions to what just happened with {user_name}
-   - Internal struggles, uncertainties, or excitement not expressed openly
-   - Specific memories from {npc_name}'s past that connect to current events
-   - Commentary on how the relationship is developing (currently at Stage {current_stage})
-   - Natural thought patterns with pauses (...), emphasis, and emotional fluctuations
+   Your thoughts should feel natural and include:
+   - Unfiltered emotional reactions to interactions with {user_name}
+   - Doubts, desires, hopes, fears, and contradictions
+   - Memories triggered by current events
+   - Personal reflections on how they feel about the relationship developing
+   - Their true opinions that they might not express openly
 
-   Example thought style:
-   "The way they just touched my hand... it reminds me of my first real relationship back in college. That same electricity. I haven't felt this in years, not since Alex left. Is it too soon to be feeling this way? Part of me wants to pull back, protect myself... but there's something about {user_name} that feels different. Safer, somehow."
+   Make these thoughts feel human, with natural patterns of thinking that might include 
+   hesitations, tangents, sudden realizations, or emotional shifts.
 
-2. BIOGRAPHICAL NARRATIVE UPDATE (Rich, Detailed, Specific):
-   When something significant happens, integrate it into {npc_name}'s evolving biography with specific details.
+2. BIOGRAPHY & MEMORY UPDATES:
+   You're maintaining an evolving biography for {npc_name} that grows with each significant interaction.
+   When updating their biography, feel free to:
 
-   Memory updates should be written as specific narrative additions to the biography, including:
-   - Concrete new details about {npc_name}'s past revealed through conversation
-   - Specific personal information learned about {user_name}
-   - Detailed account of relationship developments with emotional context
-   - Specific vulnerabilities or secrets revealed, with context about why they matter
-   - Precise shifts in feelings or intentions, with reasoning
+   - Add completely new elements to their backstory when it makes sense
+   - Reveal deeper aspects of their personality, history, values or motivations
+   - Connect current events to their past experiences or future aspirations
+   - Develop their relationship journey with {user_name} in meaningful ways
+   - Create rich personal history details that add depth to the character
 
-   Don't just state that something happened - provide rich context about WHY it matters to {npc_name}'s story.
-   If nothing truly significant happened, respond with: (no biographical update needed)
+   Don't be constrained by strict categories - write their biography as a flowing narrative
+   that evolves organically. If this interaction reveals something meaningful about {npc_name},
+   incorporate it naturally into their story.
+
+   The biography should feel like a living document that paints a complex picture of who they
+   are, where they've been, and what matters to them.
 
 IMPORTANT CONTEXT:
 {npc_personal_data}
 
-PREVIOUS BIOGRAPHY & MEMORIES (TREAT AS CANONICAL FACTS): 
+PREVIOUS BIOGRAPHY: 
 {prev_memories}
 
-PREVIOUS THOUGHT PATTERNS:
+PREVIOUS THOUGHTS:
 {prev_thoughts}
 
 RECENT INTERACTIONS:
@@ -436,9 +440,9 @@ CURRENT INTERACTION:
 USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
-Return EXACTLY two sections:
-PRIVATE_THOUGHTS: ... (Current internal monologue processing this interaction)
-BIOGRAPHICAL_UPDATE: ... (Only if this interaction revealed something truly significant - provide specific details that enrich the biography)
+Return two sections:
+PRIVATE_THOUGHTS: ... (Current internal monologue)
+BIOGRAPHICAL_UPDATE: ... (Any meaningful additions or changes to their biography based on this interaction)
 """
 
     chat = model.start_chat()
@@ -589,32 +593,30 @@ MEMORY_UPDATE: (System Error)
     else:
         # A significant update happened - integrate it into the biography
         if existing_memories.strip().lower() == "(none)":
-            updated_memories = build_initial_npc_memory() + f"\n\n## NEW DISCOVERY [{timestamp}]\n{memory_txt}"
+            updated_memories = build_initial_npc_memory() + f"\n\n## Character Evolution [{timestamp}]\n{memory_txt}"
         else:
-            # Check if there's already a Relationship Development section
-            if "### Relationship Development" in existing_memories:
-                # Add the new memory as a new bullet point in the Relationship Development section
-                rel_dev_section = "### Relationship Development"
-                parts = existing_memories.split(rel_dev_section)
-
-                if len(parts) >= 2:
-                    # Add as a new bullet point after the existing ones
-                    first_part = parts[0] + rel_dev_section
-                    second_part = parts[1]
-
-                    # If there are already bullet points, add a new one
-                    if "•" in second_part:
-                        # Add as a new entry with timestamp
-                        updated_memories = f"{first_part}{second_part}\n• {timestamp}: {memory_txt}"
-                    else:
-                        # Start bullet points
-                        updated_memories = f"{first_part}{second_part}\n• {timestamp}: {memory_txt}"
-                else:
-                    # Fallback if splitting didn't work as expected
-                    updated_memories = f"{existing_memories}\n\n#### Memory Update [{timestamp}]\n{memory_txt}"
+            # More flexible approach - detect if this is a completely new aspect of the character
+            # or if it's updating something that already exists
+            
+            # Check if there's already a Character Evolution section
+            if "## Character Evolution" in existing_memories:
+                # Append to Character Evolution section
+                updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
             else:
-                # Just append as a new section
-                updated_memories = f"{existing_memories}\n\n#### Memory Update [{timestamp}]\n{memory_txt}"
+                # Create a new Character Evolution section
+                updated_memories = f"{existing_memories}\n\n## Character Evolution\n### {timestamp}\n{memory_txt}"
+                
+            # Clean up any redundant formatting
+            updated_memories = updated_memories.replace("\n\n\n", "\n\n")
+            
+            # If the biography is getting very long, consider summarizing older parts
+            # This is optional and can be adjusted based on needs
+            if len(updated_memories) > 10000:  # If biography exceeds 10K characters
+                parts = updated_memories.split("## ")
+                if len(parts) > 3:  # If we have multiple sections
+                    # Keep the first part (intro) and the last two sections
+                    compact_bio = parts[0] + "## " + "## ".join(parts[-2:])
+                    updated_memories = compact_bio
 
     session["npcPrivateThoughts"] = updated_thoughts
     session["npcBehavior"] = updated_memories
@@ -1867,34 +1869,75 @@ def delete_gallery_image(index):
 @login_required
 def manual_npc_update():
     """
-    Lets the user manually append text to the NPC's private thoughts or memories.
+    Lets the user manually update the NPC's private thoughts or biography with free-form options.
     """
     if request.method == "POST":
         new_text = request.form.get("new_text", "").strip()
-        target = request.form.get("target", "thoughts")  # "thoughts" or "memories"
+        target = request.form.get("target", "thoughts")  # "thoughts" or "memories" or "reset_bio"
 
-        if not new_text:
+        if target == "reset_bio":
+            # Create a simplified free-form biography structure 
+            npc_name = session.get('npc_name', 'Character')
+            basic_info = f"""# {npc_name}'s Biography
+            
+{npc_name} is a {session.get('npc_age', '')} year old {session.get('npc_ethnicity', '')} {session.get('npc_gender', '')}.
+
+## Personal Background
+(Character's background story and key life events)
+
+## Personality & Traits
+(Character's personality, quirks, values, and defining traits)
+
+## Relationship Development
+(How the relationship with the user is evolving)
+"""
+            session["npcBehavior"] = basic_info
+            flash("Biography reset to a free-form template. Please add details to personalize it.", "success")
+            return redirect(url_for("manual_npc_update"))
+
+        if not new_text and target != "reset_bio":
             flash("No text provided to update NPC internal state.", "warning")
             return redirect(url_for("manual_npc_update"))
 
         if target == "memories":
             existing_memories = session.get("npcBehavior", "")
+            
             if existing_memories.strip().lower() == "(none)":
+                # Create a new biography if none exists
                 session["npcBehavior"] = new_text
             else:
-                session["npcBehavior"] = existing_memories + f"\n• {new_text}"
-            flash("Memory updated successfully!", "success")
-        else:
+                # Get timestamp for the update
+                timestamp = time.strftime("%b %d, %I:%M %p")
+                
+                # Determine if this is a complete replacement or an addition
+                if new_text.startswith("#"):
+                    # Looks like a complete biography replacement
+                    session["npcBehavior"] = new_text
+                else:
+                    # Add as an update with timestamp
+                    session["npcBehavior"] = f"{existing_memories}\n\n### Update [{timestamp}]\n{new_text}"
+            
+            flash("Biography updated successfully!", "success")
+        
+        elif target == "thoughts":
             existing_thoughts = session.get("npcPrivateThoughts", "")
+            timestamp = time.strftime("%b %d, %I:%M %p")
+            
             if existing_thoughts.strip().lower() == "(none)":
-                session["npcPrivateThoughts"] = new_text
+                session["npcPrivateThoughts"] = f"### {timestamp}\n{new_text}"
             else:
-                session["npcPrivateThoughts"] = existing_thoughts + f"\n• {new_text}"
+                session["npcPrivateThoughts"] = f"{existing_thoughts}\n\n### {timestamp}\n{new_text}"
+            
             flash("Private thoughts updated successfully!", "success")
 
         return redirect(url_for("interaction"))
     else:
-        return render_template("manual_npc_update.html", title="Manual NPC Update")
+        npc_behavior = session.get("npcBehavior", "")
+        npc_thoughts = session.get("npcPrivateThoughts", "")
+        return render_template("manual_npc_update.html", 
+                             title="Manual NPC Update",
+                             current_behavior=npc_behavior,
+                             current_thoughts=npc_thoughts)
 
 
 if __name__ == "__main__":
