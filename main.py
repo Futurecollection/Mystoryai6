@@ -681,7 +681,8 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
             "low-res, bad anatomy, text, error, missing fingers, extra digit, fewer digits, cropped, "
             "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, "
             "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
-            "floating limbs, (mutated hands and fingers:14), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
+            "floating limbs```python
+, (mutated hands and fingers:14), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
         ),
         "clip_last_layer": -2
     }
@@ -1343,7 +1344,7 @@ Orgasm & Afterglow:
             current_situation_options=CURRENT_SITUATION_OPTIONS,
             environment_options=ENVIRONMENT_OPTIONS,
             encounter_context_options=ENCOUNTER_CONTEXT_OPTIONS,
-            ethnicity_options=ETHNICITYOPTIONS,
+            ethnicity_options=ETHNICITY_OPTIONS,
 
             # Extra orientation/relationship fields
             npc_sexual_orientation_options=NPC_SEXUAL_ORIENTATION_OPTIONS,
@@ -1465,6 +1466,7 @@ def interaction():
             trust = session.get("trustScore", 5.0)
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
+            interaction_mode = session.get("interaction_mode", "narrative")
             log_message(f"User: {user_action}")
 
             # Try up to 3 times to get a non-empty narration
@@ -1504,6 +1506,73 @@ def interaction():
             if not narration_txt or len(narration_txt.strip()) <= 10:
                 narration_txt = "[The system encountered an issue generating a response. Please try again or refresh the page.]"
                 log_message("[SYSTEM] Failed to generate narration after multiple attempts.")
+
+            # For dialogue mode, extract just the NPC's dialogue and actions like Replika
+            if interaction_mode == "dialogue":
+                # Process narration for dialogue mode (Replika-style)
+                npc_name = session.get('npc_name', '')
+
+                # Extract direct speech and actions
+                import re
+
+                # First, get all dialogue from the NPC (text in quotes)
+                dialogue_parts = []
+                quotes = re.findall(r'[""]([^""]+)[""]', narration_txt)
+
+                # Get all action descriptions (text between asterisks)
+                actions = re.findall(r'\*([^*]+)\*', narration_txt)
+
+                # Combine dialogue and action in a more natural conversational format
+                result = ""
+
+                # If there's dialogue, format it without quotes (Replika style)
+                if quotes:
+                    # First pass: Look for quotes that are clearly from the NPC
+                    npc_lines = []
+                    for quote in quotes:
+                        # If it's clearly the NPC talking
+                        if len(quote.strip()) > 0:
+                            npc_lines.append(quote.strip())
+
+                    # Add the dialogue without quotes
+                    if npc_lines:
+                        result = "\n\n".join(npc_lines)
+
+                # Add action descriptions with asterisks
+                if actions:
+                    # If we already have dialogue, add a line break
+                    if result:
+                        result += "\n\n"
+
+                    # Add actions with asterisks
+                    action_texts = [f"*{action.strip()}*" for action in actions]
+                    result += "\n".join(action_texts)
+
+                # If we didn't find any usable dialogue or actions, try to extract any lines likely to be the NPC
+                if not result:
+                    # Split by newlines and look for potential direct speech without quotes
+                    lines = narration_txt.split('\n')
+                    potential_dialogue = []
+
+                    for line in lines:
+                        # Skip lines that are clearly narrative description
+                        if re.search(r'\b(you|your)\b', line, re.IGNORECASE):
+                            continue
+                        if re.search(r'\b(the room|across|around|behind|beside)\b', line, re.IGNORECASE):
+                            continue
+
+                        # Keep lines that look like they could be direct speech
+                        line = line.strip()
+                        if line and not line.startswith('You') and len(line) > 10:
+                            potential_dialogue.append(line)
+
+                    if potential_dialogue:
+                        result = "\n\n".join(potential_dialogue)
+
+                # Use the result if we found something, otherwise fall back to the original
+                if result:
+                    narration_txt = result
+
 
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff

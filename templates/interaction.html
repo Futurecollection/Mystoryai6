@@ -71,7 +71,14 @@
   <div class="card-body">
     <div class="border p-3 mb-3" style="white-space: pre-line; background-color: #3b0b0b; color: #f8d0d0; border-radius: 8px; border: 1px solid #6d1d1d; {% if interaction_mode == 'dialogue' %}font-size: 1.1rem; line-height: 1.6;{% endif %}">
       {% if interaction_mode == 'dialogue' %}
-        {{ npc_narration|replace('*', '<span style="color: #ff9fa3; font-style: italic;">*')|replace('*', '*</span>', 1) }}
+        {% set parts = npc_narration.split('\n\n') %}
+        {% for part in parts %}
+          {% if '*' in part %}
+            <div style="margin-bottom: 1rem; color: #ff9fa3; font-style: italic;">{{ part }}</div>
+          {% else %}
+            <div style="margin-bottom: 1.5rem; color: #f8d0d0;">{{ part }}</div>
+          {% endif %}
+        {% endfor %}
       {% else %}
         {{ npc_narration }}
       {% endif %}
