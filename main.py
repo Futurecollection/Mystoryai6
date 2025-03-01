@@ -288,33 +288,81 @@ def build_initial_npc_memory() -> str:
     occupation = session.get('npc_occupation','?')
     current_situation = session.get('npc_current_situation','?')
     backstory = session.get('npc_backstory','').strip()
+    environment = session.get('environment', '')
+    encounter_context = session.get('encounter_context', '')
+    user_name = session.get('user_name', 'the user')
     
-    # Format a structured biography with sections
-    biography = f"BIOGRAPHY OF {name.upper()}:\n"
+    # Format a rich, narrative-style biography with sections
+    biography = f"## DETAILED BIOGRAPHY: {name.upper()}\n\n"
     
-    # Personal details section
-    biography += f"\nPersonal Details:\n"
-    biography += f"• {name} is a {age}-year-old {ethnicity} {gender}\n"
-    biography += f"• Works as a {occupation}\n"
-    biography += f"• Has a {personality} personality\n"
-    biography += f"• {orientation}, looking for {relationship_goal}\n"
+    # Core identity section - written in narrative style
+    biography += f"### Core Identity\n"
+    biography += f"{name} is a {age}-year-old {ethnicity} {gender} with a {personality} personality that defines much of how they interact with the world. "
     
-    # Physical appearance section
-    biography += f"\nPhysical Appearance:\n"
-    biography += f"• {body_type} build\n"
-    biography += f"• {hair_color} hair styled {hair_style}\n"
-    biography += f"• Typically dresses in {clothing}\n"
+    if personality.lower() in ["confident", "charming", "flirty", "playful"]:
+        biography += f"Their natural confidence makes them approachable yet intriguing, often drawing others in with seemingly little effort. "
+    elif personality.lower() in ["intellectual", "analytical", "professional"]:
+        biography += f"They carry themselves with quiet thoughtfulness, observing details others might miss and approaching life with measured consideration. "
+    elif personality.lower() in ["mysterious", "reserved"]:
+        biography += f"They tend to keep parts of themselves hidden behind a carefully maintained exterior, revealing their true thoughts only to those they trust. "
     
-    # Current situation and backstory
-    biography += f"\nCurrent Life Situation:\n"
-    biography += f"• {current_situation}\n"
+    biography += f"As a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
     
+    # Life circumstances and current situation
+    biography += f"\n\n### Life Circumstances\n"
+    biography += f"Currently, {name} is {current_situation.lower() if not current_situation.startswith('Other') else 'navigating a personal transition in life'}. "
+    
+    if "broke up" in current_situation.lower():
+        biography += f"The end of their previous relationship left some emotional scars that occasionally surface in quiet moments of vulnerability. "
+    elif "divorce" in current_situation.lower():
+        biography += f"The divorce was a significant turning point, forcing them to reexamine their priorities and approach to relationships. "
+    elif "single" in current_situation.lower():
+        biography += f"While comfortable with independence, there's an underlying desire for meaningful connection that motivates their social interactions. "
+    elif "new in town" in current_situation.lower():
+        biography += f"Still learning the rhythms of a new place has left them both excited for fresh possibilities and occasionally longing for the familiarity of what they left behind. "
+    
+    biography += f"\n\n### Physical Presence\n"
+    biography += f"{name} has a {body_type.lower()} physique that they {random.choice(['maintain with regular exercise', 'carry with natural confidence', 'have grown comfortable with over the years'])}. "
+    biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they've perfected over time', 'has become part of their signature appearance'])}. "
+    biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their personal style', 'they chose with care', 'makes them feel confident'])}. "
+    
+    biography += f"\n\n### Relationship Approach\n"
+    biography += f"As someone who identifies as {orientation.lower()}, {name} is currently looking for {relationship_goal.lower()}. "
+    
+    if "casual" in relationship_goal.lower():
+        biography += f"They value freedom and spontaneity, preferring connections that don't come with excessive expectations or constraints. "
+    elif "serious" in relationship_goal.lower():
+        biography += f"They've reached a point in life where they value depth and commitment, seeking someone to build something meaningful with. "
+    elif "friends with benefits" in relationship_goal.lower():
+        biography += f"They appreciate the balance of emotional connection and physical intimacy without the pressure of traditional relationship structures. "
+    
+    # Add backstory if provided
     if backstory:
-        biography += f"\nBackstory:\n{backstory}\n"
+        biography += f"\n\n### Personal History\n{backstory}\n"
+    else:
+        # Generate some basic backstory elements if none provided
+        biography += f"\n\n### Personal History\n"
+        biography += f"{name} was raised in a {random.choice(['small coastal town', 'bustling city', 'quiet suburban neighborhood', 'rural community'])}, "
+        biography += f"which instilled in them a sense of {random.choice(['independence', 'community', 'ambition', 'creativity'])}. "
+        biography += f"Their {random.choice(['parents', 'family', 'upbringing'])} played a significant role in shaping their values around "
+        biography += f"{random.choice(['hard work', 'authenticity', 'emotional openness', 'resilience'])}. "
+    
+    # Current meeting context
+    biography += f"\n\n### Current Encounter\n"
+    if environment:
+        biography += f"Meeting in {environment.lower()}, " 
+    else:
+        biography += f"In this current setting, "
+        
+    if encounter_context:
+        biography += f"under the circumstances of {encounter_context.lower()}, "
+    
+    biography += f"{name} finds themselves intrigued by {user_name}. The interaction is just beginning, but already there's a sense of "
+    biography += f"{random.choice(['possibility', 'curiosity', 'interest', 'chemistry'])} that has caught their attention."
     
     # Relationship development placeholder
-    biography += f"\nRelationship with User:\n"
-    biography += f"• Just met - relationship is beginning to develop"
+    biography += f"\n\n### Relationship Development\n"
+    biography += f"• First Meeting: Just getting to know each other - initial impressions forming"
     
     return biography
 
@@ -325,7 +373,7 @@ def build_initial_npc_memory() -> str:
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a separate LLM call to process NPC thoughts and memories,
        focusing on the NPC's internal narrative and evolving biography.
-       Memories track key biographical data and relationship development.
+       Memories represent a rich, detailed biographical narrative that evolves.
        Thoughts capture stream-of-consciousness reactions and feelings.
     """
     npc_name = session.get('npc_name', '?')
@@ -336,40 +384,46 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     # Get conversation context from recent history
     recent_interactions = "\n".join(session.get("interaction_log", [])[-5:])
     current_stage = session.get("currentStage", 1)
+    
+    # Extract key information for context
+    user_name = session.get('user_name', 'the user')
+    relationship_goal = session.get('npc_relationship_goal', '?')
+    personality = session.get('npc_personality', '?')
+    environment = session.get('environment', '?')
 
     system_prompt = f"""
-You are generating two distinct types of content for {npc_name}:
+You are generating two distinct types of content for {npc_name}, focusing on depth, specificity and narrative richness:
 
 1. INNER THOUGHTS (Private, First-Person Stream of Consciousness):
    Write as {npc_name}'s inner voice in first-person present tense, capturing their real-time mental processing.
    
    Your thoughts should include:
-   - Raw emotional reactions to what just happened with the user
+   - Raw emotional reactions to what just happened with {user_name}
    - Internal struggles, uncertainties, or excitement not expressed openly
-   - Connecting current events to past experiences and memories
-   - Commentary on the evolving relationship (currently at Stage {current_stage})
+   - Specific memories from {npc_name}'s past that connect to current events
+   - Commentary on how the relationship is developing (currently at Stage {current_stage})
    - Natural thought patterns with pauses (...), emphasis, and emotional fluctuations
    
    Example thought style:
-   "The way they just looked at me... I can't help feeling drawn in. But should I trust this? My ex made me cautious, yet this feels different. There's something about them that makes me want to let my guard down..."
+   "The way they just touched my hand... it reminds me of my first real relationship back in college. That same electricity. I haven't felt this in years, not since Alex left. Is it too soon to be feeling this way? Part of me wants to pull back, protect myself... but there's something about {user_name} that feels different. Safer, somehow."
 
-2. BIOGRAPHICAL MEMORY UPDATE (Third-Person, Factual):
-   Identify if something significant happened that should become part of {npc_name}'s ongoing biographical narrative.
+2. BIOGRAPHICAL NARRATIVE UPDATE (Rich, Detailed, Specific):
+   When something significant happens, integrate it into {npc_name}'s evolving biography with specific details.
    
-   Memory updates can include:
-   - New discoveries about {npc_name}'s own history or personality
-   - Important information learned about the user
-   - Relationship milestones or emotional turning points
-   - Revealing vulnerabilities or secrets
-   - Significant changes in feelings or intentions
+   Memory updates should be written as specific narrative additions to the biography, including:
+   - Concrete new details about {npc_name}'s past revealed through conversation
+   - Specific personal information learned about {user_name}
+   - Detailed account of relationship developments with emotional context
+   - Specific vulnerabilities or secrets revealed, with context about why they matter
+   - Precise shifts in feelings or intentions, with reasoning
    
-   Only add truly meaningful developments - not routine interactions.
-   If nothing significant happened, respond with: (no biographical update needed)
+   Don't just state that something happened - provide rich context about WHY it matters to {npc_name}'s story.
+   If nothing truly significant happened, respond with: (no biographical update needed)
 
 IMPORTANT CONTEXT:
 {npc_personal_data}
 
-PREVIOUS BIOGRAPHY & MEMORIES: 
+PREVIOUS BIOGRAPHY & MEMORIES (TREAT AS CANONICAL FACTS): 
 {prev_memories}
 
 PREVIOUS THOUGHT PATTERNS:
@@ -384,7 +438,7 @@ SCENE NARRATION: {narration}
 
 Return EXACTLY two sections:
 PRIVATE_THOUGHTS: ... (Current internal monologue processing this interaction)
-BIOGRAPHICAL_UPDATE: ... (Only if this interaction revealed something significant about {npc_name}, the user, or their relationship)
+BIOGRAPHICAL_UPDATE: ... (Only if this interaction revealed something truly significant - provide specific details that enrich the biography)
 """
 
     chat = model.start_chat()
@@ -521,11 +575,11 @@ MEMORY_UPDATE: (System Error)
     # Format the date/time for better context
     timestamp = time.strftime("%b %d, %I:%M %p")
     
-    # Append new private thoughts with timestamp
+    # Append new private thoughts with timestamp and formatting
     if existing_thoughts.strip().lower() == "(none)":
-        updated_thoughts = f"[{timestamp}] {thoughts_txt}"
+        updated_thoughts = f"### {timestamp}\n{thoughts_txt}"
     else:
-        updated_thoughts = f"{existing_thoughts}\n\n[{timestamp}] {thoughts_txt}"
+        updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
 
     # Only append memory if it's not trivial or blank
     memory_txt_lower = memory_txt.strip().lower()
@@ -533,11 +587,34 @@ MEMORY_UPDATE: (System Error)
         # No update needed for memories
         updated_memories = existing_memories
     else:
-        # A significant update happened - add it to memories with a section header
+        # A significant update happened - integrate it into the biography
         if existing_memories.strip().lower() == "(none)":
-            updated_memories = f"NEW DISCOVERY [{timestamp}]:\n{memory_txt}"
+            updated_memories = build_initial_npc_memory() + f"\n\n## NEW DISCOVERY [{timestamp}]\n{memory_txt}"
         else:
-            updated_memories = f"{existing_memories}\n\nNEW DISCOVERY [{timestamp}]:\n{memory_txt}"
+            # Check if there's already a Relationship Development section
+            if "### Relationship Development" in existing_memories:
+                # Add the new memory as a new bullet point in the Relationship Development section
+                rel_dev_section = "### Relationship Development"
+                parts = existing_memories.split(rel_dev_section)
+                
+                if len(parts) >= 2:
+                    # Add as a new bullet point after the existing ones
+                    first_part = parts[0] + rel_dev_section
+                    second_part = parts[1]
+                    
+                    # If there are already bullet points, add a new one
+                    if "•" in second_part:
+                        # Add as a new entry with timestamp
+                        updated_memories = f"{first_part}{second_part}\n• {timestamp}: {memory_txt}"
+                    else:
+                        # Start bullet points
+                        updated_memories = f"{first_part}{second_part}\n• {timestamp}: {memory_txt}"
+                else:
+                    # Fallback if splitting didn't work as expected
+                    updated_memories = f"{existing_memories}\n\n#### Memory Update [{timestamp}]\n{memory_txt}"
+            else:
+                # Just append as a new section
+                updated_memories = f"{existing_memories}\n\n#### Memory Update [{timestamp}]\n{memory_txt}"
 
     session["npcPrivateThoughts"] = updated_thoughts
     session["npcBehavior"] = updated_memories
