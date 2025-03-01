@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -274,7 +273,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Character Settings -->
   <div class="accordion-item" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
     <h2 class="accordion-header">
@@ -300,11 +299,16 @@
 
 <!-- Footer Controls -->
 <div class="d-flex justify-content-between mb-3">
-  <a href="{{ url_for('restart') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;" onclick="return confirm('Are you sure you want to restart? All progress will be lost.')">
-    <i class="bi bi-arrow-repeat"></i> Restart Story
-  </a>
-  <a href="{{ url_for('logout_route') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
-    <i class="bi bi-box-arrow-right"></i> Logout
+  <div>
+    <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-sm mb-2" style="background-color: #5f1c1c; color: #f8d0d0;">
+      <i class="bi bi-gear"></i> Update NPC
+    </a>
+    <a href="{{ url_for('manual_npc_update') }}" class="btn btn-sm mb-2" style="background-color: #5f1c1c; color: #f8d0d0; border-left: 1px solid #f8d0d0;">
+      <i class="bi bi-journal-text"></i> View/Edit Memories
+    </a>
+  </div>
+  <a href="{{ url_for('full_story') }}" class="btn btn-sm mb-2" style="background-color: #5f1c1c; color: #f8d0d0;">
+    <i class="bi bi-journals"></i> View Full Story
   </a>
 </div>
 
@@ -316,12 +320,12 @@ function prefillAction(text) {
 
 function showLoading() {
   document.getElementById("loading").style.display = "block";
-  
+
   // If this is a move submission, show the move loading indicator too
   if (event.submitter && event.submitter.name === "submit_action") {
     document.getElementById("moveLoading").style.display = "block";
   }
-  
+
   // If this is an image action, show the image loading indicator
   if (event.submitter && (event.submitter.name === "generate_image" || event.submitter.name === "new_seed")) {
     document.getElementById("imageLoading").style.display = "block";
@@ -335,7 +339,7 @@ function showImageLoading() {
 function toggleAdvancedSettings() {
   const advancedBody = document.getElementById('advancedSettingsBody');
   const icon = document.getElementById('advancedToggleIcon');
-  
+
   if (advancedBody.style.display === 'none') {
     advancedBody.style.display = 'block';
     icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
@@ -379,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize model visibility based on selected radio
   const selectedModel = document.querySelector('input[name="model_type"]:checked')?.value || 'flux';
   toggleVisibilityForModel(selectedModel);
-  
+
   // Handle all forms
   document.querySelectorAll('form').forEach(function(form) {
     form.addEventListener('submit', function(event) {

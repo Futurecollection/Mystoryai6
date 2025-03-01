@@ -273,17 +273,50 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 def build_initial_npc_memory() -> str:
-    """Construct a short snippet describing the NPC personal data as 'initial memory.'"""
+    """Construct a detailed biography for the NPC using all available personalization data."""
     name = session.get('npc_name','Unknown')
     gender = session.get('npc_gender','?')
     age = session.get('npc_age','?')
+    ethnicity = session.get('npc_ethnicity','?')
+    orientation = session.get('npc_sexual_orientation','?')
+    relationship_goal = session.get('npc_relationship_goal','?')
     personality = session.get('npc_personality','?')
+    body_type = session.get('npc_body_type','?')
+    hair_color = session.get('npc_hair_color','?')
+    hair_style = session.get('npc_hair_style','?')
     clothing = session.get('npc_clothing','?')
     occupation = session.get('npc_occupation','?')
-
-    # Just build a quick bullet or short summary
-    return (f"Initial memory about {name}: " 
-            f"{gender}, age {age}, personality={personality}, clothing={clothing}, occupation={occupation}.")
+    current_situation = session.get('npc_current_situation','?')
+    backstory = session.get('npc_backstory','').strip()
+    
+    # Format a structured biography with sections
+    biography = f"BIOGRAPHY OF {name.upper()}:\n"
+    
+    # Personal details section
+    biography += f"\nPersonal Details:\n"
+    biography += f"• {name} is a {age}-year-old {ethnicity} {gender}\n"
+    biography += f"• Works as a {occupation}\n"
+    biography += f"• Has a {personality} personality\n"
+    biography += f"• {orientation}, looking for {relationship_goal}\n"
+    
+    # Physical appearance section
+    biography += f"\nPhysical Appearance:\n"
+    biography += f"• {body_type} build\n"
+    biography += f"• {hair_color} hair styled {hair_style}\n"
+    biography += f"• Typically dresses in {clothing}\n"
+    
+    # Current situation and backstory
+    biography += f"\nCurrent Life Situation:\n"
+    biography += f"• {current_situation}\n"
+    
+    if backstory:
+        biography += f"\nBackstory:\n{backstory}\n"
+    
+    # Relationship development placeholder
+    biography += f"\nRelationship with User:\n"
+    biography += f"• Just met - relationship is beginning to develop"
+    
+    return biography
 
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
@@ -291,50 +324,67 @@ def build_initial_npc_memory() -> str:
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a separate LLM call to process NPC thoughts and memories,
-       focusing on only significant/pivotal new knowledge or changes.
-       The function now preserves memory accumulation better.
+       focusing on the NPC's internal narrative and evolving biography.
+       Memories track key biographical data and relationship development.
+       Thoughts capture stream-of-consciousness reactions and feelings.
     """
     npc_name = session.get('npc_name', '?')
     prev_thoughts = session.get("npcPrivateThoughts", "(none)")
     prev_memories = session.get("npcBehavior", "(none)")
     npc_personal_data = build_personalization_string()
+    
+    # Get conversation context from recent history
+    recent_interactions = "\n".join(session.get("interaction_log", [])[-5:])
+    current_stage = session.get("currentStage", 1)
 
     system_prompt = f"""
-You are {npc_name}'s inner voice, expressing their raw thoughts, feelings, and reactions.
-Write in first-person present tense as a stream of consciousness.
+You are generating two distinct types of content for {npc_name}:
 
-Your thoughts should reflect:
-- Immediate emotional reactions to the user's words/actions
-- Hidden desires, fears, and uncertainties
-- Commentary on the growing relationship dynamics
-- Unfiltered honest feelings that wouldn't be said out loud
-- Natural thought patterns with pauses (...) and emphases
-- Both rational thoughts and emotional impulses
+1. INNER THOUGHTS (Private, First-Person Stream of Consciousness):
+   Write as {npc_name}'s inner voice in first-person present tense, capturing their real-time mental processing.
+   
+   Your thoughts should include:
+   - Raw emotional reactions to what just happened with the user
+   - Internal struggles, uncertainties, or excitement not expressed openly
+   - Connecting current events to past experiences and memories
+   - Commentary on the evolving relationship (currently at Stage {current_stage})
+   - Natural thought patterns with pauses (...), emphasis, and emotional fluctuations
+   
+   Example thought style:
+   "The way they just looked at me... I can't help feeling drawn in. But should I trust this? My ex made me cautious, yet this feels different. There's something about them that makes me want to let my guard down..."
 
-Example thought style:
-"God, the way they just looked at me... I can't help but feel drawn in. But am I moving too fast? No, this feels different. There's something about them that makes me want to let my guard down..."
+2. BIOGRAPHICAL MEMORY UPDATE (Third-Person, Factual):
+   Identify if something significant happened that should become part of {npc_name}'s ongoing biographical narrative.
+   
+   Memory updates can include:
+   - New discoveries about {npc_name}'s own history or personality
+   - Important information learned about the user
+   - Relationship milestones or emotional turning points
+   - Revealing vulnerabilities or secrets
+   - Significant changes in feelings or intentions
+   
+   Only add truly meaningful developments - not routine interactions.
+   If nothing significant happened, respond with: (no biographical update needed)
 
-IMPORTANT: Only add NEW thoughts based on the latest interaction.
-Focus on your immediate inner reaction to what just happened.
-
-Context about {npc_name}:
+IMPORTANT CONTEXT:
 {npc_personal_data}
 
-Guidelines for generating NEW memories:
-- Only capture truly significant moments or revelations
-- Focus on emotional turning points
-- Record important user disclosures
-- Note relationship progression points
-- Skip minor small talk or routine interactions
+PREVIOUS BIOGRAPHY & MEMORIES: 
+{prev_memories}
 
-PREVIOUS MEMORIES (for context only): {prev_memories}
-LAST USER ACTION: {last_user_action}
+PREVIOUS THOUGHT PATTERNS:
+{prev_thoughts}
+
+RECENT INTERACTIONS:
+{recent_interactions}
+
+CURRENT INTERACTION:
+USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
-Return EXACTLY two lines:
-Line 1 => PRIVATE_THOUGHTS: ... (current thoughts/feelings about this interaction)
-Line 2 => NEW_MEMORY: ... (ONLY new significant memory from this interaction)
-            If nothing significant to remember, respond with: (no new memory)
+Return EXACTLY two sections:
+PRIVATE_THOUGHTS: ... (Current internal monologue processing this interaction)
+BIOGRAPHICAL_UPDATE: ... (Only if this interaction revealed something significant about {npc_name}, the user, or their relationship)
 """
 
     chat = model.start_chat()
@@ -349,7 +399,7 @@ Line 2 => NEW_MEMORY: ... (ONLY new significant memory from this interaction)
     for ln in response.text.strip().split("\n"):
         if ln.startswith("PRIVATE_THOUGHTS:"):
             thoughts = ln.split(":", 1)[1].strip()
-        elif ln.startswith("NEW_MEMORY:"):
+        elif ln.startswith("BIOGRAPHICAL_UPDATE:") or ln.startswith("NEW_MEMORY:"):
             memory = ln.split(":", 1)[1].strip()
 
     return thoughts, memory
@@ -463,26 +513,31 @@ MEMORY_UPDATE: (System Error)
     thoughts_txt, memory_txt = process_npc_thoughts(last_user_action, narration_txt)
 
     # ---------------------------------------------------------
-    #  ACCUMULATE THOUGHTS & MEMORIES INSTEAD OF OVERWRITING
+    #  ACCUMULATE THOUGHTS & MEMORIES WITH IMPROVED FORMATTING
     # ---------------------------------------------------------
     existing_thoughts = session.get("npcPrivateThoughts", "")
     existing_memories = session.get("npcBehavior", "")
-
-    # Append new private thoughts
+    
+    # Format the date/time for better context
+    timestamp = time.strftime("%b %d, %I:%M %p")
+    
+    # Append new private thoughts with timestamp
     if existing_thoughts.strip().lower() == "(none)":
-        updated_thoughts = thoughts_txt
+        updated_thoughts = f"[{timestamp}] {thoughts_txt}"
     else:
-        updated_thoughts = f"{existing_thoughts}\n• {thoughts_txt}"
+        updated_thoughts = f"{existing_thoughts}\n\n[{timestamp}] {thoughts_txt}"
 
     # Only append memory if it's not trivial or blank
     memory_txt_lower = memory_txt.strip().lower()
-    if memory_txt_lower.startswith("(no significant update)") or not memory_txt_lower:
+    if memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower or not memory_txt_lower:
+        # No update needed for memories
         updated_memories = existing_memories
     else:
+        # A significant update happened - add it to memories with a section header
         if existing_memories.strip().lower() == "(none)":
-            updated_memories = memory_txt
+            updated_memories = f"NEW DISCOVERY [{timestamp}]:\n{memory_txt}"
         else:
-            updated_memories = f"{existing_memories}\n• {memory_txt}"
+            updated_memories = f"{existing_memories}\n\nNEW DISCOVERY [{timestamp}]:\n{memory_txt}"
 
     session["npcPrivateThoughts"] = updated_thoughts
     session["npcBehavior"] = updated_memories

@@ -8,20 +8,20 @@
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
     <h3 style="margin-bottom: 0;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h3>
-    <small style="opacity: 0.8;">These represent the NPC's internal monologue and feelings that they don't express openly</small>
+    <small style="opacity: 0.8;">Represents the character's internal monologue, emotional reactions, and reasoning process</small>
   </div>
   <div class="card-body" style="background-color: #3b0b0b;">
-    <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto;">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+    <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
   </div>
 </div>
 
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Memories</h3>
-    <small style="opacity: 0.8;">These represent key events, revelations, and relationship developments the NPC remembers</small>
+    <h3 style="margin-bottom: 0;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Biography & Memories</h3>
+    <small style="opacity: 0.8;">Key biographical information, past experiences, and relationship developments</small>
   </div>
   <div class="card-body" style="background-color: #3b0b0b;">
-    <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto;">{{ session.get('npcBehavior', '(None)') }}</div>
+    <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
   </div>
 </div>
 
@@ -32,22 +32,23 @@
   <div class="card-body">
     <form method="POST">
       <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0;">Select where to add:</label>
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Select where to add:</label>
         <select name="target" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          <option value="thoughts">Private Thoughts (what they're thinking but not saying)</option>
-          <option value="memories">Memories (significant events they should remember)</option>
+          <option value="thoughts">Private Thoughts (internal monologue, reactions, and feelings)</option>
+          <option value="memories">Biography & Memories (background info, experiences, and revelations)</option>
         </select>
       </div>
 
       <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0;">Enter new content:</label>
-        <textarea name="new_text" class="form-control" rows="5" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;" 
-                  placeholder="Example for thoughts: 'I can't believe how much I'm starting to trust them...'
-Example for memories: 'We shared our first kiss at the café today. It was unexpected but wonderful.'"></textarea>
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Enter new content:</label>
+        <textarea name="new_text" class="form-control" rows="5" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" 
+                  placeholder="Example for thoughts: 'I find myself constantly thinking about them when we're apart. There's something different about this connection that I can't explain...'
+                  
+Example for biography/memories: 'Grew up in a small coastal town. Parents divorced when I was 12, which made me cautious about relationships. Recently discovered a passion for photography.'"></textarea>
       </div>
 
       <div class="d-flex justify-content-between">
-        <button type="submit" class="btn" style="background-color: #ff5789; color: white;">
+        <button type="submit" class="btn" style="background-color: #ff5789; color: white; font-weight: bold;">
           <i class="bi bi-plus-circle"></i> Add to Character
         </button>
         <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
@@ -60,16 +61,28 @@ Example for memories: 'We shared our first kiss at the café today. It was unexp
 
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h4 style="margin-bottom: 0;"><i class="bi bi-info-circle"></i> Tips for Effective Memory Editing</h4>
+    <h4 style="margin-bottom: 0;"><i class="bi bi-info-circle"></i> How Character Memory Works</h4>
   </div>
-  <div class="card-body">
-    <ul style="color: #f8d0d0;">
-      <li><strong>For Private Thoughts:</strong> Focus on emotions, inner conflicts, and unspoken desires</li>
-      <li><strong>For Memories:</strong> Add pivotal moments, important revelations, or relationship milestones</li> 
-      <li>Use first-person perspective for thoughts ("I feel...") and factual statements for memories</li>
-      <li>Memories have more impact on future interactions than private thoughts</li>
-      <li>Adding too much content at once may overwhelm the AI - focus on quality over quantity</li>
-    </ul>
+  <div class="card-body" style="background-color: #3b0b0b;">
+    <div class="mb-3" style="color: #ffd0d0;">
+      <h5><i class="bi bi-journal-text"></i> Biography & Memories:</h5>
+      <ul>
+        <li><strong>Background Information:</strong> Character's history, upbringing, and formative experiences</li>
+        <li><strong>Self-Discovery:</strong> New aspects of personality or past revealed through interactions</li>
+        <li><strong>Relationship Timeline:</strong> Key events and milestones between the NPC and user</li>
+        <li><strong>Learning About User:</strong> Discoveries about the user's life, preferences, and history</li>
+      </ul>
+    </div>
+    
+    <div style="color: #ffd0d0;">
+      <h5><i class="bi bi-lightbulb"></i> Private Thoughts:</h5>
+      <ul>
+        <li><strong>Emotional Processing:</strong> Raw reactions to recent interactions with the user</li>
+        <li><strong>Inner Conflicts:</strong> Personal struggles, hesitations, or excitement not expressed openly</li>
+        <li><strong>Reflections:</strong> Contemplation on evolving feelings and the relationship's development</li>
+        <li><strong>Unspoken Intentions:</strong> Desires or plans the character is considering but hasn't shared</li>
+      </ul>
+    </div>
   </div>
 </div>
 {% endblock %}
