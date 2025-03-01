@@ -84,7 +84,7 @@
           {% endif %}
         {% endfor %}
       {% else %}
-        {{ npc_narration }}
+        {{ npc_narration|safe }}
       {% endif %}
     </div>
   </div>
