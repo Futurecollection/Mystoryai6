@@ -323,7 +323,7 @@ def build_initial_npc_memory() -> str:
     
     biography += f"\n\n### Physical Presence\n"
     biography += f"{name} has a {body_type.lower()} physique that they {random.choice(['maintain with regular exercise', 'carry with natural confidence', 'have grown comfortable with over the years'])}. "
-    biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they've perfected over time', 'has become part of their signature appearance'])}. "
+    biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they\'ve perfected over time', 'has become part of their signature appearance'])}. "
     biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their personal style', 'they chose with care', 'makes them feel confident'])}. "
     
     biography += f"\n\n### Relationship Approach\n"
