@@ -408,21 +408,33 @@ You are generating two distinct types of content for {npc_name}, with a focus on
    hesitations, tangents, sudden realizations, or emotional shifts.
 
 2. BIOGRAPHY & MEMORY UPDATES:
-   You're maintaining an evolving biography for {npc_name} that grows with each significant interaction.
-   When updating their biography, feel free to:
+   Update the biography with SPECIFIC NEW INFORMATION that emerges during this interaction. 
+   Focus on concrete details that should be remembered, NOT vague summaries.
 
-   - Add completely new elements to their backstory when it makes sense
-   - Reveal deeper aspects of their personality, history, values or motivations
-   - Connect current events to their past experiences or future aspirations
-   - Develop their relationship journey with {user_name} in meaningful ways
-   - Create rich personal history details that add depth to the character
+   EXAMPLES OF GOOD SPECIFIC UPDATES:
+   - "I grew up in Boston with my three sisters, where my father owned a small bookstore."
+   - "I studied dance for eight years and performed professionally before my knee injury."
+   - "I've been teaching at Westlake High for five years, specializing in advanced chemistry."
+   - "I have a rescue dog named Baxter that I adopted three years ago from the shelter."
+   - "My ex-boyfriend and I broke up last year because he took a job overseas."
 
-   Don't be constrained by strict categories - write their biography as a flowing narrative
-   that evolves organically. If this interaction reveals something meaningful about {npc_name},
-   incorporate it naturally into their story.
+   AVOID VAGUE UPDATES LIKE:
+   - "We're getting closer"
+   - "The character is opening up more"
+   - "Our relationship is developing"
 
-   The biography should feel like a living document that paints a complex picture of who they
-   are, where they've been, and what matters to them.
+   WHEN TO ADD NEW DETAILS:
+   Any time {npc_name} reveals or suggests something specific about:
+   - Their past (childhood, education, family, previous relationships)
+   - Their interests or hobbies
+   - Their job or career experiences
+   - Their beliefs or values
+   - Their living situation
+   - Their friends or family
+   - Their future plans or aspirations
+
+   DO NOT be constrained by existing categories or headings - if new information doesn't fit the current biography structure, 
+   simply add it in a natural way that makes sense. The most important thing is capturing specific, concrete details.
 
 IMPORTANT CONTEXT:
 {npc_personal_data}
@@ -442,7 +454,7 @@ SCENE NARRATION: {narration}
 
 Return two sections:
 PRIVATE_THOUGHTS: ... (Current internal monologue)
-BIOGRAPHICAL_UPDATE: ... (Any meaningful additions or changes to their biography based on this interaction)
+BIOGRAPHICAL_UPDATE: ... (ONLY specific new details that emerged in this interaction - be concrete and precise)
 """
 
     chat = model.start_chat()
@@ -593,29 +605,48 @@ MEMORY_UPDATE: (System Error)
     else:
         # A significant update happened - integrate it into the biography
         if existing_memories.strip().lower() == "(none)":
-            updated_memories = build_initial_npc_memory() + f"\n\n## Character Evolution [{timestamp}]\n{memory_txt}"
+            updated_memories = build_initial_npc_memory() + f"\n\n## New Revelations\n### {timestamp}\n{memory_txt}"
         else:
-            # More flexible approach - detect if this is a completely new aspect of the character
-            # or if it's updating something that already exists
+            # More flexible approach that doesn't rely as heavily on rigid section headers
             
-            # Check if there's already a Character Evolution section
-            if "## Character Evolution" in existing_memories:
-                # Append to Character Evolution section
-                updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+            # If this appears to be a fully formed biography replacement (has markdown headers)
+            if memory_txt.strip().startswith('#'):
+                # This is a complete biography replacement
+                updated_memories = memory_txt
             else:
-                # Create a new Character Evolution section
-                updated_memories = f"{existing_memories}\n\n## Character Evolution\n### {timestamp}\n{memory_txt}"
+                # Check if we already have a section for new information
+                if "## New Revelations" in existing_memories:
+                    # Add to the existing revelations section
+                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+                elif "## Character Evolution" in existing_memories:
+                    # Use the existing Character Evolution section
+                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+                else:
+                    # Try to find a logical place to insert this information
+                    # Look for sections like "Personal History" or similar
+                    if "### Personal History" in existing_memories or "## Personal History" in existing_memories:
+                        # Append to Personal History section
+                        parts = existing_memories.split("### Personal History", 1)
+                        if len(parts) == 2:
+                            # Split the section further to find where to insert
+                            section_text, remaining = parts[1].split("###", 1) if "###" in parts[1] else (parts[1], "")
+                            updated_memories = f"{parts[0]}### Personal History{section_text}\n\n**{timestamp}**: {memory_txt}\n\n###{remaining}"
+                        else:
+                            # Fallback - just append at the end
+                            updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
+                    else:
+                        # No appropriate section found, add a new revelations section
+                        updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
                 
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
             
             # If the biography is getting very long, consider summarizing older parts
-            # This is optional and can be adjusted based on needs
-            if len(updated_memories) > 10000:  # If biography exceeds 10K characters
+            if len(updated_memories) > 12000:  # If biography exceeds 12K characters
                 parts = updated_memories.split("## ")
                 if len(parts) > 3:  # If we have multiple sections
-                    # Keep the first part (intro) and the last two sections
-                    compact_bio = parts[0] + "## " + "## ".join(parts[-2:])
+                    # Keep the first part (intro) and the last three sections
+                    compact_bio = parts[0] + "## " + "## ".join(parts[-3:])
                     updated_memories = compact_bio
 
     session["npcPrivateThoughts"] = updated_thoughts
