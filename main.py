@@ -407,34 +407,37 @@ You are generating two distinct types of content for {npc_name}, with a focus on
    Make these thoughts feel human, with natural patterns of thinking that might include 
    hesitations, tangents, sudden realizations, or emotional shifts.
 
-2. BIOGRAPHY & MEMORY UPDATES:
-   Update the biography with SPECIFIC NEW INFORMATION that emerges during this interaction. 
-   Focus on concrete details that should be remembered, NOT vague summaries.
+2. BIOGRAPHY & MEMORY UPDATES: [CRITICAL - ALWAYS INCLUDE THIS]
+   It is ESSENTIAL that you identify and extract SPECIFIC NEW INFORMATION that emerges during each interaction.
+   You MUST provide concrete new biographical details after EVERY interaction, even if subtle.
+   Focus on precise details that should be remembered, NOT vague summaries.
 
    EXAMPLES OF GOOD SPECIFIC UPDATES:
-   - "I grew up in Boston with my three sisters, where my father owned a small bookstore."
-   - "I studied dance for eight years and performed professionally before my knee injury."
-   - "I've been teaching at Westlake High for five years, specializing in advanced chemistry."
-   - "I have a rescue dog named Baxter that I adopted three years ago from the shelter."
-   - "My ex-boyfriend and I broke up last year because he took a job overseas."
+   - "Grew up in Boston with three sisters, where father owned a small bookstore"
+   - "Studied dance for eight years and performed professionally before knee injury"
+   - "Teaching at Westlake High for five years, specializing in advanced chemistry"
+   - "Has a rescue dog named Baxter adopted three years ago from the shelter"
+   - "Ex-boyfriend and she broke up last year because he took a job overseas"
+   - "Favorite food is spicy Thai curry which reminds her of backpacking through Southeast Asia after college"
+   - "First job was at age 16 working at his uncle's hardware store during summers"
+   - "Recently took up rock climbing as a way to challenge her fear of heights"
 
    AVOID VAGUE UPDATES LIKE:
    - "We're getting closer"
    - "The character is opening up more"
    - "Our relationship is developing"
 
-   WHEN TO ADD NEW DETAILS:
-   Any time {npc_name} reveals or suggests something specific about:
-   - Their past (childhood, education, family, previous relationships)
-   - Their interests or hobbies
-   - Their job or career experiences
-   - Their beliefs or values
-   - Their living situation
-   - Their friends or family
-   - Their future plans or aspirations
+   SEEK OUT ANY TINY DETAIL REVEALED IN THE CONVERSATION, including:
+   - Preferences (foods, music, activities, etc.)
+   - Past experiences (childhood, education, travel, relationships)
+   - Career information (job details, ambitions, challenges)
+   - Personal traits (habits, quirks, skills, fears)
+   - Current life situation (living arrangements, daily routines)
+   - Relationships (family, friends, colleagues, exes)
+   - Future plans or aspirations
 
-   DO NOT be constrained by existing categories or headings - if new information doesn't fit the current biography structure, 
-   simply add it in a natural way that makes sense. The most important thing is capturing specific, concrete details.
+   If nothing explicit was revealed, LOOK DEEPER for implicit information that can be reasonably inferred.
+   For example, if they mention being tired from "another late night at the office," you can add that they frequently work late.
 
 IMPORTANT CONTEXT:
 {npc_personal_data}
@@ -454,7 +457,7 @@ SCENE NARRATION: {narration}
 
 Return two sections:
 PRIVATE_THOUGHTS: ... (Current internal monologue)
-BIOGRAPHICAL_UPDATE: ... (ONLY specific new details that emerged in this interaction - be concrete and precise)
+BIOGRAPHICAL_UPDATE: ... (Specific new details that emerged in this interaction - be concrete and precise. ALWAYS include at least one new detail.)
 """
 
     chat = model.start_chat()
@@ -471,6 +474,30 @@ BIOGRAPHICAL_UPDATE: ... (ONLY specific new details that emerged in this interac
             thoughts = ln.split(":", 1)[1].strip()
         elif ln.startswith("BIOGRAPHICAL_UPDATE:") or ln.startswith("NEW_MEMORY:"):
             memory = ln.split(":", 1)[1].strip()
+
+    # If we got no biographical update, make one more attempt with a more focused prompt
+    if not memory or memory.lower().startswith("no new") or "no biographical update" in memory.lower():
+        try:
+            focused_prompt = f"""
+Review this dialogue and extract ANY specific detail about {npc_name} that was revealed or can be reasonably inferred.
+Even tiny details matter. Look for preferences, habits, background information, work details, etc.
+Do not say "no new information" - dig deeper and find something that adds to the character's biography.
+
+DIALOGUE TO ANALYZE:
+{narration}
+
+Respond with ONLY the new biographical detail(s), no explanation or preamble.
+"""
+            focused_chat = model.start_chat()
+            focused_resp = focused_chat.send_message(
+                focused_prompt,
+                generation_config={"temperature": 0.7, "max_output_tokens": 256},
+                safety_settings=safety_settings
+            )
+            if focused_resp and focused_resp.text and len(focused_resp.text.strip()) > 5:
+                memory = focused_resp.text.strip()
+        except Exception as e:
+            print(f"[ERROR] Focused biographical extraction failed: {e}")
 
     return thoughts, memory
 
@@ -530,6 +557,12 @@ SPECIAL INSTRUCTIONS:
 3) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
    (e.g., 😛) rather than describing them in words.
 
+4) BIOGRAPHY UPDATES - IMPORTANT:
+   - After each interaction, update the character's biography with ANY specific new information that was revealed
+   - This includes things like personal background, interests, education, family details, career information, etc.
+   - Be specific and concrete in these updates - don't just say "they shared more about themselves"
+   - Example good updates: "She revealed she studied English literature at Boston University" or "He mentioned growing up with three siblings in a small town outside Seattle"
+
 Relationship Stage={current_stage} ({stage_desc})
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 
@@ -540,7 +573,7 @@ Return EXACTLY four lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
 Line 2 => NARRATION: ... (must be at least 300 characters describing the NPC's reaction, setting, dialogue, and actions)
 Line 3 => PRIVATE_THOUGHTS: ... (NPC's internal thoughts/feelings)
-Line 4 => MEMORY_UPDATE: ... (key events and feelings to remember)
+Line 4 => MEMORY_UPDATE: ... (key events, new biographical details, and feelings to remember - be specific and concrete)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
@@ -569,6 +602,10 @@ MEMORY_UPDATE: (System Error)
 """
     affect_delta = 0.0
     narration_txt = ""
+    thoughts_txt = ""
+    memory_txt = ""
+    
+    # Extract all components from the response
     for ln in result_text.split("\n"):
         s = ln.strip()
         if s.startswith("AFFECT_CHANGE_FINAL:"):
@@ -578,9 +615,18 @@ MEMORY_UPDATE: (System Error)
                 affect_delta = 0.0
         elif s.startswith("NARRATION:"):
             narration_txt = s.split(":", 1)[1].strip()
+        elif s.startswith("PRIVATE_THOUGHTS:"):
+            thoughts_txt = s.split(":", 1)[1].strip()
+        elif s.startswith("MEMORY_UPDATE:"):
+            memory_txt = s.split(":", 1)[1].strip()
 
-    # Make separate LLM call for thoughts and memories
-    thoughts_txt, memory_txt = process_npc_thoughts(last_user_action, narration_txt)
+    # Make separate LLM call for additional thoughts and memories if needed
+    if not thoughts_txt or not memory_txt:
+        additional_thoughts, additional_memory = process_npc_thoughts(last_user_action, narration_txt)
+        if not thoughts_txt:
+            thoughts_txt = additional_thoughts
+        if not memory_txt:
+            memory_txt = additional_memory
 
     # ---------------------------------------------------------
     #  ACCUMULATE THOUGHTS & MEMORIES WITH IMPROVED FORMATTING
@@ -597,19 +643,14 @@ MEMORY_UPDATE: (System Error)
     else:
         updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
 
-    # Only append memory if it's not trivial or blank
+    # Always update biography with any new information
     memory_txt_lower = memory_txt.strip().lower()
-    if memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower or not memory_txt_lower:
-        # No update needed for memories
-        updated_memories = existing_memories
-    else:
-        # A significant update happened - integrate it into the biography
+    if memory_txt_lower and not (memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower):
+        # Significant update - integrate into biography
         if existing_memories.strip().lower() == "(none)":
             updated_memories = build_initial_npc_memory() + f"\n\n## New Revelations\n### {timestamp}\n{memory_txt}"
         else:
             # More flexible approach that doesn't rely as heavily on rigid section headers
-            
-            # If this appears to be a fully formed biography replacement (has markdown headers)
             if memory_txt.strip().startswith('#'):
                 # This is a complete biography replacement
                 updated_memories = memory_txt
@@ -621,22 +662,21 @@ MEMORY_UPDATE: (System Error)
                 elif "## Character Evolution" in existing_memories:
                     # Use the existing Character Evolution section
                     updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                else:
-                    # Try to find a logical place to insert this information
-                    # Look for sections like "Personal History" or similar
-                    if "### Personal History" in existing_memories or "## Personal History" in existing_memories:
-                        # Append to Personal History section
-                        parts = existing_memories.split("### Personal History", 1)
-                        if len(parts) == 2:
-                            # Split the section further to find where to insert
-                            section_text, remaining = parts[1].split("###", 1) if "###" in parts[1] else (parts[1], "")
-                            updated_memories = f"{parts[0]}### Personal History{section_text}\n\n**{timestamp}**: {memory_txt}\n\n###{remaining}"
-                        else:
-                            # Fallback - just append at the end
-                            updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
+                elif "## New Information" in existing_memories:
+                    # Use the existing New Information section
+                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+                elif "## Relationship Development" in existing_memories:
+                    # Check if this is relationship related information
+                    if "relationship" in memory_txt_lower or "feelings" in memory_txt_lower or "connection" in memory_txt_lower:
+                        # Add to relationship development
+                        parts = existing_memories.split("## Relationship Development", 1)
+                        updated_memories = f"{parts[0]}## Relationship Development{parts[1]}\n\n• **{timestamp}**: {memory_txt}"
                     else:
-                        # No appropriate section found, add a new revelations section
+                        # Add a new section for this information
                         updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
+                else:
+                    # No appropriate section found, add a new revelations section
+                    updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
                 
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
@@ -648,6 +688,9 @@ MEMORY_UPDATE: (System Error)
                     # Keep the first part (intro) and the last three sections
                     compact_bio = parts[0] + "## " + "## ".join(parts[-3:])
                     updated_memories = compact_bio
+    else:
+        # No specific memory update, keep existing memories
+        updated_memories = existing_memories
 
     session["npcPrivateThoughts"] = updated_thoughts
     session["npcBehavior"] = updated_memories
