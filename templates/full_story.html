@@ -1,15 +1,16 @@
+
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Full Story So Far</h1>
+<h1 style="color: #ff9fa3;" class="mb-4">Full Story So Far</h1>
 
-<div class="p-3 mb-3" style="background: rgba(255,255,255,0.1); white-space: pre-wrap;">
+<div class="p-3 mb-3" style="background-color: #4a0d0d; border: 1px solid #ff5789; border-radius: 5px; white-space: pre-wrap;">
   {% if lines %}
     {% for text in lines %}
       {% if text.startswith('> ') %}
-        <div style="margin-bottom: 0.5rem; color: #88ff88;">{{ text }}</div>
+        <div style="margin-bottom: 0.5rem; color: #88ff88; padding: 0.5rem; background-color: #3b0b0b; border-radius: 5px;">{{ text }}</div>
       {% else %}
-        <div style="margin-bottom: 1.5rem;">{{ text }}</div>
+        <div style="margin-bottom: 1.5rem; padding: 0.5rem;">{{ text }}</div>
       {% endif %}
     {% endfor %}
   {% else %}
@@ -18,15 +19,26 @@
 </div>
 
 <!-- Form for erotica generation with prompt -->
-<form method="POST" action="{{ url_for('generate_erotica') }}" class="mb-3">
-  <div class="mb-2">
-    <label class="form-label">Custom Instructions (optional):</label>
-    <textarea name="erotica_prompt" class="form-control" rows="2" 
-              placeholder="E.g.: Make it more romantic, focus on emotional connection, etc."></textarea>
+<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+  <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0;">
+    <i class="bi bi-pencil-square"></i> Generate Erotic Story Version
   </div>
-  <button type="submit" class="btn btn-danger">Generate Erotica</button>
-</form>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('generate_erotica') }}" class="mb-3">
+      <div class="mb-2">
+        <label class="form-label" style="color: #f8d0d0;">Custom Instructions (optional):</label>
+        <textarea name="erotica_prompt" class="form-control" rows="2" 
+                style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;"
+                placeholder="E.g.: Make it more romantic, focus on emotional connection, etc."></textarea>
+      </div>
+      <button type="submit" class="btn" style="background-color: #ff5789; color: white;">
+        <i class="bi bi-magic"></i> Generate Erotica
+      </button>
+    </form>
+  </div>
+</div>
 
-<hr>
-<a href="{{ url_for('interaction') }}" class="btn btn-secondary">Back to Interaction</a>
+<a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
+  <i class="bi bi-arrow-left"></i> Back to Interaction
+</a>
 {% endblock %}

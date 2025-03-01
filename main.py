@@ -722,7 +722,7 @@ def update_npc_info(form):
 
 ### NPC name, age, gender
 NPC_NAME_OPTIONS = [
-    "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella",
+    "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma,"Isabella",
     "James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew",
     "Other"
 ]
@@ -1318,7 +1318,7 @@ def interaction():
             flash("Scene updated!", "info")
             return redirect(url_for("interaction"))
 
-        if "submit_action" in request.form:
+        elif "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip()
             affection = session.get("affectionScore", 0.0)
             trust = session.get("trustScore", 5.0)
@@ -1326,24 +1326,43 @@ def interaction():
             cstage = session.get("currentStage", 1)
             log_message(f"User: {user_action}")
 
-            result_text = interpret_npc_state(
-                affection=affection,
-                trust=trust,
-                npc_mood=mood,
-                current_stage=cstage,
-                last_user_action=user_action
-            )
-            affect_delta = 0.0
+            # Try up to 3 times to get a non-empty narration
+            max_retry_attempts = 3
             narration_txt = ""
-            for ln in result_text.split("\n"):
-                s = ln.strip()
-                if s.startswith("AFFECT_CHANGE_FINAL:"):
-                    try:
-                        affect_delta = float(s.split(":", 1)[1].strip())
-                    except:
-                        affect_delta = 0.0
-                elif s.startswith("NARRATION:"):
-                    narration_txt = s.split(":", 1)[1].strip()
+            affect_delta = 0.0
+
+            for attempt in range(max_retry_attempts):
+                result_text = interpret_npc_state(
+                    affection=affection,
+                    trust=trust,
+                    npc_mood=mood,
+                    current_stage=cstage,
+                    last_user_action=user_action
+                )
+
+                # Extract values from result
+                for ln in result_text.split("\n"):
+                    s = ln.strip()
+                    if s.startswith("AFFECT_CHANGE_FINAL:"):
+                        try:
+                            affect_delta = float(s.split(":", 1)[1].strip())
+                        except:
+                            affect_delta = 0.0
+                    elif s.startswith("NARRATION:"):
+                        narration_txt = s.split(":", 1)[1].strip()
+
+                # If we got a valid narration, break the loop
+                if narration_txt and len(narration_txt.strip()) > 10:
+                    break
+
+                # Log the retry attempt
+                if attempt < max_retry_attempts - 1:
+                    log_message(f"[SYSTEM] Empty narration detected (attempt {attempt+1}/{max_retry_attempts}). Retrying...")
+
+            # If still empty after retries, add a fallback message
+            if not narration_txt or len(narration_txt.strip()) <= 10:
+                narration_txt = "[The system encountered an issue generating a response. Please try again or refresh the page.]"
+                log_message("[SYSTEM] Failed to generate narration after multiple attempts.")
 
             new_aff = affection + affect_delta
             session["affectionScore"] = new_aff
