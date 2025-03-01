@@ -326,7 +326,7 @@ def build_initial_npc_memory() -> str:
 
     # Occupation and related details
     biography += f"\n\nAs a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
-
+    
     if "student" in occupation.lower():
         biography += f"Their academic pursuits in {random.choice(['liberal arts', 'sciences', 'business', 'fine arts', 'engineering'])} have cultivated a curious mind that's always eager to learn and grow. "
         biography += f"Campus life has exposed them to diverse perspectives and experiences, broadening their horizons beyond their upbringing. "
@@ -389,7 +389,7 @@ def build_initial_npc_memory() -> str:
 
     # Physical description
     biography += f"\n\n### Physical Presence\n"
-
+    
     if gender.lower() == "female":
         biography += f"{name} has a {body_type.lower()} physique that she {random.choice(['maintains with regular exercise', 'carries with natural confidence', 'has grown comfortable with over the years', 'embraces as part of her identity'])}. "
         biography += f"Her {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements her features nicely', 'she has perfected over time', 'has become part of her signature appearance', 'frames her face in a flattering way'])}. "
@@ -449,7 +449,7 @@ def build_initial_npc_memory() -> str:
     else:
         # Generate a more detailed backstory based on available information
         biography += f"\n\n### Personal History\n"
-
+        
         # Create childhood environment based on ethnicity or random if not specified
         if ethnicity and ethnicity.lower() != "?":
             if "american" in ethnicity.lower():
@@ -463,7 +463,7 @@ def build_initial_npc_memory() -> str:
             elif "italian" in ethnicity.lower():
                 childhood_location = random.choice(['Rome', 'a small village in Tuscany', 'Naples', 'Sicily', 'Florence', 'the Italian countryside'])
             elif "asian" in ethnicity.lower() or "chinese" in ethnicity.lower() or "japanese" in ethnicity.lower() or "korean" in ethnicity.lower():
-                childhood_location = random.choice(['an urban center in Asia', 'a traditional familycompound', 'a neighborhood blending traditional and modern influences', 'a coastal city', 'a rural community with strong cultural traditions'])
+                childhood_location = random.choice(['an urban center in Asia', 'a traditional family compound', 'a neighborhood blending traditional and modern influences', 'a coastal city', 'a rural community with strong cultural traditions'])
             elif "hispanic" in ethnicity.lower() or "latin" in ethnicity.lower():
                 childhood_location = random.choice(['Mexico City', 'a coastal town in Puerto Rico', 'Miami', 'a small village in Central America', 'Barcelona', 'Buenos Aires'])
             elif "indian" in ethnicity.lower() or "pakistani" in ethnicity.lower():
@@ -472,7 +472,7 @@ def build_initial_npc_memory() -> str:
                 childhood_location = random.choice(['a coastal city', 'a metropolitan area', 'a small town with a tight-knit community', 'a culturally diverse neighborhood', 'a suburban environment'])
         else:
             childhood_location = random.choice(['a coastal city', 'a bustling metropolis', 'a quiet suburban neighborhood', 'a small rural community', 'a culturally diverse urban center'])
-
+        
         # Family structure
         family_structure = random.choice([
             f"the youngest of three siblings in a close-knit family",
@@ -483,7 +483,7 @@ def build_initial_npc_memory() -> str:
             f"raised by their grandparents after losing their parents at a young age",
             f"the oldest child who often helped care for their younger siblings"
         ])
-
+        
         # Education and formative experiences
         education = random.choice([
             f"attended public schools before earning a scholarship to a prestigious university",
@@ -494,7 +494,7 @@ def build_initial_npc_memory() -> str:
             f"changed their educational focus after a formative experience revealed their authentic interests",
             f"took a non-traditional educational path that aligned with their independent thinking"
         ])
-
+        
         # Important life events
         life_event = random.choice([
             f"A gap year spent {random.choice(['traveling through Europe', 'volunteering in developing countries', 'working on an organic farm', 'apprenticing with a mentor'])} shaped their perspective on what truly matters.",
@@ -504,7 +504,7 @@ def build_initial_npc_memory() -> str:
             f"Mentorship from {random.choice(['a professor', 'a family friend', 'a colleague', 'an unexpected source'])} opened doors and provided guidance at a critical juncture.",
             f"Their experience living in {random.choice(['another country', 'a completely different environment', 'multiple cities'])} gave them adaptability and cultural awareness."
         ])
-
+        
         # Values and influences
         values = random.choice([
             f"Family traditions around {random.choice(['holiday celebrations', 'shared meals', 'cultural practices', 'storytelling'])} instilled values that remain important to them.",
@@ -513,13 +513,13 @@ def build_initial_npc_memory() -> str:
             f"Art and creativity have always been channels for self-expression and processing their experiences of the world.",
             f"Their approach to challenges reflects lessons learned from {random.choice(['family wisdom', 'personal setbacks', 'diverse life experiences', 'influential mentors'])}."
         ])
-
+        
         # Create comprehensive backstory
         biography += f"{name} was raised in {childhood_location}, {family_structure}. "
         biography += f"They {education}. "
         biography += f"{life_event} "
         biography += f"{values} "
-
+        
         # Career trajectory
         if occupation and occupation.lower() != "?":
             biography += f"\n\nTheir career as a {occupation} developed from {random.choice(['an early passion', 'a serendipitous opportunity', 'careful planning and dedication', 'mentorship and guidance', 'a desire to make a difference'])}. "
@@ -540,9 +540,9 @@ def build_initial_npc_memory() -> str:
 
     biography += f"{name} finds themselves intrigued by {user_name}. The interaction is just beginning, but already there's a sense of "
     biography += f"{random.choice(['possibility', 'curiosity', 'interest', 'chemistry', 'connection', 'intrigue'])} that has caught their attention. "
-
+    
     biography += f"Something about {user_name}'s {random.choice(['confidence', 'authenticity', 'perspective', 'energy', 'attentiveness', 'sense of humor'])} stands out from typical first encounters, making {name} more {random.choice(['open', 'curious', 'engaged', 'attentive', 'present'])} than they might usually be with someone new. "
-
+    
     biography += f"While maintaining a natural {random.choice(['reserve', 'sociability', 'poise', 'warmth', 'thoughtfulness'])}, they find themselves wondering where this interaction might lead. "
 
     # Relationship development placeholder
@@ -789,7 +789,7 @@ MEMORY_UPDATE: (System Error)
     narration_txt = ""
     thoughts_txt = ""
     memory_txt = ""
-
+    
     # Extract all components from the response
     for ln in result_text.split("\n"):
         s = ln.strip()
@@ -862,10 +862,10 @@ MEMORY_UPDATE: (System Error)
                 else:
                     # No appropriate section found, add a new revelations section
                     updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
-
+                
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
-
+            
             # If the biography is getting very long, consider summarizing older parts
             if len(updated_memories) > 12000:  # If biography exceeds 12K characters
                 parts = updated_memories.split("## ")
@@ -1107,7 +1107,7 @@ def update_npc_info(form):
         session[key] = merge_dd(form, key, key + "_custom")
     session["npc_backstory"] = form.get("npc_backstory", "").strip()
     session["environment"] = merge_dd(form, "environment", "environment_custom")
-    session["encounter_context"] =merge_dd(form, "encounter_context", "encounter_context_custom")
+    session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
 
 # --------------------------------------------------------------------------
 # Example Data for personalization
@@ -1770,13 +1770,14 @@ def interaction():
             # For dialogue mode, make a separate LLM call to get just the NPC's dialogue
             if interaction_mode == "dialogue":
                 npc_name = session.get('npc_name', '')
-
+                
                 @retry_with_backoff(retries=3, backoff_in_seconds=1)
-                def generate_dialogue_only(narration: str, npc_name: str) -> str:"""Make a separate LLM call to get only dialogue and actions like Replika."""
+                def generate_dialogue_only(narration: str, npc_name: str) -> str:
+                    """Make a separate LLM call to get only dialogue and actions like Replika."""
                     system_prompt = f"""
                     Convert the following narration into ONLY {npc_name}'s dialogue and actions in the style of 
                     chat apps like Replika.
-
+                    
                     RULES:
                     1. Return ONLY what {npc_name} says and does - no narration, no descriptions.
                     2. Remove all quotes around dialogue.
@@ -1785,17 +1786,17 @@ def interaction():
                     5. Don't include any of the user's speech or actions.
                     6. Split different dialogue elements with blank lines.
                     7. DO NOT describe the scene, only dialogue and immediate actions.
-
+                    
                     EXAMPLE OUTPUT FORMAT:
                     Hey there, I've been waiting for you.
-
+                    
                     *smiles and tucks her hair behind her ear*
-
+                    
                     I think we should go somewhere more private, don't you?
-
+                    
                     *bites her lip nervously*
                     """
-
+                    
                     try:
                         chat = model.start_chat()
                         resp = chat.send_message(
@@ -1807,10 +1808,10 @@ def interaction():
                     except Exception as e:
                         print(f"[ERROR] Dialogue mode generation: {e}")
                         return f"*seems to be having trouble communicating*\n\n{npc_name}: Sorry, could you repeat that?"
-
+                
                 # Make the separate call to get just dialogue
                 dialogue_result = generate_dialogue_only(narration_txt, npc_name)
-
+                
                 # Use the dialogue result if we got something valid
                 if dialogue_result and len(dialogue_result.strip()) > 10:
                     narration_txt = dialogue_result
@@ -2137,7 +2138,7 @@ def manual_npc_update():
             # Create a simplified free-form biography structure 
             npc_name = session.get('npc_name', 'Character')
             basic_info = f"""# {npc_name}'s Biography
-
+            
 {npc_name} is a {session.get('npc_age', '')} year old {session.get('npc_ethnicity', '')} {session.get('npc_gender', '')}.
 
 ## Personal Background
@@ -2159,14 +2160,14 @@ def manual_npc_update():
 
         if target == "memories":
             existing_memories = session.get("npcBehavior", "")
-
+            
             if existing_memories.strip().lower() == "(none)":
                 # Create a new biography if none exists
                 session["npcBehavior"] = new_text
             else:
                 # Get timestamp for the update
                 timestamp = time.strftime("%b %d, %I:%M %p")
-
+                
                 # Determine if this is a complete replacement or an addition
                 if new_text.startswith("#"):
                     # Looks like a complete biography replacement
@@ -2174,18 +2175,18 @@ def manual_npc_update():
                 else:
                     # Add as an update with timestamp
                     session["npcBehavior"] = f"{existing_memories}\n\n### Update [{timestamp}]\n{new_text}"
-
+            
             flash("Biography updated successfully!", "success")
-
+        
         elif target == "thoughts":
             existing_thoughts = session.get("npcPrivateThoughts", "")
             timestamp = time.strftime("%b %d, %I:%M %p")
-
+            
             if existing_thoughts.strip().lower() == "(none)":
                 session["npcPrivateThoughts"] = f"### {timestamp}\n{new_text}"
             else:
                 session["npcPrivateThoughts"] = f"{existing_thoughts}\n\n### {timestamp}\n{new_text}"
-
+            
             flash("Private thoughts updated successfully!", "success")
 
         return redirect(url_for("interaction"))
