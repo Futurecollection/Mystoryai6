@@ -273,7 +273,8 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 def build_initial_npc_memory() -> str:
-    """Construct a detailed biography for the NPC using all available personalization data."""
+    """Construct a detailed biography for the NPC using all available personalization data.
+    If limited information is available, use the LLM to generate additional details."""
     name = session.get('npc_name','Unknown')
     gender = session.get('npc_gender','?')
     age = session.get('npc_age','?')
@@ -291,7 +292,27 @@ def build_initial_npc_memory() -> str:
     environment = session.get('environment', '')
     encounter_context = session.get('encounter_context', '')
     user_name = session.get('user_name', 'the user')
-
+    
+    # Check if we have enough basic information or need LLM to fill in missing details
+    missing_key_fields = (
+        name == 'Unknown' or gender == '?' or age == '?' or 
+        personality == '?' or occupation == '?' or 
+        hair_color == '?' or clothing == '?'
+    )
+    
+    # If missing key fields, use LLM to generate a complete biography
+    if missing_key_fields and GEMINI_API_KEY:
+        try:
+            return generate_llm_biography(
+                name, gender, age, ethnicity, orientation, relationship_goal,
+                personality, body_type, hair_color, hair_style, clothing,
+                occupation, current_situation, backstory, environment,
+                encounter_context, user_name
+            )
+        except Exception as e:
+            print(f"[ERROR] LLM biography generation failed: {e}")
+            # Fall back to template-based approach if LLM fails
+    
     # Format a rich, narrative-style biography with sections
     biography = f"## DETAILED BIOGRAPHY: {name.upper()}\n\n"
 
@@ -305,6 +326,8 @@ def build_initial_npc_memory() -> str:
         biography += f"They carry themselves with quiet thoughtfulness, observing details others might miss and approaching life with measured consideration. "
     elif personality.lower() in ["mysterious", "reserved"]:
         biography += f"They tend to keep parts of themselves hidden behind a carefully maintained exterior, revealing their true thoughts only to those they trust. "
+    else:
+        biography += f"Their unique personal style creates an impression that stays with people long after they've met. "
 
     biography += f"As a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
 
@@ -320,21 +343,37 @@ def build_initial_npc_memory() -> str:
         biography += f"While comfortable with independence, there's an underlying desire for meaningful connection that motivates their social interactions. "
     elif "new in town" in current_situation.lower():
         biography += f"Still learning the rhythms of a new place has left them both excited for fresh possibilities and occasionally longing for the familiarity of what they left behind. "
+    else:
+        biography += f"This period in their life has them reflecting on what they truly want and where they see themselves in the coming years. "
 
     biography += f"\n\n### Physical Presence\n"
-    biography += f"{name} has a {body_type.lower()} physique that they {random.choice(['maintain with regular exercise', 'carry with natural confidence', 'have grown comfortable with over the years'])}. "
-    biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they have perfected over time', 'has become part of their signature appearance'])}. "
-    biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their personal style', 'they chose with care', 'makes them feel confident'])}. "
+    biography += f"{name} has a {body_type.lower() if body_type != '?' else 'distinctive'} physique that they {random.choice(['maintain with regular exercise', 'carry with natural confidence', 'have grown comfortable with over the years'])}. "
+    
+    if hair_color != '?' and hair_style != '?':
+        biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they have perfected over time', 'has become part of their signature appearance'])}. "
+    else:
+        biography += f"Their hair is styled in a way that frames their face perfectly and highlights their expressive features. "
+    
+    if clothing != '?':
+        biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their personal style', 'they chose with care', 'makes them feel confident'])}. "
+    else:
+        biography += f"Their clothing choices tend to reflect both practicality and a subtle sense of style that's uniquely their own. "
 
     biography += f"\n\n### Relationship Approach\n"
-    biography += f"As someone who identifies as {orientation.lower()}, {name} is currently looking for {relationship_goal.lower()}. "
+    
+    if orientation != '?' and relationship_goal != '?':
+        biography += f"As someone who identifies as {orientation.lower()}, {name} is currently looking for {relationship_goal.lower()}. "
 
-    if "casual" in relationship_goal.lower():
-        biography += f"They value freedom and spontaneity, preferring connections that don't come with excessive expectations or constraints. "
-    elif "serious" in relationship_goal.lower():
-        biography += f"They've reached a point in life where they value depth and commitment, seeking someone to build something meaningful with. "
-    elif "friends with benefits" in relationship_goal.lower():
-        biography += f"They appreciate the balance of emotional connection and physical intimacy without the pressure of traditional relationship structures. "
+        if "casual" in relationship_goal.lower():
+            biography += f"They value freedom and spontaneity, preferring connections that don't come with excessive expectations or constraints. "
+        elif "serious" in relationship_goal.lower():
+            biography += f"They've reached a point in life where they value depth and commitment, seeking someone to build something meaningful with. "
+        elif "friends with benefits" in relationship_goal.lower():
+            biography += f"They appreciate the balance of emotional connection and physical intimacy without the pressure of traditional relationship structures. "
+        else:
+            biography += f"Their approach to relationships is authentic and honest, focusing on real connection rather than games or facades. "
+    else:
+        biography += f"{name} approaches relationships with a blend of caution and openness, taking time to truly know someone before fully letting them in. Their past experiences have taught them valuable lessons about what they need in a partner and what they have to offer. "
 
     # Add backstory if provided
     if backstory:
@@ -346,6 +385,11 @@ def build_initial_npc_memory() -> str:
         biography += f"which instilled in them a sense of {random.choice(['independence', 'community', 'ambition', 'creativity'])}. "
         biography += f"Their {random.choice(['parents', 'family', 'upbringing'])} played a significant role in shaping their values around "
         biography += f"{random.choice(['hard work', 'authenticity', 'emotional openness', 'resilience'])}. "
+        
+        if occupation != '?':
+            biography += f"Their career as a {occupation} wasn't their first choice, but it's become a path they've grown to love and excel in. "
+        else:
+            biography += f"Professionally, they've followed an interesting path that has allowed them to develop diverse skills and perspectives. "
 
     # Current meeting context
     biography += f"\n\n### Current Encounter\n"
@@ -365,6 +409,79 @@ def build_initial_npc_memory() -> str:
     biography += f"• First Meeting: Just getting to know each other - initial impressions forming"
 
     return biography
+
+@retry_with_backoff(retries=2, backoff_in_seconds=1)
+def generate_llm_biography(name, gender, age, ethnicity, orientation, relationship_goal,
+                        personality, body_type, hair_color, hair_style, clothing,
+                        occupation, current_situation, backstory, environment,
+                        encounter_context, user_name) -> str:
+    """Use the LLM to generate a detailed, rich biography with any missing information filled in creatively."""
+    
+    # Create a summary of what we know for sure (non-? values)
+    known_details = []
+    if name != 'Unknown': known_details.append(f"Name: {name}")
+    if gender != '?': known_details.append(f"Gender: {gender}")
+    if age != '?': known_details.append(f"Age: {age}")
+    if ethnicity != '?': known_details.append(f"Ethnicity: {ethnicity}")
+    if orientation != '?': known_details.append(f"Sexual Orientation: {orientation}")
+    if relationship_goal != '?': known_details.append(f"Relationship Goal: {relationship_goal}")
+    if personality != '?': known_details.append(f"Personality: {personality}")
+    if body_type != '?': known_details.append(f"Body Type: {body_type}")
+    if hair_color != '?': known_details.append(f"Hair Color: {hair_color}")
+    if hair_style != '?': known_details.append(f"Hair Style: {hair_style}")
+    if clothing != '?': known_details.append(f"Clothing: {clothing}")
+    if occupation != '?': known_details.append(f"Occupation: {occupation}")
+    if current_situation != '?': known_details.append(f"Current Situation: {current_situation}")
+    if backstory: known_details.append(f"Backstory: {backstory}")
+    if environment: known_details.append(f"Environment: {environment}")
+    if encounter_context: known_details.append(f"Encounter Context: {encounter_context}")
+    
+    known_info = "\n".join(known_details)
+    
+    prompt = f"""
+    Create a detailed, narrative-style character biography for an interactive romance story.
+    
+    KNOWN INFORMATION:
+    {known_info if known_details else "Very limited information available. Create a compelling character."}
+    
+    The biography should be written in Markdown format with these sections:
+    1. ## DETAILED BIOGRAPHY: [CHARACTER NAME]
+    2. ### Core Identity - Who they are, their age, gender, ethnicity, personality traits
+    3. ### Life Circumstances - Current life situation, recent significant events
+    4. ### Physical Presence - Body type, hair, clothing style, distinctive features
+    5. ### Relationship Approach - Sexual orientation, relationship goals, dating philosophy
+    6. ### Personal History - Background, upbringing, formative experiences, education, career path
+    7. ### Current Encounter - Meeting context with {user_name}, initial impressions
+    8. ### Relationship Development - Just a placeholder noting this is a first meeting
+    
+    IMPORTANT REQUIREMENTS:
+    - If any details are not provided above, create plausible and interesting ones
+    - Write in third-person narrative style
+    - Ages must be 20 or older - this is an adult story
+    - Create a rich, nuanced personality with a mix of strengths and vulnerabilities
+    - Include specific, concrete details that make the character feel real
+    - Ensure consistency across all aspects of the character
+    - Maintain a mature, sophisticated tone suitable for adult readers
+    
+    The biography will be presented to the user as they interact with this character.
+    """
+    
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.7, "max_output_tokens": 4096},
+            safety_settings=safety_settings
+        )
+        
+        if response and response.text:
+            return response.text.strip()
+        else:
+            raise Exception("Empty response from LLM")
+            
+    except Exception as e:
+        print(f"[ERROR] Biography generation failed: {e}")
+        raise e
 
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
@@ -1383,13 +1500,15 @@ Orgasm & Afterglow:
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
         session["npcPrivateThoughts"] = "(none)"
-        session["npcBehavior"] = "(none)"
         session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
         session["interaction_log"] = []
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
         session["log_summary"] = ""
+        
+        # Generate initial NPC biography based on available information
+        session["npcBehavior"] = build_initial_npc_memory()
 
         # NEW: Seed the initial memory with some personal data about the NPC
         session["npcBehavior"] = build_initial_npc_memory()
