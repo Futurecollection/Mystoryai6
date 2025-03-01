@@ -1506,71 +1506,54 @@ def interaction():
                 narration_txt = "[The system encountered an issue generating a response. Please try again or refresh the page.]"
                 log_message("[SYSTEM] Failed to generate narration after multiple attempts.")
 
-            # For dialogue mode, extract just the NPC's dialogue and actions like Replika
+            # For dialogue mode, make a separate LLM call to get just the NPC's dialogue
             if interaction_mode == "dialogue":
-                # Process narration for dialogue mode (Replika-style)
                 npc_name = session.get('npc_name', '')
-
-                # Extract direct speech and actions
-                import re
-
-                # First, get all dialogue from the NPC (text in quotes)
-                dialogue_parts = []
-                quotes = re.findall(r'[""]([^""]+)[""]', narration_txt)
-
-                # Get all action descriptions (text between asterisks)
-                actions = re.findall(r'\*([^*]+)\*', narration_txt)
-
-                # Combine dialogue and action in a more natural conversational format
-                result = ""
-
-                # If there's dialogue, format it without quotes (Replika style)
-                if quotes:
-                    # First pass: Look for quotes that are clearly from the NPC
-                    npc_lines = []
-                    for quote in quotes:
-                        # If it's clearly the NPC talking
-                        if len(quote.strip()) > 0:
-                            npc_lines.append(quote.strip())
-
-                    # Add the dialogue without quotes
-                    if npc_lines:
-                        result = "\n\n".join(npc_lines)
-
-                # Add action descriptions with asterisks
-                if actions:
-                    # If we already have dialogue, add a line break
-                    if result:
-                        result += "\n\n"
-
-                    # Add actions with asterisks
-                    action_texts = [f"*{action.strip()}*" for action in actions]
-                    result += "\n".join(action_texts)
-
-                # If we didn't find any usable dialogue or actions, try to extract any lines likely to be the NPC
-                if not result:
-                    # Split by newlines and look for potential direct speech without quotes
-                    lines = narration_txt.split('\n')
-                    potential_dialogue = []
-
-                    for line in lines:
-                        # Skip lines that are clearly narrative description
-                        if re.search(r'\b(you|your)\b', line, re.IGNORECASE):
-                            continue
-                        if re.search(r'\b(the room|across|around|behind|beside)\b', line, re.IGNORECASE):
-                            continue
-
-                        # Keep lines that look like they could be direct speech
-                        line = line.strip()
-                        if line and not line.startswith('You') and len(line) > 10:
-                            potential_dialogue.append(line)
-
-                    if potential_dialogue:
-                        result = "\n\n".join(potential_dialogue)
-
-                # Use the result if we found something, otherwise fall back to the original
-                if result:
-                    narration_txt = result
+                
+                @retry_with_backoff(retries=3, backoff_in_seconds=1)
+                def generate_dialogue_only(narration: str, npc_name: str) -> str:
+                    """Make a separate LLM call to get only dialogue and actions like Replika."""
+                    system_prompt = f"""
+                    Convert the following narration into ONLY {npc_name}'s dialogue and actions in the style of 
+                    chat apps like Replika.
+                    
+                    RULES:
+                    1. Return ONLY what {npc_name} says and does - no narration, no descriptions.
+                    2. Remove all quotes around dialogue.
+                    3. Keep actions in asterisks (e.g., *smiles*)
+                    4. Include emotional sounds in asterisks (e.g., *mmm*, *sighs*)
+                    5. Don't include any of the user's speech or actions.
+                    6. Split different dialogue elements with blank lines.
+                    7. DO NOT describe the scene, only dialogue and immediate actions.
+                    
+                    EXAMPLE OUTPUT FORMAT:
+                    Hey there, I've been waiting for you.
+                    
+                    *smiles and tucks her hair behind her ear*
+                    
+                    I think we should go somewhere more private, don't you?
+                    
+                    *bites her lip nervously*
+                    """
+                    
+                    try:
+                        chat = model.start_chat()
+                        resp = chat.send_message(
+                            f"{system_prompt}\n\nNARRATION TO CONVERT:\n{narration}",
+                            generation_config={"temperature": 0.3, "max_output_tokens": 1024},
+                            safety_settings=safety_settings
+                        )
+                        return resp.text.strip()
+                    except Exception as e:
+                        print(f"[ERROR] Dialogue mode generation: {e}")
+                        return f"*seems to be having trouble communicating*\n\n{npc_name}: Sorry, could you repeat that?"
+                
+                # Make the separate call to get just dialogue
+                dialogue_result = generate_dialogue_only(narration_txt, npc_name)
+                
+                # Use the dialogue result if we got something valid
+                if dialogue_result and len(dialogue_result.strip()) > 10:
+                    narration_txt = dialogue_result
 
 
             new_aff = affection + affect_delta
