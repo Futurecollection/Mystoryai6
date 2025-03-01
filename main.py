@@ -681,8 +681,7 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
             "low-res, bad anatomy, text, error, missing fingers, extra digit, fewer digits, cropped, "
             "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, "
             "(deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, "
-            "floating limbs```python
-, (mutated hands and fingers:14), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
+            "floating limbs, (mutated hands and fingers:14), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation"
         ),
         "clip_last_layer": -2
     }
