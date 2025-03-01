@@ -311,103 +311,69 @@ def build_initial_npc_memory() -> str:
             )
         except Exception as e:
             print(f"[ERROR] LLM biography generation failed: {e}")
-            # Fall back to template-based approach if LLM fails
+            # Fall back to narrative approach if LLM fails
     
-    # Format a rich, narrative-style biography with sections
-    biography = f"## DETAILED BIOGRAPHY: {name.upper()}\n\n"
-
-    # Core identity section - written in narrative style
-    biography += f"### Core Identity\n"
-    biography += f"{name} is a {age}-year-old {ethnicity} {gender} with a {personality} personality that defines much of how they interact with the world. "
-
-    if personality.lower() in ["confident", "charming", "flirty", "playful"]:
-        biography += f"Their natural confidence makes them approachable yet intriguing, often drawing others in with seemingly little effort. "
-    elif personality.lower() in ["intellectual", "analytical", "professional"]:
-        biography += f"They carry themselves with quiet thoughtfulness, observing details others might miss and approaching life with measured consideration. "
-    elif personality.lower() in ["mysterious", "reserved"]:
-        biography += f"They tend to keep parts of themselves hidden behind a carefully maintained exterior, revealing their true thoughts only to those they trust. "
-    else:
-        biography += f"Their unique personal style creates an impression that stays with people long after they've met. "
-
-    biography += f"As a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
-
-    # Life circumstances and current situation
-    biography += f"\n\n### Life Circumstances\n"
-    biography += f"Currently, {name} is {current_situation.lower() if not current_situation.startswith('Other') else 'navigating a personal transition in life'}. "
-
-    if "broke up" in current_situation.lower():
-        biography += f"The end of their previous relationship left some emotional scars that occasionally surface in quiet moments of vulnerability. "
-    elif "divorce" in current_situation.lower():
-        biography += f"The divorce was a significant turning point, forcing them to reexamine their priorities and approach to relationships. "
-    elif "single" in current_situation.lower():
-        biography += f"While comfortable with independence, there's an underlying desire for meaningful connection that motivates their social interactions. "
-    elif "new in town" in current_situation.lower():
-        biography += f"Still learning the rhythms of a new place has left them both excited for fresh possibilities and occasionally longing for the familiarity of what they left behind. "
-    else:
-        biography += f"This period in their life has them reflecting on what they truly want and where they see themselves in the coming years. "
-
-    biography += f"\n\n### Physical Presence\n"
-    biography += f"{name} has a {body_type.lower() if body_type != '?' else 'distinctive'} physique that they {random.choice(['maintain with regular exercise', 'carry with natural confidence', 'have grown comfortable with over the years'])}. "
+    # Format a narrative-style biography without rigid section structure
+    biography = f"# {name}'s Biography\n\n"
     
-    if hair_color != '?' and hair_style != '?':
-        biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they have perfected over time', 'has become part of their signature appearance'])}. "
-    else:
-        biography += f"Their hair is styled in a way that frames their face perfectly and highlights their expressive features. "
+    # Opening paragraph with core details
+    biography += f"{name} is a {age}-year-old {ethnicity} {gender} with {hair_color.lower() if hair_color != '?' else ''} {hair_style.lower() if hair_style != '?' else 'hair'} and a {body_type.lower() if body_type != '?' else 'distinctive'} physique. "
+    biography += f"Working as a {occupation}, their {personality.lower() if personality != '?' else 'unique'} personality shines through in how they approach both their professional and personal life. "
     
-    if clothing != '?':
-        biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their personal style', 'they chose with care', 'makes them feel confident'])}. "
-    else:
-        biography += f"Their clothing choices tend to reflect both practicality and a subtle sense of style that's uniquely their own. "
-
-    biography += f"\n\n### Relationship Approach\n"
-    
-    if orientation != '?' and relationship_goal != '?':
-        biography += f"As someone who identifies as {orientation.lower()}, {name} is currently looking for {relationship_goal.lower()}. "
-
-        if "casual" in relationship_goal.lower():
-            biography += f"They value freedom and spontaneity, preferring connections that don't come with excessive expectations or constraints. "
-        elif "serious" in relationship_goal.lower():
-            biography += f"They've reached a point in life where they value depth and commitment, seeking someone to build something meaningful with. "
-        elif "friends with benefits" in relationship_goal.lower():
-            biography += f"They appreciate the balance of emotional connection and physical intimacy without the pressure of traditional relationship structures. "
+    # Current life situation
+    if current_situation and current_situation != '?':
+        if "broke up" in current_situation.lower():
+            biography += f"Having recently ended a relationship, {name} is navigating the complex emotions that come with moving on. The breakup left some unresolved feelings, but also opened up possibilities for new connections. "
+        elif "divorce" in current_situation.lower():
+            biography += f"Still processing a recent divorce, {name} is rediscovering who they are as an individual again. The experience changed their perspective on relationships, making them more thoughtful about what they truly want. "
+        elif "single" in current_situation.lower():
+            biography += f"Currently single, {name} has been focused on personal growth and self-discovery. While comfortable with independence, there's a natural desire for meaningful connection that brings them to social settings. "
+        elif "new in town" in current_situation.lower():
+            biography += f"New to the area, {name} is still finding their footing. The excitement of new beginnings mixes with occasional homesickness, creating a unique openness to new experiences and connections. "
         else:
-            biography += f"Their approach to relationships is authentic and honest, focusing on real connection rather than games or facades. "
+            biography += f"Currently {current_situation.lower()}, {name} is in a transitional period that has them reflecting on their priorities and desires. "
     else:
-        biography += f"{name} approaches relationships with a blend of caution and openness, taking time to truly know someone before fully letting them in. Their past experiences have taught them valuable lessons about what they need in a partner and what they have to offer. "
-
-    # Add backstory if provided
+        biography += f"At this point in their life, {name} is navigating a period of personal growth and change. "
+    
+    # Appearance and style
+    if clothing and clothing != '?':
+        biography += f"Today they're wearing {clothing.lower()}, which reflects their personal style and the image they want to project. The way they present themselves—confident yet approachable—draws attention in subtle ways. "
+    else:
+        biography += f"Their style is distinctive and carefully considered, reflecting both practicality and a subtle flair that makes them memorable. "
+    
+    # Relationship approach and orientation
+    if orientation != '?' and relationship_goal != '?':
+        biography += f"\n\n{name} identifies as {orientation.lower()} and is looking for {relationship_goal.lower()}. "
+        if "casual" in relationship_goal.lower():
+            biography += f"They value their independence and prefer relationships that allow for spontaneity without heavy expectations. Past experiences have taught them that forced commitment often leads to disappointment, so they approach connections with honesty about their intentions. "
+        elif "serious" in relationship_goal.lower():
+            biography += f"Having experienced enough surface-level connections, they're seeking something with genuine depth and potential for growth. They believe in taking the time to build trust before fully investing emotionally. "
+        else:
+            biography += f"Their approach to dating is straightforward and authentic—they believe in being clear about intentions while remaining open to how connections naturally evolve. "
+    else:
+        biography += f"\n\n{name}'s approach to relationships balances caution with genuine openness. Past experiences have shaped their expectations, making them value authenticity above all else in potential partners. "
+    
+    # Background/history
     if backstory:
-        biography += f"\n\n### Personal History\n{backstory}\n"
+        biography += f"\n\n{backstory}\n"
     else:
-        # Generate some basic backstory elements if none provided
-        biography += f"\n\n### Personal History\n"
-        biography += f"{name} was raised in a {random.choice(['small coastal town', 'bustling city', 'quiet suburban neighborhood', 'rural community'])}, "
-        biography += f"which instilled in them a sense of {random.choice(['independence', 'community', 'ambition', 'creativity'])}. "
-        biography += f"Their {random.choice(['parents', 'family', 'upbringing'])} played a significant role in shaping their values around "
-        biography += f"{random.choice(['hard work', 'authenticity', 'emotional openness', 'resilience'])}. "
+        biography += f"\n\n{name} was raised in a {random.choice(['coastal town with stunning ocean views', 'bustling metropolitan area', 'close-knit suburban community', 'rural setting surrounded by nature'])}, which significantly shaped their worldview and values. "
+        biography += f"Their upbringing instilled a strong sense of {random.choice(['independence and self-reliance', 'community and connection to others', 'ambition and determination', 'creativity and expression'])}. "
         
         if occupation != '?':
-            biography += f"Their career as a {occupation} wasn't their first choice, but it's become a path they've grown to love and excel in. "
-        else:
-            biography += f"Professionally, they've followed an interesting path that has allowed them to develop diverse skills and perspectives. "
-
+            biography += f"The path to their current career as a {occupation} wasn't straightforward, involving both challenges and unexpected opportunities that ultimately led them to where they are today. They've developed a reputation for {random.choice(['attention to detail', 'creative problem-solving', 'leadership', 'innovation', 'reliability'])} in their professional life. "
+    
     # Current meeting context
-    biography += f"\n\n### Current Encounter\n"
+    biography += f"\n\nMeeting {user_name} "
     if environment:
-        biography += f"Meeting in {environment.lower()}, " 
-    else:
-        biography += f"In this current setting, "
-
+        biography += f"in {environment.lower()}, "
     if encounter_context:
         biography += f"under the circumstances of {encounter_context.lower()}, "
-
-    biography += f"{name} finds themselves intrigued by {user_name}. The interaction is just beginning, but already there's a sense of "
-    biography += f"{random.choice(['possibility', 'curiosity', 'interest', 'chemistry'])} that has caught their attention."
-
-    # Relationship development placeholder
-    biography += f"\n\n### Relationship Development\n"
-    biography += f"• First Meeting: Just getting to know each other - initial impressions forming"
-
+    biography += f"has sparked {name}'s interest. There's something intriguing about this new connection that has caught their attention, though they're still forming their impressions as they learn more."
+    
+    # Initial relationship status
+    biography += f"\n\n## Relationship Status\nFirst meeting - getting to know each other - initial impressions forming"
+    
     return biography
 
 @retry_with_backoff(retries=2, backoff_in_seconds=1)
@@ -513,16 +479,29 @@ You are generating two distinct types of content for {npc_name}, with a focus on
 
 1. INNER THOUGHTS (First-Person Stream of Consciousness):
    Write as {npc_name}'s authentic inner voice, capturing their raw mental and emotional state.
-
+   
+   IMPORTANT: Write an EXTENSIVE inner monologue of at least 200-300 words, exploring multiple aspects of the character's thoughts.
+   
    Your thoughts should feel natural and include:
-   - Unfiltered emotional reactions to interactions with {user_name}
-   - Doubts, desires, hopes, fears, and contradictions
-   - Memories triggered by current events
-   - Personal reflections on how they feel about the relationship developing
-   - Their true opinions that they might not express openly
-
-   Make these thoughts feel human, with natural patterns of thinking that might include 
-   hesitations, tangents, sudden realizations, or emotional shifts.
+   - Unfiltered emotional reactions to interactions with {user_name} (both immediate and developing feelings)
+   - Deeper analysis of the interaction's subtext and what they believe {user_name} might be thinking
+   - Multiple doubts, desires, hopes, fears, and contradictions that create internal tension
+   - Specific memories triggered by current events, including sensory details and emotional associations
+   - Personal reflections on how they feel about the relationship developing and where they hope it might go
+   - Their true opinions that they might not express openly due to social constraints or personal fears
+   - Thoughts about their own appearance, behavior or choice of words during the interaction
+   - Questions they're asking themselves or things they wish they had said differently
+   - Conflicting emotions and the character wrestling with complex feelings
+   - Reflections on their past and how it influences their current situation
+   
+   Make these thoughts feel deeply human, with natural patterns of thinking that include:
+   - Stream-of-consciousness style with natural tangents and associations
+   - Both rational analysis and emotional reaction intermingled
+   - Moments of self-doubt followed by self-reassurance
+   - Observations about subtle details they noticed during the interaction
+   - Unresolved questions or concerns they're mulling over
+   - Private admissions they wouldn't share with others
+   - Hesitations, realizations, and emotional shifts that reveal their complexity
 
 2. BIOGRAPHY & MEMORY UPDATES: [CRITICAL - ALWAYS INCLUDE THIS]
    It is ESSENTIAL that you identify and extract SPECIFIC NEW INFORMATION that emerges during each interaction.
@@ -573,7 +552,7 @@ USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
 Return two sections:
-PRIVATE_THOUGHTS: ... (Current internal monologue)
+PRIVATE_THOUGHTS: ... (Extensive internal monologue, at least 200-300 words)
 BIOGRAPHICAL_UPDATE: ... (Specific new details that emerged in this interaction - be concrete and precise. ALWAYS include at least one new detail.)
 """
 
