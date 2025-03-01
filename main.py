@@ -722,7 +722,7 @@ def update_npc_info(form):
 
 ### NPC name, age, gender
 NPC_NAME_OPTIONS = [
-    "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma,"Isabella",
+    "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella",
     "James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew",
     "Other"
 ]
