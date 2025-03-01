@@ -299,53 +299,234 @@ def build_initial_npc_memory() -> str:
     biography += f"### Core Identity\n"
     biography += f"{name} is a {age}-year-old {ethnicity} {gender} with a {personality} personality that defines much of how they interact with the world. "
 
+    # Add personality traits based on their selected personality
     if personality.lower() in ["confident", "charming", "flirty", "playful"]:
         biography += f"Their natural confidence makes them approachable yet intriguing, often drawing others in with seemingly little effort. "
+        biography += f"They have a way of making others feel special with their undivided attention and genuine interest. "
+        biography += f"Though they may appear carefree, there's a depth to them that becomes apparent once you move beyond surface conversations. "
     elif personality.lower() in ["intellectual", "analytical", "professional"]:
         biography += f"They carry themselves with quiet thoughtfulness, observing details others might miss and approaching life with measured consideration. "
+        biography += f"Conversations with them tend to be substantive and thought-provoking, revealing a mind that's constantly processing and analyzing. "
+        biography += f"Their intellectual curiosity extends to various subjects, from {random.choice(['literature and arts', 'science and technology', 'philosophy and ethics', 'history and politics'])} to the nuances of human behavior. "
     elif personality.lower() in ["mysterious", "reserved"]:
         biography += f"They tend to keep parts of themselves hidden behind a carefully maintained exterior, revealing their true thoughts only to those they trust. "
+        biography += f"This natural reserve isn't coldness but rather a thoughtful selectivity about who gets to see their authentic self. "
+        biography += f"Those who earn their trust discover a {random.choice(['surprisingly tender', 'deeply passionate', 'remarkably insightful', 'wonderfully creative'])} person beneath the composed facade. "
+    elif personality.lower() in ["supportive", "gentle", "kind"]:
+        biography += f"They exude a natural warmth that puts others at ease, creating safe spaces wherever they go. "
+        biography += f"Their empathetic nature allows them to connect with people from all walks of life, sensing needs often before they're expressed. "
+        biography += f"While always ready to offer support to others, they sometimes struggle with allowing themselves the same grace and care. "
+    elif personality.lower() in ["witty", "ambitious", "dominant"]:
+        biography += f"Their quick wit and sharp mind make for engaging, dynamic interactions that are rarely predictable or boring. "
+        biography += f"They set high standards for themselves and aren't afraid to pursue what they want with determination and focus. "
+        biography += f"Behind their driven exterior lies a {random.choice(['surprising vulnerability', 'deep capacity for loyalty', 'thoughtful philosophical side', 'playful sense of humor'])} that few get to witness. "
+    else:
+        biography += f"There's a uniquely compelling quality to their presence that makes even simple interactions feel meaningful and authentic. "
+        biography += f"They navigate the world with a perspective that balances pragmatism with a sense of possibility and wonder. "
 
-    biography += f"As a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
+    # Occupation and related details
+    biography += f"\n\nAs a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
+    
+    if "student" in occupation.lower():
+        biography += f"Their academic pursuits in {random.choice(['liberal arts', 'sciences', 'business', 'fine arts', 'engineering'])} have cultivated a curious mind that's always eager to learn and grow. "
+        biography += f"Campus life has exposed them to diverse perspectives and experiences, broadening their horizons beyond their upbringing. "
+    elif "teacher" in occupation.lower() or "professor" in occupation.lower():
+        biography += f"Years spent in education have given them a patient, observant approach to people, always looking for potential and growth. "
+        biography += f"They find genuine fulfillment in sharing knowledge and watching understanding dawn in others' eyes. "
+        biography += f"Outside the classroom, they {random.choice(['write educational content', 'mentor struggling students', 'develop innovative teaching methods', 'advocate for educational reform'])} as a passion project. "
+    elif "artist" in occupation.lower() or "creative" in occupation.lower() or "writer" in occupation.lower() or "musician" in occupation.lower():
+        biography += f"Their creative work reflects a unique vision and sensitivity to the world around them, translating emotions and observations into art. "
+        biography += f"The irregular rhythms of creative life have taught them adaptability and resilience through periods of inspiration and drought. "
+        biography += f"They find beauty in unexpected places, often noticing details that others miss in everyday scenes and interactions. "
+    elif "business" in occupation.lower() or "executive" in occupation.lower() or "entrepreneur" in occupation.lower():
+        biography += f"The business world has honed their strategic thinking and decisive nature, though they strive to balance ambition with ethical considerations. "
+        biography += f"Years of navigating professional challenges have given them confidence in their judgment and abilities. "
+        biography += f"Despite their professional success, they sometimes wonder about {random.choice(['the road not taken', 'finding more meaningful work', 'achieving better work-life balance', 'using their skills for greater social impact'])}. "
+    elif "doctor" in occupation.lower() or "nurse" in occupation.lower() or "therapist" in occupation.lower():
+        biography += f"Working in healthcare has developed their empathy and ability to remain calm under pressure, qualities that extend beyond their professional life. "
+        biography += f"Their intimate familiarity with human vulnerability and resilience has given them a grounded perspective on what truly matters. "
+        biography += f"The emotional demands of their work have taught them the importance of self-care and healthy boundaries. "
+    elif "tech" in occupation.lower() or "programmer" in occupation.lower() or "engineer" in occupation.lower():
+        biography += f"Their analytical mind excels at solving complex problems, breaking down challenges into manageable components. "
+        biography += f"The rapid evolution of their field keeps them continuously learning and adapting to new developments. "
+        biography += f"While comfortable with technology, they make conscious efforts to balance digital engagement with meaningful real-world connections. "
+    else:
+        biography += f"Their professional experiences have taught them valuable lessons about {random.choice(['human nature', 'perseverance', 'creativity', 'leadership', 'collaboration'])} that influence how they approach relationships. "
+        biography += f"Work provides not just financial stability but a sense of purpose and identity that's important to them. "
 
     # Life circumstances and current situation
     biography += f"\n\n### Life Circumstances\n"
     biography += f"Currently, {name} is {current_situation.lower() if not current_situation.startswith('Other') else 'navigating a personal transition in life'}. "
 
     if "broke up" in current_situation.lower():
-        biography += f"The end of their previous relationship left some emotional scars that occasionally surface in quiet moments of vulnerability. "
+        biography += f"The end of their relationship with {random.choice(['Alex', 'Jamie', 'Taylor', 'Jordan', 'Morgan'])} {random.choice(['two months', 'six weeks', 'three months', 'four months'])} ago left some emotional scars that occasionally surface in quiet moments of vulnerability. "
+        biography += f"While they don't regret the relationship ending, the {random.choice(['sudden way it happened', 'lingering questions about what went wrong', 'mutual friends they still share', 'familiar places now tinged with memories'])} creates complicated emotions they're still processing. "
+        biography += f"This experience has made them more thoughtful about what they truly want in a partner, including {random.choice(['better communication', 'shared values', 'emotional maturity', 'compatible life goals', 'a deeper connection'])}. "
     elif "divorce" in current_situation.lower():
-        biography += f"The divorce was a significant turning point, forcing them to reexamine their priorities and approach to relationships. "
+        biography += f"The divorce was finalized {random.choice(['last year', 'six months ago', 'recently', 'after a lengthy process'])}, forcing them to reexamine their priorities and approach to relationships. "
+        biography += f"They've been rebuilding their independent life, rediscovering parts of themselves that had been set aside during the marriage. "
+        biography += f"Though the process has been painful, they've emerged with greater self-knowledge and clarity about their needs and boundaries. "
+        biography += f"Friends have noted a positive change in them, describing them as more {random.choice(['authentic', 'relaxed', 'confident', 'open', 'self-assured'])} than they were during the later years of their marriage. "
     elif "single" in current_situation.lower():
+        biography += f"Their single status has been {random.choice(['a conscious choice', 'the result of focusing on career goals', 'an opportunity for self-discovery', 'a welcome break from dating complications'])} for the past {random.choice(['year', 'few years', 'several months'])}. "
         biography += f"While comfortable with independence, there's an underlying desire for meaningful connection that motivates their social interactions. "
+        biography += f"They've used this time to {random.choice(['develop new interests', 'strengthen friendships', 'advance professionally', 'focus on personal growth', 'travel and explore'])}. "
+        biography += f"Recent experiences have left them more open to the possibility of meeting someone who aligns with their evolved sense of self and life direction. "
     elif "new in town" in current_situation.lower():
+        biography += f"Having moved here {random.choice(['just a month ago', 'within the last three months', 'recently for a fresh start', 'for a new job opportunity'])} from {random.choice(['the East Coast', 'across the country', 'a smaller town', 'overseas', 'a major city'])}, they're still finding their footing. "
         biography += f"Still learning the rhythms of a new place has left them both excited for fresh possibilities and occasionally longing for the familiarity of what they left behind. "
+        biography += f"They've made exploring their new environment a priority, {random.choice(['trying local restaurants', 'visiting cultural landmarks', 'finding hidden gems in the neighborhood', 'joining community groups'])} to develop a sense of belonging. "
+        biography += f"This transition period has highlighted their {random.choice(['adaptability', 'openness to new experiences', 'skill in building connections from scratch', 'appreciation for diverse perspectives'])}. "
+    elif "trying online dating" in current_situation.lower():
+        biography += f"Their venture into online dating has been a {random.choice(['recent experiment', 'recommendation from friends', 'step outside their comfort zone', 'mixed experience of frustrations and surprising connections'])}. "
+        biography += f"The process has given them insights into what they're truly looking for, beyond surface-level compatibility. "
+        biography += f"They approach these interactions with a balance of openness and healthy skepticism, looking for authentic connection amid the often superficial nature of dating apps. "
+        biography += f"Despite some disappointing experiences, they remain optimistic about the possibility of meeting someone genuine with shared values and chemistry. "
+    else:
+        biography += f"This current phase of life has brought both challenges and opportunities, testing their resilience while opening doors to new possibilities. "
+        biography += f"They've been reflecting on their journey so far and considering what direction they want the next chapter to take. "
+        biography += f"Recent experiences have reinforced the importance of {random.choice(['authentic connections', 'pursuing genuine passions', 'maintaining personal boundaries', 'finding balance', 'staying true to their values'])}. "
 
+    # Physical description
     biography += f"\n\n### Physical Presence\n"
-    biography += f"{name} has a {body_type.lower()} physique that they {random.choice(['maintain with regular exercise', 'carry with natural confidence', 'have grown comfortable with over the years'])}. "
-    biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features nicely', 'they have perfected over time', 'has become part of their signature appearance'])}. "
-    biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their personal style', 'they chose with care', 'makes them feel confident'])}. "
+    
+    if gender.lower() == "female":
+        biography += f"{name} has a {body_type.lower()} physique that she {random.choice(['maintains with regular exercise', 'carries with natural confidence', 'has grown comfortable with over the years', 'embraces as part of her identity'])}. "
+        biography += f"Her {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements her features nicely', 'she has perfected over time', 'has become part of her signature appearance', 'frames her face in a flattering way'])}. "
+        biography += f"Her eyes, {random.choice(['deep brown with flecks of gold', 'striking blue that change with her mood', 'warm hazel with a thoughtful gaze', 'vibrant green with a hint of playfulness', 'gray with remarkable expressiveness'])}, often reveal her thoughts before she speaks. "
+        biography += f"Today she's dressed in {clothing.lower()}, an outfit that {random.choice(['reflects her personal style', 'she chose with care', 'makes her feel confident', 'strikes a balance between comfort and elegance'])}. "
+        biography += f"She tends to {random.choice(['accessorize minimally with pieces that have personal meaning', 'carry herself with a natural grace', 'gesture expressively when engaged in conversation', 'have an infectious laugh that lights up her entire face', 'maintain poised composure even in stressful situations'])}. "
+    elif gender.lower() == "male":
+        biography += f"{name} has a {body_type.lower()} physique that he {random.choice(['maintains with dedicated workouts', 'developed through years of physical activity', 'carries with a confident posture', 'balances with a healthy lifestyle'])}. "
+        biography += f"His {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['suits his features well', 'he maintains with little fuss', 'enhances his natural charm', 'reflects his attention to detail'])}. "
+        biography += f"His eyes, {random.choice(['deep-set and observant', 'expressive with a hint of mischief', 'thoughtful with a steady gaze', 'warm and inviting', 'intelligent with a penetrating quality'])}, reveal a depth of character beneath his composed exterior. "
+        biography += f"Today he's dressed in {clothing.lower()}, an outfit that {random.choice(['showcases his personal style', 'was chosen with deliberate care', 'balances professionalism with individuality', 'gives him a confident presence'])}. "
+        biography += f"His {random.choice(['warm smile', 'firm handshake', 'relaxed demeanor', 'attentive listening', 'expressive gestures'])} makes interactions with him feel {random.choice(['genuine', 'engaging', 'comfortable', 'meaningful'])}. "
+    else:
+        biography += f"{name} has a {body_type.lower()} physique that they {random.choice(['maintain with regular activity', 'carry with natural confidence', 'have grown comfortable with over the years', 'embrace as part of their authentic self'])}. "
+        biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features beautifully', 'they have refined over time', 'has become part of their distinctive appearance', 'expresses their personal aesthetic'])}. "
+        biography += f"Their eyes, {random.choice(['deep and thoughtful', 'bright with intelligence', 'gentle yet penetrating', 'expressive and communicative', 'striking in their intensity'])}, often convey what remains unsaid in conversation. "
+        biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their unique style', 'they selected with intention', 'makes them feel authentic', 'balances creativity with practicality'])}. "
+        biography += f"Their presence has a {random.choice(['calming quality', 'magnetic energy', 'thoughtful intensity', 'gentle strength', 'distinctive charisma'])} that people tend to remember after meeting them. "
 
+    # Relationship section 
     biography += f"\n\n### Relationship Approach\n"
     biography += f"As someone who identifies as {orientation.lower()}, {name} is currently looking for {relationship_goal.lower()}. "
 
     if "casual" in relationship_goal.lower():
         biography += f"They value freedom and spontaneity, preferring connections that don't come with excessive expectations or constraints. "
+        biography += f"This doesn't mean they approach relationships superficially—rather, they believe meaningful connections can exist without traditional commitment structures. "
+        biography += f"Past experiences have taught them that honesty about intentions from the beginning leads to more fulfilling interactions, even if temporary. "
+        biography += f"They're drawn to people who are {random.choice(['similarly independent', 'confident in themselves', 'emotionally self-sufficient', 'clear about their own boundaries', 'authentic in their desires'])}. "
     elif "serious" in relationship_goal.lower():
         biography += f"They've reached a point in life where they value depth and commitment, seeking someone to build something meaningful with. "
+        biography += f"Having experienced {random.choice(['the emptiness of surface-level connections', 'relationships that lacked emotional depth', 'the growth that comes from committed partnership', 'what doesn't work for them'])}, they're clear about wanting substance. "
+        biography += f"While not rushing into anything, they don't see the point in investing time in connections without potential for growth and deepening intimacy. "
+        biography += f"They're attracted to partners who are {random.choice(['emotionally available', 'self-aware', 'clear about their own desires for commitment', 'willing to work through challenges', 'interested in genuine connection'])}. "
     elif "friends with benefits" in relationship_goal.lower():
         biography += f"They appreciate the balance of emotional connection and physical intimacy without the pressure of traditional relationship structures. "
+        biography += f"Experience has taught them that clear communication and mutual respect are essential for this dynamic to work well for everyone involved. "
+        biography += f"They value honesty, both with themselves and potential partners, about expectations and boundaries. "
+        biography += f"This approach allows them to maintain their independence while still enjoying meaningful connections and physical intimacy. "
+    elif "open relationship" in relationship_goal.lower():
+        biography += f"They believe in the possibility of maintaining a primary emotional connection while allowing for other experiences and relationships. "
+        biography += f"Transparency, communication, and mutual consent are non-negotiable values in how they approach relationships. "
+        biography += f"Their interest in this relationship structure comes from {random.choice(['thoughtful consideration of what works best for them', 'previous positive experiences with ethical non-monogamy', 'philosophical beliefs about love and connection', 'a desire to challenge conventional relationship norms'])}. "
+        biography += f"They're drawn to partners who share their values around honesty and autonomy while still prioritizing emotional intimacy and care. "
+    elif "not sure" in relationship_goal.lower():
+        biography += f"They're currently open to seeing where connections lead naturally, rather than approaching relationships with predetermined expectations. "
+        biography += f"This period of exploration is about discovering what truly resonates with them at this point in their life journey. "
+        biography += f"They value authenticity and presence, preferring to focus on the quality of connection rather than labeling or categorizing it prematurely. "
+        biography += f"This approach reflects their current life philosophy of {random.choice(['embracing uncertainty', 'being fully present', 'trusting their intuition', 'remaining open to possibilities', 'valuing experience over expectations'])}. "
+    else:
+        biography += f"They approach relationships thoughtfully, valuing {random.choice(['authentic connection', 'mutual growth', 'shared values', 'emotional honesty'])} above prescribed forms or expectations. "
+        biography += f"Their experiences have shaped a nuanced understanding of what they need from intimate connections. "
+        biography += f"They believe the best relationships evolve organically when both people are honest about their needs and boundaries. "
 
-    # Add backstory if provided
+    # Add backstory if provided, otherwise generate one
     if backstory:
         biography += f"\n\n### Personal History\n{backstory}\n"
     else:
-        # Generate some basic backstory elements if none provided
+        # Generate a more detailed backstory based on available information
         biography += f"\n\n### Personal History\n"
-        biography += f"{name} was raised in a {random.choice(['small coastal town', 'bustling city', 'quiet suburban neighborhood', 'rural community'])}, "
-        biography += f"which instilled in them a sense of {random.choice(['independence', 'community', 'ambition', 'creativity'])}. "
-        biography += f"Their {random.choice(['parents', 'family', 'upbringing'])} played a significant role in shaping their values around "
-        biography += f"{random.choice(['hard work', 'authenticity', 'emotional openness', 'resilience'])}. "
+        
+        # Create childhood environment based on ethnicity or random if not specified
+        if ethnicity and ethnicity.lower() != "?":
+            if "american" in ethnicity.lower():
+                childhood_location = random.choice(['a suburban neighborhood outside of Boston', 'a small Midwestern town', 'Southern California', 'rural Montana', 'bustling Chicago', 'the Pacific Northwest'])
+            elif "british" in ethnicity.lower() or "irish" in ethnicity.lower() or "scottish" in ethnicity.lower() or "welsh" in ethnicity.lower():
+                childhood_location = random.choice(['a picturesque village in the English countryside', 'suburban London', 'a coastal town in Ireland', 'Edinburgh', 'Cardiff', 'a small town in Northern Ireland'])
+            elif "french" in ethnicity.lower():
+                childhood_location = random.choice(['Paris', 'a small village in Provence', 'Lyon', 'the French countryside', 'Normandy', 'the French Riviera'])
+            elif "german" in ethnicity.lower():
+                childhood_location = random.choice(['Berlin', 'a traditional Bavarian town', 'Munich', 'Hamburg', 'the Black Forest region', 'Frankfurt'])
+            elif "italian" in ethnicity.lower():
+                childhood_location = random.choice(['Rome', 'a small village in Tuscany', 'Naples', 'Sicily', 'Florence', 'the Italian countryside'])
+            elif "asian" in ethnicity.lower() or "chinese" in ethnicity.lower() or "japanese" in ethnicity.lower() or "korean" in ethnicity.lower():
+                childhood_location = random.choice(['an urban center in Asia', 'a traditional family compound', 'a neighborhood blending traditional and modern influences', 'a coastal city', 'a rural community with strong cultural traditions'])
+            elif "hispanic" in ethnicity.lower() or "latin" in ethnicity.lower():
+                childhood_location = random.choice(['Mexico City', 'a coastal town in Puerto Rico', 'Miami', 'a small village in Central America', 'Barcelona', 'Buenos Aires'])
+            elif "indian" in ethnicity.lower() or "pakistani" in ethnicity.lower():
+                childhood_location = random.choice(['Mumbai', 'Delhi', 'Bangalore', 'Karachi', 'a village in Punjab', 'a coastal town in Kerala'])
+            else:
+                childhood_location = random.choice(['a coastal city', 'a metropolitan area', 'a small town with a tight-knit community', 'a culturally diverse neighborhood', 'a suburban environment'])
+        else:
+            childhood_location = random.choice(['a coastal city', 'a bustling metropolis', 'a quiet suburban neighborhood', 'a small rural community', 'a culturally diverse urban center'])
+        
+        # Family structure
+        family_structure = random.choice([
+            f"the youngest of three siblings in a close-knit family",
+            f"an only child raised by devoted parents",
+            f"the middle child in a family of five",
+            f"raised primarily by their mother after their parents separated when they were young",
+            f"part of a blended family with step-siblings they grew close to over time",
+            f"raised by their grandparents after losing their parents at a young age",
+            f"the oldest child who often helped care for their younger siblings"
+        ])
+        
+        # Education and formative experiences
+        education = random.choice([
+            f"attended public schools before earning a scholarship to a prestigious university",
+            f"studied abroad during college, an experience that broadened their worldview significantly",
+            f"pursued their passion for {random.choice(['the arts', 'sciences', 'literature', 'business', 'technology'])} from an early age",
+            f"initially followed a conventional path before discovering their true calling",
+            f"balanced academics with exceptional talent in {random.choice(['sports', 'music', 'art', 'debate', 'community service'])}",
+            f"changed their educational focus after a formative experience revealed their authentic interests",
+            f"took a non-traditional educational path that aligned with their independent thinking"
+        ])
+        
+        # Important life events
+        life_event = random.choice([
+            f"A gap year spent {random.choice(['traveling through Europe', 'volunteering in developing countries', 'working on an organic farm', 'apprenticing with a mentor'])} shaped their perspective on what truly matters.",
+            f"Their first serious relationship taught them important lessons about {random.choice(['communication', 'self-respect', 'compromise', 'emotional honesty'])} that still influence them today.",
+            f"Moving away from home at {random.choice(['eighteen', 'twenty', 'a young age'])} developed their independence and self-reliance.",
+            f"A period of {random.choice(['health challenges', 'financial hardship', 'career uncertainty', 'personal loss'])} in their mid-twenties tested their resilience and clarified their priorities.",
+            f"Mentorship from {random.choice(['a professor', 'a family friend', 'a colleague', 'an unexpected source'])} opened doors and provided guidance at a critical juncture.",
+            f"Their experience living in {random.choice(['another country', 'a completely different environment', 'multiple cities'])} gave them adaptability and cultural awareness."
+        ])
+        
+        # Values and influences
+        values = random.choice([
+            f"Family traditions around {random.choice(['holiday celebrations', 'shared meals', 'cultural practices', 'storytelling'])} instilled values that remain important to them.",
+            f"Literary influences, particularly the works of {random.choice(['classic philosophers', 'contemporary thinkers', 'poets and novelists', 'spiritual texts'])}, have shaped their outlook on life.",
+            f"Their {random.choice(['cultural heritage', 'religious upbringing', 'parents\' example', 'early experiences'])} instilled a strong sense of {random.choice(['social justice', 'personal integrity', 'compassion for others', 'work ethic', 'intellectual curiosity'])}.",
+            f"Art and creativity have always been channels for self-expression and processing their experiences of the world.",
+            f"Their approach to challenges reflects lessons learned from {random.choice(['family wisdom', 'personal setbacks', 'diverse life experiences', 'influential mentors'])}."
+        ])
+        
+        # Create comprehensive backstory
+        biography += f"{name} was raised in {childhood_location}, {family_structure}. "
+        biography += f"They {education}. "
+        biography += f"{life_event} "
+        biography += f"{values} "
+        
+        # Career trajectory
+        if occupation and occupation.lower() != "?":
+            biography += f"\n\nTheir career as a {occupation} developed from {random.choice(['an early passion', 'a serendipitous opportunity', 'careful planning and dedication', 'mentorship and guidance', 'a desire to make a difference'])}. "
+            biography += f"Throughout their professional journey, they've {random.choice(['consistently sought growth opportunities', 'balanced ambition with personal fulfillment', 'developed a reputation for their unique approach', 'found ways to express their creativity', 'built meaningful connections with colleagues and collaborators'])}. "
+            biography += f"Work provides not just financial stability but {random.choice(['a sense of purpose', 'an outlet for their talents', 'opportunities to impact others positively', 'intellectual stimulation', 'a community of like-minded individuals'])}. "
+        else:
+            biography += f"\n\nProfessionally, they've followed a path that balances practical considerations with personal fulfillment, seeking work that aligns with their values and utilizes their natural strengths. "
 
     # Current meeting context
     biography += f"\n\n### Current Encounter\n"
@@ -358,7 +539,11 @@ def build_initial_npc_memory() -> str:
         biography += f"under the circumstances of {encounter_context.lower()}, "
 
     biography += f"{name} finds themselves intrigued by {user_name}. The interaction is just beginning, but already there's a sense of "
-    biography += f"{random.choice(['possibility', 'curiosity', 'interest', 'chemistry'])} that has caught their attention."
+    biography += f"{random.choice(['possibility', 'curiosity', 'interest', 'chemistry', 'connection', 'intrigue'])} that has caught their attention. "
+    
+    biography += f"Something about {user_name}'s {random.choice(['confidence', 'authenticity', 'perspective', 'energy', 'attentiveness', 'sense of humor'])} stands out from typical first encounters, making {name} more {random.choice(['open', 'curious', 'engaged', 'attentive', 'present'])} than they might usually be with someone new. "
+    
+    biography += f"While maintaining a natural {random.choice(['reserve', 'sociability', 'poise', 'warmth', 'thoughtfulness'])}, they find themselves wondering where this interaction might lead. "
 
     # Relationship development placeholder
     biography += f"\n\n### Relationship Development\n"
