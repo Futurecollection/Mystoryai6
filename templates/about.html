@@ -1,124 +1,340 @@
+
 {% extends "base.html" %}
 {% block content %}
-<div class="alert alert-primary mb-4">
-  <h4 class="alert-heading" style="color: #ff5789;">Coming Soon: Enhanced Experience!</h4>
-  <p>
-    We're working on exciting new features to make your interactions even more immersive:
+<div class="about-container">
+  <!-- Hero Section -->
+  <div class="hero-section text-center mb-5">
+    <h1 class="display-4 mb-3" style="color: #ff5789; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Destined Encounters</h1>
+    <p class="lead">Create immersive romantic storylines with AI-powered characters that evolve with your choices</p>
+    <div class="hero-images mt-4">
+      <div class="row justify-content-center">
+        <div class="col-md-5">
+          <img src="{{ url_for('static', filename='images/IMG_3483.jpeg') }}" alt="Destined Encounters" class="img-fluid rounded shadow mb-3">
+        </div>
+        <div class="col-md-5">
+          <img src="{{ url_for('static', filename='images/IMG_2978.jpeg') }}" alt="Characters" class="img-fluid rounded shadow mb-3">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature Cards -->
+  <div class="feature-cards mb-5">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-person-heart fs-1 mb-3" style="color: #ff5789;"></i>
+            <h3 class="card-title">Customizable Characters</h3>
+            <p class="card-text">Create unique romantic partners with detailed personalities, appearances, and backstories that evolve throughout your story.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-chat-heart-fill fs-1 mb-3" style="color: #ff5789;"></i>
+            <h3 class="card-title">Relationship Progression</h3>
+            <p class="card-text">Experience a naturally evolving relationship through 6 distinct stages, each unlocking new levels of intimacy and connection.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-image fs-1 mb-3" style="color: #ff5789;"></i>
+            <h3 class="card-title">AI-Generated Imagery</h3>
+            <p class="card-text">Visualize your characters and scenes with advanced AI image generation that brings your romantic storyline to life.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <div class="how-it-works-section mb-5 p-4 rounded">
+    <h2 class="text-center mb-4" style="color: #ff5789;">How It Works</h2>
+    
+    <div class="step-container">
+      <div class="step mb-4">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Create Your Characters</h4>
+          <p>Design both yourself and your AI companion with detailed traits including personality, appearance, and background. All characters must be 20+ years old.</p>
+        </div>
+      </div>
+      
+      <div class="step mb-4">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Choose Your Setting</h4>
+          <p>Set the stage for your encounter — select from various locations like cafés, parks, or offices, or create your own custom environment.</p>
+        </div>
+      </div>
+      
+      <div class="step mb-4">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Shape Your Story</h4>
+          <p>Drive the narrative through your choices and actions. Watch as your relationship evolves naturally based on your interactions.</p>
+        </div>
+      </div>
+      
+      <div class="step mb-4">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h4>Generate Visuals</h4>
+          <p>Create images of scenes and characters using AI image generation with multiple style options to match your story's mood.</p>
+        </div>
+      </div>
+      
+      <div class="step mb-4">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <h4>Save & Continue</h4>
+          <p>Your story progress is saved automatically when logged in. Return anytime to continue your romantic journey.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Special Features Section -->
+  <div class="special-features mb-5">
+    <h2 class="text-center mb-4" style="color: #ff5789;">Special Features</h2>
+    
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card special-feature-card h-100">
+          <div class="card-body">
+            <h4 class="card-title"><i class="bi bi-chat-quote me-2" style="color: #ff5789;"></i>OOC Commands</h4>
+            <p class="card-text">Use "OOC:" (Out of Character) commands to guide the AI without breaking immersion:</p>
+            <ul>
+              <li><code>OOC: Make the character more flirtatious</code></li>
+              <li><code>OOC: Change the mood to more serious</code></li>
+              <li><code>OOC: Skip ahead to later in the evening</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-4">
+        <div class="card special-feature-card h-100">
+          <div class="card-body">
+            <h4 class="card-title"><i class="bi bi-book me-2" style="color: #ff5789;"></i>Story Generation</h4>
+            <p class="card-text">Transform your interactions into a cohesive narrative:</p>
+            <ul>
+              <li>Convert your dialogue and actions into a polished story</li>
+              <li>Generate alternative versions with different tones</li>
+              <li>Continue where you left off if the story gets cut off</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card special-feature-card h-100">
+          <div class="card-body">
+            <h4 class="card-title"><i class="bi bi-images me-2" style="color: #ff5789;"></i>Multiple Image Models</h4>
+            <p class="card-text">Choose from different AI image generation styles:</p>
+            <ul>
+              <li><strong>Flux</strong>: Photorealistic portrait style images</li>
+              <li><strong>Pony</strong>: Detailed, customizable rendering for intimate scenes</li>
+              <li><strong>Realistic</strong>: High-fidelity scene visualization</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-4">
+        <div class="card special-feature-card h-100">
+          <div class="card-body">
+            <h4 class="card-title"><i class="bi bi-arrow-up-circle me-2" style="color: #ff5789;"></i>Relationship Stages</h4>
+            <p class="card-text">Experience evolving intimacy through 6 relationship stages:</p>
+            <ul>
+              <li><strong>Stage 1</strong>: Playful Connection & Getting to Know Each Other</li>
+              <li><strong>Stage 2</strong>: Deepening Chemistry</li>
+              <li><strong>Stage 3</strong>: Growing Emotional Intimacy</li>
+              <li><strong>Stage 4</strong>: Romantic & Physical Connection</li>
+              <li><strong>Stage 5</strong>: Mature Dating Phase</li>
+              <li><strong>Stage 6</strong>: Committed Relationship</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coming Soon Section -->
+  <div class="alert alert-primary mb-5">
+    <h4 class="alert-heading" style="color: #ff5789;">Coming Soon: Enhanced Experience!</h4>
+    <p>We're working on exciting new features to make your interactions even more immersive:</p>
+    <div class="row">
+      <div class="col-md-6">
+        <ul>
+          <li><strong>Advanced AI Image Generation:</strong> More realistic and detailed character portraits</li>
+          <li><strong>Video Generation:</strong> Dynamic video clips that bring key story moments to life</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <ul>
+          <li><strong>Voice Generation:</strong> Give your characters unique voices and hear their dialogue</li>
+          <li><strong>Live Calling:</strong> Interactive voice conversations with your AI companion</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Important Notes -->
+  <div class="important-notes mb-5">
+    <h2 class="text-center mb-4" style="color: #ff5789;">Important Notes</h2>
+    
+    <div class="card note-card mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-exclamation-triangle me-2"></i>Age Restriction</h5>
+        <p class="card-text">All characters must be explicitly 20+ years old. Any content involving minors is strictly prohibited and will be blocked by our system.</p>
+      </div>
+    </div>
+    
+    <div class="card note-card mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-arrow-clockwise me-2"></i>Frequent Updates</h5>
+        <p class="card-text">We're actively improving the application with new features. Occasionally your session may time out during deployments.</p>
+      </div>
+    </div>
+    
+    <div class="card note-card">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-person-badge me-2"></i>Guest Mode</h5>
+        <p class="card-text">You can use the application without creating an account, but your stories and settings won't be saved between sessions.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-5 mb-4">
+    <a href="{{ url_for('interaction') }}" class="btn btn-primary btn-lg">Start Your Story</a>
+    <a href="{{ url_for('main_home') }}" class="btn btn-outline-secondary btn-lg ms-3">Back to Home</a>
+  </div>
+
+  <p class="text-center mt-4">
+    <small>Join our official subreddit for the latest updates and discussions: <a href="https://www.reddit.com/r/MyStoryAI/s/EalpGwwbuv" target="_blank">r/MyStoryAI</a></small>
   </p>
-  <ul>
-    <li><strong>Realistic Images:</strong> Advanced AI image generation for more authentic character portraits and scene visualization</li>
-    <li><strong>Video Generation:</strong> Dynamic video clips that bring key story moments to life</li>
-    <li><strong>Voice Generation:</strong> Give your characters unique voices and hear their dialogue</li>
-    <li><strong>Live Calling:</strong> Interactive voice conversations with your AI companion</li>
-  </ul>
-  <p class="mb-0">
-    Stay tuned as we roll out these features to create an even more engaging and interactive storytelling experience!
-  </p>
 </div>
+{% endblock %}
 
-<div class="row mb-4">
-  <div class="col-md-6">
-    <img src="{{ url_for('static', filename='images/IMG_2978.jpeg') }}" alt="MyStory Banner" style="max-width: 100%; height: auto;" class="img-fluid rounded mb-4">
-  </div>
-  <div class="col-md-6">
-    <video class="img-fluid rounded" controls autoplay loop muted>
-      <source src="{{ url_for('static', filename='videos/cafe_moments.mp4') }}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</div>
-<div class="row mb-4">
-  <div class="col-md-6">
-    <img src="{{ url_for('static', filename='images/IMG_3483.jpeg') }}" alt="Additional Banner" style="max-width: 100%; height: auto;" class="img-fluid rounded">
-  </div>
-  <div class="col-md-6">
-    <video class="img-fluid rounded" controls autoplay loop muted>
-      <source src="{{ url_for('static', filename='videos/1ztbyjhn4srmc0cmvakabbx0vw.mp4') }}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</div>
-
-<h1 style="color: #ff5789;">About / Help</h1>
-
-<p>
-  Welcome to <strong>Destined Encounters</strong>, where you can shape an adult storyline 
-  through AI-generated narratives and interactions. This application blends storytelling, 
-  romance, and dynamic AI-driven characters to give you a unique, customizable experience.
-</p>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<h3 style="color: #ff5789;">Basic Usage</h3>
-<ol>
-  <li>
-    <strong>Personalize Your Characters:</strong>  
-    On the <em>Personalize</em> page, fill out details for both yourself (the user) and the NPC. 
-    You can pick from dropdowns or type in your own custom entries. Note: All characters must be 20+ years old.
-  </li>
-  <li>
-    <strong>Set the Environment:</strong>  
-    Decide where the story begins—at a café, a gym, etc. Select from the provided options or 
-    type in a custom location.
-  </li>
-  <li>
-    <strong>Begin Interaction:</strong>  
-    After saving your details, go to the <em>Interaction</em> page. Type in actions or dialogue 
-    to guide the story, and the AI will respond with a narrative and the NPC's perspective.
-  </li>
-</ol>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<h3 style="color: #ff5789;">Generating Images</h3>
-<ol>
-  <li>
-    <strong>Auto-Generate Prompt:</strong>  
-    Click "Auto Generate Scene Prompt" to have the AI produce a single-sentence description 
-    of the current scene.
-  </li>
-  <li>
-    <strong>Customize for Better Results:</strong>  
-    If the auto-generated prompt is lacking detail, feel free to edit it. All prompts are checked for age-appropriate content.
-  </li>
-  <li>
-    <strong>One Image per Turn:</strong>  
-    You can only generate an image once per turn to keep the story flow balanced.
-  </li>
-</ol>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<h3 style="color: #ff5789;">Special Commands</h3>
-<p>
-  To give the AI special instructions, simply begin your action with <em>"OOC:"</em>. For example, 
-  <code>OOC: Make the NPC act more flirtatious</code>. This is useful for reshaping the AI's 
-  response without changing the official settings.
-</p>
-
-<hr style="border-top: 1px solid #ff5789;">
-
-<h3 style="color: #ff5789;">Important Notes</h3>
-<ul>
-  <li>
-    <strong>Age Restriction:</strong> All characters must be explicitly 20+ years old. Any content involving minors 
-    or characters under 20 is strictly prohibited and will be blocked by the system.
-  </li>
-  <li>
-    <strong>Frequent Updates:</strong> We're actively adding new features, and sometimes your session may 
-    time out while we deploy changes.
-  </li>
-  <li>
-    <strong>Story Generation:</strong> You can generate an erotic story version of your interaction log 
-    or continue the story if it gets cut off due to length limits.
-  </li>
-</ul>
-
-<p class="mt-4">
-  <small>Join our official subreddit for the latest updates and discussions: <a href="https://www.reddit.com/r/MyStoryAI/s/EalpGwwbuv" target="_blank">r/MyStoryAI</a></small>
-</p>
-
-<div class="text-center mt-4">
-  <a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Interaction</a>
-</div>
+{% block extra_styles %}
+<style>
+  .about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  
+  .hero-section {
+    padding: 2rem 0;
+  }
+  
+  .feature-card, .special-feature-card, .note-card {
+    background-color: rgba(40, 10, 10, 0.5);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-card:hover, .special-feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .how-it-works-section {
+    background-color: rgba(40, 10, 10, 0.4);
+  }
+  
+  .step {
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .step-number {
+    background-color: #ff5789;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .step-content {
+    flex-grow: 1;
+  }
+  
+  .special-feature-card h4, .note-card h5 {
+    color: #ff9fa3;
+  }
+  
+  code {
+    background-color: rgba(255, 87, 137, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    color: #ff9fa3;
+  }
+  
+  .note-card {
+    border-left: 4px solid #ff5789;
+  }
+  
+  .alert-primary {
+    background-color: rgba(40, 10, 40, 0.6);
+    border-color: #ff5789;
+  }
+  
+  .btn-primary {
+    background-color: #ff5789;
+    border-color: #ff5789;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: #e83e6f;
+    border-color: #e83e6f;
+    transform: scale(1.05);
+  }
+  
+  .btn-outline-secondary {
+    border-color: #ff9fa3;
+    color: #ff9fa3;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #ff9fa3;
+    color: #1e0505;
+  }
+  
+  /* Make images look like polaroids */
+  .hero-images img {
+    border: 8px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .step {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .step-number {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+  }
+</style>
 {% endblock %}
