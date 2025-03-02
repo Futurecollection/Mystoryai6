@@ -522,82 +522,45 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
         "feeling particularly aware of how their body moves"
     ])
 
-    # Enhanced method with multiple thought fragments
-    thought_fragments = []
-    
-    # Make 3 separate attempts to generate rich thought content
-    for fragment_attempt in range(3):
-        topic_seed = random.randint(1000, 9999)
-        fragment_focus = random.choice([
-            "direct reaction to current situation",
-            "deeper emotional analysis",
-            "conflicting desires and motivations",
-            "past memories triggered by current events",
-            "immediate physical and sensory experiences",
-            "anxieties and hopes about the future",
-            "comparison to past relationships",
-            "professional/life concerns intruding",
-            "self-evaluation and identity questions",
-            "practical concerns and planning thoughts"
-        ])
+    # Instead of always generating 3 fragments, let's be more selective
+    # and generate just one focused, high-quality fragment
+    fragment_focus = random.choice([
+        "direct reaction to current situation",
+        "deeper emotional analysis",
+        "conflicting desires and motivations",
+        "past memories triggered by current events",
+        "immediate physical and sensory experiences",
+        "anxieties and hopes about the future",
+        "comparison to past relationships",
+        "professional/life concerns intruding",
+        "self-evaluation and identity questions",
+        "practical concerns and planning thoughts"
+    ])
 
-        system_prompt = f"""
-YOU MUST GENERATE AN EXTREMELY LONG AND DETAILED STREAM OF INTERNAL THOUGHTS FOR {npc_name} 
-(SEED: {random_seed}-{topic_seed}, FOCUS: {fragment_focus})
-
-Your task is to create an ULTRA-DETAILED first-person internal monologue that is AT MINIMUM 1500-2000 WORDS IN LENGTH. 
-THIS IS A STRICT REQUIREMENT - the content must be EXTENSIVE, VERBOSE, and EXHAUSTIVELY DETAILED.
+    system_prompt = f"""
+Generate a DETAILED first-person internal monologue for {npc_name} that feels authentic and doesn't repeat information.
 
 TODAY'S MENTAL STATE: {npc_name} is particularly {thought_approach} today, while physically {physical_state}.
 
-YOU MUST INCLUDE ALL OF THESE ELEMENTS IN YOUR RESPONSE:
+The internal monologue should focus on: {fragment_focus}
 
-1. ULTRA-REALISTIC INNER VOICE:
-   - Use extremely messy, disjointed first-person stream-of-consciousness with raw emotional honesty
-   - Create at least 10+ fragmented thoughts, interrupted ideas, and mental tangents
-   - Include extensive self-address (using "I" or their own name) in reflective moments
-   - Use abundant natural profanity and colloquialisms that match their character
+Create a REALISTIC inner voice with these elements:
+1. First-person stream-of-consciousness with natural flow
+2. Genuine internal contradictions and emotional complexity
+3. Mixture of complete thoughts and fragmented ideas
+4. Natural language patterns including occasional profanity if fitting
+5. Clear connection to the current interaction but also broader context
+6. Specific sensory experiences and bodily sensations
+7. Authentic psychological complexity (contradictory feelings, doubts, hopes)
+8. Some unrelated thoughts that naturally intrude
+9. References to {npc_name}'s life experiences and memories
+10. Analysis of {user_name}'s behavior and what it might mean
 
-2. DEEP PHYSIOLOGICAL & SENSORY EXPERIENCE (MINIMUM 8-10 DISTINCT INSTANCES):
-   - Describe at least 8-10 distinct bodily sensations in extreme detail (heart racing, stomach knotting, tension headache beginning)
-   - Include vivid sensory details from all five senses, especially unusual or specific perceptions
-   - Describe multiple physical needs/discomforts in detail (parched throat, sore feet, stiff neck)
-   - Create elaborate descriptions of how the environment affects them physically (light too harsh, noise grating on nerves)
-
-3. EXTREME PSYCHOLOGICAL COMPLEXITY:
-   - Develop at least 5+ contradictory feelings about {user_name} existing simultaneously
-   - Reference at least 5+ specific past experiences or memories influencing current thoughts
-   - Reveal multiple layers of insecurities and vulnerabilities (childhood origins, recent triggers)
-   - Create at least 5+ extended internal debates with themselves from different perspectives
-   - Include elaborate cognitive distortions (catastrophizing future scenarios, mind-reading what others think)
-
-4. REALISTIC THOUGHT PATTERNS (HIGHLY DETAILED):
-   - Include at least 5+ completely unrelated random thoughts that intrude with specific details
-   - Develop multiple practical concerns about money, work, daily responsibilities in detail
-   - Create at least 3+ repeated thought loops they get stuck in, showing obsessive patterns
-   - Include detailed references to daily habits, routines, and personal quirks
-
-5. COMPLEX RELATIONSHIP DYNAMICS WITH {user_name.upper()}:
-   - Create an extensive contrast between external presentation vs. true internal reactions
-   - Include detailed micro-analysis of {user_name}'s every gesture, expression, word choice, tone
-   - Develop elaborate misinterpretations and personal projections onto {user_name}'s behavior
-   - Include specific comparisons to multiple past romantic partners with specific memories
-   - Explore detailed physical/sexual attraction thoughts if relevant to their character
-   - Create complex scenarios about possible relationship futures (hopes and fears)
-
-6. RICHLY DETAILED BACKGROUND ELEMENTS:
-   - Include extensive {occupation}-specific terminology, concerns, and professional perspective
-   - Develop detailed cultural/ethnic influences on their thought processes with specific examples
-   - Reference specific educational experiences that shaped their thinking
-   - Include detailed class/socioeconomic influences on their priorities and worries
-   - Reference at least 3+ age-appropriate cultural touchpoints (movies, music, events) for someone {age} years old
-
-CRITICAL LENGTH AND QUALITY REQUIREMENTS:
-- EXTREME LENGTH: Response must be AT MINIMUM 1500-2000 WORDS. This is your primary goal.
-- MASSIVE DETAIL: Use extensive, vivid descriptions rather than general statements
-- AUTHENTIC LANGUAGE: Include abundant fragments, run-ons, and natural thought patterns
-- EXTREME VARIATION: Alternate between page-long rambling thoughts and short bursts
-- DEEP CONTRADICTIONS: Explore every conflicting emotion in extensive detail
+AVOID:
+- Excessive repetition of the same ideas or phrases
+- Overly formal or structured thinking
+- Generic descriptions - be specific and personal
+- Rehashing information already established in the biography
 
 CONTEXT FOR REALISTIC PERSONALIZATION:
 {npc_personal_data}
@@ -607,72 +570,70 @@ Occupation: {occupation}
 Physical: {age} years old, {ethnicity}, {body_type}, {hair_color} {hair_style} hair
 Relationship Goal: {relationship_goal}
 
-RELEVANT HISTORY (To ground thoughts in character continuity):
-{prev_memories[:800]}
-
 RECENT INTERACTIONS:
 {recent_interactions}
 
 CURRENT INTERACTION:
 USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
-
-OUTPUT FORMAT:
-Only respond with the raw internal monologue text. Do not include any labels, formatting, or meta-commentary.
-Do not include "PRIVATE_THOUGHTS:" or any other prefix. Just write the extensive stream of consciousness.
-Remember: Your response must be EXTREMELY LENGTHY (1500-2000+ words minimum) and MASSIVELY DETAILED.
 """
 
-        try:
-            chat = model.start_chat()
-            response = chat.send_message(
-                system_prompt,
-                generation_config={
-                    "temperature": 0.95,  # Very high temperature for maximum creativity and variation
-                    "max_output_tokens": 8192,  # Maximum allowed
-                    "top_p": 0.98,
-                    "top_k": 60
-                },
-                safety_settings=safety_settings
-            )
-            
-            if response and response.text and len(response.text.strip()) > 200:
-                thought_fragments.append(response.text.strip())
-        except Exception as e:
-            print(f"[ERROR] Thought fragment generation failed: {e}")
+    # Generate just one high-quality thought fragment
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            system_prompt,
+            generation_config={
+                "temperature": 0.9,
+                "max_output_tokens": 4096,
+                "top_p": 0.95,
+                "top_k": 50
+            },
+            safety_settings=safety_settings
+        )
+        
+        if response and response.text and len(response.text.strip()) > 200:
+            combined_thoughts = response.text.strip()
+        else:
+            combined_thoughts = f"I wonder what {user_name} is thinking right now... there's something about the way they look at me that makes me feel both excited and nervous at the same time."
+    except Exception as e:
+        print(f"[ERROR] Thought generation failed: {e}")
+        combined_thoughts = f"I wonder what {user_name} is thinking right now... there's something about the way they look at me that makes me feel both excited and nervous at the same time."
     
-    # Combine the thought fragments into one comprehensive inner monologue
-    combined_thoughts = "\n\n...\n\n".join(thought_fragments)
-    
-    # Generate the biographical memory update
+    # Generate a more focused biographical memory update
     memory_prompt = f"""
-Create a DETAILED biographical update for {npc_name} (minimum 300-400 words) based on this interaction.
-Don't just identify a single detail - construct an elaborate, interconnected set of biographical elements that:
+Create a FOCUSED biographical update for {npc_name} based on this interaction. 
+Focus ONLY on NEW information that hasn't been established before.
 
-1. EXPAND PERSONAL HISTORY: Create specific childhood memories, formative experiences, and past relationship details
-2. ADD PSYCHOLOGICAL DEPTH: Reveal core values, emotional patterns, fears, and hopes
-3. ENRICH PROFESSIONAL LIFE: Add career aspirations, workplace dynamics, and professional skills
-4. BUILD CULTURAL CONTEXT: Include family traditions, cultural background elements, and worldview
-5. DEVELOP PERSONAL QUIRKS: Identify unique habits, preferences, mannerisms, and behavioral patterns
+DO NOT repeat existing biographical details. Instead:
+1. Identify 2-3 NEW meaningful details revealed in this interaction
+2. Connect these new details to existing character information when relevant
+3. Be specific and concrete rather than general
+4. Focus on quality over quantity - a few meaningful details are better than many generic ones
 
 INTERACTION TO ANALYZE:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
 
-EXISTING BIOGRAPHICAL ELEMENTS TO BUILD UPON:
-{prev_memories[:800] if len(prev_memories) > 20 else "Limited existing information - expand significantly"}
+EXISTING BIOGRAPHICAL ELEMENTS (DO NOT REPEAT THESE):
+{prev_memories[:1000] if len(prev_memories) > 20 else "Limited existing information - provide initial details"}
 
-Be extremely specific and detailed. Create vivid, concrete elements that make {npc_name} feel like a real person with a rich life history.
+IMPORTANT: If no significant new biographical details are revealed in this interaction, 
+respond with "(No new biographical information to add)" instead of inventing facts.
 """
     
     try:
         memory_chat = model.start_chat()
         memory_resp = memory_chat.send_message(
             memory_prompt,
-            generation_config={"temperature": 0.8, "max_output_tokens": 4096},
+            generation_config={"temperature": 0.7, "max_output_tokens": 1024},
             safety_settings=safety_settings
         )
         memory = memory_resp.text.strip() if memory_resp and memory_resp.text else ""
+        
+        # Check if the response indicates no new information
+        if "no new biographical" in memory.lower():
+            memory = "(No significant new biographical details to add from this interaction)"
     except Exception as e:
         print(f"[ERROR] Memory generation failed: {e}")
         memory = ""
@@ -865,23 +826,49 @@ MEMORY_UPDATE: (System Error)
         if existing_memories.strip().lower() == "(none)":
             updated_memories = build_initial_npc_memory() + f"\n\n## New Information\n### {timestamp}\n{memory_txt}"
         else:
-            # Simpler, more flexible approach without rigid sections
-            if memory_txt.strip().startswith('#'):
-                # This is a complete biography replacement
-                updated_memories = memory_txt
-            else:
-                # Simply add the new information with a timestamp
-                updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+            # Check if the memory_txt contains mostly duplicated information
+            # by seeing if large chunks already exist in the current biography
+            memory_sentences = [s.strip() for s in memory_txt.split('.') if len(s.strip()) > 15]
+            
+            # Calculate how much is duplicate content
+            duplicate_count = 0
+            for sentence in memory_sentences:
+                if sentence and len(sentence) > 25 and sentence.lower() in existing_memories.lower():
+                    duplicate_count += 1
+            
+            # If more than 60% is duplicate, summarize instead of appending everything
+            if memory_sentences and (duplicate_count / len(memory_sentences) > 0.6):
+                # Extract only the sentences that aren't already in the biography
+                new_content = []
+                for sentence in memory_sentences:
+                    if sentence and sentence.lower() not in existing_memories.lower():
+                        new_content.append(sentence)
                 
+                if new_content:
+                    # Only add the genuinely new information
+                    new_info = ". ".join(new_content) + "."
+                    updated_memories = f"{existing_memories}\n\n### {timestamp} (New Details)\n{new_info}"
+                else:
+                    # No significant new info
+                    updated_memories = existing_memories
+            else:
+                # Standard approach for mostly new information
+                if memory_txt.strip().startswith('#'):
+                    # This is a complete biography replacement
+                    updated_memories = memory_txt
+                else:
+                    # Add the new information with a timestamp
+                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+            
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
             
             # If the biography is getting very long, consider summarizing older parts
-            if len(updated_memories) > 12000:  # If biography exceeds 12K characters
+            if len(updated_memories) > 10000:  # If biography exceeds 10K characters
                 parts = updated_memories.split("## ")
                 if len(parts) > 3:  # If we have multiple sections
-                    # Keep the first part (intro) and the last three sections
-                    compact_bio = parts[0] + "## " + "## ".join(parts[-3:])
+                    # Keep the first part (intro) and the last two sections
+                    compact_bio = parts[0] + "## " + "## ".join(parts[-2:])
                     updated_memories = compact_bio
     else:
         # No specific memory update, keep existing memories
@@ -2487,6 +2474,42 @@ def clear_auto_update_flag():
 # --------------------------------------------------------------------------
 # (Optional) A route to let the user manually add to NPC memory or thoughts
 # --------------------------------------------------------------------------
+# Helper function to clean up repetitive text
+def cleanup_repetitive_biography(bio_text):
+    """Remove repetitive sections and redundant information from character biography"""
+    if not bio_text or bio_text.strip().lower() == "(none)":
+        return bio_text
+        
+    try:
+        # Make an LLM call to consolidate the biography
+        if GEMINI_API_KEY:
+            prompt = f"""
+            Clean up this character biography by removing repetition and redundancy.
+            - Remove repeated sentences, facts, and anecdotes
+            - Consolidate similar information into single, clear statements
+            - Keep all unique character details and information
+            - Maintain the overall structure but make it more concise
+            - Do not add any new information that isn't present in the original
+            - Retain markdown formatting for headings
+            
+            REPETITIVE BIOGRAPHY TEXT TO CLEAN:
+            {bio_text}
+            """
+            
+            chat = model.start_chat()
+            response = chat.send_message(
+                prompt,
+                generation_config={"temperature": 0.3, "max_output_tokens": 4096},
+                safety_settings=safety_settings
+            )
+            
+            if response and response.text:
+                return response.text.strip()
+    except Exception as e:
+        print(f"[ERROR] Biography cleanup failed: {e}")
+        
+    return bio_text
+
 @app.route("/manual_npc_update", methods=["GET", "POST"])
 def manual_npc_update():
     if not session.get('logged_in') and not session.get('guest_mode'):
@@ -2509,6 +2532,19 @@ def manual_npc_update():
 """
             session["npcBehavior"] = basic_info
             flash("Biography reset to a minimal template. You can now build it however you want.", "success")
+            return redirect(url_for("manual_npc_update"))
+            
+        if target == "cleanup_bio":
+            # Remove repetition from the biography
+            existing_memories = session.get("npcBehavior", "")
+            
+            if existing_memories.strip().lower() == "(none)":
+                flash("No biography exists to clean up yet.", "warning")
+                return redirect(url_for("manual_npc_update"))
+                
+            cleaned_bio = cleanup_repetitive_biography(existing_memories)
+            session["npcBehavior"] = cleaned_bio
+            flash("Biography cleaned up to remove repetition!", "success")
             return redirect(url_for("manual_npc_update"))
             
         if target == "rewrite_bio":

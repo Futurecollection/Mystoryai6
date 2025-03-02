@@ -61,7 +61,7 @@
         <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 1.1rem;">
           <i class="bi bi-gear-fill"></i> Choose Update Type:
         </label>
-        
+
         <div class="row mb-3">
           <div class="col-12">
             <div class="btn-group w-100" role="group" aria-label="Update type options">
@@ -69,17 +69,17 @@
               <label class="btn" for="thoughts-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='thoughts'; updateFormDisplay();">
                 <i class="bi bi-lightbulb"></i> Thoughts
               </label>
-              
+
               <input type="radio" class="btn-check" name="update-type-btn" id="memories-btn" autocomplete="off">
               <label class="btn" for="memories-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='memories'; updateFormDisplay();">
                 <i class="bi bi-journal-text"></i> Biography
               </label>
-              
+
               <input type="radio" class="btn-check" name="update-type-btn" id="rewrite-btn" autocomplete="off">
               <label class="btn" for="rewrite-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='rewrite_bio'; updateFormDisplay();">
                 <i class="bi bi-arrow-repeat"></i> Rewrite
               </label>
-              
+
               <input type="radio" class="btn-check" name="update-type-btn" id="reset-btn" autocomplete="off">
               <label class="btn" for="reset-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='reset_bio'; updateFormDisplay();">
                 <i class="bi bi-arrow-counterclockwise"></i> Reset
@@ -87,7 +87,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="card mb-3" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
           <div class="card-body py-2">
             <select name="target" id="updateTarget" class="form-select" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 1.05rem;">
@@ -95,10 +95,11 @@
               <option value="memories">Add to Biography & Memories (new information, experiences, revelations)</option>
               <option value="rewrite_bio">Rewrite Complete Biography (incorporate all information into cohesive text)</option>
               <option value="reset_bio">Reset Biography (clear and start with minimal format)</option>
+              <option value="cleanup_bio">Cleanup Biography (remove repetitive content)</option>
             </select>
           </div>
         </div>
-        
+
         <div class="alert alert-info mb-3" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #ff5789;">
           <i class="bi bi-info-circle-fill"></i> <strong>Action Summary:</strong>
           <div id="actionDescription" style="margin-top: 5px; font-style: italic;">
@@ -117,7 +118,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="card mb-4" id="tipSection" style="background-color: #2a0808; border: 1px solid #ff5789;">
         <div class="card-header" style="background-color: #3b0b0b; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
           <div class="d-flex justify-content-between align-items-center">
@@ -142,7 +143,7 @@
                 <li>Questions they're asking themselves</li>
               </ul>
             </div>
-            
+
             <div id="bioTips" style="display: none;">
               <p>For detailed biography updates, focus on:</p>
               <ul class="mb-0">
@@ -155,7 +156,7 @@
                 <li>Goals and aspirations for the future</li>
               </ul>
             </div>
-            
+
             <div id="rewriteTips" style="display: none;">
               <p>For a cohesive biography rewrite:</p>
               <ul class="mb-0">
@@ -167,7 +168,7 @@
                 <li>No new information will be added beyond what's already present</li>
               </ul>
             </div>
-            
+
             <div id="resetTips" style="display: none;">
               <p>Warning about biography reset:</p>
               <ul class="mb-0">
@@ -175,6 +176,14 @@
                 <li>A minimal template will be created with just the character's name and basic details</li>
                 <li>This is useful if you want to start fresh with a new character direction</li>
                 <li>This action cannot be undone</li>
+              </ul>
+            </div>
+            <div id="cleanupTips" style="display: none;">
+              <p>About biography cleanup:</p>
+              <ul class="mb-0">
+                <li>This will remove repetitive or redundant information from the biography.</li>
+                <li>The AI will attempt to preserve the core meaning and details while streamlining the text.</li>
+                <li>This is helpful for refining the biography and improving its clarity.</li>
               </ul>
             </div>
           </div>
@@ -190,7 +199,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="text-center">
         <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; padding: 10px 20px; border-radius: 30px;">
           <i class="bi bi-arrow-left"></i> Return to Story
@@ -209,13 +218,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const actionDescription = document.getElementById('actionDescription');
   const textInputSection = document.getElementById('textInputSection');
   const newContentText = document.getElementById('newContentText');
-  
+
   // Tip sections
   const thoughtTips = document.getElementById('thoughtTips');
   const bioTips = document.getElementById('bioTips');
   const rewriteTips = document.getElementById('rewriteTips');
   const resetTips = document.getElementById('resetTips');
-  
+  const cleanupTips = document.getElementById('cleanupTips');
+
+
   // Placeholder examples
   const thoughtPlaceholder = `The way they looked at me today felt different. There was a warmth in their eyes I haven't seen before, and it made my heart race. I keep trying to act casual, but I'm catching myself thinking about them more and more during the day. 
 
@@ -230,16 +241,17 @@ During college, I was part of the university's debate team, which helped me over
 I have two older sisters who still live in our hometown, and we try to meet for a family reunion at least once a year. My relationship with my parents is close but sometimes complicated - they always wanted me to take over the family bookstore, and there's still some tension around my decision to forge my own path.`;
 
   updateTarget.addEventListener('change', updateFormDisplay);
-  
+
   function updateFormDisplay() {
     const selectedValue = updateTarget.value;
-    
+
     // Hide all tip sections first
     thoughtTips.style.display = 'none';
     bioTips.style.display = 'none';
     rewriteTips.style.display = 'none';
     resetTips.style.display = 'none';
-    
+    cleanupTips.style.display = 'none';
+
     // Show the appropriate section based on selection
     switch(selectedValue) {
       case 'thoughts':
@@ -276,9 +288,18 @@ I have two older sisters who still live in our hometown, and we try to meet for 
         textInputSection.style.display = 'none';
         actionDescription.textContent = 'WARNING: This will clear the entire biography and start with a minimal template. Cannot be undone.';
         break;
+      case 'cleanup_bio':
+        contentLabel.textContent = 'Enter Additional Instructions (Optional):';
+        submitLabel.textContent = 'Clean Up Biography';
+        tipTitle.textContent = 'About Biography Cleanup';
+        cleanupTips.style.display = 'block';
+        textInputSection.style.display = 'block';
+        newContentText.placeholder = 'Optional: Add any specific instructions for cleaning up the biography...';
+        actionDescription.textContent = 'The AI will remove repetitive or redundant information from the biography while preserving core meaning and details.';
+        break;
     }
   }
-  
+
   // Initialize form display
   updateFormDisplay();
 });
@@ -312,7 +333,7 @@ I have two older sisters who still live in our hometown, and we try to meet for 
       </div>
     </div>
   </div>
-  
+
   <div class="col-md-6">
     <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
       <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
