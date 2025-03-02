@@ -1160,7 +1160,7 @@ ETHNICITY_OPTIONS = [
 ]
 
 NPC_SEXUAL_ORIENTATION_OPTIONS = [
-    "Straight","Bisexual","Gay/Lesbian","Pansexual","Asexual","Questioning","Demisexual","Fluid","Other"
+    "Straight","Bisexual","Gay/Lesbian","Other"
 ]
 NPC_RELATIONSHIP_GOAL_OPTIONS = [
     "Casual Dating","Serious Relationship","Long-term Relationship","Marriage-minded",

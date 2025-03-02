@@ -319,6 +319,23 @@
            value="{% if not ctx_in_list %}{{ session['encounter_context'] }}{% endif %}">
   </div>
 
+  <!-- NPC Sexual Orientation -->
+  <div class="col-md-6">
+    <label class="form-label">NPC Sexual Orientation</label>
+    <select class="form-select mb-1" name="npc_sexual_orientation">
+      <option value="">--Select--</option>
+      <option value="Straight" {% if session['npc_sexual_orientation'] == "Straight" or session['npc_sexual_orientation'] is none %}selected{% endif %}>Straight</option>
+      <option value="Gay/Lesbian" {% if session['npc_sexual_orientation'] == "Gay/Lesbian" %}selected{% endif %}>Gay/Lesbian</option>
+      <option value="Bisexual" {% if session['npc_sexual_orientation'] == "Bisexual" %}selected{% endif %}>Bisexual</option>
+    </select>
+    {% set so_in_list = session['npc_sexual_orientation'] in ['Straight', 'Gay/Lesbian', 'Bisexual'] %}
+    <label>Or custom:</label>
+    <input type="text" class="form-control"
+           name="npc_sexual_orientation_custom"
+           value="{% if not so_in_list %}{{ session['npc_sexual_orientation'] }}{% endif %}">
+  </div>
+
+
   <input type="hidden" name="npc_backstory" value="{{ session['npc_backstory'] }}">
 
   <div class="col-12">
