@@ -638,28 +638,38 @@ PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
         thoughts = f"I wonder what {user_name} is thinking right now... there's something in their expression I can't quite read."
     
     # MEMORY/BIOGRAPHY GENERATION
-    # Use a separate memory-focused prompt
+    # Use a separate memory-focused prompt that incorporates BOTH thoughts and narration
     memory_prompt = f"""
-Identify SPECIFIC NEW biographical information for {npc_name} revealed in this interaction.
+Create a DETAILED MEMORY UPDATE for {npc_name} based on this interaction, analyzing internal thoughts, narration, and user actions.
 
 IMPORTANT GUIDELINES:
-1. Extract ONLY concrete, NEW information not previously established
-2. Focus on factual details about background, experiences, preferences, and relationships
-3. Do not fabricate information - only include what was clearly revealed
-4. Be concise and specific rather than general
-5. Use neutral, third-person documentation style
-6. If nothing new was revealed, respond with "(No new biographical information)"
+1. Create a COMPREHENSIVE update that captures:
+   - New biographical facts revealed explicitly
+   - Emotional developments and reactions to the user
+   - Shifts in attitude, comfort level, or feelings toward {user_name}
+   - Key moments that might influence future interactions
+   - Insights into the character's personality revealed through their reactions
+   - Meaningful developments in the relationship dynamic
 
-THE INTERACTION TO ANALYZE:
+2. Consider THREE sources of information:
+   - The explicit narration of what happened
+   - The character's internal thoughts (showing their true reactions)
+   - The user's actions and what they reveal about the relationship
+
+3. Write in third-person, past tense, biographical style
+4. Be specific and detailed rather than generic
+5. Organize into 2-3 paragraphs when appropriate
+6. If truly nothing significant happened, respond with "(No meaningful updates to record at this time)"
+
+SOURCES TO ANALYZE:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
+INTERNAL THOUGHTS: {thoughts[:500] if len(thoughts) > 10 else "No recorded thoughts."}
 
-EXAMPLES OF GOOD BIOGRAPHICAL UPDATES:
-- "Revealed she studied marine biology at University of Washington"
-- "Mentioned growing up with three siblings in a rural town outside Boston"
-- "Disclosed previous work experience as a barista while in college"
-- "Expressed deep interest in classical music, especially Bach"
-- "Admitted to having trust issues stemming from a previous relationship"
+EXAMPLES OF COMPREHENSIVE MEMORY UPDATES:
+- "During their conversation at the café, Sarah revealed her passion for marine biology and her undergraduate studies at the University of Washington. When discussing her previous relationships, she became noticeably guarded, suggesting unresolved feelings about past romantic experiences. Though she maintained a casual tone, her internal hesitation about opening up fully to someone new became apparent, especially when the topic shifted to future plans."
+
+- "Alex's comfort level with Michael increased significantly during their walk through the park. While initially reserved, he gradually opened up about his childhood in rural Vermont and his complicated relationship with his father. The conversation marked the first time Alex had shared personal family history, indicating growing trust. Despite his outward confidence, his internal thoughts revealed lingering vulnerability about these memories."
 
 EXISTING BIOGRAPHY ELEMENTS (DO NOT REPEAT THESE):
 {memory_summary[:800] if len(memory_summary) > 20 else "Limited existing information."}
