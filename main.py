@@ -1008,6 +1008,104 @@ IMPORTANT:
 2. Do not make assumptions or inferences beyond what's explicitly stated.
 3. Leave fields empty if no new information is provided.
 4. When a location change occurs, be explicit about the new location.
+
+@retry_with_backoff(retries=2, backoff_in_seconds=1)
+def extract_details_from_bio(bio_text: str) -> None:
+    """
+    Use the LLM to extract key details from the character biography text
+    and update the session variables with those details.
+    """
+    if not bio_text.strip() or not GEMINI_API_KEY:
+        return
+        
+    prompt = f"""
+    Extract key character details from the following biography text. 
+    Return ONLY JSON format with these fields (leave empty if not found):
+    
+    {{
+        "name": "Character's name",
+        "gender": "Character's gender (Male/Female/etc)",
+        "age": "Character's age (number only)",
+        "ethnicity": "Character's ethnicity",
+        "hair_color": "Character's hair color",
+        "hair_style": "Character's hair style",
+        "body_type": "Character's body type",
+        "personality": "Brief personality description",
+        "occupation": "Character's job/occupation",
+        "clothing": "Current outfit/clothing",
+        "location": "Current environment/location",
+        "sexual_orientation": "Character's sexual orientation if mentioned",
+        "relationship_goal": "Character's dating goals if mentioned"
+    }}
+    
+    BIOGRAPHY TEXT:
+    {bio_text}
+    
+    Return ONLY the JSON with no additional text, explanations, or markdown.
+    """
+    
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.1, "max_output_tokens": 1024},
+            safety_settings=safety_settings
+        )
+        
+        if not response or not response.text:
+            return
+            
+        # Extract JSON from response
+        response_text = response.text.strip()
+        try:
+            if "```json" in response_text:
+                json_text = response_text.split("```json", 1)[1]
+                if "```" in json_text:
+                    json_text = json_text.split("```", 1)[0]
+            elif "```" in response_text:
+                json_text = response_text.split("```", 1)[1]
+                if "```" in json_text:
+                    json_text = json_text.split("```", 1)[0]
+            else:
+                json_text = response_text
+                
+            import json
+            details = json.loads(json_text)
+            
+            # Update session variables with extracted details
+            if details.get("name"):
+                session["npc_name"] = details["name"]
+            if details.get("gender"):
+                session["npc_gender"] = details["gender"]
+            if details.get("age"):
+                session["npc_age"] = details["age"]
+            if details.get("ethnicity"):
+                session["npc_ethnicity"] = details["ethnicity"]
+            if details.get("hair_color"):
+                session["npc_hair_color"] = details["hair_color"]
+            if details.get("hair_style"):
+                session["npc_hair_style"] = details["hair_style"]
+            if details.get("body_type"):
+                session["npc_body_type"] = details["body_type"]
+            if details.get("personality"):
+                session["npc_personality"] = details["personality"]
+            if details.get("occupation"):
+                session["npc_occupation"] = details["occupation"]
+            if details.get("clothing"):
+                session["npc_clothing"] = details["clothing"]
+            if details.get("location"):
+                session["environment"] = details["location"]
+            if details.get("sexual_orientation"):
+                session["npc_sexual_orientation"] = details["sexual_orientation"]
+            if details.get("relationship_goal"):
+                session["npc_relationship_goal"] = details["relationship_goal"]
+                
+        except Exception as e:
+            print(f"[ERROR] Failed to parse extracted details: {e}")
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to extract details from bio: {e}")
+
 5. When clothing changes, describe the complete new outfit.
 6. Hair COLOR must be a color name only (like "blonde", "brown", "red", etc.) - NOT actions or conditions.
 7. Hair STYLE describes the cut/style (like "long", "curly", "pulled back", etc.)
@@ -1359,24 +1457,42 @@ def update_npc_info(form):
         "npc_current_situation"
     ]
     for key in npc_fields:
-        session[key] = merge_dd(form, key, key + "_custom")
-    session["npc_backstory"] = form.get("npc_backstory", "").strip()
-    session["environment"] = merge_dd(form, "environment", "environment_custom")
-    session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
+        value = merge_dd(form, key, key + "_custom")
+        if value:  # Only update if value is not empty
+            session[key] = value
+    
+    # Only update if provided
+    backstory = form.get("npc_backstory", "").strip()
+    if backstory:
+        session["npc_backstory"] = backstory
+        
+    env = merge_dd(form, "environment", "environment_custom")
+    if env:
+        session["environment"] = env
+        
+    context = merge_dd(form, "encounter_context", "encounter_context_custom")
+    if context:
+        session["encounter_context"] = context
     
     # Handle current scene (immediate situation)
     if "current_scene" in form:
-        session["current_scene"] = form.get("current_scene", "").strip()
+        scene = form.get("current_scene", "").strip()
+        if scene:
+            session["current_scene"] = scene
         
     # Handle NPC's current mood 
     if "npc_mood" in form:
-        session["npc_mood"] = form.get("npc_mood", "Neutral").strip()
+        mood = form.get("npc_mood", "Neutral").strip()
+        if mood:
+            session["npc_mood"] = mood
     
     # Additional scene state fields
     scene_state_fields = ["time_of_day", "weather", "scene_mood", "scene_notes"]
     for field in scene_state_fields:
         if field in form:
-            session[field] = form.get(field, "").strip()
+            value = form.get(field, "").strip()
+            if value:
+                session[field] = value
 
 # --------------------------------------------------------------------------
 # Example Data for personalization
@@ -1843,14 +1959,33 @@ def personalize():
     """
     if request.method == "POST" and "save_personalization" in request.form:
         # Basic user info
-        session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom")
-        session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom")
+        session["user_name"] = merge_dd(request.form, "user_name", "user_name_custom") or "You"
+        session["user_age"] = merge_dd(request.form, "user_age", "user_age_custom") or "25"
         session["user_background"] = request.form.get("user_background", "").strip()
 
+        # Handle premade bio if that option was chosen
+        if request.form.get("bioText", "").strip():
+            session["npc_backstory"] = request.form.get("bioText", "").strip()
+            
+            # Attempt to automatically extract key details from the bio
+            extract_details_from_bio(session["npc_backstory"])
+        
         # NPC personalization
         update_npc_info(request.form)
 
-        npc_gender = session.get("npc_gender", "").lower()
+        # Ensure critical fields have values
+        if not session.get("npc_name"):
+            session["npc_name"] = "Alex"
+        if not session.get("npc_gender"):
+            session["npc_gender"] = "Female"
+        if not session.get("npc_age"):
+            session["npc_age"] = "25"
+        if not session.get("npc_personality"):
+            session["npc_personality"] = "Friendly and Outgoing"
+        if not session.get("environment"):
+            session["environment"] = "Coffee Shop"
+
+        npc_gender = session.get("npc_gender", "Female").lower()
         if npc_gender == "male":
             session["npc_instructions"] = "(MALE-SPECIFIC INSTRUCTIONS BLOCK)"
         else:
@@ -2053,6 +2188,19 @@ def interaction():
         stage_unlocks = session.get("stage_unlocks", DEFAULT_STAGE_UNLOCKS)
         st_desc = stage_unlocks.get(cstage, "Unknown stage")
         nxt_thresh = session.get("nextStageThreshold", 999)
+        
+        # Check if this is the first time viewing the interaction page after personalization
+        first_view = False
+        if not session.get("narrationText") and session.get("npc_name"):
+            first_view = True
+            # Generate initial narration from the biography
+            npc_bio = session.get("npcBehavior", "")
+            npc_name = session.get("npc_name", "the character")
+            environment = session.get("environment", "a quiet place")
+            opening_narration = f"You find yourself with {npc_name} in {environment}. The air between you feels charged with possibility as you begin your first conversation."
+            session["narrationText"] = opening_narration
+            log_message(f"NARRATION => {opening_narration}")
+            
         last_narration = session.get("narrationText", "(No scene yet.)")
         scene_prompt = session.get("scene_image_prompt", "")
         scene_url = session.get("scene_image_url", None)

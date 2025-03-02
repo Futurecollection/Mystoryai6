@@ -73,8 +73,7 @@
           <option value="college">College Classmate Crush</option>
           <option value="neighbor">New Neighbor Next Door</option>
         </select>
-        <textarea class="form-control" id="bioTextArea" rows="10" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"></textarea>
-        <input type="hidden" name="npc_backstory" id="bioText">
+        <textarea class="form-control" id="bioTextArea" name="bioText" rows="10" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"></textarea>
       </div>
     </div>
   </div>
@@ -864,12 +863,6 @@ function updateBioText() {
   const hiddenInput = document.getElementById('bioText');
   
   textarea.value = bios[select.value] || '';
-  hiddenInput.value = textarea.value;
-  
-  // Add event listener to sync the textarea with the hidden input
-  textarea.addEventListener('input', function() {
-    hiddenInput.value = this.value;
-  });
 }
 
 // Initialize tabs if Bootstrap is available
