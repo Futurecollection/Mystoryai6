@@ -454,138 +454,175 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
 # --------------------------------------------------------------------------
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
-    """Makes a separate LLM call to process NPC thoughts and memories,
-       focusing on the NPC's internal narrative and evolving biography.
-       Memories represent a rich, detailed biographical narrative that evolves.
-       Thoughts capture stream-of-consciousness reactions and feelings.
+    """Makes a dedicated LLM call to generate high-quality NPC thoughts and memories.
+       This is the primary function for creating the NPC's internal narrative.
+       
+       Returns:
+         - thoughts: First-person stream of consciousness
+         - memories: Biographical updates with new information
     """
     npc_name = session.get('npc_name', '?')
+    user_name = session.get('user_name', 'the user')
+    
+    # Get only the most recent thoughts/memories for context (avoid massive context)
     prev_thoughts = session.get("npcPrivateThoughts", "(none)")
+    if len(prev_thoughts) > 2000:  # Trim if too long
+        # Find the last few timestamps (marked by ###)
+        thought_sections = prev_thoughts.split("### ")
+        if len(thought_sections) > 3:
+            prev_thoughts = "### " + "### ".join(thought_sections[-3:])
+    
+    # For memories, get a summary if it's long
     prev_memories = session.get("npcBehavior", "(none)")
-    npc_personal_data = build_personalization_string()
-
-    # Get conversation context from recent history
-    recent_interactions = "\n".join(session.get("interaction_log", [])[-10:])  # Increased context further
+    memory_summary = prev_memories
+    if len(prev_memories) > 2000:
+        # Extract just key sections for context
+        if "## " in prev_memories:
+            # Find key biography sections
+            sections = prev_memories.split("## ")
+            # Take intro + latest updates if available
+            memory_summary = sections[0]  # Always include intro
+            if len(sections) > 3:
+                memory_summary += "\n\n## " + "## ".join(sections[-2:])  # Add latest sections
+    
+    # Get conversation context from recent history (only recent)
+    recent_interactions = "\n".join(session.get("interaction_log", [])[-8:])
     current_stage = session.get("currentStage", 1)
+    stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
 
     # Extract key information for context
-    user_name = session.get('user_name', 'the user')
-    relationship_goal = session.get('npc_relationship_goal', '?')
     personality = session.get('npc_personality', '?')
-    environment = session.get('environment', '?')
     mood = session.get('npc_mood', 'Neutral')
-    body_type = session.get('npc_body_type', '?')
     occupation = session.get('npc_occupation', '?')
-    ethnicity = session.get('npc_ethnicity', '?')
-    hair_color = session.get('npc_hair_color', '?')
-    hair_style = session.get('npc_hair_style', '?')
-    age = session.get('npc_age', '?')
+    relationship_goal = session.get('npc_relationship_goal', '?')
+    affection = session.get("affectionScore", 0)
+    trust = session.get("trustScore", 5)
     
-    # Add randomization seed to prevent similar patterns
+    # Add randomization to prevent repetitive patterns
     import random
-    random_seed = random.randint(1000, 9999)
+    # This is key for preventing repetitive output patterns
     thought_approach = random.choice([
         "conflicted and uncertain", 
         "analytical and observant", 
         "emotional and reactive",
         "philosophical and introspective",
         "anxious and overthinking",
-        "confident and scheming",
+        "confident and determined",
         "nostalgic and reflective",
         "hopeful and excited",
-        "cautious and strategic",
+        "cautious but curious",
         "vulnerable and honest",
         "impulsive and passionate",
-        "calculating and measured",
+        "strategic and measured",
         "self-doubting yet hopeful",
         "cynical but intrigued",
         "emotionally guarded yet longing",
-        "internally chaotic but outwardly composed"
+        "inspired and motivated",
+        "playful and flirtatious",
+        "confused but trying to understand",
+        "surprised and processing new information",
+        "sensitive to subtleties in the interaction"
     ])
     
-    # Add physical sensations and states for more realism
+    # Physical state adds realism and prevents repetitive patterns
     physical_state = random.choice([
-        "slightly tired and fighting the urge to yawn",
-        "feeling a rush of adrenaline",
-        "noticing a fluttering sensation in their stomach",
-        "experiencing a slight headache",
-        "feeling unusually energetic and restless",
-        "aware of tension in their shoulders",
-        "feeling particularly attractive and confident today",
-        "slightly uncomfortable in their clothing",
-        "noticing their heart beating faster than usual",
-        "fighting distraction from background noise",
-        "experiencing heightened sensory awareness",
-        "feeling the weight of lack of sleep",
-        "experiencing that 'second wind' of energy",
-        "dealing with nervous energy manifesting as fidgeting",
-        "feeling particularly aware of how their body moves"
+        "feeling a flutter in their chest",
+        "experiencing a pleasant warmth throughout their body",
+        "noticing their heartbeat quicken",
+        "feeling a slight tension in their shoulders",
+        "with heightened awareness of their surroundings",
+        "physically relaxed but mentally alert",
+        "feeling a nervous energy they can't quite contain",
+        "hyper-aware of the physical space between them",
+        "finding it hard to maintain eye contact",
+        "with a slight smile they can't suppress",
+        "feeling unusually attuned to body language",
+        "noticing their own nervous gestures",
+        "feeling particularly present in the moment",
+        "experiencing time moving differently",
+        "slightly light-headed from the intensity of emotions",
+        "with heightened sensory awareness",
+        "feeling their defenses slowly lowering",
+        "experiencing a mix of comfort and excitement",
+        "physically calm but emotionally stirred",
+        "feeling their expression betray their thoughts"
     ])
 
-    # Instead of always generating 3 fragments, let's be more selective
-    # and generate just one focused, high-quality fragment
-    fragment_focus = random.choice([
-        "direct reaction to current situation",
-        "deeper emotional analysis",
+    # Choose a specific focus for this thought generation
+    # This rotation helps create varied internal monologues
+    emotional_focus = random.choice([
+        "direct reaction to what just happened",
+        "deeper emotional analysis of their feelings",
         "conflicting desires and motivations",
         "past memories triggered by current events",
         "immediate physical and sensory experiences",
-        "anxieties and hopes about the future",
-        "comparison to past relationships",
-        "professional/life concerns intruding",
-        "self-evaluation and identity questions",
-        "practical concerns and planning thoughts"
+        "hopes and anxieties about the future",
+        "comparison to past relationships and experiences",
+        "unrelated life concerns intruding on their thoughts",
+        "self-reflection on personal growth and change",
+        "uncertain feelings they're just beginning to recognize",
+        "subconscious motivations driving their behavior",
+        "the gap between their words and true feelings",
+        "assessment of the evolving relationship dynamic",
+        "specific details they've noticed about the user",
+        "an unexpected emotional reaction they didn't anticipate",
+        "wondering about missed opportunities or alternate paths",
+        "connections between current interaction and past patterns",
+        "processing a shift in their perspective",
+        "reflection on their own vulnerability",
+        "questions they're afraid to ask directly"
     ])
 
-    system_prompt = f"""
-Generate a DETAILED first-person internal monologue for {npc_name} that feels authentic and doesn't repeat information.
+    # THOUGHTS GENERATION
+    thoughts_prompt = f"""
+Generate a detailed and authentic first-person internal monologue for {npc_name}.
 
-TODAY'S MENTAL STATE: {npc_name} is particularly {thought_approach} today, while physically {physical_state}.
+THE CHARACTER'S CURRENT STATE:
+- Mood: {mood}
+- Emotional Approach: {thought_approach}
+- Physical State: {physical_state}
+- Relationship Stage: {current_stage} ({stage_desc})
+- Affection Level: {affection}, Trust Level: {trust}
+- Personality: {personality}
+- Occupation: {occupation}
+- Relationship Goal: {relationship_goal}
 
-The internal monologue should focus on: {fragment_focus}
+FOCUS THIS MONOLOGUE ON: {emotional_focus}
 
-Create a REALISTIC inner voice with these elements:
-1. First-person stream-of-consciousness with natural flow
+CREATE A REALISTIC INNER VOICE WITH THESE ELEMENTS:
+1. Raw, unfiltered stream-of-consciousness
 2. Genuine internal contradictions and emotional complexity
-3. Mixture of complete thoughts and fragmented ideas
-4. Natural language patterns including occasional profanity if fitting
-5. Clear connection to the current interaction but also broader context
-6. Specific sensory experiences and bodily sensations
-7. Authentic psychological complexity (contradictory feelings, doubts, hopes)
-8. Some unrelated thoughts that naturally intrude
-9. References to {npc_name}'s life experiences and memories
-10. Analysis of {user_name}'s behavior and what it might mean
+3. Specific reactions to what just happened
+4. Natural language patterns including incomplete thoughts
+5. References to sensory experiences and bodily sensations
+6. Authentic psychological depth (mixed emotions, confusion, clarity)
+7. Brief intrusions of unrelated thoughts
+8. References to past experiences that influence current feelings
+9. Analysis of {user_name}'s words, actions, or body language
+10. Questions they're asking themselves
 
 AVOID:
-- Excessive repetition of the same ideas or phrases
+- Repetition of the same thoughts or phrases from previous entries
 - Overly formal or structured thinking
-- Generic descriptions - be specific and personal
-- Rehashing information already established in the biography
+- Generic descriptions instead of specific personal reactions
+- Information dumps that don't feel like natural thoughts
 
-CONTEXT FOR REALISTIC PERSONALIZATION:
-{npc_personal_data}
-Personality: {personality}
-Current Mood: {mood}
-Occupation: {occupation} 
-Physical: {age} years old, {ethnicity}, {body_type}, {hair_color} {hair_style} hair
-Relationship Goal: {relationship_goal}
-
-RECENT INTERACTIONS:
-{recent_interactions}
-
-CURRENT INTERACTION:
+RECENT INTERACTION CONTEXT:
 USER ACTION: {last_user_action}
-SCENE NARRATION: {narration}
+NARRATION: {narration}
+
+PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
+{prev_thoughts[:500] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
 """
 
-    # Generate just one high-quality thought fragment
+    # Generate internal thoughts
     try:
         chat = model.start_chat()
         response = chat.send_message(
-            system_prompt,
+            thoughts_prompt,
             generation_config={
-                "temperature": 0.9,
-                "max_output_tokens": 4096,
+                "temperature": 0.9,  # Higher temperature for more varied thoughts
+                "max_output_tokens": 2048,
                 "top_p": 0.95,
                 "top_k": 50
             },
@@ -593,52 +630,60 @@ SCENE NARRATION: {narration}
         )
         
         if response and response.text and len(response.text.strip()) > 200:
-            combined_thoughts = response.text.strip()
+            thoughts = response.text.strip()
         else:
-            combined_thoughts = f"I wonder what {user_name} is thinking right now... there's something about the way they look at me that makes me feel both excited and nervous at the same time."
+            thoughts = f"I wonder what {user_name} is thinking right now... there's something about the way they look at me that makes me feel both excited and nervous at the same time."
     except Exception as e:
         print(f"[ERROR] Thought generation failed: {e}")
-        combined_thoughts = f"I wonder what {user_name} is thinking right now... there's something about the way they look at me that makes me feel both excited and nervous at the same time."
+        thoughts = f"I wonder what {user_name} is thinking right now... there's something in their expression I can't quite read."
     
-    # Generate a more focused biographical memory update
+    # MEMORY/BIOGRAPHY GENERATION
+    # Use a separate memory-focused prompt
     memory_prompt = f"""
-Create a FOCUSED biographical update for {npc_name} based on this interaction. 
-Focus ONLY on NEW information that hasn't been established before.
+Identify SPECIFIC NEW biographical information for {npc_name} revealed in this interaction.
 
-DO NOT repeat existing biographical details. Instead:
-1. Identify 2-3 NEW meaningful details revealed in this interaction
-2. Connect these new details to existing character information when relevant
-3. Be specific and concrete rather than general
-4. Focus on quality over quantity - a few meaningful details are better than many generic ones
+IMPORTANT GUIDELINES:
+1. Extract ONLY concrete, NEW information not previously established
+2. Focus on factual details about background, experiences, preferences, and relationships
+3. Do not fabricate information - only include what was clearly revealed
+4. Be concise and specific rather than general
+5. Use neutral, third-person documentation style
+6. If nothing new was revealed, respond with "(No new biographical information)"
 
-INTERACTION TO ANALYZE:
+THE INTERACTION TO ANALYZE:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
 
-EXISTING BIOGRAPHICAL ELEMENTS (DO NOT REPEAT THESE):
-{prev_memories[:1000] if len(prev_memories) > 20 else "Limited existing information - provide initial details"}
+EXAMPLES OF GOOD BIOGRAPHICAL UPDATES:
+- "Revealed she studied marine biology at University of Washington"
+- "Mentioned growing up with three siblings in a rural town outside Boston"
+- "Disclosed previous work experience as a barista while in college"
+- "Expressed deep interest in classical music, especially Bach"
+- "Admitted to having trust issues stemming from a previous relationship"
 
-IMPORTANT: If no significant new biographical details are revealed in this interaction, 
-respond with "(No new biographical information to add)" instead of inventing facts.
+EXISTING BIOGRAPHY ELEMENTS (DO NOT REPEAT THESE):
+{memory_summary[:800] if len(memory_summary) > 20 else "Limited existing information."}
+
+Current Relationship Stage: {current_stage} ({stage_desc})
 """
     
     try:
         memory_chat = model.start_chat()
         memory_resp = memory_chat.send_message(
             memory_prompt,
-            generation_config={"temperature": 0.7, "max_output_tokens": 1024},
+            generation_config={"temperature": 0.4, "max_output_tokens": 1024},
             safety_settings=safety_settings
         )
         memory = memory_resp.text.strip() if memory_resp and memory_resp.text else ""
         
         # Check if the response indicates no new information
-        if "no new biographical" in memory.lower():
-            memory = "(No significant new biographical details to add from this interaction)"
+        if "no new biographical" in memory.lower() or len(memory.strip()) < 10:
+            memory = "(No significant new biographical details revealed in this interaction)"
     except Exception as e:
         print(f"[ERROR] Memory generation failed: {e}")
-        memory = ""
+        memory = "(Memory update unavailable)"
 
-    return combined_thoughts, memory
+    return thoughts, memory
 
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
@@ -652,10 +697,6 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     prepare_history()
     conversation_history = session.get("interaction_log", [])
     combined_history = "\n".join(conversation_history)
-
-    # Get previous thoughts and memories
-    prev_thoughts = session.get("npcPrivateThoughts", "(none)")
-    prev_memories = session.get("npcBehavior", "(none)")
 
     # Handle traditional OOC and implicit narrative directions
     if not last_user_action.strip():
@@ -689,14 +730,7 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
 
-    # Add thoughts/memories context
-    personalization += f"""
-PREVIOUS THOUGHTS & MEMORIES:
-Previous Thoughts: {prev_thoughts}
-Previous Memories: {prev_memories}
-"""
-
-    # We demand at least 300 characters for the narration
+    # We only need basic narration from this LLM call now, not thoughts or memories
     system_instructions = f"""
 You are a third-person descriptive erotic romance novel narrator.
 
@@ -729,12 +763,6 @@ SPECIAL INSTRUCTIONS:
 4) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
    (e.g., 😛) rather than describing them in words.
 
-5) BIOGRAPHY UPDATES - IMPORTANT:
-   - After each interaction, update the character's biography with ANY specific new information that was revealed
-   - This includes things like personal background, interests, education, family details, career information, etc.
-   - Be specific and concrete in these updates - don't just say "they shared more about themselves"
-   - Example good updates: "She revealed she studied English literature at Boston University" or "He mentioned growing up with three siblings in a small town outside Seattle"
-
 Special Context Notes:
 - Is Explicit OOC Command: {is_ooc}
 - Has Implicit Narrative Direction: {has_narrative_direction}
@@ -745,11 +773,9 @@ Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 
-Return EXACTLY four lines:
+Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
 Line 2 => NARRATION: ... (must be at least 300 characters describing the NPC's reaction, setting, dialogue, and actions)
-Line 3 => PRIVATE_THOUGHTS: ... (NPC's internal thoughts/feelings)
-Line 4 => MEMORY_UPDATE: ... (key events, new biographical details, and feelings to remember - be specific and concrete)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
@@ -778,10 +804,8 @@ MEMORY_UPDATE: (System Error)
 """
     affect_delta = 0.0
     narration_txt = ""
-    thoughts_txt = ""
-    memory_txt = ""
     
-    # Extract all components from the response
+    # Extract affection change and narration from the response
     for ln in result_text.split("\n"):
         s = ln.strip()
         if s.startswith("AFFECT_CHANGE_FINAL:"):
@@ -791,102 +815,94 @@ MEMORY_UPDATE: (System Error)
                 affect_delta = 0.0
         elif s.startswith("NARRATION:"):
             narration_txt = s.split(":", 1)[1].strip()
-        elif s.startswith("PRIVATE_THOUGHTS:"):
-            thoughts_txt = s.split(":", 1)[1].strip()
-        elif s.startswith("MEMORY_UPDATE:"):
-            memory_txt = s.split(":", 1)[1].strip()
 
-    # Make separate LLM call for additional thoughts and memories if needed
-    if not thoughts_txt or not memory_txt:
-        additional_thoughts, additional_memory = process_npc_thoughts(last_user_action, narration_txt)
-        if not thoughts_txt:
-            thoughts_txt = additional_thoughts
-        if not memory_txt:
-            memory_txt = additional_memory
+    # Always make a separate LLM call for thoughts and memories
+    # This produces higher quality, more focused content
+    thoughts_txt, memory_txt = process_npc_thoughts(last_user_action, narration_txt)
 
-    # ---------------------------------------------------------
-    #  ACCUMULATE THOUGHTS & MEMORIES WITH IMPROVED FORMATTING
-    # ---------------------------------------------------------
-    existing_thoughts = session.get("npcPrivateThoughts", "")
-    existing_memories = session.get("npcBehavior", "")
+    # Update the NPC internal state
+    update_npc_internal_state(thoughts_txt, memory_txt)
 
-    # Format the date/time for better context
-    timestamp = time.strftime("%b %d, %I:%M %p")
-
-    # Append new private thoughts with timestamp and formatting
-    if existing_thoughts.strip().lower() == "(none)":
-        updated_thoughts = f"### {timestamp}\n{thoughts_txt}"
-    else:
-        updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
-
-    # Always update biography with any new information
-    memory_txt_lower = memory_txt.strip().lower()
-    if memory_txt_lower and not (memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower):
-        # Significant update - integrate into biography
-        if existing_memories.strip().lower() == "(none)":
-            updated_memories = build_initial_npc_memory() + f"\n\n## New Information\n### {timestamp}\n{memory_txt}"
-        else:
-            # Check if the memory_txt contains mostly duplicated information
-            # by seeing if large chunks already exist in the current biography
-            memory_sentences = [s.strip() for s in memory_txt.split('.') if len(s.strip()) > 15]
-            
-            # Calculate how much is duplicate content
-            duplicate_count = 0
-            for sentence in memory_sentences:
-                if sentence and len(sentence) > 25 and sentence.lower() in existing_memories.lower():
-                    duplicate_count += 1
-            
-            # If more than 60% is duplicate, summarize instead of appending everything
-            if memory_sentences and (duplicate_count / len(memory_sentences) > 0.6):
-                # Extract only the sentences that aren't already in the biography
-                new_content = []
-                for sentence in memory_sentences:
-                    if sentence and sentence.lower() not in existing_memories.lower():
-                        new_content.append(sentence)
-                
-                if new_content:
-                    # Only add the genuinely new information
-                    new_info = ". ".join(new_content) + "."
-                    updated_memories = f"{existing_memories}\n\n### {timestamp} (New Details)\n{new_info}"
-                else:
-                    # No significant new info
-                    updated_memories = existing_memories
-            else:
-                # Standard approach for mostly new information
-                if memory_txt.strip().startswith('#'):
-                    # This is a complete biography replacement
-                    updated_memories = memory_txt
-                else:
-                    # Add the new information with a timestamp
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-            
-            # Clean up any redundant formatting
-            updated_memories = updated_memories.replace("\n\n\n", "\n\n")
-            
-            # If the biography is getting very long, consider summarizing older parts
-            if len(updated_memories) > 10000:  # If biography exceeds 10K characters
-                parts = updated_memories.split("## ")
-                if len(parts) > 3:  # If we have multiple sections
-                    # Keep the first part (intro) and the last two sections
-                    compact_bio = parts[0] + "## " + "## ".join(parts[-2:])
-                    updated_memories = compact_bio
-    else:
-        # No specific memory update, keep existing memories
-        updated_memories = existing_memories
-
-    session["npcPrivateThoughts"] = updated_thoughts
-    session["npcBehavior"] = updated_memories
-
-    # ---------------------------------------------------------
-    # AUTO-UPDATE NPC & ENVIRONMENT SETTINGS FROM NARRATIVE
-    # ---------------------------------------------------------
-    # After each interaction, try to automatically extract character & environment changes
+    # Auto-update NPC & environment settings from narrative
     auto_update_npc_settings_from_narrative(narration_txt, memory_txt)
 
     return f"""AFFECT_CHANGE_FINAL: {affect_delta}
 NARRATION: {narration_txt}
 PRIVATE_THOUGHTS: {thoughts_txt}
 MEMORY_UPDATE: {memory_txt}"""
+
+def update_npc_internal_state(thoughts_txt: str, memory_txt: str):
+    """
+    Updates the NPC's internal state (thoughts and memories) with new content,
+    handling formatting and reducing redundancy.
+    """
+    existing_thoughts = session.get("npcPrivateThoughts", "")
+    existing_memories = session.get("npcBehavior", "")
+    timestamp = time.strftime("%b %d, %I:%M %p")
+    
+    # Update thoughts - simple append with timestamp
+    if existing_thoughts.strip().lower() == "(none)":
+        updated_thoughts = f"### {timestamp}\n{thoughts_txt}"
+    else:
+        updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
+    
+    # Update memories with better handling of redundancy
+    memory_txt_lower = memory_txt.strip().lower()
+    if memory_txt_lower and not (memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower):
+        # If this is the first memory entry, use the initial memory builder
+        if existing_memories.strip().lower() == "(none)":
+            updated_memories = build_initial_npc_memory() + f"\n\n## New Information\n### {timestamp}\n{memory_txt}"
+        else:
+            # Check for significant duplication
+            is_mostly_duplicate = False
+            
+            # Split into sentences for better granularity when checking duplicates
+            memory_sentences = [s.strip() for s in memory_txt.split('.') if len(s.strip()) > 15]
+            new_sentences = []
+            
+            # Count duplicates and collect only new content
+            duplicate_count = 0
+            for sentence in memory_sentences:
+                if sentence and len(sentence) > 20:
+                    # Check if this sentence or very similar one already exists
+                    if sentence.lower() in existing_memories.lower():
+                        duplicate_count += 1
+                    else:
+                        new_sentences.append(sentence)
+            
+            # Determine if the new content is mostly duplicate
+            if memory_sentences and (duplicate_count / len(memory_sentences) > 0.7):
+                is_mostly_duplicate = True
+            
+            # Handle based on duplication status
+            if is_mostly_duplicate and new_sentences:
+                # Only add the truly new sentences
+                new_content = ". ".join(new_sentences) + "."
+                updated_memories = f"{existing_memories}\n\n### {timestamp} (New Details)\n{new_content}"
+            elif is_mostly_duplicate and not new_sentences:
+                # No meaningful new content
+                updated_memories = existing_memories
+            else:
+                # Content is mostly new - add as normal
+                updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
+            
+            # Clean up any redundant formatting
+            updated_memories = updated_memories.replace("\n\n\n", "\n\n")
+            
+            # If biography is getting too long, trim it while preserving structure
+            if len(updated_memories) > 12000:  # Biography exceeds 12K chars
+                parts = updated_memories.split("## ")
+                if len(parts) > 3:
+                    # Keep intro and latest sections
+                    compact_bio = parts[0] + "## " + "## ".join(parts[-3:])
+                    updated_memories = compact_bio
+    else:
+        # No biography update needed
+        updated_memories = existing_memories
+    
+    # Store the updated state
+    session["npcPrivateThoughts"] = updated_thoughts
+    session["npcBehavior"] = updated_memories
 
 
 @retry_with_backoff(retries=2, backoff_in_seconds=1)
