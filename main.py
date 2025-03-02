@@ -1066,6 +1066,57 @@ Return ONLY this JSON format with no additional text:
                     log_message(f"[AUTO-UPDATE] Environment changed to: {new_env}")
                     has_updates = True
             
+
+@retry_with_backoff(retries=2, backoff_in_seconds=1)
+def generate_initial_narration() -> str:
+    """Generate an initial narration to start the scene based on the NPC's biography."""
+    npc_name = session.get('npc_name', 'Unknown')
+    environment = session.get('environment', 'an unknown location')
+    encounter_context = session.get('encounter_context', 'a chance meeting')
+    
+    prompt = f"""
+    You are a skilled narrative writer for a romance story. Create an opening narration that:
+
+    1. Introduces the character: {npc_name}
+    2. Describes the environment: {environment}
+    3. Sets up the encounter context: {encounter_context}
+    4. Includes rich sensory details (sights, sounds, smells)
+    5. Hints at the character's personality and appearance
+    6. Ends with an open invitation like "How would you like to start the scene?" or "What would you like to say to {npc_name}?"
+
+    Keep the narration under 500 words, but make it vivid and engaging.
+    Focus on setting the scene and creating atmosphere rather than advancing the plot.
+
+    CHARACTER DETAILS:
+    Name: {session.get('npc_name', 'Unknown')}
+    Gender: {session.get('npc_gender', '')}
+    Age: {session.get('npc_age', '')}
+    Ethnicity: {session.get('npc_ethnicity', '')}
+    Occupation: {session.get('npc_occupation', '')}
+    Personality: {session.get('npc_personality', '')}
+    Hair: {session.get('npc_hair_color', '')} {session.get('npc_hair_style', '')}
+    Body Type: {session.get('npc_body_type', '')}
+    Clothing: {session.get('npc_clothing', '')}
+    Current Situation: {session.get('npc_current_situation', '')}
+    """
+    
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.7, "max_output_tokens": 1024},
+            safety_settings=safety_settings
+        )
+        
+        if response and response.text:
+            return response.text.strip()
+        else:
+            return f"You find yourself in {environment}, about to meet {npc_name}. How would you like to start the scene?"
+            
+    except Exception as e:
+        print(f"[ERROR] Initial narration generation failed: {e}")
+        return f"You find yourself in {environment}, about to meet {npc_name}. How would you like to start the scene?"
+
             # Clothing update
             if updates.get("clothing_update") and updates["clothing_update"].strip():
                 new_clothing = updates["clothing_update"].strip()
@@ -1949,6 +2000,38 @@ Orgasm & Afterglow:
     4.  User-Controlled Detail Level: The AI adapts based on how explicit the user wants the conversation to be—ranging from sensual teasing to raw, unfiltered sex talk.
 """
 
+        # Fill in defaults for any empty fields
+        if not session.get("npc_name"):
+            session["npc_name"] = random.choice(NPC_NAME_OPTIONS) 
+        if not session.get("npc_gender"):
+            session["npc_gender"] = random.choice(NPC_GENDER_OPTIONS)
+        if not session.get("npc_age"):
+            session["npc_age"] = random.choice(NPC_AGE_OPTIONS)
+        if not session.get("npc_ethnicity"):
+            session["npc_ethnicity"] = random.choice(ETHNICITY_OPTIONS)
+        if not session.get("npc_sexual_orientation"):
+            session["npc_sexual_orientation"] = random.choice(NPC_SEXUAL_ORIENTATION_OPTIONS)
+        if not session.get("npc_relationship_goal"):
+            session["npc_relationship_goal"] = random.choice(NPC_RELATIONSHIP_GOAL_OPTIONS)
+        if not session.get("npc_body_type"):
+            session["npc_body_type"] = random.choice(BODY_TYPE_OPTIONS)
+        if not session.get("npc_hair_color"):
+            session["npc_hair_color"] = random.choice(HAIR_COLOR_OPTIONS)
+        if not session.get("npc_hair_style"):
+            session["npc_hair_style"] = random.choice(HAIR_STYLE_OPTIONS)
+        if not session.get("npc_personality"):
+            session["npc_personality"] = random.choice(NPC_PERSONALITY_OPTIONS)
+        if not session.get("npc_clothing"):
+            session["npc_clothing"] = random.choice(CLOTHING_OPTIONS)
+        if not session.get("npc_occupation"):
+            session["npc_occupation"] = random.choice(OCCUPATION_OPTIONS)
+        if not session.get("npc_current_situation"):
+            session["npc_current_situation"] = random.choice(CURRENT_SITUATION_OPTIONS)
+        if not session.get("environment"):
+            session["environment"] = random.choice(ENVIRONMENT_OPTIONS)
+        if not session.get("encounter_context"):
+            session["encounter_context"] = random.choice(ENCOUNTER_CONTEXT_OPTIONS)
+        
         # Initialize stats
         session["affectionScore"] = 0.0
         session["trustScore"] = 5.0
@@ -1964,9 +2047,11 @@ Orgasm & Afterglow:
         
         # Generate initial NPC biography based on available information
         session["npcBehavior"] = build_initial_npc_memory()
-
-        # NEW: Seed the initial memory with some personal data about the NPC
-        session["npcBehavior"] = build_initial_npc_memory()
+        
+        # Generate initial narration
+        initial_narration = generate_initial_narration()
+        session["narrationText"] = initial_narration
+        log_message(f"NARRATION => {initial_narration}")
 
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
