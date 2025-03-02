@@ -999,6 +999,12 @@ def update_npc_info(form):
     session["npc_backstory"] = form.get("npc_backstory", "").strip()
     session["environment"] = merge_dd(form, "environment", "environment_custom")
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
+    
+    # Additional scene state fields
+    scene_state_fields = ["time_of_day", "weather", "scene_mood", "scene_notes"]
+    for field in scene_state_fields:
+        if field in form:
+            session[field] = form.get(field, "").strip()
 
 # --------------------------------------------------------------------------
 # Example Data for personalization
