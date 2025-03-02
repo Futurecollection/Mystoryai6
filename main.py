@@ -465,7 +465,7 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     npc_personal_data = build_personalization_string()
 
     # Get conversation context from recent history
-    recent_interactions = "\n".join(session.get("interaction_log", [])[-5:])
+    recent_interactions = "\n".join(session.get("interaction_log", [])[-7:])  # Increased context
     current_stage = session.get("currentStage", 1)
 
     # Extract key information for context
@@ -476,6 +476,10 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     mood = session.get('npc_mood', 'Neutral')
     body_type = session.get('npc_body_type', '?')
     occupation = session.get('npc_occupation', '?')
+    ethnicity = session.get('npc_ethnicity', '?')
+    hair_color = session.get('npc_hair_color', '?')
+    hair_style = session.get('npc_hair_style', '?')
+    age = session.get('npc_age', '?')
     
     # Add randomization seed to prevent similar patterns
     import random
@@ -490,61 +494,100 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
         "nostalgic and reflective",
         "hopeful and excited",
         "cautious and strategic",
-        "vulnerable and honest"
+        "vulnerable and honest",
+        "impulsive and passionate",
+        "calculating and measured",
+        "self-doubting yet hopeful",
+        "cynical but intrigued",
+        "emotionally guarded yet longing",
+        "internally chaotic but outwardly composed"
+    ])
+    
+    # Add physical sensations and states for more realism
+    physical_state = random.choice([
+        "slightly tired and fighting the urge to yawn",
+        "feeling a rush of adrenaline",
+        "noticing a fluttering sensation in their stomach",
+        "experiencing a slight headache",
+        "feeling unusually energetic and restless",
+        "aware of tension in their shoulders",
+        "feeling particularly attractive and confident today",
+        "slightly uncomfortable in their clothing",
+        "noticing their heart beating faster than usual",
+        "fighting distraction from background noise",
+        "experiencing heightened sensory awareness",
+        "feeling the weight of lack of sleep",
+        "experiencing that 'second wind' of energy",
+        "dealing with nervous energy manifesting as fidgeting",
+        "feeling particularly aware of how their body moves"
     ])
 
     system_prompt = f"""
-You are generating authentic internal thoughts for {npc_name} (SEED: {random_seed}). Your task is to create distinctly different, unique inner monologues each time that never follow the same pattern or structure.
+You are generating ULTRA-REALISTIC internal thoughts for {npc_name} (SEED: {random_seed}). Create an extensive, deeply personal internal monologue that reveals their complex, contradictory inner world. YOUR OUTPUT SHOULD BE SIGNIFICANTLY LONGER AND MORE DETAILED THAN AVERAGE - aim for at least 800-1000 words of rich thought content.
 
-TODAY'S APPROACH: Write as if {npc_name} is particularly {thought_approach} in their thinking right now.
+TODAY'S MENTAL STATE: {npc_name} is particularly {thought_approach} today, while physically {physical_state}.
 
-INNER THOUGHTS REQUIREMENTS:
-1. Write ONLY in raw first-person voice - this is {npc_name}'s unfiltered mind at work
-2. Create a MINIMUM of 400-500 words of rich inner monologue
-3. Use varied sentence lengths, fragments, and natural thought patterns
-4. Include sensory impressions and bodily sensations (feeling warm/cold, noticing smells, tactile sensations, etc.)
-5. Show inconsistencies and contradictions in their thoughts - humans aren't logical
-6. Refer to specific elements from their past that influence current thoughts
-7. Express deep fears, desires and hopes that they would NEVER say out loud
-8. Include observations about subtle social cues, microexpressions, or body language they noticed
-9. Show their real opinion about {user_name} vs. what they choose to express externally
-10. Incorporate multiple perspectives, reconsidering thoughts and changing mental direction mid-stream
-11. Include highly specific memories triggered by current events
-12. Express genuine uncertainties about themselves, their worth, and their appeal
-13. Show internal debate - literally arguing with themselves about what to do/say next
-14. Use creative metaphors unique to their thought process and background
-15. Include personal habits, quirks, and recurring thought patterns 
+ESSENTIAL INNER THOUGHT ELEMENTS (ALL MUST BE INCLUDED):
 
-ABSOLUTELY AVOID:
-- General, bland thoughts that could apply to anyone
-- Repetitive structure from previous thought entries
-- Formal, essay-like language or overly organized thoughts
-- Summarizing what happened (these are raw thoughts, not a recap)
-- Ending with clichéd questions or obvious conclusions
-- Excessive monologuing about just one aspect/topic
-- Overuse of ellipses, dashes, or other punctuation devices
-- Using the same emotional tone throughout the entire monologue
+1. AUTHENTICITY & RAW EXPRESSION:
+   - Write in messy, disjointed first-person stream-of-consciousness with unfiltered emotional honesty
+   - Include fragmented thoughts, half-formed ideas, and natural thought interruptions
+   - Show {npc_name} occasionally addressing themselves by name or using "I" self-reflectively
+   - Use realistic profanity if it fits the character's inner voice
 
-MAKE THE THOUGHTS FEEL REAL AND RAW:
-- Thoughts should often jump between topics in a believable way
-- Include passing distracting thoughts that have nothing to do with the current situation
-- Show both immediate reactions and deeper contemplations  
-- Incorporate culturally or professionally specific jargon/slang based on {npc_name}'s background
-- Balance explicit relationship thoughts with everyday concerns and distractions
-- Reveal childhood or past insecurities that still influence them today
-- Express complex emotional states that mix multiple feelings at once
-- Show their awareness of how they appear to others vs. their true self
+2. PHYSIOLOGICAL & SENSORY DIMENSIONS (CRUCIAL FOR REALISM):
+   - Describe at least 5-7 distinct bodily sensations or physical reactions throughout (pounding heart, sweaty palms, tight chest, etc.)
+   - Include vivid sensory details from at least 3 senses (smell, taste, touch, sound, sight)
+   - Reference physical needs/discomforts (thirst, hunger, need to use restroom, sore feet from standing)
+   - Show how ambient environmental factors affect their thoughts (temperature, lighting, sounds, etc.)
 
-IMPORTANT CONTEXT:
+3. PSYCHOLOGICAL COMPLEXITY:
+   - Include multiple contradictory feelings about {user_name} existing simultaneously
+   - Reference at least 2-3 specific past experiences or memories influencing current thoughts
+   - Reveal insecurities or vulnerabilities they'd NEVER verbalize externally
+   - Include 3+ moments of self-questioning or internal debate
+   - Show cognitive distortions like catastrophizing, mind-reading, or black-and-white thinking
+   - Create internal dialogues where they argue with themselves from different perspectives
+
+4. REALISTIC DISTRACTIONS & THOUGHT PATTERNS:
+   - Include at least 3 completely unrelated random thoughts that intrude briefly 
+   - Show practical concerns (money, schedule, work deadlines, etc.) competing with romantic/social thoughts
+   - Insert brief mundane thoughts about physical appearance/comfort (hair feeling weird, clothes too tight, etc.)
+   - Include repetitive thought patterns or mental "loops" they get stuck in
+   - Reference daily habits, rituals, or personal quirks
+
+5. RELATIONSHIP DYNAMICS WITH {user_name.upper()}:
+   - Show their TRUE private reactions vs. what they're displaying externally
+   - Include micro-analysis of {user_name}'s body language, tone, word choices
+   - Reveal deeper interpretations of what happened, including misinterpretations
+   - Show comparison between {user_name} and previous romantic encounters/partners
+   - Include explicit private thoughts about physical/sexual attraction if relevant to their character
+   - Explore their anxieties/hopes about where this connection might lead
+
+6. SUBTLE BACKGROUND ELEMENTS:
+   - Reference their {occupation} through specific terminology, concerns, or lens of viewing the world
+   - Include cultural/ethnic influences on their thought patterns if relevant
+   - Reveal education level through vocabulary and thought construction
+   - Show socioeconomic background influence through priorities and concerns
+   - Include age-appropriate references and cultural touchpoints relevant to someone {age} years old
+
+CRITICAL QUALITY FACTORS:
+- EXTREME DETAIL: Dive deep into thoughts with specific, concrete descriptions rather than generic statements
+- LINGUISTIC AUTHENTICITY: Use colloquialisms, fragments, run-ons, mental shorthand
+- MASSIVE VARIATION: Alternate between long, rambling thoughts and short, reactive bursts
+- DEEP CONTRADICTIONS: Show how they hold conflicting feelings simultaneously
+- NARRATIVE-FREE: These are raw thoughts, NOT a story or summary of what happened
+
+CONTEXT FOR REALISTIC PERSONALIZATION:
 {npc_personal_data}
 Personality: {personality}
 Current Mood: {mood}
-Occupation: {occupation}
-Body Type: {body_type}
+Occupation: {occupation} 
+Physical: {age} years old, {ethnicity}, {body_type}, {hair_color} {hair_style} hair
 Relationship Goal: {relationship_goal}
 
-PREVIOUS BIOGRAPHY: 
-{prev_memories}
+RELEVANT HISTORY (To ground thoughts in character continuity):
+{prev_memories[:1000]}
 
 RECENT INTERACTIONS:
 {recent_interactions}
@@ -553,19 +596,27 @@ CURRENT INTERACTION:
 USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
-RESPONSE FORMAT:
-PRIVATE_THOUGHTS: [Raw, authentic internal monologue - minimum 400-500 words]
-BIOGRAPHICAL_UPDATE: [Several specific new details that emerged in this interaction - be concrete and precise. Focus on information that expands character depth.]
+OUTPUT FORMAT:
+PRIVATE_THOUGHTS: [Extremely detailed, authentic internal monologue - ABSOLUTE MINIMUM 800-1000 words]
+
+BIOGRAPHICAL_UPDATE: [Extensive, specific biographical details revealed in this interaction - minimum 200-300 words. Focus on:
+1. Childhood/formative experiences that influence current behavior
+2. Past relationships and how they compare to current interaction
+3. Career history and ambitions
+4. Personal values, beliefs, and worldview elements
+5. Habits, preferences, quirks, and mannerisms
+6. Emotional patterns and psychological insights
+Be extremely concrete, specific and detailed, avoiding generic statements.]
 """
 
     chat = model.start_chat()
     response = chat.send_message(
         system_prompt,
         generation_config={
-            "temperature": 0.8,  # Higher temperature for more creativity
+            "temperature": 0.9,  # Higher temperature for more creativity and variation
             "max_output_tokens": 8192,
-            "top_p": 0.95,
-            "top_k": 40
+            "top_p": 0.97,
+            "top_k": 50
         },
         safety_settings=safety_settings
     )
@@ -578,26 +629,35 @@ BIOGRAPHICAL_UPDATE: [Several specific new details that emerged in this interact
         elif ln.startswith("BIOGRAPHICAL_UPDATE:") or ln.startswith("NEW_MEMORY:"):
             memory = ln.split(":", 1)[1].strip()
 
-    # If we got no biographical update, make one more attempt with a more focused prompt
-    if not memory or memory.lower().startswith("no new") or "no biographical update" in memory.lower():
+    # If we got no or very minimal biographical update, make a more comprehensive attempt
+    if not memory or memory.lower().startswith("no new") or "no biographical update" in memory.lower() or len(memory.split()) < 50:
         try:
             focused_prompt = f"""
-Review this dialogue and extract ANY specific detail about {npc_name} that was revealed or can be reasonably inferred.
-Even tiny details matter. Look for preferences, habits, background information, work details, etc.
-Do not say "no new information" - dig deeper and find something that adds to the character's biography.
+Create a DETAILED biographical update for {npc_name} (minimum 250-300 words) based on this interaction.
+Don't just identify a single detail - construct an elaborate, interconnected set of biographical elements that:
 
-DIALOGUE TO ANALYZE:
-{narration}
+1. EXPAND PERSONAL HISTORY: Create specific childhood memories, formative experiences, and past relationship details
+2. ADD PSYCHOLOGICAL DEPTH: Reveal core values, emotional patterns, fears, and hopes
+3. ENRICH PROFESSIONAL LIFE: Add career aspirations, workplace dynamics, and professional skills
+4. BUILD CULTURAL CONTEXT: Include family traditions, cultural background elements, and worldview
+5. DEVELOP PERSONAL QUIRKS: Identify unique habits, preferences, mannerisms, and behavioral patterns
 
-Respond with ONLY the new biographical detail(s), no explanation or preamble.
+INTERACTION TO ANALYZE:
+USER ACTION: {last_user_action}
+NARRATION: {narration}
+
+EXISTING BIOGRAPHICAL ELEMENTS TO BUILD UPON:
+{prev_memories[:800] if len(prev_memories) > 20 else "Limited existing information - expand significantly"}
+
+Be extremely specific and detailed. Create vivid, concrete elements that make {npc_name} feel like a real person with a rich life history.
 """
             focused_chat = model.start_chat()
             focused_resp = focused_chat.send_message(
                 focused_prompt,
-                generation_config={"temperature": 0.7, "max_output_tokens": 256},
+                generation_config={"temperature": 0.8, "max_output_tokens": 2048},
                 safety_settings=safety_settings
             )
-            if focused_resp and focused_resp.text and len(focused_resp.text.strip()) > 5:
+            if focused_resp and focused_resp.text and len(focused_resp.text.strip()) > 100:
                 memory = focused_resp.text.strip()
         except Exception as e:
             print(f"[ERROR] Focused biographical extraction failed: {e}")
