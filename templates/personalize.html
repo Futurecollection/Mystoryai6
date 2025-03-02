@@ -874,13 +874,40 @@ function updateBioText() {
 
 // Initialize tabs if Bootstrap is available
 document.addEventListener('DOMContentLoaded', function() {
+  // Ensure Bootstrap is loaded and accessible
   if (typeof bootstrap !== 'undefined') {
-    const tabElements = document.querySelectorAll('#npcDetailsTabs button');
-    tabElements.forEach(function(tabEl) {
-      tabEl.addEventListener('click', function(event) {
+    const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
+    triggerTabList.forEach(function(triggerEl) {
+      const tabTrigger = new bootstrap.Tab(triggerEl);
+      
+      triggerEl.addEventListener('click', function(event) {
         event.preventDefault();
-        const bsTab = new bootstrap.Tab(tabEl);
-        bsTab.show();
+        tabTrigger.show();
+      });
+    });
+  } else {
+    console.error('Bootstrap is not available - tabs may not function correctly');
+    // Fallback for when Bootstrap JS is not loaded
+    const tabButtons = document.querySelectorAll('#npcDetailsTabs button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Remove active class from all buttons and panes
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => {
+          p.classList.remove('show', 'active');
+        });
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Show the corresponding pane
+        const targetId = this.getAttribute('data-bs-target').substring(1);
+        const targetPane = document.getElementById(targetId);
+        if (targetPane) {
+          targetPane.classList.add('show', 'active');
+        }
       });
     });
   }

@@ -61,6 +61,33 @@
         <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 1.1rem;">
           <i class="bi bi-gear-fill"></i> Choose Update Type:
         </label>
+        
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="btn-group w-100" role="group" aria-label="Update type options">
+              <input type="radio" class="btn-check" name="update-type-btn" id="thoughts-btn" autocomplete="off" checked>
+              <label class="btn" for="thoughts-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='thoughts'; updateFormDisplay();">
+                <i class="bi bi-lightbulb"></i> Thoughts
+              </label>
+              
+              <input type="radio" class="btn-check" name="update-type-btn" id="memories-btn" autocomplete="off">
+              <label class="btn" for="memories-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='memories'; updateFormDisplay();">
+                <i class="bi bi-journal-text"></i> Biography
+              </label>
+              
+              <input type="radio" class="btn-check" name="update-type-btn" id="rewrite-btn" autocomplete="off">
+              <label class="btn" for="rewrite-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='rewrite_bio'; updateFormDisplay();">
+                <i class="bi bi-arrow-repeat"></i> Rewrite
+              </label>
+              
+              <input type="radio" class="btn-check" name="update-type-btn" id="reset-btn" autocomplete="off">
+              <label class="btn" for="reset-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='reset_bio'; updateFormDisplay();">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+              </label>
+            </div>
+          </div>
+        </div>
+        
         <div class="card mb-3" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
           <div class="card-body py-2">
             <select name="target" id="updateTarget" class="form-select" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 1.05rem;">
@@ -154,11 +181,18 @@
         </div>
       </div>
 
-      <div class="d-flex justify-content-between">
-        <button type="submit" class="btn" style="background-color: #ff5789; color: white; font-weight: bold; padding: 10px 24px;">
-          <i class="bi bi-check2-circle"></i> <span id="submitLabel">Update Character Thoughts</span>
-        </button>
-        <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; padding: 10px 20px;">
+      <div class="row">
+        <div class="col-12 col-md-8 offset-md-2">
+          <div class="d-grid gap-2 mb-3">
+            <button type="submit" class="btn btn-lg" style="background-color: #ff5789; color: white; font-weight: bold; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+              <i class="bi bi-check2-circle"></i> <span id="submitLabel">Update Character Thoughts</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center">
+        <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; padding: 10px 20px; border-radius: 30px;">
           <i class="bi bi-arrow-left"></i> Return to Story
         </a>
       </div>
