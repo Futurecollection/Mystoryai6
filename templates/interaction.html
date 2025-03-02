@@ -104,12 +104,33 @@
 
       <div class="mb-3">
         <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-cursor-text"></i> Type your action or dialogue:</label>
-        <div class="input-group">
+        <div class="input-group mobile-input-group">
           <input type="text" class="form-control" name="user_action" placeholder="How do you want to respond?" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          <button type="submit" name="submit_action" class="btn" style="background-color: #ff5789; color: white;">
-            <i class="bi bi-send"></i> Send
+          <button type="submit" name="submit_action" class="btn mobile-send-btn" style="background-color: #ff5789; color: white;">
+            <i class="bi bi-send"></i> <span class="send-text">Send</span>
           </button>
         </div>
+        <style>
+          @media (max-width: 768px) {
+            .mobile-input-group {
+              display: flex;
+              flex-direction: row;
+              width: 100%;
+            }
+            .mobile-input-group input {
+              flex: 1;
+              border-radius: 8px 0 0 8px !important;
+            }
+            .mobile-send-btn {
+              width: auto !important;
+              border-radius: 0 8px 8px 0 !important;
+              padding: 0 1rem !important;
+            }
+            .send-text {
+              display: none;
+            }
+          }
+        </style>
       </div>
       <div id="moveLoading" style="display: none; margin-top: 10px; color: #ff5789;">
         <div class="spinner-border text-success spinner-border-sm" role="status">
