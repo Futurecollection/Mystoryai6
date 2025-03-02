@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="card mb-3" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-body" style="color: #f8d0d0;">
+  <div class="card-body" style="color: #ffffff;">
     <h1>Stage Unlocks</h1>
 
     <!-- Show the user which stage they are currently in -->
@@ -13,7 +13,7 @@
     <form method="POST" class="mb-4">
       {% for i in range(1,7) %}
         <label>Stage {{ i }} Unlock Text:</label>
-        <textarea class="form-control mb-2" rows="2" name="stage_unlock_{{ i }}">{{ stage_unlocks[i]|trim }}</textarea>
+        <textarea class="form-control mb-2" rows="2" name="stage_unlock_{{ i }}">{{ stage_unlocks.get(i, "")|trim }}</textarea>
       {% endfor %}
       <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
         Save Stage Unlocks

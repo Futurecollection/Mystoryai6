@@ -1885,6 +1885,30 @@ def interaction():
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
 
+        # Add default suggestions based on the current stage
+        suggestions = [
+            "Tell me more about yourself",
+            "What do you enjoy doing?",
+            "*smile and make eye contact*",
+            "I'd like to get to know you better",
+            "What are your plans for later?",
+        ]
+        
+        # Add stage-specific suggestions
+        if cstage >= 3:
+            suggestions.extend([
+                "You look amazing today",
+                "*move closer*",
+                "I can't stop thinking about you"
+            ])
+        
+        if cstage >= 4:
+            suggestions.extend([
+                "*take your hand*",
+                "I really enjoy spending time with you",
+                "*lean in closer*"
+            ])
+            
         return render_template(
             "interaction.html",
             title="Interact with NPC",
@@ -1900,6 +1924,7 @@ def interaction():
             scene_image_seed=seed_used,
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
+            suggestions=suggestions,
 
             npc_current_action=current_action,
             environment=environment,
@@ -2294,7 +2319,16 @@ def stage_unlocks():
     # Ensure session has default stage unlock texts if not already
     if "stage_unlocks" not in session:
         session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
-
+    elif not isinstance(session["stage_unlocks"], dict):
+        # If it's not a dictionary for some reason, reset it
+        session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
+        flash("Reset stage unlocks to defaults due to data format issue", "info")
+    
+    # Ensure all stages have values
+    for i in range(1, 7):
+        if i not in session["stage_unlocks"] or not session["stage_unlocks"][i]:
+            session["stage_unlocks"][i] = DEFAULT_STAGE_UNLOCKS.get(i, f"Stage {i} description")
+    
     current_stage = session.get("currentStage", 1)
 
     if request.method == "POST" and "update_stage_unlocks" in request.form:
