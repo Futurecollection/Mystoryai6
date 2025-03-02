@@ -22,6 +22,7 @@ def retry_with_backoff(retries=3, backoff_in_seconds=1):
                     sleep = (backoff_in_seconds * 2 ** x)
                     time.sleep(sleep)
                     x += 1
+                    continue
         return wrapper
     return decorator
 
