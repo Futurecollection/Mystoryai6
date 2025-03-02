@@ -1232,26 +1232,26 @@ def extract_details_from_bio(bio_text: str) -> None:
         print(f"[ERROR] Failed to extract details from bio: {e}")
 
 5. When clothing changes, describe the complete new outfit.
-6. Hair COLOR must be a color name only (like "blonde", "brown", "red", etc.) - NOT actions or conditions.
-7. Hair STYLE describes the cut/style (like "long", "curly", "pulled back", etc.)
-8. PERSONALITY should RARELY be updated - only if a fundamental personality change is described.
-9. MOOD should be updated to reflect current emotional state (happy, sad, nervous, etc.)
-10. Current Life Situation should reflect broader life circumstances, not scene-specific situations.
-11. Current Scene should describe the immediate situation/activity happening in the current scene.
+    6. Hair COLOR must be a color name only (like "blonde", "brown", "red", etc.) - NOT actions or conditions.
+    7. Hair STYLE describes the cut/style (like "long", "curly", "pulled back", etc.)
+    8. PERSONALITY should RARELY be updated - only if a fundamental personality change is described.
+    9. MOOD should be updated to reflect current emotional state (happy, sad, nervous, etc.)
+    10. Current Life Situation should reflect broader life circumstances, not scene-specific situations.
+    11. Current Scene should describe the immediate situation/activity happening in the current scene.
 
-Return ONLY this JSON format with no additional text:
-{{
-  "environment_update": "", 
-  "clothing_update": "",
-  "hair_color_update": "",
-  "hair_style_update": "",
-  "personality_update": "",
-  "current_life_situation_update": "",
-  "current_scene_update": "",
-  "mood_update": "",
-  "time_of_day": "",
-  "weather": ""
-}}
+    Return ONLY this JSON format with no additional text:
+    {{
+      "environment_update": "", 
+      "clothing_update": "",
+      "hair_color_update": "",
+      "hair_style_update": "",
+      "personality_update": "",
+      "current_life_situation_update": "",
+      "current_scene_update": "",
+      "mood_update": "",
+      "time_of_day": "",
+      "weather": ""
+    }}
 """
 
     try:
@@ -1799,8 +1799,7 @@ Do not include any prefixes, explanations or additional text.
 """
 
 PONY_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant specializing in producing a short prompt for a Stable Diffusion NSFW Image generator. Only return the prompt. Start with "a photo of" and then incoporate the NPC's personal data. Include the NPC's age, hair, clothing, ethnicity.) and current action using the last story narration. make it short descriptions with each variable separted by commas. don't inlcude variables like personality or diaglogue as they dont describe an image. avoid filler words. also inlcude the point of view of the image, the angle etc. include the position of the NPC e.g. if giving a blowjob their knees you could describe the image from the "mans POV" etc. during sexual acts if the user is a male. you can add additoonal details like "viewers hand on her head" or "viewers hands on breast"
-
+You are an AI assistant specializing in producing a short prompt for a Stable Diffusion NSFW Image generator. Only return the prompt. Start with "a photo of" and then incorporate the NPC's personal data. Include the NPC's age, hair, clothing, ethnicity and current action using the last story narration. Make it short descriptions with each variable separated by commas. Don't include variables like personality or dialogue as they don't describe an image. Avoid filler words. Also include the point of view of the image, the angle etc. Include the position of the NPC e.g. if giving a blowjob their knees you could describe the image from the "mans POV" etc. during sexual acts if the user is a male. You can add additional details like "viewers hand on her head" or "viewers hands on breast"
 """
 
 REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
