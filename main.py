@@ -771,10 +771,160 @@ MEMORY_UPDATE: (System Error)
     session["npcPrivateThoughts"] = updated_thoughts
     session["npcBehavior"] = updated_memories
 
+    # ---------------------------------------------------------
+    # AUTO-UPDATE NPC & ENVIRONMENT SETTINGS FROM NARRATIVE
+    # ---------------------------------------------------------
+    # After each interaction, try to automatically extract character & environment changes
+    auto_update_npc_settings_from_narrative(narration_txt, memory_txt)
+
     return f"""AFFECT_CHANGE_FINAL: {affect_delta}
 NARRATION: {narration_txt}
 PRIVATE_THOUGHTS: {thoughts_txt}
 MEMORY_UPDATE: {memory_txt}"""
+
+
+@retry_with_backoff(retries=2, backoff_in_seconds=1)
+def auto_update_npc_settings_from_narrative(narration_text: str, memory_text: str) -> None:
+    """
+    Automatically extracts and updates NPC and environment settings from narrative text.
+    This reduces the need for manual updates in the UI.
+    """
+    # Get current settings for context
+    npc_name = session.get('npc_name', 'Unknown')
+    current_env = session.get('environment', '')
+    current_clothing = session.get('npc_clothing', '')
+    current_hair = f"{session.get('npc_hair_color', '')} {session.get('npc_hair_style', '')}"
+    current_personality = session.get('npc_personality', '')
+    current_situation = session.get('npc_current_situation', '')
+    
+    # Create prompt for LLM
+    prompt = f"""
+You are a character data extractor. Analyze this narrative text to update the character settings in a romance story.
+Extract ONLY clear changes or new information that matches the categories below.
+
+Current character info:
+- Name: {npc_name}
+- Current Environment/Location: {current_env}
+- Current Clothing: {current_clothing}
+- Current Hair: {current_hair}
+- Personality: {current_personality}
+- Current Situation: {current_situation}
+
+TEXT TO ANALYZE:
+Narrative: {narration_text}
+Memory Update: {memory_text}
+
+IMPORTANT:
+1. ONLY extract information if clearly stated in the text.
+2. Do not make assumptions or inferences beyond what's explicitly stated.
+3. Leave fields empty if no new information is provided.
+4. When a location change occurs, be explicit about the new location.
+5. When clothing changes, describe the complete new outfit.
+
+Return ONLY this JSON format with no additional text:
+{{
+  "environment_update": "", 
+  "clothing_update": "",
+  "hair_update": "",
+  "personality_update": "",
+  "current_situation_update": ""
+}}
+"""
+
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.1, "max_output_tokens": 1024},
+            safety_settings=safety_settings
+        )
+        
+        if not response or not response.text:
+            return
+        
+        # Extract JSON from response
+        response_text = response.text.strip()
+        try:
+            # Remove any markdown formatting
+            json_text = response_text
+            if "```json" in json_text:
+                json_text = json_text.split("```json", 1)[1]
+            if "```" in json_text:
+                json_text = json_text.split("```", 1)[0]
+                
+            import json
+            updates = json.loads(json_text)
+            
+            # Apply updates to session variables
+            has_updates = False
+            
+            # Environment update
+            if updates.get("environment_update") and updates["environment_update"].strip():
+                new_env = updates["environment_update"].strip()
+                if new_env != current_env:
+                    session["environment"] = new_env
+                    log_message(f"[AUTO-UPDATE] Environment changed to: {new_env}")
+                    has_updates = True
+            
+            # Clothing update
+            if updates.get("clothing_update") and updates["clothing_update"].strip():
+                new_clothing = updates["clothing_update"].strip()
+                if new_clothing != current_clothing:
+                    session["npc_clothing"] = new_clothing
+                    log_message(f"[AUTO-UPDATE] Clothing changed to: {new_clothing}")
+                    has_updates = True
+            
+            # Hair update  
+            if updates.get("hair_update") and updates["hair_update"].strip():
+                new_hair = updates["hair_update"].strip()
+                # Try to separate color and style if possible
+                if " " in new_hair:
+                    parts = new_hair.split(" ", 1)
+                    session["npc_hair_color"] = parts[0]
+                    session["npc_hair_style"] = parts[1]
+                else:
+                    # If we can't separate, treat as style
+                    session["npc_hair_style"] = new_hair
+                log_message(f"[AUTO-UPDATE] Hair changed to: {new_hair}")
+                has_updates = True
+            
+            # Personality update
+            if updates.get("personality_update") and updates["personality_update"].strip():
+                new_personality = updates["personality_update"].strip()
+                if new_personality != current_personality:
+                    session["npc_personality"] = new_personality
+                    log_message(f"[AUTO-UPDATE] Personality updated to: {new_personality}")
+                    has_updates = True
+            
+            # Current situation update
+            if updates.get("current_situation_update") and updates["current_situation_update"].strip():
+                new_situation = updates["current_situation_update"].strip()
+                if new_situation != current_situation:
+                    session["npc_current_situation"] = new_situation
+                    log_message(f"[AUTO-UPDATE] Current situation updated to: {new_situation}")
+                    has_updates = True
+            
+            # Look for time of day and weather indicators
+            if "time_of_day" in updates and updates["time_of_day"]:
+                session["time_of_day"] = updates["time_of_day"]
+                has_updates = True
+                
+            if "weather" in updates and updates["weather"]:
+                session["weather"] = updates["weather"]
+                has_updates = True
+                
+            if "scene_mood" in updates and updates["scene_mood"]:
+                session["scene_mood"] = updates["scene_mood"]
+                has_updates = True
+                
+            if has_updates:
+                log_message("[AUTO-UPDATE] Character and environment settings automatically updated")
+                
+        except Exception as e:
+            log_message(f"[AUTO-UPDATE] Error parsing JSON response: {str(e)}")
+            
+    except Exception as e:
+        log_message(f"[AUTO-UPDATE] Error calling LLM: {str(e)}")
 
 # --------------------------------------------------------------------------
 # Replicate Model Functions
@@ -1828,6 +1978,9 @@ def interaction():
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
 
+            # Set a flag for auto-update notification
+            session["auto_updated"] = True
+            
             # Auto-generate scene prompt after each action
             model_type = session.get("last_model_choice", "flux")
             prompt_text = generate_image_prompt_for_scene(model_type)
@@ -2124,6 +2277,12 @@ def delete_gallery_image(index):
         session["saved_images"] = saved_images
         flash("Image deleted successfully!", "success")
     return redirect(url_for("gallery"))
+
+@app.route("/clear_auto_update_flag", methods=["POST"])
+@login_required
+def clear_auto_update_flag():
+    session.pop('auto_updated', None)
+    return "", 204  # No content response
 
 # --------------------------------------------------------------------------
 # (Optional) A route to let the user manually add to NPC memory or thoughts

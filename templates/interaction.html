@@ -364,9 +364,14 @@
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
     <div class="d-flex justify-content-between align-items-center">
       <h4 style="margin-bottom: 0;">{{ session.get('npc_name', 'Character') }}</h4>
-      <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #6d1d1d;" title="Update Character">
-        <i class="bi bi-pencil-square"></i>
-      </a>
+      <div>
+        <span id="auto-update-badge" class="badge bg-success me-2" style="display: none;">
+          <i class="bi bi-magic"></i> Auto-updated
+        </span>
+        <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #6d1d1d;" title="Update Character">
+          <i class="bi bi-pencil-square"></i>
+        </a>
+      </div>
     </div>
   </div>
   <div class="card-body" style="background-color: #3b0b0b;">
@@ -446,6 +451,17 @@ function showLoading() {
   }
 }
 
+// Show auto-update notification after successful interaction
+function showAutoUpdateNotification() {
+  const badge = document.getElementById('auto-update-badge');
+  if (badge) {
+    badge.style.display = 'inline-block';
+    setTimeout(() => {
+      badge.style.display = 'none';
+    }, 5000); // Hide after 5 seconds
+  }
+}
+
 function showImageLoading() {
   document.getElementById("imageLoading").style.display = "block";
 }
@@ -503,6 +519,13 @@ document.addEventListener('DOMContentLoaded', function() {
       showLoading();
     });
   });
+  
+  // Check if we need to show the auto-update notification
+  {% if session.get('auto_updated') %}
+    showAutoUpdateNotification();
+    // Clear the flag
+    fetch('/clear_auto_update_flag', { method: 'POST' });
+  {% endif %}
 
   // Add event listeners to radio buttons
   document.querySelectorAll('input[name="model_type"]').forEach(function(radio) {
