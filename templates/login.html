@@ -2,33 +2,122 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Login</h1>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">
-        {{ message }}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="auth-container">
+      <div class="text-center mb-4">
+        <h1 class="auth-title">Login</h1>
+        <p class="auth-subtitle">Welcome back to Destined Encounters</p>
       </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
 
-<form method="POST" class="mb-4">
-  <div class="mb-3">
-    <label for="email" class="form-label">Email:</label>
-    <input type="email" class="form-control" name="email" id="email" required>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="card auth-card">
+        <div class="card-body">
+          <form method="POST" class="mb-4">
+            <div class="mb-4">
+              <label for="email" class="form-label"><i class="bi bi-envelope me-2"></i>Email</label>
+              <input type="email" class="form-control" name="email" id="email" required>
+            </div>
+            
+            <div class="mb-4">
+              <label for="password" class="form-label"><i class="bi bi-lock me-2"></i>Password</label>
+              <input type="password" class="form-control" name="password" id="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">Login</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="auth-links mt-4">
+        <div class="d-flex justify-content-between">
+          <p>Don't have an account? <a href="{{ url_for('register_route') }}">Register here</a></p>
+          <p><a href="{{ url_for('personalize') }}" class="continue-as-guest"><i class="bi bi-incognito me-1"></i>Continue as guest</a></p>
+        </div>
+        <div class="text-center mt-3">
+          <a href="{{ url_for('main_home') }}" class="btn btn-outline-secondary"><i class="bi bi-house me-2"></i>Back to Home</a>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .auth-container {
+    margin-top: 2rem;
+  }
   
-  <div class="mb-3">
-    <label for="password" class="form-label">Password:</label>
-    <input type="password" class="form-control" name="password" id="password" required>
-  </div>
-
-  <button type="submit" class="btn btn-primary">Login</button>
-</form>
-
-<p>Don't have an account? <a href="{{ url_for('register_route') }}">Register here</a></p>
-<p><a href="{{ url_for('main_home') }}" class="btn btn-secondary">Back to Home</a></p>
-
+  .auth-title {
+    color: #ff9fa3;
+    margin-bottom: 0.5rem;
+  }
+  
+  .auth-subtitle {
+    color: #f8d0d0;
+    opacity: 0.8;
+  }
+  
+  .auth-card {
+    background-color: rgba(30, 5, 5, 0.4);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  
+  .auth-links {
+    color: #f8d0d0;
+  }
+  
+  .auth-links a {
+    color: #ff9fa3;
+    text-decoration: none;
+  }
+  
+  .auth-links a:hover {
+    text-decoration: underline;
+  }
+  
+  .continue-as-guest {
+    color: #f8d0d0 !important;
+  }
+  
+  .form-control {
+    background-color: rgba(20, 3, 3, 0.4) !important;
+    border: 1px solid rgba(255, 87, 137, 0.3) !important;
+    color: #f8d0d0 !important;
+  }
+  
+  .form-control:focus {
+    background-color: rgba(25, 5, 5, 0.5) !important;
+    border-color: rgba(255, 87, 137, 0.7) !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 87, 137, 0.25) !important;
+  }
+  
+  .btn-primary {
+    background-color: #ff5789 !important;
+    border: none !important;
+    font-weight: bold;
+  }
+  
+  .btn-outline-secondary {
+    border-color: #f8d0d0 !important;
+    color: #f8d0d0 !important;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: rgba(248, 208, 208, 0.1) !important;
+  }
+</style>
 {% endblock %}

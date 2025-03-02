@@ -1,53 +1,168 @@
 
 {% extends "base.html" %}
 {% block content %}
-<h1>Welcome to Destined Encounters</h1>
+<div class="home-container">
+  <div class="header-section text-center mb-5">
+    <h1 class="display-4">Destined Encounters</h1>
+    <p class="lead">Create immersive romantic interactions with customizable characters</p>
+  </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-{% if session.logged_in %}
-  <p>You are logged in as {{ session.user_email }}</p>
-  
-  <div class="row mt-4">
-    {% if session.npc_name or session.logged_in %}
-      <div class="text-center mb-4">
-        <a href="{{ url_for('interaction') }}" class="btn btn-success btn-lg">Continue Interaction</a>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages mb-4">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
       </div>
     {% endif %}
-    
-    <div class="col-md-{% if has_previous_session %}6{% else %}12{% endif %} mb-3">
-      <div class="card">
+  {% endwith %}
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card main-card mb-4">
         <div class="card-body">
-          <h5 class="card-title">Start New Story</h5>
-          <p class="card-text">Create a fresh story with new characters and settings.</p>
-          {% if session.npc_name %}
-          <div class="mt-3">
-            <a href="{{ url_for('interaction') }}" class="btn btn-success">Continue Existing Story</a>
-          </div>
+          {% if session.logged_in %}
+            <div class="user-welcome mb-4">
+              <h4>Welcome back, {{ session.user_email }}</h4>
+              <p>You're logged in. Your stories and settings will be saved.</p>
+            </div>
+            
+            <div class="action-buttons">
+              {% if session.npc_name %}
+                <a href="{{ url_for('interaction') }}" class="btn btn-lg btn-primary btn-block mb-3">
+                  <i class="bi bi-chat-heart-fill me-2"></i>Continue Your Story
+                </a>
+              {% endif %}
+              
+              <a href="{{ url_for('personalize') }}" class="btn btn-lg btn-success btn-block mb-3">
+                <i class="bi bi-plus-circle-fill me-2"></i>Create New Story
+              </a>
+              
+              <a href="{{ url_for('logout_route') }}" class="btn btn-outline-danger">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </a>
+            </div>
+          {% else %}
+            <div class="guest-options mb-4">
+              <h4>Choose how to proceed:</h4>
+              <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                  <div class="card h-100 option-card">
+                    <div class="card-body text-center">
+                      <i class="bi bi-person-check fs-1 mb-3 text-primary"></i>
+                      <h5 class="card-title">Sign In</h5>
+                      <p class="card-text">Access your saved stories and preferences</p>
+                      <div class="mt-3">
+                        <a href="{{ url_for('login_route') }}" class="btn btn-primary">Login</a>
+                        <a href="{{ url_for('register_route') }}" class="btn btn-outline-primary ms-2">Register</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="card h-100 option-card">
+                    <div class="card-body text-center">
+                      <i class="bi bi-lightning-charge fs-1 mb-3 text-success"></i>
+                      <h5 class="card-title">Try as Guest</h5>
+                      <p class="card-text">Start immediately, but your progress won't be saved</p>
+                      <div class="mt-3">
+                        <a href="{{ url_for('personalize') }}" class="btn btn-success">Get Started</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           {% endif %}
-          <a href="{{ url_for('personalize') }}" class="btn btn-primary">Start New Story</a>
+        </div>
+      </div>
+
+      <div class="card feature-card">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-stars me-2"></i>Features</h5>
+          <div class="row text-center mt-3">
+            <div class="col-md-4 mb-3">
+              <div class="feature-item">
+                <i class="bi bi-people-fill feature-icon"></i>
+                <h6>Customizable Characters</h6>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="feature-item">
+                <i class="bi bi-chat-square-text-fill feature-icon"></i>
+                <h6>Dynamic Conversations</h6>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="feature-item">
+                <i class="bi bi-image-fill feature-icon"></i>
+                <h6>AI Image Generation</h6>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .home-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
   
-  <p class="mt-3">
-    <a href="{{ url_for('logout_route') }}" class="btn btn-danger">Logout</a>
-  </p>
-{% else %}
-  <div class="row mt-4">
-    <div class="col-md-6 mb-3">
-      <a href="{{ url_for('login_route') }}" class="btn btn-primary">Login</a>
-    </div>
-    <div class="col-md-6 mb-3">
-      <a href="{{ url_for('register_route') }}" class="btn btn-success">Register</a>
-    </div>
-  </div>
-{% endif %}
+  .main-card {
+    border: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    background-color: rgba(30, 5, 5, 0.4);
+  }
+  
+  .feature-card {
+    background-color: rgba(30, 5, 5, 0.3);
+    border: none;
+    margin-top: 1.5rem;
+  }
+  
+  .option-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    background-color: rgba(40, 10, 10, 0.5);
+    border: none;
+  }
+  
+  .option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+  
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #ff5789;
+  }
+  
+  .feature-item {
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: rgba(40, 10, 10, 0.3);
+  }
+  
+  .header-section h1 {
+    color: #ff9fa3;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  .action-buttons .btn {
+    transition: transform 0.2s;
+  }
+  
+  .action-buttons .btn:hover {
+    transform: scale(1.03);
+  }
+</style>
 {% endblock %}

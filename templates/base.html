@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{{ title|default("MyStory") }}</title>
+  <title>{{ title|default("Destined Encounters") }}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <style>
-    /* Dark burgundy background, pinkish text, everything 50% larger than before */
+    /* Dark burgundy background, pinkish text */
     body {
       background: #3b0b0b;
       color: #f8d0d0;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       margin: 0;
       padding: 0;
-      /* 1.3rem * 1.5 => ~1.95rem for 50% bigger text */
       font-size: 1.95rem;
       line-height: 1.5;
+      background-image: linear-gradient(to bottom, #2a0808, #3b0b0b);
+      background-attachment: fixed;
     }
 
     .container {
@@ -24,6 +25,8 @@
       margin: 1rem auto;
       padding: 1.5rem;
       border-radius: 10px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(5px);
     }
 
     h1, h2, h3, h4 {
@@ -33,37 +36,149 @@
     }
 
     .btn {
-      background-color: #ff5789 !important;
       border: none !important;
       color: #fff !important;
-      /* Make buttons a bit bigger too */
       font-size: 1.95rem !important;
+      transition: all 0.3s ease;
     }
-    .btn:hover {
-      background-color: #e4467d !important; 
+    
+    .btn-primary {
+      background-color: #ff5789 !important;
+    }
+    
+    .btn-primary:hover {
+      background-color: #e4467d !important;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: #6c4b5e !important;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #5a3d4e !important;
+    }
+    
+    .btn-success {
+      background-color: #2a9d8f !important;
+    }
+    
+    .btn-success:hover {
+      background-color: #1e8a7e !important;
     }
 
-    /* Make form controls 50% bigger as well */
+    /* Form controls styling */
     .form-control,
     .form-select {
       font-size: 1.95rem !important;
-      /* for comfortable vertical space, can tweak as you like */
       min-height: 3rem;
       line-height: 1.4;
       background-color: #2a0a0a;
       color: #f8d0d0;
-      border: 1px solid #ccc;
+      border: 1px solid #6d1d1d;
+      transition: all 0.3s ease;
     }
+    
     .form-control:focus,
     .form-select:focus {
       outline: none !important;
       box-shadow: 0 0 0 0.2rem rgba(255,87,137,0.25) !important;
       border-color: #ff5789 !important;
+      background-color: #3a0f0f;
+    }
+    
+    /* Guest mode banner */
+    .guest-mode-banner {
+      background-color: rgba(255, 193, 7, 0.2);
+      border-left: 4px solid #ffc107;
+      color: #fff0c8;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 0 5px 5px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .guest-mode-banner i {
+      font-size: 2rem;
+      margin-right: 1rem;
+      color: #ffc107;
+    }
+    
+    /* Alerts styling */
+    .alert {
+      border: none;
+      border-radius: 8px;
+    }
+    
+    .alert-success {
+      background-color: rgba(25, 135, 84, 0.2);
+      color: #d1e7dd;
+      border-left: 4px solid #198754;
+    }
+    
+    .alert-danger {
+      background-color: rgba(220, 53, 69, 0.2);
+      color: #f8d7da;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .alert-warning {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #fff3cd;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .alert-info {
+      background-color: rgba(13, 202, 240, 0.2);
+      color: #cff4fc;
+      border-left: 4px solid #0dcaf0;
+    }
+
+    /* Navigation bar */
+    .navbar {
+      background-color: rgba(20, 3, 3, 0.7);
+      margin-bottom: 1.5rem;
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+    }
+    
+    .navbar-brand {
+      color: #ff9fa3 !important;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    
+    .nav-link {
+      color: #f8d0d0 !important;
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 87, 137, 0.2);
+    }
+    
+    /* Card styling */
+    .card {
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      background-color: rgba(40, 10, 10, 0.4);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: rgba(30, 5, 5, 0.5);
+      color: #ff9fa3;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     @media (max-width: 576px) {
-      /* On small screens, you might want to reduce slightly 
-         so it doesn't overflow too much. */
       body {
         font-size: 1.7rem;
       }
@@ -81,21 +196,64 @@
       }
     }
   </style>
+  
+  {% block extra_styles %}{% endblock %}
 </head>
 <body>
   <div class="container">
+    <nav class="navbar">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main_home') }}">
+          <i class="bi bi-heart-fill me-2"></i>Destined Encounters
+        </a>
+        <div class="d-flex">
+          {% if session.logged_in %}
+            <a href="{{ url_for('interaction') }}" class="nav-link">
+              <i class="bi bi-chat-heart me-1"></i>Story
+            </a>
+            <a href="{{ url_for('logout_route') }}" class="nav-link">
+              <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </a>
+          {% else %}
+            {% if not session.guest_mode %}
+              <a href="{{ url_for('login_route') }}" class="nav-link">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+              </a>
+              <a href="{{ url_for('register_route') }}" class="nav-link">
+                <i class="bi bi-person-plus me-1"></i>Register
+              </a>
+            {% endif %}
+          {% endif %}
+          <a href="{{ url_for('about') }}" class="nav-link">
+            <i class="bi bi-info-circle me-1"></i>Help
+          </a>
+        </div>
+      </div>
+    </nav>
+    
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <a href="https://reddit.com/u/Known-Concern-2836" class="btn btn-danger" target="_blank" style="background-color: #FF4500 !important;">
+      <a href="https://reddit.com/u/Known-Concern-2836" class="btn btn-sm" target="_blank" style="background-color: #FF4500 !important; font-size: 1.5rem !important;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-reddit" viewBox="0 0 16 16" style="margin-right: 8px;">
           <path d="M6.167 8a.831.831 0 0 0-.83.83c0 .459.372.84.83.831a.831.831 0 0 0 0-1.661m1.843 3.647c.315 0 1.403-.038 1.976-.611a.232.232 0 0 0 0-.306.213.213 0 0 0-.306 0c-.353.363-1.126.487-1.67.487-.545 0-1.308-.124-1.671-.487a.213.213 0 0 0-.306 0 .213.213 0 0 0 0 .306c.564.563 1.652.61 1.977.61zm.992-2.807c0 .458.373.83.831.83.458 0 .83-.381.83-.83a.831.831 0 0 0-1.661 0z"/>
           <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.828-1.165c-.315 0-.602.124-.812.325-.801-.573-1.9-.945-3.121-.993l.534-2.501 1.738.372a.83.83 0 1 0 .83-.869.83.83 0 0 0-.744.468l-1.938-.41a.203.203 0 0 0-.153.028.186.186 0 0 0-.086.134l-.592 2.788c-1.24.038-2.358.41-3.17.992-.21-.2-.496-.324-.81-.324a1.163 1.163 0 0 0-.478 2.224c-.02.115-.029.23-.029.353 0 1.795 2.091 3.256 4.669 3.256 2.577 0 4.668-1.451 4.668-3.256 0-.114-.01-.238-.029-.353.401-.181.688-.592.688-1.069 0-.65-.525-1.165-1.165-1.165"/>
         </svg>
         r/MyStoryAI
       </a>
-      <a href="{{ url_for('about') }}" class="btn btn-secondary">About / Help</a>
     </div>
+    
+    {% if session.guest_mode %}
+    <div class="guest-mode-banner">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div>
+        <strong>Guest Mode:</strong> You're using the app without an account. Your progress won't be saved. 
+        <a href="{{ url_for('register_route') }}" class="text-warning text-decoration-underline">Create an account</a> to save your stories.
+      </div>
+    </div>
+    {% endif %}
 
     {% block content %}{% endblock %}
   </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

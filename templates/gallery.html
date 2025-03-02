@@ -1,31 +1,70 @@
-
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container">
-    <h1 style="color: #ff5789;">Image Gallery</h1>
-    
-    {% if images %}
-        <div class="row">
-        {% for image in images %}
-            <div class="col-md-4 mb-4">
-                <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-                    <img src="{{ url_for('gallery_image', index=loop.index0) }}" class="card-img-top" alt="Generated Image">
-                    <div class="card-body text-center">
-                        <a href="{{ url_for('delete_gallery_image', index=loop.index0) }}" 
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Are you sure you want to delete this image?')">
-                            Delete Image
-                        </a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-    {% else %}
-        <p style="color: #f8d0d0;">No saved images yet.</p>
-    {% endif %}
-    
-    <a href="{{ url_for('interaction') }}" class="btn btn-secondary">Back to Story</a>
+<h1>Image Gallery</h1>
+
+{% if session.guest_mode %}
+<div class="alert alert-warning mb-4">
+  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+  <strong>Guest Mode Notice:</strong> Images cannot be saved in guest mode. 
+  <a href="{{ url_for('register_route') }}" class="alert-link">Create an account</a> to save your favorite images.
 </div>
+{% endif %}
+
+{% if images %}
+  <div class="row">
+    {% for image in images %}
+    <div class="col-md-6 mb-4">
+      <div class="card gallery-card">
+        <img src="{{ url_for('gallery_image', index=loop.index0) }}" class="card-img-top" alt="Gallery Image">
+        <div class="card-body">
+          <p class="card-text"><strong>Prompt:</strong> {{ image.prompt }}</p>
+          <p class="card-text"><strong>Model:</strong> {{ image.model }}</p>
+          <p class="card-text"><strong>Seed:</strong> {{ image.seed }}</p>
+          <p class="card-text"><strong>Created:</strong> {{ image.timestamp }}</p>
+          <a href="{{ url_for('delete_gallery_image', index=loop.index0) }}" class="btn btn-danger"
+             onclick="return confirm('Are you sure you want to delete this image?')"
+             {% if session.guest_mode %}disabled{% endif %}>
+            <i class="bi bi-trash"></i> Delete
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center p-5 mt-3 mb-3 empty-gallery">
+    <i class="bi bi-images" style="font-size: 5rem; opacity: 0.5;"></i>
+    <h4 class="mt-3">No saved images yet</h4>
+    <p>Save images from your stories to view them here.</p>
+  </div>
+{% endif %}
+
+<p><a href="{{ url_for('interaction') }}" class="btn btn-primary">Back to Story</a></p>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .gallery-card {
+    transition: transform 0.3s;
+    overflow: hidden;
+  }
+
+  .gallery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+
+  .gallery-card img {
+    transition: transform 0.5s;
+  }
+
+  .gallery-card:hover img {
+    transform: scale(1.03);
+  }
+
+  .empty-gallery {
+    background-color: rgba(30, 5, 5, 0.4);
+    border-radius: 10px;
+  }
+</style>
 {% endblock %}
