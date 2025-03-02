@@ -1600,8 +1600,21 @@ def restart():
     return redirect(url_for("personalize"))
 
 @app.route("/personalize", methods=["GET", "POST"])
-@login_required
 def personalize():
+    """
+    This route renders a form allowing the user to select or input
+    personalizations for the NPC and user data.
+    """
+    # Check if user came from guest link
+    is_guest = request.args.get('guest') == 'true'
+    
+    if not is_guest and not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
+        
+    # Set guest mode if accessed as guest
+    if is_guest:
+        session['guest_mode'] = True
     """
     This route renders a form allowing the user to select or input
     personalizations for the NPC and user data.
@@ -1766,8 +1779,10 @@ Orgasm & Afterglow:
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
-@login_required
 def mid_game_personalize():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     Allows mid-game updates to the NPC's info.
     """
@@ -1804,8 +1819,10 @@ def mid_game_personalize():
     )
 
 @app.route("/interaction", methods=["GET", "POST"])
-@login_required
 def interaction():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
         trust = session.get("trustScore", 5.0)
@@ -2119,8 +2136,10 @@ def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
 @app.route("/full_story")
-@login_required
 def full_story():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     logs = session.get("full_story_log", [])
     story_lines = []
     for line in logs:
@@ -2137,8 +2156,10 @@ def full_story():
 # --------------------------------------------------------------------------
 
 @app.route("/generate_erotica", methods=["POST"])
-@login_required
 def generate_erotica():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     1) Takes the entire original narration from logs
     2) Splits into manageable chunks by words if not done yet (3000 words)
@@ -2188,8 +2209,10 @@ def generate_erotica():
     )
 
 @app.route("/continue_erotica", methods=["POST"])
-@login_required
 def continue_erotica():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     Continues rewriting the next chunk of the original text in erotic style,
     picking up from where we left off.
@@ -2227,8 +2250,10 @@ def continue_erotica():
     )
 
 @app.route("/stage_unlocks", methods=["GET", "POST"])
-@login_required
 def stage_unlocks():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     # Ensure session has default stage unlock texts if not already
     if "stage_unlocks" not in session:
         session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
@@ -2251,14 +2276,18 @@ def stage_unlocks():
     )
 
 @app.route("/gallery")
-@login_required
 def gallery():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     saved_images = session.get("saved_images", [])
     return render_template("gallery.html", images=saved_images)
 
 @app.route("/gallery_image/<int:index>")
-@login_required
 def gallery_image(index):
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     saved_images = session.get("saved_images", [])
     if 0 <= index < len(saved_images):
         # It's stored as base64 in "image_data"
@@ -2269,8 +2298,10 @@ def gallery_image(index):
     return "Image not found", 404
 
 @app.route("/delete_gallery_image/<int:index>")
-@login_required
 def delete_gallery_image(index):
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     saved_images = session.get("saved_images", [])
     if 0 <= index < len(saved_images):
         saved_images.pop(index)
@@ -2279,8 +2310,10 @@ def delete_gallery_image(index):
     return redirect(url_for("gallery"))
 
 @app.route("/clear_auto_update_flag", methods=["POST"])
-@login_required
 def clear_auto_update_flag():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     session.pop('auto_updated', None)
     return "", 204  # No content response
 
@@ -2288,8 +2321,10 @@ def clear_auto_update_flag():
 # (Optional) A route to let the user manually add to NPC memory or thoughts
 # --------------------------------------------------------------------------
 @app.route("/manual_npc_update", methods=["GET", "POST"])
-@login_required
 def manual_npc_update():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     Lets the user manually update the NPC's private thoughts or biography with free-form options.
     """
