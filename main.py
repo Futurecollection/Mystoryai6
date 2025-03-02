@@ -1009,6 +1009,8 @@ IMPORTANT:
 3. Leave fields empty if no new information is provided.
 4. When a location change occurs, be explicit about the new location.
 
+# Helper function (moved outside of auto_update_npc_settings_from_narrative)
+@retry_with_backoff(retries=3, backoff_in_seconds=1)
 def extract_details_from_bio(bio_text: str) -> None:
     """
     Use the LLM to extract key details from the character biography text
