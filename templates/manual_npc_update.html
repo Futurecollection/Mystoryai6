@@ -5,71 +5,160 @@
   <i class="bi bi-journal-richtext"></i> NPC Memory & Thoughts Editor
 </h1>
 
-<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h3>
-    <small style="opacity: 0.8;">Represents the character's internal monologue, emotional reactions, and reasoning process</small>
-  </div>
-  <div class="card-body" style="background-color: #3b0b0b;">
-    <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 style="margin-bottom: 0;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h3>
+          <button class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #ff5789;" 
+                  data-bs-toggle="collapse" data-bs-target="#thoughtsCollapse" aria-expanded="true">
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <small style="opacity: 0.8;">The character's internal monologue, emotional reactions, and reasoning process</small>
+      </div>
+      <div class="collapse show" id="thoughtsCollapse">
+        <div class="card-body" style="background-color: #3b0b0b;">
+          <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Biography & Memories</h3>
-    <small style="opacity: 0.8;">Key biographical information, past experiences, and relationship developments</small>
-  </div>
-  <div class="card-body" style="background-color: #3b0b0b;">
-    <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 style="margin-bottom: 0;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Biography & Memories</h3>
+          <button class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #ff5789;" 
+                  data-bs-toggle="collapse" data-bs-target="#bioCollapse" aria-expanded="true">
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <small style="opacity: 0.8;">Key biographical information, past experiences, and relationship developments</small>
+      </div>
+      <div class="collapse show" id="bioCollapse">
+        <div class="card-body" style="background-color: #3b0b0b;">
+          <div class="markdown-content" style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0;"><i class="bi bi-pencil-square"></i> Add New Content</h3>
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 style="margin-bottom: 0;"><i class="bi bi-pencil-square"></i> Update Character Information</h3>
+    </div>
   </div>
-  <div class="card-body">
+  <div class="card-body" style="background-color: #3b0b0b;">
     <form method="POST">
-      <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Select action type:</label>
-        <select name="target" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          <option value="thoughts">Add to Private Thoughts (internal monologue, reactions, feelings)</option>
-          <option value="memories">Add to Biography & Memories (new information, experiences, revelations)</option>
-          <option value="rewrite_bio">Rewrite Complete Biography (incorporate all new information into cohesive text)</option>
-          <option value="reset_bio">Reset Biography (clear and start with minimal format)</option>
-        </select>
-        <small class="text-muted" style="color: #ff9fa3 !important;">
-          <i class="bi bi-info-circle"></i> Choose "Rewrite Complete Biography" to consolidate all accumulated updates into a clean, unified biography.
-        </small>
+      <div class="mb-4">
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 1.1rem;">
+          <i class="bi bi-gear-fill"></i> Choose Update Type:
+        </label>
+        <div class="card mb-3" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
+          <div class="card-body py-2">
+            <select name="target" id="updateTarget" class="form-select" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 1.05rem;">
+              <option value="thoughts">Add to Private Thoughts (internal monologue, reactions, feelings)</option>
+              <option value="memories">Add to Biography & Memories (new information, experiences, revelations)</option>
+              <option value="rewrite_bio">Rewrite Complete Biography (incorporate all information into cohesive text)</option>
+              <option value="reset_bio">Reset Biography (clear and start with minimal format)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="alert alert-info mb-3" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #ff5789;">
+          <i class="bi bi-info-circle-fill"></i> <strong>Action Summary:</strong>
+          <div id="actionDescription" style="margin-top: 5px; font-style: italic;">
+            Add new thoughts to the character's private internal monologue. These represent what they're thinking but not saying.
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Enter new content:</label>
-        <textarea name="new_text" class="form-control" rows="8" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" 
-                  placeholder="For Biography & Memories (use SPECIFIC, CONCRETE details):
-'I grew up in Chicago with my younger brother. Our parents divorced when I was 12, which made me become more independent at a young age. I studied English Literature at Northwestern University and graduated with honors. During college, I worked part-time at a local bookstore where I developed my love for classic literature. After graduation, I moved to New York for my first job in publishing, but moved back to the Midwest after two years because I missed being close to my family.'
-
-For Private Thoughts (introspective, personal):
-'The way they asked about my family caught me off guard. I usually keep those memories to myself - they're precious to me. But something about their genuine interest made me want to share. I wonder if they could tell how much that period of my life meant to me... there's still so much I didn't say.'"></textarea>
+      <div class="mb-4" id="textInputSection">
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 1.1rem;">
+          <i class="bi bi-pencil"></i> <span id="contentLabel">Enter New Thoughts:</span>
+        </label>
+        <div class="card" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
+          <div class="card-body">
+            <textarea name="new_text" id="newContentText" class="form-control" rows="10" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 1.05rem;"></textarea>
+          </div>
+        </div>
       </div>
       
-      <div class="alert alert-info mb-3" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #ff5789;">
-        <i class="bi bi-lightbulb"></i> <strong>Pro Tip:</strong> When updating the biography, focus on adding specific, concrete details about the character's:
-        <ul class="mb-0 mt-2">
-          <li>Past experiences (where they grew up, went to school, previous jobs)</li>
-          <li>Family relationships (siblings, parents, extended family)</li>
-          <li>Formative events (achievements, disappointments, turning points)</li>
-          <li>Skills & interests (hobbies, talents, expertise)</li>
-          <li>Beliefs & values (what matters most to them and why)</li>
-        </ul>
+      <div class="card mb-4" id="tipSection" style="background-color: #2a0808; border: 1px solid #ff5789;">
+        <div class="card-header" style="background-color: #3b0b0b; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 style="margin-bottom: 0;"><i class="bi bi-lightbulb-fill"></i> <span id="tipTitle">Tips for Writing Character Thoughts</span></h5>
+            <button class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #ff5789;" 
+                    data-bs-toggle="collapse" data-bs-target="#tipsCollapse" aria-expanded="true">
+              <i class="bi bi-chevron-down"></i>
+            </button>
+          </div>
+        </div>
+        <div class="collapse show" id="tipsCollapse">
+          <div class="card-body" style="color: #ffd0d0;">
+            <div id="thoughtTips">
+              <p>For effective character thoughts, include:</p>
+              <ul class="mb-0">
+                <li>Raw emotional reactions to recent events</li>
+                <li>Unspoken opinions about the user or situation</li>
+                <li>Inner conflicts or contradictions the character is struggling with</li>
+                <li>Reflections on their developing feelings</li>
+                <li>Fears or insecurities they're hiding</li>
+                <li>Memories triggered by current interactions</li>
+                <li>Questions they're asking themselves</li>
+              </ul>
+            </div>
+            
+            <div id="bioTips" style="display: none;">
+              <p>For detailed biography updates, focus on:</p>
+              <ul class="mb-0">
+                <li>Concrete details about the character's background (hometown, education, career)</li>
+                <li>Family relationships and history</li>
+                <li>Formative life experiences and how they shaped the character</li>
+                <li>Specific hobbies, interests, and skills with details</li>
+                <li>Values and beliefs that define their worldview</li>
+                <li>Past relationships and what they learned from them</li>
+                <li>Goals and aspirations for the future</li>
+              </ul>
+            </div>
+            
+            <div id="rewriteTips" style="display: none;">
+              <p>For a cohesive biography rewrite:</p>
+              <ul class="mb-0">
+                <li>The AI will consolidate all existing information into a well-organized narrative</li>
+                <li>All important character details will be preserved</li>
+                <li>Redundancies will be removed</li>
+                <li>Information will be organized logically</li>
+                <li>The narrative will maintain a consistent voice</li>
+                <li>No new information will be added beyond what's already present</li>
+              </ul>
+            </div>
+            
+            <div id="resetTips" style="display: none;">
+              <p>Warning about biography reset:</p>
+              <ul class="mb-0">
+                <li>This will clear all existing biography information</li>
+                <li>A minimal template will be created with just the character's name and basic details</li>
+                <li>This is useful if you want to start fresh with a new character direction</li>
+                <li>This action cannot be undone</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="d-flex justify-content-between">
-        <button type="submit" class="btn" style="background-color: #ff5789; color: white; font-weight: bold;">
-          <i class="bi bi-plus-circle"></i> Add to Character
+        <button type="submit" class="btn" style="background-color: #ff5789; color: white; font-weight: bold; padding: 10px 24px;">
+          <i class="bi bi-check2-circle"></i> <span id="submitLabel">Update Character Thoughts</span>
         </button>
-        <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
+        <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; padding: 10px 20px;">
           <i class="bi bi-arrow-left"></i> Return to Story
         </a>
       </div>
@@ -77,29 +166,144 @@ For Private Thoughts (introspective, personal):
   </div>
 </div>
 
-<div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h4 style="margin-bottom: 0;"><i class="bi bi-info-circle"></i> How Character Memory Works</h4>
-  </div>
-  <div class="card-body" style="background-color: #3b0b0b;">
-    <div class="mb-3" style="color: #ffd0d0;">
-      <h5><i class="bi bi-journal-text"></i> Biography & Memories:</h5>
-      <ul>
-        <li><strong>Background Information:</strong> Character's history, upbringing, and formative experiences</li>
-        <li><strong>Self-Discovery:</strong> New aspects of personality or past revealed through interactions</li>
-        <li><strong>Relationship Timeline:</strong> Key events and milestones between the NPC and user</li>
-        <li><strong>Learning About User:</strong> Discoveries about the user's life, preferences, and history</li>
-      </ul>
-    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const updateTarget = document.getElementById('updateTarget');
+  const contentLabel = document.getElementById('contentLabel');
+  const submitLabel = document.getElementById('submitLabel');
+  const tipTitle = document.getElementById('tipTitle');
+  const actionDescription = document.getElementById('actionDescription');
+  const textInputSection = document.getElementById('textInputSection');
+  const newContentText = document.getElementById('newContentText');
+  
+  // Tip sections
+  const thoughtTips = document.getElementById('thoughtTips');
+  const bioTips = document.getElementById('bioTips');
+  const rewriteTips = document.getElementById('rewriteTips');
+  const resetTips = document.getElementById('resetTips');
+  
+  // Placeholder examples
+  const thoughtPlaceholder = `The way they looked at me today felt different. There was a warmth in their eyes I haven't seen before, and it made my heart race. I keep trying to act casual, but I'm catching myself thinking about them more and more during the day. 
 
-    <div style="color: #ffd0d0;">
-      <h5><i class="bi bi-lightbulb"></i> Private Thoughts:</h5>
-      <ul>
-        <li><strong>Emotional Processing:</strong> Raw reactions to recent interactions with the user</li>
-        <li><strong>Inner Conflicts:</strong> Personal struggles, hesitations, or excitement not expressed openly</li>
-        <li><strong>Reflections:</strong> Contemplation on evolving feelings and the relationship's development</li>
-        <li><strong>Unspoken Intentions:</strong> Desires or plans the character is considering but hasn't shared</li>
-      </ul>
+I wonder if they can tell how nervous I get sometimes? I've always been good at keeping my composure, but something about them breaks through my usual defenses. When they mentioned their favorite book, I almost revealed how I've read it three times just because they once said they loved it. 
+
+There's so much I want to say, but I'm terrified of moving too fast and scaring them away. Maybe I should be more direct about my feelings? Or would that ruin what we're building? The uncertainty is both exciting and terrifying.`;
+
+  const bioPlaceholder = `I grew up in a small coastal town called Bay Harbor, where my parents ran a local bookstore. Being surrounded by books from an early age, I developed a passion for literature that eventually led me to pursue a degree in English Literature at Berkeley.
+
+During college, I was part of the university's debate team, which helped me overcome my childhood shyness and develop the confidence I often show today. After graduation, I worked for three years at a publishing house in San Francisco before deciding to take a risk and move to the city to pursue my dream of becoming a literary agent.
+
+I have two older sisters who still live in our hometown, and we try to meet for a family reunion at least once a year. My relationship with my parents is close but sometimes complicated - they always wanted me to take over the family bookstore, and there's still some tension around my decision to forge my own path.`;
+
+  updateTarget.addEventListener('change', updateFormDisplay);
+  
+  function updateFormDisplay() {
+    const selectedValue = updateTarget.value;
+    
+    // Hide all tip sections first
+    thoughtTips.style.display = 'none';
+    bioTips.style.display = 'none';
+    rewriteTips.style.display = 'none';
+    resetTips.style.display = 'none';
+    
+    // Show the appropriate section based on selection
+    switch(selectedValue) {
+      case 'thoughts':
+        contentLabel.textContent = 'Enter New Thoughts:';
+        submitLabel.textContent = 'Update Character Thoughts';
+        tipTitle.textContent = 'Tips for Writing Character Thoughts';
+        thoughtTips.style.display = 'block';
+        textInputSection.style.display = 'block';
+        newContentText.placeholder = thoughtPlaceholder;
+        actionDescription.textContent = 'Add new thoughts to the character\'s private internal monologue. These represent what they\'re thinking but not saying.';
+        break;
+      case 'memories':
+        contentLabel.textContent = 'Enter New Biographical Information:';
+        submitLabel.textContent = 'Update Character Biography';
+        tipTitle.textContent = 'Tips for Biographical Details';
+        bioTips.style.display = 'block';
+        textInputSection.style.display = 'block';
+        newContentText.placeholder = bioPlaceholder;
+        actionDescription.textContent = 'Add new information to the character\'s biography. This creates a record of their history and personality traits.';
+        break;
+      case 'rewrite_bio':
+        contentLabel.textContent = 'Enter Additional Instructions (Optional):';
+        submitLabel.textContent = 'Rewrite Complete Biography';
+        tipTitle.textContent = 'About Biography Rewriting';
+        rewriteTips.style.display = 'block';
+        textInputSection.style.display = 'block';
+        newContentText.placeholder = 'Optional: Add any specific instructions for how you want the biography reorganized or presented...';
+        actionDescription.textContent = 'Use AI to rewrite the entire biography into a cohesive narrative, incorporating all existing information.';
+        break;
+      case 'reset_bio':
+        submitLabel.textContent = 'Reset Biography';
+        tipTitle.textContent = 'Warning: Reset Biography';
+        resetTips.style.display = 'block';
+        textInputSection.style.display = 'none';
+        actionDescription.textContent = 'WARNING: This will clear the entire biography and start with a minimal template. Cannot be undone.';
+        break;
+    }
+  }
+  
+  // Initialize form display
+  updateFormDisplay();
+});
+</script>
+
+<div class="row mt-4">
+  <div class="col-md-6">
+    <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <h5 style="margin-bottom: 0;"><i class="bi bi-journal-text"></i> Biography Elements</h5>
+      </div>
+      <div class="card-body" style="background-color: #3b0b0b;">
+        <ul class="list-group list-group-flush" style="background-color: transparent;">
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-person-badge"></i> <strong>Personal History</strong>
+            <div class="small opacity-75">Childhood, family, education, career path</div>
+          </li>
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-stars"></i> <strong>Key Experiences</strong>
+            <div class="small opacity-75">Formative moments that shaped their personality</div>
+          </li>
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-heart"></i> <strong>Relationship Timeline</strong>
+            <div class="small opacity-75">Progress and milestones with the user</div>
+          </li>
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-palette"></i> <strong>Interests & Talents</strong>
+            <div class="small opacity-75">Hobbies, skills, and passions</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <h5 style="margin-bottom: 0;"><i class="bi bi-lightbulb"></i> Private Thought Elements</h5>
+      </div>
+      <div class="card-body" style="background-color: #3b0b0b;">
+        <ul class="list-group list-group-flush" style="background-color: transparent;">
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-emoji-smile"></i> <strong>Raw Emotions</strong>
+            <div class="small opacity-75">Unfiltered feelings about recent interactions</div>
+          </li>
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-arrow-left-right"></i> <strong>Inner Conflicts</strong>
+            <div class="small opacity-75">Personal struggles and contradictions</div>
+          </li>
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-chat-square-text"></i> <strong>Unspoken Thoughts</strong>
+            <div class="small opacity-75">What they think but don't say</div>
+          </li>
+          <li class="list-group-item" style="background-color: #2a0808; color: #ffd0d0; border-color: #6d1d1d;">
+            <i class="bi bi-hourglass-split"></i> <strong>Future Plans</strong>
+            <div class="small opacity-75">Intentions they're considering</div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>

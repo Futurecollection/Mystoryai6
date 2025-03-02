@@ -1006,61 +1006,166 @@ def update_npc_info(form):
 
 ### NPC name, age, gender
 NPC_NAME_OPTIONS = [
+    # Female Names
     "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella",
+    "Madison","Olivia","Ava","Charlotte","Amelia","Lily","Zoe","Hannah","Natalie","Victoria",
+    # Male Names
     "James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew",
+    "Ethan","Andrew","Joshua","Ryan","John","Nathan","Samuel","Jack","Benjamin","Henry",
     "Other"
 ]
-NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
-NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
+NPC_AGE_OPTIONS = ["20","22","24","25","26","28","30","32","35","37","40","42","45"]
+NPC_GENDER_OPTIONS = ["Female","Male"]
 
 ### Additional NPC fields
 HAIR_STYLE_OPTIONS = [
-    "Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut",
-    "Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes","Other"
+    "Short","Medium Length","Long","Pixie Cut","Bob Cut","Wavy","Curly","Straight",
+    "Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut",
+    "Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes",
+    "Dreadlocks","Afro","Mohawk","Buzz Cut","Layered","Shaggy","Beach Waves","Other"
 ]
 BODY_TYPE_OPTIONS = [
-    "Athletic","Muscular","Tall & Broad","Lean & Toned","Average Build","Rugby Build",
-    "Swimmer's Build","Basketball Build","Other"
+    "Athletic","Muscular","Tall & Slim","Petite","Curvy","Voluptuous",
+    "Lean & Toned","Average Build","Rugby Build","Hourglass Figure",
+    "Swimmer's Build","Basketball Build","Slender","Broad-shouldered",
+    "Pear-shaped","Apple-shaped","Model-like","Fit","Other"
 ]
-HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Brown","Grey","Dyed (Blue/Pink/etc)"]
+HAIR_COLOR_OPTIONS = [
+    "Blonde","Platinum Blonde","Strawberry Blonde","Dirty Blonde",
+    "Brunette","Light Brown","Dark Brown","Chestnut Brown","Auburn",
+    "Black","Jet Black","Raven",
+    "Red","Ginger","Copper",
+    "Grey","Silver","White",
+    "Blue (Dyed)","Pink (Dyed)","Purple (Dyed)","Green (Dyed)","Multi-colored (Dyed)"
+]
 NPC_PERSONALITY_OPTIONS = [
-  "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
-  "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive","Other"
+    "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
+    "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive",
+    "Adventurous","Shy","Artistic","Nurturing","Sarcastic","Thoughtful","Analytical","Spontaneous",
+    "Romantic","Competitive","Sensual","Carefree","Determined","Kind-hearted","Bold","Humble",
+    "Funny","Serious","Laid-back","Intense","Other"
 ]
 CLOTHING_OPTIONS = [
-  "Red Summer Dress","Blue T-shirt & Jeans","Black Evening Gown","Green Hoodie & Leggings","White Blouse & Dark Skirt",
-  "Business Attire","Grey Sweater & Jeans","Pink Casual Dress","Suit & Tie","Leather Jacket & Dark Jeans",
-  "Button-up Shirt & Chinos","Tank Top & Shorts","Polo & Khakis","Athletic Wear","Blazer & Fitted Pants",
-  "Denim Jacket & White Tee","Other"
+  # Female Clothing
+  "Red Summer Dress","Black Evening Gown","Green Hoodie & Leggings","White Blouse & Dark Skirt",
+  "Business Suit (Female)","Grey Sweater & Jeans","Pink Casual Dress","Leather Jacket & Dark Jeans",
+  "Tank Top & Shorts","Athleisure Wear","Blazer & Fitted Pants","Denim Jacket & White Tee",
+  "Yoga Pants & Tank Top","Maxi Dress","Mini Skirt & Blouse","Jumpsuit","Romper","Crop Top & High-waisted Jeans",
+  "Sundress","Cocktail Dress","Pencil Skirt & Blouse","Floral Print Dress","Off-shoulder Top & Jeans",
+  
+  # Male Clothing
+  "Blue T-shirt & Jeans","Business Suit (Male)","Suit & Tie","Button-up Shirt & Chinos","Polo & Khakis",
+  "Athletic Wear","Blazer & Jeans","Sweater & Dress Pants","Henley & Jeans","Graphic Tee & Cargo Shorts",
+  "Denim Shirt & Black Jeans","Hoodie & Sweatpants","Flannel Shirt & Jeans","Bomber Jacket & T-shirt",
+  "Tuxedo","Casual Linen Shirt & Shorts","Leather Jacket & Slim Fit Jeans","Hawaiian Shirt & Khakis",
+  
+  # Unisex
+  "Military-inspired Outfit","Vintage Style Clothing","Bohemian Style","Formal Business Attire",
+  "Casual Friday Look","Weekend Casual","Smart Casual","Loungewear","Festival Outfit","Other"
 ]
 OCCUPATION_OPTIONS = [
-  "College Student","School Teacher","Librarian","Office Worker","Freelance Artist","Bartender",
-  "Travel Blogger","Ex-Military","Nurse","Startup Founder","CEO","Investment Banker","Professional Athlete",
-  "Doctor","Firefighter","Police Detective","Personal Trainer","Musician","Chef","Architect","Tech Executive",
-  "Business Consultant","Other"
+  # Academic/Education
+  "College Student","School Teacher","University Professor","Education Administrator","Tutor",
+  
+  # Healthcare
+  "Nurse","Doctor","Surgeon","Therapist","Psychiatrist","Dentist","Veterinarian","Pharmacist",
+  
+  # Business/Finance
+  "Office Worker","Startup Founder","CEO","Investment Banker","Financial Analyst","Accountant",
+  "Marketing Executive","HR Manager","Business Consultant","Sales Director","Entrepreneur",
+  
+  # Creative
+  "Freelance Artist","Musician","Writer","Photographer","Fashion Designer","Graphic Designer",
+  "Interior Designer","Filmmaker","Actor/Actress","Dancer","Chef","Architect",
+  
+  # Tech
+  "Software Engineer","UX Designer","Data Scientist","Tech Executive","IT Specialist",
+  "Game Developer","Cybersecurity Expert","Web Developer","AI Researcher",
+  
+  # Service Industry
+  "Bartender","Barista","Flight Attendant","Hotel Manager","Restaurant Owner","Sommelier",
+  "Event Planner","Personal Stylist","Travel Agent",
+  
+  # Other Professional
+  "Lawyer","Journalist","Real Estate Agent","Pilot","Police Detective","Firefighter",
+  "Personal Trainer","Yoga Instructor","Professional Athlete","Political Aide",
+  "Museum Curator","Wildlife Conservationist","Travel Blogger","Ex-Military","Other"
 ]
 CURRENT_SITUATION_OPTIONS = [
-  "Recently Broke Up","Recovering from Divorce","Single & Looking","New in Town","Trying Online Dating","Hobby Enthusiast","Other"
+  "Recently Broke Up","Recovering from Divorce","Single & Looking","New in Town","Trying Online Dating",
+  "Taking a Break from Dating","Career Transition","Just Got Promoted","Recently Graduated",
+  "Moving Soon","Starting New Job","Taking a Sabbatical","Long-term Single","Newly Independent",
+  "Healing from Past Relationship","Recently Moved","Life Crossroads","Pursuing Passion Project",
+  "Fresh Start After Life Change","Exploring New Social Circles","Hobby Enthusiast","Other"
 ]
 ENVIRONMENT_OPTIONS = [
-  "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge","Music Festival","Restaurant","Mountain Resort"
+  # Urban
+  "Cafe","Cozy Bookstore Cafe","Upscale Restaurant","Casual Diner","Rooftop Bar","Wine Bar",
+  "Nightclub","Art Gallery Opening","Museum","Theater Lobby","Concert Venue","Jazz Club",
+  "Local Pub","Office Building Elevator","Subway/Metro","City Park","Farmers Market",
+  "Shopping Mall","Boutique Store","Food Festival","Street Fair","Coffee Shop",
+  
+  # Sports/Fitness
+  "Gym","Yoga Studio","Rock Climbing Center","Tennis Court","Golf Course","Running Trail",
+  "Swimming Pool","Beach Volleyball Court","Ski Resort Lodge","Hiking Trail",
+  
+  # Nature/Outdoors
+  "Beach","Park","Lake Shore","Mountain Resort","Scenic Overlook","Botanical Garden",
+  "Forest Trail","Campsite","Countryside B&B","Island Getaway",
+  
+  # Travel/Transportation
+  "Airport Lounge","First Class Cabin","Train Compartment","Cruise Ship Deck",
+  "Hotel Lobby","Resort Pool","Vacation Rental",
+  
+  # Events
+  "Music Festival","Wedding Reception","Charity Gala","Award Ceremony","Class Reunion",
+  "Conference","Workshop","Speed Dating Event","Company Party","Other"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-  "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
+  "First Date","Second Date","Blind Date","Accidental Meeting","Haven't Met Yet",
+  "Friend's Introduction","Dating App Match","Colleagues","Classmates","Neighbors",
+  "Childhood Friends Reconnecting","Ex-Lovers Reunited","Shared Hobby Group",
+  "Seated Together by Chance","Asked for Directions","Both Reached for Same Item",
+  "Group Activity","Work-related Encounter","Professional Consultation",
+  "Regular at Their Business","Party Meeting","Chance Encounter While Traveling",
+  "Mutual Friend's Event","Stuck Together (Elevator, Storm, etc.)","Other"
 ]
 ETHNICITY_OPTIONS = [
-    "American (Black)","American (White)","Hispanic","Australian",
-    "British","Irish","Scottish","Welsh","French","German","Dutch","Danish","Norwegian","Swedish",
-    "Italian","Greek","Spanish","Portuguese","Russian","Ukrainian","Polish","Czech","Slovak","Croatian","Serbian",
-    "Chinese","Japanese","Korean","Vietnamese","Thai","Indian","Pakistani","Filipino",
-    "Brazilian","Turkish","Middle Eastern","Other"
+    # North America
+    "American (Black)","American (White)","African American","Hispanic/Latino","Mexican American",
+    "Native American","Canadian","Caribbean",
+    
+    # Europe
+    "British","Irish","Scottish","Welsh","French","German","Italian","Spanish","Portuguese",
+    "Dutch","Belgian","Danish","Norwegian","Swedish","Finnish","Swiss","Austrian",
+    "Greek","Polish","Russian","Ukrainian","Czech","Hungarian","Romanian","Balkan",
+    
+    # Asia
+    "Chinese","Japanese","Korean","Vietnamese","Thai","Filipino","Malaysian","Indonesian",
+    "Indian","Pakistani","Bangladeshi","Sri Lankan","Nepali","Middle Eastern","Turkish",
+    "Israeli","Lebanese","Persian/Iranian","Arab",
+    
+    # Africa
+    "North African","West African","East African","South African","Ethiopian","Egyptian","Moroccan",
+    "Nigerian","Kenyan","Ghanaian",
+    
+    # Oceania
+    "Australian","New Zealander","Pacific Islander",
+    
+    # Latin America
+    "Brazilian","Argentinian","Colombian","Venezuelan","Chilean","Peruvian","Mexican",
+    
+    # Mixed
+    "Mixed European","Mixed Asian","Mixed African","Mixed Race","Multiethnic","Other"
 ]
 
 NPC_SEXUAL_ORIENTATION_OPTIONS = [
-    "Straight","Bisexual","Gay/Lesbian","Pansexual","Asexual","Questioning","Other"
+    "Straight","Bisexual","Gay/Lesbian","Pansexual","Asexual","Questioning","Demisexual","Fluid","Other"
 ]
 NPC_RELATIONSHIP_GOAL_OPTIONS = [
-    "Casual Dating","Serious Relationship","Open Relationship","Monogamous Dating","Friends with Benefits","Not Sure","Other"
+    "Casual Dating","Serious Relationship","Long-term Relationship","Marriage-minded",
+    "Open Relationship","Monogamous Dating","Friends with Benefits","Taking Things Slow",
+    "Exploring Options","Looking for Connection","Not Sure","Other"
 ]
 
 # --------------------------------------------------------------------------
