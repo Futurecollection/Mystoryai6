@@ -52,7 +52,7 @@
         </div>
         <div>
           <span class="badge rounded-pill" style="background-color: #5f1c1c; color: #f8d0d0;">
-            Stage: {{ stage_desc|truncate(50) }}
+            Stage {{ current_stage }}: Relationship Level
           </span>
         </div>
       </div>
@@ -377,7 +377,10 @@
       <strong>Age:</strong> {{ session.get('npc_age', '?') }}
     </p>
     <p style="color: #ffd0d0; margin-bottom: 5px;">
-      <strong>Relationship Status:</strong> Stage {{ current_stage }} - {{ stage_desc }}
+      <strong>Relationship Status:</strong> Stage {{ current_stage }}
+    </p>
+    <p style="color: #ffd0d0; margin-bottom: 10px; font-style: italic; font-size: 0.95rem;">
+      <strong>Stage Description:</strong> {{ stage_desc }}
     </p>
     <p style="color: #ffd0d0; margin-bottom: 5px;">
       <strong>Current Stats:</strong>
