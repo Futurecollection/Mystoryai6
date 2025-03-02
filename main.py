@@ -614,9 +614,35 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     prev_thoughts = session.get("npcPrivateThoughts", "(none)")
     prev_memories = session.get("npcBehavior", "(none)")
 
+    # Handle traditional OOC and implicit narrative directions
     if not last_user_action.strip():
-        last_user_action = "OOC: Continue the scene"
-
+        last_user_action = "Continue the scene"
+    
+    # Check for explicit OOC commands but also detect implicit narrative directions
+    is_ooc = last_user_action.strip().lower().startswith("ooc:")
+    has_narrative_direction = False
+    
+    # Look for patterns that indicate narrative directions without OOC prefix
+    narrative_patterns = [
+        "*focus on the scene*", "*let our connection deepen*", "*gaze into their eyes*",
+        "move closer", "*move closer*", "setting", "dialogue", "describe",
+        "*focus on*", "tell me more about"
+    ]
+    
+    for pattern in narrative_patterns:
+        if pattern.lower() in last_user_action.lower():
+            has_narrative_direction = True
+            break
+    
+    # If this contains narrative direction but isn't explicitly OOC, 
+    # interpret it naturally as part of the scene
+    
+    # Remove the OOC prefix for processing if present
+    if is_ooc:
+        last_user_action_clean = last_user_action[4:].strip()
+    else:
+        last_user_action_clean = last_user_action
+    
     stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
 
@@ -643,21 +669,32 @@ SPECIAL INSTRUCTIONS:
    - The NPC can return to earlier topics or questions later in natural ways
    - Vary between questions, statements, observations, and emotional expressions
 
-2) For OOC (Out of Character) interactions:
+2) For implicit narrative directions:
+   - User may express guidance through natural actions like "*focus on the surroundings*"
+   - When user requests more details about something, provide those details naturally
+   - If user moves conversation in a particular direction, follow their lead
+   - When user asks character to elaborate on something, have character do so naturally
+   - These shouldn't break immersion - respond in a way that maintains the scene's flow
+
+3) For explicit OOC (Out of Character) interactions:
    - If the user's message starts with "OOC:", this is a meta-interaction
    - For questions (e.g. "OOC: What happened earlier?"), respond directly as the narrator with relevant information
    - For instructions (e.g. "OOC: Make her more flirty"), adjust the scene accordingly
    - For clarifications (e.g. "OOC: Can you explain her motivation?"), provide context as the narrator
    - Begin OOC responses with "[Narrator:" and end with "]" to distinguish them
 
-3) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
+4) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
    (e.g., 😛) rather than describing them in words.
 
-4) BIOGRAPHY UPDATES - IMPORTANT:
+5) BIOGRAPHY UPDATES - IMPORTANT:
    - After each interaction, update the character's biography with ANY specific new information that was revealed
    - This includes things like personal background, interests, education, family details, career information, etc.
    - Be specific and concrete in these updates - don't just say "they shared more about themselves"
    - Example good updates: "She revealed she studied English literature at Boston University" or "He mentioned growing up with three siblings in a small town outside Seattle"
+
+Special Context Notes:
+- Is Explicit OOC Command: {is_ooc}
+- Has Implicit Narrative Direction: {has_narrative_direction}
 
 Relationship Stage={current_stage} ({stage_desc})
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
