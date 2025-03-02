@@ -78,9 +78,9 @@
           {% set parts = npc_narration.split('\n\n') %}
           {% for part in parts %}
             {% if '*' in part %}
-              <div style="margin-bottom: 1rem; color: #ff9fa3; font-style: italic; font-size: 1.2rem;">{{ part }}</div>
+              <div style="margin-bottom: 0.5rem; color: #ff9fa3; font-style: italic; font-size: 1.3rem;">{{ part }}</div>
             {% else %}
-              <div style="margin-bottom: 1rem; color: #f8d0d0; font-size: 1.2rem;">{{ part }}</div>
+              <div style="margin-bottom: 0.5rem; color: #f8d0d0; font-size: 1.3rem;">{{ part }}</div>
             {% endif %}
           {% endfor %}
         {% else %}
@@ -174,27 +174,19 @@
 
       <!-- Model Selection -->
       <div class="row mb-3">
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="form-check">
             <input class="form-check-input" type="radio" name="model_type" id="model_type_flux" value="flux" {% if last_model_choice == 'flux' %}checked{% endif %} onchange="toggleVisibilityForModel('flux')">
             <label class="form-check-label" for="model_type_flux" style="color: #f8d0d0;">
-              Flux (Fast, Photorealistic)
+              Fast Photorealistic Portraits
             </label>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="form-check">
             <input class="form-check-input" type="radio" name="model_type" id="model_type_pony" value="pony" {% if last_model_choice == 'pony' %}checked{% endif %} onchange="toggleVisibilityForModel('pony')">
             <label class="form-check-label" for="model_type_pony" style="color: #f8d0d0;">
-              Pony (NSFW capable)
-            </label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="model_type" id="model_type_realistic" value="realistic" {% if last_model_choice == 'realistic' %}checked{% endif %} onchange="toggleVisibilityForModel('realistic')">
-            <label class="form-check-label" for="model_type_realistic" style="color: #f8d0d0;">
-              Realistic Vision
+              Detailed NSFW-capable Images
             </label>
           </div>
         </div>
@@ -482,28 +474,16 @@ function toggleAdvancedSettings() {
 function toggleVisibilityForModel(model) {
   var stepsDiv = document.getElementById('steps_div');
   var ponyDiv = document.getElementById('pony_div');
-  var realisticDiv = document.getElementById('realistic_scheduler_div');
 
-  // Steps range visible only if pony or realistic
-  if (model === 'pony' || model === 'realistic') {
+  // Steps range visible only if pony
+  if (model === 'pony') {
     stepsDiv.style.display = 'block';
-  } else {
-    stepsDiv.style.display = 'none';
-  }
-
-  // Pony options only if model === 'pony'
-  if (model === 'pony') {    ponyDiv.style.display = 'block';
-    realisticDiv.style.display = 'none';
+    ponyDiv.style.display = 'block';
   } 
-  // Realistic only if model === 'realistic'
-  else if (model === 'realistic') {
-    ponyDiv.style.display = 'none';
-    realisticDiv.style.display = 'block';
-  }
   // Flux (or anything else)
   else {
+    stepsDiv.style.display = 'none';
     ponyDiv.style.display = 'none';
-    realisticDiv.style.display = 'none';
   }
 }
 
