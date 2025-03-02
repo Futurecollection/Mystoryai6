@@ -830,9 +830,12 @@ def auto_update_npc_settings_from_narrative(narration_text: str, memory_text: st
     npc_name = session.get('npc_name', 'Unknown')
     current_env = session.get('environment', '')
     current_clothing = session.get('npc_clothing', '')
-    current_hair = f"{session.get('npc_hair_color', '')} {session.get('npc_hair_style', '')}"
+    current_hair_color = session.get('npc_hair_color', '')
+    current_hair_style = session.get('npc_hair_style', '')
     current_personality = session.get('npc_personality', '')
     current_situation = session.get('npc_current_situation', '')
+    current_scene = session.get('current_scene', '')
+    current_mood = session.get('npc_mood', 'Neutral')
     
     # Create prompt for LLM
     prompt = f"""
@@ -843,9 +846,12 @@ Current character info:
 - Name: {npc_name}
 - Current Environment/Location: {current_env}
 - Current Clothing: {current_clothing}
-- Current Hair: {current_hair}
+- Current Hair Color: {current_hair_color}
+- Current Hair Style: {current_hair_style}
 - Personality: {current_personality}
-- Current Situation: {current_situation}
+- Current Life Situation (broad life circumstances): {current_situation}
+- Current Scene (immediate situation): {current_scene}
+- Current Mood: {current_mood}
 
 TEXT TO ANALYZE:
 Narrative: {narration_text}
@@ -857,14 +863,25 @@ IMPORTANT:
 3. Leave fields empty if no new information is provided.
 4. When a location change occurs, be explicit about the new location.
 5. When clothing changes, describe the complete new outfit.
+6. Hair COLOR must be a color name only (like "blonde", "brown", "red", etc.) - NOT actions or conditions.
+7. Hair STYLE describes the cut/style (like "long", "curly", "pulled back", etc.)
+8. PERSONALITY should RARELY be updated - only if a fundamental personality change is described.
+9. MOOD should be updated to reflect current emotional state (happy, sad, nervous, etc.)
+10. Current Life Situation should reflect broader life circumstances, not scene-specific situations.
+11. Current Scene should describe the immediate situation/activity happening in the current scene.
 
 Return ONLY this JSON format with no additional text:
 {{
   "environment_update": "", 
   "clothing_update": "",
-  "hair_update": "",
+  "hair_color_update": "",
+  "hair_style_update": "",
   "personality_update": "",
-  "current_situation_update": ""
+  "current_life_situation_update": "",
+  "current_scene_update": "",
+  "mood_update": "",
+  "time_of_day": "",
+  "weather": ""
 }}
 """
 
@@ -911,21 +928,23 @@ Return ONLY this JSON format with no additional text:
                     log_message(f"[AUTO-UPDATE] Clothing changed to: {new_clothing}")
                     has_updates = True
             
-            # Hair update  
-            if updates.get("hair_update") and updates["hair_update"].strip():
-                new_hair = updates["hair_update"].strip()
-                # Try to separate color and style if possible
-                if " " in new_hair:
-                    parts = new_hair.split(" ", 1)
-                    session["npc_hair_color"] = parts[0]
-                    session["npc_hair_style"] = parts[1]
-                else:
-                    # If we can't separate, treat as style
-                    session["npc_hair_style"] = new_hair
-                log_message(f"[AUTO-UPDATE] Hair changed to: {new_hair}")
-                has_updates = True
+            # Hair color update  
+            if updates.get("hair_color_update") and updates["hair_color_update"].strip():
+                new_hair_color = updates["hair_color_update"].strip()
+                if new_hair_color != current_hair_color:
+                    session["npc_hair_color"] = new_hair_color
+                    log_message(f"[AUTO-UPDATE] Hair color changed to: {new_hair_color}")
+                    has_updates = True
             
-            # Personality update
+            # Hair style update  
+            if updates.get("hair_style_update") and updates["hair_style_update"].strip():
+                new_hair_style = updates["hair_style_update"].strip()
+                if new_hair_style != current_hair_style:
+                    session["npc_hair_style"] = new_hair_style
+                    log_message(f"[AUTO-UPDATE] Hair style changed to: {new_hair_style}")
+                    has_updates = True
+            
+            # Personality update - should be rare
             if updates.get("personality_update") and updates["personality_update"].strip():
                 new_personality = updates["personality_update"].strip()
                 if new_personality != current_personality:
@@ -933,25 +952,37 @@ Return ONLY this JSON format with no additional text:
                     log_message(f"[AUTO-UPDATE] Personality updated to: {new_personality}")
                     has_updates = True
             
-            # Current situation update
-            if updates.get("current_situation_update") and updates["current_situation_update"].strip():
-                new_situation = updates["current_situation_update"].strip()
+            # Current life situation update (broad circumstances)
+            if updates.get("current_life_situation_update") and updates["current_life_situation_update"].strip():
+                new_situation = updates["current_life_situation_update"].strip()
                 if new_situation != current_situation:
                     session["npc_current_situation"] = new_situation
-                    log_message(f"[AUTO-UPDATE] Current situation updated to: {new_situation}")
+                    log_message(f"[AUTO-UPDATE] Current life situation updated to: {new_situation}")
                     has_updates = True
             
-            # Look for time of day and weather indicators
-            if "time_of_day" in updates and updates["time_of_day"]:
-                session["time_of_day"] = updates["time_of_day"]
+            # Current scene update (immediate situation)
+            if updates.get("current_scene_update") and updates["current_scene_update"].strip():
+                new_scene = updates["current_scene_update"].strip()
+                if new_scene != current_scene:
+                    session["current_scene"] = new_scene
+                    log_message(f"[AUTO-UPDATE] Current scene updated to: {new_scene}")
+                    has_updates = True
+            
+            # Mood update
+            if updates.get("mood_update") and updates["mood_update"].strip():
+                new_mood = updates["mood_update"].strip()
+                if new_mood != current_mood:
+                    session["npc_mood"] = new_mood
+                    log_message(f"[AUTO-UPDATE] Mood updated to: {new_mood}")
+                    has_updates = True
+            
+            # Other scene attributes
+            if updates.get("time_of_day") and updates["time_of_day"].strip():
+                session["time_of_day"] = updates["time_of_day"].strip()
                 has_updates = True
                 
-            if "weather" in updates and updates["weather"]:
-                session["weather"] = updates["weather"]
-                has_updates = True
-                
-            if "scene_mood" in updates and updates["scene_mood"]:
-                session["scene_mood"] = updates["scene_mood"]
+            if updates.get("weather") and updates["weather"].strip():
+                session["weather"] = updates["weather"].strip()
                 has_updates = True
                 
             if has_updates:
@@ -1186,6 +1217,14 @@ def update_npc_info(form):
     session["npc_backstory"] = form.get("npc_backstory", "").strip()
     session["environment"] = merge_dd(form, "environment", "environment_custom")
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
+    
+    # Handle current scene (immediate situation)
+    if "current_scene" in form:
+        session["current_scene"] = form.get("current_scene", "").strip()
+        
+    # Handle NPC's current mood 
+    if "npc_mood" in form:
+        session["npc_mood"] = form.get("npc_mood", "Neutral").strip()
     
     # Additional scene state fields
     scene_state_fields = ["time_of_day", "weather", "scene_mood", "scene_notes"]

@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -171,7 +170,7 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not rg_in_list %}{{ session['npc_relationship_goal'] }}{% endif %}">
               </div>
-              
+
               <!-- Occupation -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Occupation</label>
@@ -213,32 +212,53 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not pers_in_list %}{{ session['npc_personality'] }}{% endif %}">
               </div>
-              
-              <!-- Current Situation -->
+
+              <!-- Current Life Situation (broader life circumstances) -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Life Situation</label>
+                <small class="d-block text-muted mb-1" style="color: #ffd0d0 !important; opacity: 0.7;">Broader life circumstances</small>
                 <select class="form-select mb-1" name="npc_current_situation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   <option value="">--Select--</option>
-                  {% for cs in current_situation_options %}
-                    {% if cs == session['npc_current_situation'] %}
-                      <option value="{{ cs }}" selected>{{ cs }}</option>
+                  {% for sit in current_situation_options %}
+                    {% if sit == session['npc_current_situation'] %}
+                      <option value="{{ sit }}" selected>{{ sit }}</option>
                     {% else %}
-                      <option value="{{ cs }}">{{ cs }}</option>
+                      <option value="{{ sit }}">{{ sit }}</option>
                     {% endif %}
                   {% endfor %}
                 </select>
-                {% set cs_in_list = session['npc_current_situation'] in current_situation_options %}
+                {% set sit_in_list = session['npc_current_situation'] in current_situation_options %}
                 <label style="color: #f8d0d0;">Or custom:</label>
                 <input type="text" class="form-control"
                       name="npc_current_situation_custom"
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
-                      value="{% if not cs_in_list %}{{ session['npc_current_situation'] }}{% endif %}">
+                      value="{% if not sit_in_list %}{{ session['npc_current_situation'] }}{% endif %}">
+              </div>
+
+              <!-- Current Scene (immediate situation) -->
+              <div class="col-md-6">
+                <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Scene</label>
+                <small class="d-block text-muted mb-1" style="color: #ffd0d0 !important; opacity: 0.7;">The immediate situation/activity</small>
+                <input type="text" class="form-control"
+                      name="current_scene"
+                      style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
+                      value="{{ session.get('current_scene', '') }}">
+              </div>
+
+              <!-- Current Mood -->
+              <div class="col-md-6">
+                <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Mood</label>
+                <small class="d-block text-muted mb-1" style="color: #ffd0d0 !important; opacity: 0.7;">Emotional state</small>
+                <input type="text" class="form-control"
+                      name="npc_mood"
+                      style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
+                      value="{{ session.get('npc_mood', 'Neutral') }}">
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Appearance Tab -->
       <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
         <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
@@ -264,7 +284,7 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not bt_in_list %}{{ session['npc_body_type'] }}{% endif %}">
               </div>
-              
+
               <!-- Hair Color -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Hair Color</label>
@@ -285,7 +305,7 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not hc_in_list %}{{ session['npc_hair_color'] }}{% endif %}">
               </div>
-              
+
               <!-- Hair Style -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Hair Style</label>
@@ -306,7 +326,7 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not hs_in_list %}{{ session['npc_hair_style'] }}{% endif %}">
               </div>
-              
+
               <!-- Clothing -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Outfit</label>
@@ -331,7 +351,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Current Scene Tab -->
       <div class="tab-pane fade" id="scene" role="tabpanel" aria-labelledby="scene-tab">
         <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
@@ -357,7 +377,7 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not env_in_list %}{{ session['environment'] }}{% endif %}">
               </div>
-              
+
               <!-- Encounter Context -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Interaction</label>
@@ -378,7 +398,7 @@
                       style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                       value="{% if not ec_in_list %}{{ session['encounter_context'] }}{% endif %}">
               </div>
-              
+
               <!-- Time of Day / Lighting -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Time of Day</label>
@@ -392,7 +412,7 @@
                   <option value="Dusk" {% if session.get('time_of_day') == 'Dusk' %}selected{% endif %}>Dusk</option>
                 </select>
               </div>
-              
+
               <!-- Weather (if applicable) -->
               <div class="col-md-6">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Weather (if applicable)</label>
@@ -409,7 +429,7 @@
                   <option value="Cold" {% if session.get('weather') == 'Cold' %}selected{% endif %}>Cold</option>
                 </select>
               </div>
-              
+
               <!-- Mood/Atmosphere of Scene -->
               <div class="col-md-12">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Scene Mood/Atmosphere</label>
@@ -426,7 +446,7 @@
                   <option value="Melancholic" {% if session.get('scene_mood') == 'Melancholic' %}selected{% endif %}>Melancholic</option>
                 </select>
               </div>
-              
+
               <!-- Additional Scene Notes -->
               <div class="col-md-12">
                 <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Additional Scene Notes</label>
@@ -476,7 +496,7 @@
       var triggerTabList = [].slice.call(document.querySelectorAll('#characterTabs button'));
       triggerTabList.forEach(function(triggerEl) {
         var tabTrigger = new bootstrap.Tab(triggerEl);
-        
+
         triggerEl.addEventListener('click', function(event) {
           event.preventDefault();
           tabTrigger.show();
@@ -487,7 +507,7 @@
       // Basic fallback if Bootstrap JS isn't loaded
       const tabButtons = document.querySelectorAll('#characterTabs button');
       const tabPanes = document.querySelectorAll('.tab-pane');
-      
+
       tabButtons.forEach(button => {
         button.addEventListener('click', function() {
           // Remove active class from all buttons and panes
@@ -495,10 +515,10 @@
           tabPanes.forEach(p => {
             p.classList.remove('show', 'active');
           });
-          
+
           // Add active class to clicked button
           this.classList.add('active');
-          
+
           // Show the corresponding pane
           const targetId = this.getAttribute('data-bs-target').substring(1);
           const targetPane = document.getElementById(targetId);

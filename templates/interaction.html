@@ -17,8 +17,6 @@
         <div class="d-flex flex-column flex-md-row gap-2">
           <span class="badge bg-danger">Affection: {{ affection_score|round(1) }}</span>
           <span class="badge bg-info">Stage: {{ current_stage }}</span>
-          <span class="badge bg-warning">Trust: {{ trust_score|round(1) }}</span>
-          <span class="badge bg-success">Mood: {{ npc_mood }}</span>
         </div>
         <div class="mt-2 small text-light">
           <strong>Current Stage:</strong> {{ stage_unlocks.get(current_stage, "Unknown stage") }}
@@ -380,20 +378,17 @@
       <strong>Relationship Status:</strong> Stage {{ current_stage }}
     </p>
     <p style="color: #ffd0d0; margin-bottom: 10px; font-style: italic; font-size: 0.95rem;">
-      <strong>Stage Description:</strong> {{ stage_unlocks.get(current_stage, "Unknown stage") }}
+      <strong>Stage Description:</strong> {{ stage_desc }}
+    </p>
+    <p style="color: #ffd0d0; margin-bottom: 5px;">
+      <strong>Current Mood:</strong> {{ npc_mood }}
+    </p>
+    <p style="color: #ffd0d0; margin-bottom: 5px;">
+      <strong>Current Scene:</strong> {{ session.get('current_scene', 'Not specified') }}
     </p>
     <p style="color: #ffd0d0; margin-bottom: 5px;">
       <strong>Current Stats:</strong>
       <span class="badge bg-danger"><i class="bi bi-heart-fill"></i> Affection: {{ "%.1f"|format(affection_score) }}</span>
-      <span class="badge bg-primary"><i class="bi bi-shield-fill"></i> Trust: {{ "%.1f"|format(trust_score) }}</span>
-      <span class="badge" style="background-color: {{ 
-        '#198754' if npc_mood == 'Happy' else 
-        '#0d6efd' if npc_mood == 'Neutral' else 
-        '#ffc107' if npc_mood == 'Anxious' else 
-        '#dc3545' 
-      }};">
-        <i class="bi bi-emoji-smile-fill"></i> Mood: {{ npc_mood }}
-      </span>
     </p>
 
     <!-- Scene/Environment Info -->
