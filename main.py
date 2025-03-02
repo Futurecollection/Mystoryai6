@@ -128,37 +128,6 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
 
-def deduplicate_text_sections(text: str, section_marker: str = "###", max_sections: int = 5) -> str:
-    """
-    Prevents excessive repetition in text by keeping only a limited number of sections.
-    Args:
-        text: The text containing multiple sections
-        section_marker: String that marks the beginning of each section
-        max_sections: Maximum number of sections to keep
-    Returns:
-        Deduplicated text with only the most recent sections
-    """
-    sections = text.split(section_marker)
-    
-    # If we have a header section without the marker (first item), keep it
-    if sections and not sections[0].strip():
-        sections.pop(0)  # Remove empty first section if present
-        
-    # If we don't have more sections than max, just return the original
-    if len(sections) <= max_sections:
-        return text
-        
-    # Keep the header (if there is one) and the most recent sections
-    if sections[0].strip() and not any(marker in sections[0] for marker in ["###", "##", "#"]):
-        # First section is a header without markers
-        header = sections[0]
-        retained_sections = [header] + [section_marker + s for s in sections[-(max_sections-1):]]
-    else:
-        # No special header, just keep the most recent sections
-        retained_sections = [section_marker + s for s in sections[-max_sections:]]
-        
-    return "".join(retained_sections)
-
 def _save_image(result):
     if isinstance(result, dict) and "output" in result:
         final_url = result["output"]
@@ -693,13 +662,6 @@ NARRATION: {narration}
 EXISTING BIOGRAPHICAL ELEMENTS TO BUILD UPON:
 {prev_memories[:800] if len(prev_memories) > 20 else "Limited existing information - expand significantly"}
 
-CRITICAL REQUIREMENTS:
-1. AVOID REPETITION: Do NOT repeat information already in the existing biography above.
-2. FOCUS ON NEW REVELATIONS: Only add information revealed during the current interaction.
-3. BE SPECIFIC: Add concrete details rather than general statements.
-4. MAINTAIN CONSISTENCY: New information must align with established personality and background.
-5. PRIORITIZE UNIQUENESS: If unable to add meaningful new information, state "NO MEMORY UPDATE NEEDED."
-
 Be extremely specific and detailed. Create vivid, concrete elements that make {npc_name} feel like a real person with a rich life history.
 """
     
@@ -890,62 +852,36 @@ MEMORY_UPDATE: (System Error)
     # Format the date/time for better context
     timestamp = time.strftime("%b %d, %I:%M %p")
 
-    # For private thoughts, limit to last 3 entries to prevent excessive repetition
+    # Append new private thoughts with timestamp and formatting
     if existing_thoughts.strip().lower() == "(none)":
         updated_thoughts = f"### {timestamp}\n{thoughts_txt}"
     else:
-        # Split existing thoughts by timestamps
-        thought_sections = existing_thoughts.split("### ")
-        # Keep the first intro part (if any) and last 2 thoughts to avoid clutter
-        if len(thought_sections) > 3:
-            # Join with the new thought
-            retained_thoughts = thought_sections[0] + "### " + "### ".join(thought_sections[-2:])
-            updated_thoughts = f"{retained_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
-        else:
-            updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
+        updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
 
-    # Handle memory updates while preventing repetition
+    # Always update biography with any new information
     memory_txt_lower = memory_txt.strip().lower()
     if memory_txt_lower and not (memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower):
         # Significant update - integrate into biography
         if existing_memories.strip().lower() == "(none)":
             updated_memories = build_initial_npc_memory() + f"\n\n## New Information\n### {timestamp}\n{memory_txt}"
         else:
-            # Check if content is substantially different from recent updates
-            # Simple approach: check if any 30-char sequence from new memory is in the last section
-            is_repetitive = False
-            
-            # Get the last memory section if possible
-            memory_sections = existing_memories.split("###")
-            if len(memory_sections) > 1:
-                last_section = memory_sections[-1].lower()
-                # Create chunks from new memory to check for repetition
-                if len(memory_txt) > 30:
-                    for i in range(len(memory_txt) - 30):
-                        chunk = memory_txt[i:i+30].lower()
-                        if chunk in last_section:
-                            is_repetitive = True
-                            break
-            
+            # Simpler, more flexible approach without rigid sections
             if memory_txt.strip().startswith('#'):
                 # This is a complete biography replacement
                 updated_memories = memory_txt
-            elif is_repetitive:
-                # Skip this update if it's too similar to recent content
-                updated_memories = existing_memories
             else:
-                # Add new information with timestamp
+                # Simply add the new information with a timestamp
                 updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
                 
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
             
             # If the biography is getting very long, consider summarizing older parts
-            if len(updated_memories) > 8000:  # If biography exceeds 8K characters (reduced from 12K)
+            if len(updated_memories) > 12000:  # If biography exceeds 12K characters
                 parts = updated_memories.split("## ")
                 if len(parts) > 3:  # If we have multiple sections
-                    # Keep the first part (intro) and the last two sections only
-                    compact_bio = parts[0] + "## " + "## ".join(parts[-2:])
+                    # Keep the first part (intro) and the last three sections
+                    compact_bio = parts[0] + "## " + "## ".join(parts[-3:])
                     updated_memories = compact_bio
     else:
         # No specific memory update, keep existing memories
