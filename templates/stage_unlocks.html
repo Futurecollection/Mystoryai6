@@ -13,9 +13,7 @@
     <form method="POST" class="mb-4">
       {% for i in range(1,7) %}
         <label>Stage {{ i }} Unlock Text:</label>
-        <textarea class="form-control mb-2" rows="2" name="stage_unlock_{{ i }}">
-          {{ stage_unlocks[i] }}
-        </textarea>
+        <textarea class="form-control mb-2" rows="2" name="stage_unlock_{{ i }}">{{ stage_unlocks[i]|trim }}</textarea>
       {% endfor %}
       <button type="submit" name="update_stage_unlocks" class="btn btn-warning">
         Save Stage Unlocks
