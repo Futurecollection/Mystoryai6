@@ -1009,7 +1009,131 @@ IMPORTANT:
 3. Leave fields empty if no new information is provided.
 4. When a location change occurs, be explicit about the new location.
 
-# Helper function (moved outside of auto_update_npc_settings_from_narrative)
+Return ONLY this JSON format with no additional text:
+{{
+  "environment_update": "", 
+  "clothing_update": "",
+  "hair_color_update": "",
+  "hair_style_update": "",
+  "personality_update": "",
+  "current_life_situation_update": "",
+  "current_scene_update": "",
+  "mood_update": "",
+  "time_of_day": "",
+  "weather": ""
+}}
+"""
+
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.1, "max_output_tokens": 1024},
+            safety_settings=safety_settings
+        )
+        
+        if not response or not response.text:
+            return
+        
+        # Extract JSON from response
+        response_text = response.text.strip()
+        try:
+            # Remove any markdown formatting
+            json_text = response_text
+            if "```json" in json_text:
+                json_text = json_text.split("```json", 1)[1]
+            if "```" in json_text:
+                json_text = json_text.split("```", 1)[0]
+                
+            import json
+            updates = json.loads(json_text)
+            
+            # Apply updates to session variables
+            has_updates = False
+            
+            # Environment update
+            if updates.get("environment_update") and updates["environment_update"].strip():
+                new_env = updates["environment_update"].strip()
+                if new_env != current_env:
+                    session["environment"] = new_env
+                    log_message(f"[AUTO-UPDATE] Environment changed to: {new_env}")
+                    has_updates = True
+            
+            # Clothing update
+            if updates.get("clothing_update") and updates["clothing_update"].strip():
+                new_clothing = updates["clothing_update"].strip()
+                if new_clothing != current_clothing:
+                    session["npc_clothing"] = new_clothing
+                    log_message(f"[AUTO-UPDATE] Clothing changed to: {new_clothing}")
+                    has_updates = True
+            
+            # Hair color update  
+            if updates.get("hair_color_update") and updates["hair_color_update"].strip():
+                new_hair_color = updates["hair_color_update"].strip()
+                if new_hair_color != current_hair_color:
+                    session["npc_hair_color"] = new_hair_color
+                    log_message(f"[AUTO-UPDATE] Hair color changed to: {new_hair_color}")
+                    has_updates = True
+            
+            # Hair style update  
+            if updates.get("hair_style_update") and updates["hair_style_update"].strip():
+                new_hair_style = updates["hair_style_update"].strip()
+                if new_hair_style != current_hair_style:
+                    session["npc_hair_style"] = new_hair_style
+                    log_message(f"[AUTO-UPDATE] Hair style changed to: {new_hair_style}")
+                    has_updates = True
+            
+            # Personality update - should be rare
+            if updates.get("personality_update") and updates["personality_update"].strip():
+                new_personality = updates["personality_update"].strip()
+                if new_personality != current_personality:
+                    session["npc_personality"] = new_personality
+                    log_message(f"[AUTO-UPDATE] Personality updated to: {new_personality}")
+                    has_updates = True
+            
+            # Current life situation update (broad circumstances)
+            if updates.get("current_life_situation_update") and updates["current_life_situation_update"].strip():
+                new_situation = updates["current_life_situation_update"].strip()
+                if new_situation != current_situation:
+                    session["npc_current_situation"] = new_situation
+                    log_message(f"[AUTO-UPDATE] Current life situation updated to: {new_situation}")
+                    has_updates = True
+            
+            # Current scene update (immediate situation)
+            if updates.get("current_scene_update") and updates["current_scene_update"].strip():
+                new_scene = updates["current_scene_update"].strip()
+                if new_scene != current_scene:
+                    session["current_scene"] = new_scene
+                    log_message(f"[AUTO-UPDATE] Current scene updated to: {new_scene}")
+                    has_updates = True
+            
+            # Mood update
+            if updates.get("mood_update") and updates["mood_update"].strip():
+                new_mood = updates["mood_update"].strip()
+                if new_mood != current_mood:
+                    session["npc_mood"] = new_mood
+                    log_message(f"[AUTO-UPDATE] Mood updated to: {new_mood}")
+                    has_updates = True
+            
+            # Other scene attributes
+            if updates.get("time_of_day") and updates["time_of_day"].strip():
+                session["time_of_day"] = updates["time_of_day"].strip()
+                has_updates = True
+                
+            if updates.get("weather") and updates["weather"].strip():
+                session["weather"] = updates["weather"].strip()
+                has_updates = True
+                
+            if has_updates:
+                log_message("[AUTO-UPDATE] Character and environment settings automatically updated")
+                
+        except Exception as e:
+            log_message(f"[AUTO-UPDATE] Error parsing JSON response: {str(e)}")
+            
+    except Exception as e:
+        log_message(f"[AUTO-UPDATE] Error calling LLM: {str(e)}")
+
+
 @retry_with_backoff(retries=3, backoff_in_seconds=1)
 def extract_details_from_bio(bio_text: str) -> None:
     """
