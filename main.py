@@ -128,6 +128,37 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
     cust_val = form.get(cust_key, "").strip()
     return cust_val if cust_val else dd_val
 
+def deduplicate_text_sections(text: str, section_marker: str = "###", max_sections: int = 5) -> str:
+    """
+    Prevents excessive repetition in text by keeping only a limited number of sections.
+    Args:
+        text: The text containing multiple sections
+        section_marker: String that marks the beginning of each section
+        max_sections: Maximum number of sections to keep
+    Returns:
+        Deduplicated text with only the most recent sections
+    """
+    sections = text.split(section_marker)
+    
+    # If we have a header section without the marker (first item), keep it
+    if sections and not sections[0].strip():
+        sections.pop(0)  # Remove empty first section if present
+        
+    # If we don't have more sections than max, just return the original
+    if len(sections) <= max_sections:
+        return text
+        
+    # Keep the header (if there is one) and the most recent sections
+    if sections[0].strip() and not any(marker in sections[0] for marker in ["###", "##", "#"]):
+        # First section is a header without markers
+        header = sections[0]
+        retained_sections = [header] + [section_marker + s for s in sections[-(max_sections-1):]]
+    else:
+        # No special header, just keep the most recent sections
+        retained_sections = [section_marker + s for s in sections[-max_sections:]]
+        
+    return "".join(retained_sections)
+
 def _save_image(result):
     if isinstance(result, dict) and "output" in result:
         final_url = result["output"]
@@ -273,7 +304,8 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 def build_initial_npc_memory() -> str:
-    """Construct a detailed biography for the NPC using all available personalization data."""
+    """Construct a detailed biography for the NPC using all available personalization data.
+    If limited information is available, use the LLM to generate additional details."""
     name = session.get('npc_name','Unknown')
     gender = session.get('npc_gender','?')
     age = session.get('npc_age','?')
@@ -291,265 +323,162 @@ def build_initial_npc_memory() -> str:
     environment = session.get('environment', '')
     encounter_context = session.get('encounter_context', '')
     user_name = session.get('user_name', 'the user')
-
-    # Format a rich, narrative-style biography with sections
-    biography = f"## DETAILED BIOGRAPHY: {name.upper()}\n\n"
-
-    # Core identity section - written in narrative style
-    biography += f"### Core Identity\n"
-    biography += f"{name} is a {age}-year-old {ethnicity} {gender} with a {personality} personality that defines much of how they interact with the world. "
-
-    # Add personality traits based on their selected personality
-    if personality.lower() in ["confident", "charming", "flirty", "playful"]:
-        biography += f"Their natural confidence makes them approachable yet intriguing, often drawing others in with seemingly little effort. "
-        biography += f"They have a way of making others feel special with their undivided attention and genuine interest. "
-        biography += f"Though they may appear carefree, there's a depth to them that becomes apparent once you move beyond surface conversations. "
-    elif personality.lower() in ["intellectual", "analytical", "professional"]:
-        biography += f"They carry themselves with quiet thoughtfulness, observing details others might miss and approaching life with measured consideration. "
-        biography += f"Conversations with them tend to be substantive and thought-provoking, revealing a mind that's constantly processing and analyzing. "
-        biography += f"Their intellectual curiosity extends to various subjects, from {random.choice(['literature and arts', 'science and technology', 'philosophy and ethics', 'history and politics'])} to the nuances of human behavior. "
-    elif personality.lower() in ["mysterious", "reserved"]:
-        biography += f"They tend to keep parts of themselves hidden behind a carefully maintained exterior, revealing their true thoughts only to those they trust. "
-        biography += f"This natural reserve isn't coldness but rather a thoughtful selectivity about who gets to see their authentic self. "
-        biography += f"Those who earn their trust discover a {random.choice(['surprisingly tender', 'deeply passionate', 'remarkably insightful', 'wonderfully creative'])} person beneath the composed facade. "
-    elif personality.lower() in ["supportive", "gentle", "kind"]:
-        biography += f"They exude a natural warmth that puts others at ease, creating safe spaces wherever they go. "
-        biography += f"Their empathetic nature allows them to connect with people from all walks of life, sensing needs often before they're expressed. "
-        biography += f"While always ready to offer support to others, they sometimes struggle with allowing themselves the same grace and care. "
-    elif personality.lower() in ["witty", "ambitious", "dominant"]:
-        biography += f"Their quick wit and sharp mind make for engaging, dynamic interactions that are rarely predictable or boring. "
-        biography += f"They set high standards for themselves and aren't afraid to pursue what they want with determination and focus. "
-        biography += f"Behind their driven exterior lies a {random.choice(['surprising vulnerability', 'deep capacity for loyalty', 'thoughtful philosophical side', 'playful sense of humor'])} that few get to witness. "
-    else:
-        biography += f"There's a uniquely compelling quality to their presence that makes even simple interactions feel meaningful and authentic. "
-        biography += f"They navigate the world with a perspective that balances pragmatism with a sense of possibility and wonder. "
-
-    # Occupation and related details
-    biography += f"\n\nAs a {occupation}, {name} has developed a specific perspective and set of skills that have shaped their worldview. "
     
-    if "student" in occupation.lower():
-        biography += f"Their academic pursuits in {random.choice(['liberal arts', 'sciences', 'business', 'fine arts', 'engineering'])} have cultivated a curious mind that's always eager to learn and grow. "
-        biography += f"Campus life has exposed them to diverse perspectives and experiences, broadening their horizons beyond their upbringing. "
-    elif "teacher" in occupation.lower() or "professor" in occupation.lower():
-        biography += f"Years spent in education have given them a patient, observant approach to people, always looking for potential and growth. "
-        biography += f"They find genuine fulfillment in sharing knowledge and watching understanding dawn in others' eyes. "
-        biography += f"Outside the classroom, they {random.choice(['write educational content', 'mentor struggling students', 'develop innovative teaching methods', 'advocate for educational reform'])} as a passion project. "
-    elif "artist" in occupation.lower() or "creative" in occupation.lower() or "writer" in occupation.lower() or "musician" in occupation.lower():
-        biography += f"Their creative work reflects a unique vision and sensitivity to the world around them, translating emotions and observations into art. "
-        biography += f"The irregular rhythms of creative life have taught them adaptability and resilience through periods of inspiration and drought. "
-        biography += f"They find beauty in unexpected places, often noticing details that others miss in everyday scenes and interactions. "
-    elif "business" in occupation.lower() or "executive" in occupation.lower() or "entrepreneur" in occupation.lower():
-        biography += f"The business world has honed their strategic thinking and decisive nature, though they strive to balance ambition with ethical considerations. "
-        biography += f"Years of navigating professional challenges have given them confidence in their judgment and abilities. "
-        biography += f"Despite their professional success, they sometimes wonder about {random.choice(['the road not taken', 'finding more meaningful work', 'achieving better work-life balance', 'using their skills for greater social impact'])}. "
-    elif "doctor" in occupation.lower() or "nurse" in occupation.lower() or "therapist" in occupation.lower():
-        biography += f"Working in healthcare has developed their empathy and ability to remain calm under pressure, qualities that extend beyond their professional life. "
-        biography += f"Their intimate familiarity with human vulnerability and resilience has given them a grounded perspective on what truly matters. "
-        biography += f"The emotional demands of their work have taught them the importance of self-care and healthy boundaries. "
-    elif "tech" in occupation.lower() or "programmer" in occupation.lower() or "engineer" in occupation.lower():
-        biography += f"Their analytical mind excels at solving complex problems, breaking down challenges into manageable components. "
-        biography += f"The rapid evolution of their field keeps them continuously learning and adapting to new developments. "
-        biography += f"While comfortable with technology, they make conscious efforts to balance digital engagement with meaningful real-world connections. "
-    else:
-        biography += f"Their professional experiences have taught them valuable lessons about {random.choice(['human nature', 'perseverance', 'creativity', 'leadership', 'collaboration'])} that influence how they approach relationships. "
-        biography += f"Work provides not just financial stability but a sense of purpose and identity that's important to them. "
-
-    # Life circumstances and current situation
-    biography += f"\n\n### Life Circumstances\n"
-    biography += f"Currently, {name} is {current_situation.lower() if not current_situation.startswith('Other') else 'navigating a personal transition in life'}. "
-
-    if "broke up" in current_situation.lower():
-        biography += f"The end of their relationship with {random.choice(['Alex', 'Jamie', 'Taylor', 'Jordan', 'Morgan'])} {random.choice(['two months', 'six weeks', 'three months', 'four months'])} ago left some emotional scars that occasionally surface in quiet moments of vulnerability. "
-        biography += f"While they don't regret the relationship ending, the {random.choice(['sudden way it happened', 'lingering questions about what went wrong', 'mutual friends they still share', 'familiar places now tinged with memories'])} creates complicated emotions they're still processing. "
-        biography += f"This experience has made them more thoughtful about what they truly want in a partner, including {random.choice(['better communication', 'shared values', 'emotional maturity', 'compatible life goals', 'a deeper connection'])}. "
-    elif "divorce" in current_situation.lower():
-        biography += f"The divorce was finalized {random.choice(['last year', 'six months ago', 'recently', 'after a lengthy process'])}, forcing them to reexamine their priorities and approach to relationships. "
-        biography += f"They've been rebuilding their independent life, rediscovering parts of themselves that had been set aside during the marriage. "
-        biography += f"Though the process has been painful, they've emerged with greater self-knowledge and clarity about their needs and boundaries. "
-        biography += f"Friends have noted a positive change in them, describing them as more {random.choice(['authentic', 'relaxed', 'confident', 'open', 'self-assured'])} than they were during the later years of their marriage. "
-    elif "single" in current_situation.lower():
-        biography += f"Their single status has been {random.choice(['a conscious choice', 'the result of focusing on career goals', 'an opportunity for self-discovery', 'a welcome break from dating complications'])} for the past {random.choice(['year', 'few years', 'several months'])}. "
-        biography += f"While comfortable with independence, there's an underlying desire for meaningful connection that motivates their social interactions. "
-        biography += f"They've used this time to {random.choice(['develop new interests', 'strengthen friendships', 'advance professionally', 'focus on personal growth', 'travel and explore'])}. "
-        biography += f"Recent experiences have left them more open to the possibility of meeting someone who aligns with their evolved sense of self and life direction. "
-    elif "new in town" in current_situation.lower():
-        biography += f"Having moved here {random.choice(['just a month ago', 'within the last three months', 'recently for a fresh start', 'for a new job opportunity'])} from {random.choice(['the East Coast', 'across the country', 'a smaller town', 'overseas', 'a major city'])}, they're still finding their footing. "
-        biography += f"Still learning the rhythms of a new place has left them both excited for fresh possibilities and occasionally longing for the familiarity of what they left behind. "
-        biography += f"They've made exploring their new environment a priority, {random.choice(['trying local restaurants', 'visiting cultural landmarks', 'finding hidden gems in the neighborhood', 'joining community groups'])} to develop a sense of belonging. "
-        biography += f"This transition period has highlighted their {random.choice(['adaptability', 'openness to new experiences', 'skill in building connections from scratch', 'appreciation for diverse perspectives'])}. "
-    elif "trying online dating" in current_situation.lower():
-        biography += f"Their venture into online dating has been a {random.choice(['recent experiment', 'recommendation from friends', 'step outside their comfort zone', 'mixed experience of frustrations and surprising connections'])}. "
-        biography += f"The process has given them insights into what they're truly looking for, beyond surface-level compatibility. "
-        biography += f"They approach these interactions with a balance of openness and healthy skepticism, looking for authentic connection amid the often superficial nature of dating apps. "
-        biography += f"Despite some disappointing experiences, they remain optimistic about the possibility of meeting someone genuine with shared values and chemistry. "
-    else:
-        biography += f"This current phase of life has brought both challenges and opportunities, testing their resilience while opening doors to new possibilities. "
-        biography += f"They've been reflecting on their journey so far and considering what direction they want the next chapter to take. "
-        biography += f"Recent experiences have reinforced the importance of {random.choice(['authentic connections', 'pursuing genuine passions', 'maintaining personal boundaries', 'finding balance', 'staying true to their values'])}. "
-
-    # Physical description
-    biography += f"\n\n### Physical Presence\n"
+    # Check if we have enough basic information or need LLM to fill in missing details
+    missing_key_fields = (
+        name == 'Unknown' or gender == '?' or age == '?' or 
+        personality == '?' or occupation == '?' or 
+        hair_color == '?' or clothing == '?'
+    )
     
-    if gender.lower() == "female":
-        biography += f"{name} has a {body_type.lower()} physique that she {random.choice(['maintains with regular exercise', 'carries with natural confidence', 'has grown comfortable with over the years', 'embraces as part of her identity'])}. "
-        biography += f"Her {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements her features nicely', 'she has perfected over time', 'has become part of her signature appearance', 'frames her face in a flattering way'])}. "
-        biography += f"Her eyes, {random.choice(['deep brown with flecks of gold', 'striking blue that change with her mood', 'warm hazel with a thoughtful gaze', 'vibrant green with a hint of playfulness', 'gray with remarkable expressiveness'])}, often reveal her thoughts before she speaks. "
-        biography += f"Today she's dressed in {clothing.lower()}, an outfit that {random.choice(['reflects her personal style', 'she chose with care', 'makes her feel confident', 'strikes a balance between comfort and elegance'])}. "
-        biography += f"She tends to {random.choice(['accessorize minimally with pieces that have personal meaning', 'carry herself with a natural grace', 'gesture expressively when engaged in conversation', 'have an infectious laugh that lights up her entire face', 'maintain poised composure even in stressful situations'])}. "
-    elif gender.lower() == "male":
-        biography += f"{name} has a {body_type.lower()} physique that he {random.choice(['maintains with dedicated workouts', 'developed through years of physical activity', 'carries with a confident posture', 'balances with a healthy lifestyle'])}. "
-        biography += f"His {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['suits his features well', 'he maintains with little fuss', 'enhances his natural charm', 'reflects his attention to detail'])}. "
-        biography += f"His eyes, {random.choice(['deep-set and observant', 'expressive with a hint of mischief', 'thoughtful with a steady gaze', 'warm and inviting', 'intelligent with a penetrating quality'])}, reveal a depth of character beneath his composed exterior. "
-        biography += f"Today he's dressed in {clothing.lower()}, an outfit that {random.choice(['showcases his personal style', 'was chosen with deliberate care', 'balances professionalism with individuality', 'gives him a confident presence'])}. "
-        biography += f"His {random.choice(['warm smile', 'firm handshake', 'relaxed demeanor', 'attentive listening', 'expressive gestures'])} makes interactions with him feel {random.choice(['genuine', 'engaging', 'comfortable', 'meaningful'])}. "
+    # If missing key fields, use LLM to generate a complete biography
+    if missing_key_fields and GEMINI_API_KEY:
+        try:
+            return generate_llm_biography(
+                name, gender, age, ethnicity, orientation, relationship_goal,
+                personality, body_type, hair_color, hair_style, clothing,
+                occupation, current_situation, backstory, environment,
+                encounter_context, user_name
+            )
+        except Exception as e:
+            print(f"[ERROR] LLM biography generation failed: {e}")
+            # Fall back to narrative approach if LLM fails
+    
+    # Format a narrative-style biography without rigid section structure
+    biography = f"# {name}'s Biography\n\n"
+    
+    # Opening paragraph with core details
+    biography += f"{name} is a {age}-year-old {ethnicity} {gender} with {hair_color.lower() if hair_color != '?' else ''} {hair_style.lower() if hair_style != '?' else 'hair'} and a {body_type.lower() if body_type != '?' else 'distinctive'} physique. "
+    biography += f"Working as a {occupation}, their {personality.lower() if personality != '?' else 'unique'} personality shines through in how they approach both their professional and personal life. "
+    
+    # Current life situation
+    if current_situation and current_situation != '?':
+        if "broke up" in current_situation.lower():
+            biography += f"Having recently ended a relationship, {name} is navigating the complex emotions that come with moving on. The breakup left some unresolved feelings, but also opened up possibilities for new connections. "
+        elif "divorce" in current_situation.lower():
+            biography += f"Still processing a recent divorce, {name} is rediscovering who they are as an individual again. The experience changed their perspective on relationships, making them more thoughtful about what they truly want. "
+        elif "single" in current_situation.lower():
+            biography += f"Currently single, {name} has been focused on personal growth and self-discovery. While comfortable with independence, there's a natural desire for meaningful connection that brings them to social settings. "
+        elif "new in town" in current_situation.lower():
+            biography += f"New to the area, {name} is still finding their footing. The excitement of new beginnings mixes with occasional homesickness, creating a unique openness to new experiences and connections. "
+        else:
+            biography += f"Currently {current_situation.lower()}, {name} is in a transitional period that has them reflecting on their priorities and desires. "
     else:
-        biography += f"{name} has a {body_type.lower()} physique that they {random.choice(['maintain with regular activity', 'carry with natural confidence', 'have grown comfortable with over the years', 'embrace as part of their authentic self'])}. "
-        biography += f"Their {hair_color.lower()} hair is styled {hair_style.lower()}, a look that {random.choice(['complements their features beautifully', 'they have refined over time', 'has become part of their distinctive appearance', 'expresses their personal aesthetic'])}. "
-        biography += f"Their eyes, {random.choice(['deep and thoughtful', 'bright with intelligence', 'gentle yet penetrating', 'expressive and communicative', 'striking in their intensity'])}, often convey what remains unsaid in conversation. "
-        biography += f"Today they're dressed in {clothing.lower()}, an outfit that {random.choice(['reflects their unique style', 'they selected with intention', 'makes them feel authentic', 'balances creativity with practicality'])}. "
-        biography += f"Their presence has a {random.choice(['calming quality', 'magnetic energy', 'thoughtful intensity', 'gentle strength', 'distinctive charisma'])} that people tend to remember after meeting them. "
-
-    # Relationship section 
-    biography += f"\n\n### Relationship Approach\n"
-    biography += f"As someone who identifies as {orientation.lower()}, {name} is currently looking for {relationship_goal.lower()}. "
-
-    if "casual" in relationship_goal.lower():
-        biography += f"They value freedom and spontaneity, preferring connections that don't come with excessive expectations or constraints. "
-        biography += f"This doesn't mean they approach relationships superficially—rather, they believe meaningful connections can exist without traditional commitment structures. "
-        biography += f"Past experiences have taught them that honesty about intentions from the beginning leads to more fulfilling interactions, even if temporary. "
-        biography += f"They're drawn to people who are {random.choice(['similarly independent', 'confident in themselves', 'emotionally self-sufficient', 'clear about their own boundaries', 'authentic in their desires'])}. "
-    elif "serious" in relationship_goal.lower():
-        biography += f"They've reached a point in life where they value depth and commitment, seeking someone to build something meaningful with. "
-        biography += f"Having experienced {random.choice(['the emptiness of surface-level connections', 'relationships that lacked emotional depth', 'the growth that comes from committed partnership', 'what doesn't work for them'])}, they're clear about wanting substance. "
-        biography += f"While not rushing into anything, they don't see the point in investing time in connections without potential for growth and deepening intimacy. "
-        biography += f"They're attracted to partners who are {random.choice(['emotionally available', 'self-aware', 'clear about their own desires for commitment', 'willing to work through challenges', 'interested in genuine connection'])}. "
-    elif "friends with benefits" in relationship_goal.lower():
-        biography += f"They appreciate the balance of emotional connection and physical intimacy without the pressure of traditional relationship structures. "
-        biography += f"Experience has taught them that clear communication and mutual respect are essential for this dynamic to work well for everyone involved. "
-        biography += f"They value honesty, both with themselves and potential partners, about expectations and boundaries. "
-        biography += f"This approach allows them to maintain their independence while still enjoying meaningful connections and physical intimacy. "
-    elif "open relationship" in relationship_goal.lower():
-        biography += f"They believe in the possibility of maintaining a primary emotional connection while allowing for other experiences and relationships. "
-        biography += f"Transparency, communication, and mutual consent are non-negotiable values in how they approach relationships. "
-        biography += f"Their interest in this relationship structure comes from {random.choice(['thoughtful consideration of what works best for them', 'previous positive experiences with ethical non-monogamy', 'philosophical beliefs about love and connection', 'a desire to challenge conventional relationship norms'])}. "
-        biography += f"They're drawn to partners who share their values around honesty and autonomy while still prioritizing emotional intimacy and care. "
-    elif "not sure" in relationship_goal.lower():
-        biography += f"They're currently open to seeing where connections lead naturally, rather than approaching relationships with predetermined expectations. "
-        biography += f"This period of exploration is about discovering what truly resonates with them at this point in their life journey. "
-        biography += f"They value authenticity and presence, preferring to focus on the quality of connection rather than labeling or categorizing it prematurely. "
-        biography += f"This approach reflects their current life philosophy of {random.choice(['embracing uncertainty', 'being fully present', 'trusting their intuition', 'remaining open to possibilities', 'valuing experience over expectations'])}. "
+        biography += f"At this point in their life, {name} is navigating a period of personal growth and change. "
+    
+    # Appearance and style
+    if clothing and clothing != '?':
+        biography += f"Today they're wearing {clothing.lower()}, which reflects their personal style and the image they want to project. The way they present themselves—confident yet approachable—draws attention in subtle ways. "
     else:
-        biography += f"They approach relationships thoughtfully, valuing {random.choice(['authentic connection', 'mutual growth', 'shared values', 'emotional honesty'])} above prescribed forms or expectations. "
-        biography += f"Their experiences have shaped a nuanced understanding of what they need from intimate connections. "
-        biography += f"They believe the best relationships evolve organically when both people are honest about their needs and boundaries. "
-
-    # Add backstory if provided, otherwise generate one
+        biography += f"Their style is distinctive and carefully considered, reflecting both practicality and a subtle flair that makes them memorable. "
+    
+    # Relationship approach and orientation
+    if orientation != '?' and relationship_goal != '?':
+        biography += f"\n\n{name} identifies as {orientation.lower()} and is looking for {relationship_goal.lower()}. "
+        if "casual" in relationship_goal.lower():
+            biography += f"They value their independence and prefer relationships that allow for spontaneity without heavy expectations. Past experiences have taught them that forced commitment often leads to disappointment, so they approach connections with honesty about their intentions. "
+        elif "serious" in relationship_goal.lower():
+            biography += f"Having experienced enough surface-level connections, they're seeking something with genuine depth and potential for growth. They believe in taking the time to build trust before fully investing emotionally. "
+        else:
+            biography += f"Their approach to dating is straightforward and authentic—they believe in being clear about intentions while remaining open to how connections naturally evolve. "
+    else:
+        biography += f"\n\n{name}'s approach to relationships balances caution with genuine openness. Past experiences have shaped their expectations, making them value authenticity above all else in potential partners. "
+    
+    # Background/history
     if backstory:
-        biography += f"\n\n### Personal History\n{backstory}\n"
+        biography += f"\n\n{backstory}\n"
     else:
-        # Generate a more detailed backstory based on available information
-        biography += f"\n\n### Personal History\n"
+        biography += f"\n\n{name} was raised in a {random.choice(['coastal town with stunning ocean views', 'bustling metropolitan area', 'close-knit suburban community', 'rural setting surrounded by nature'])}, which significantly shaped their worldview and values. "
+        biography += f"Their upbringing instilled a strong sense of {random.choice(['independence and self-reliance', 'community and connection to others', 'ambition and determination', 'creativity and expression'])}. "
         
-        # Create childhood environment based on ethnicity or random if not specified
-        if ethnicity and ethnicity.lower() != "?":
-            if "american" in ethnicity.lower():
-                childhood_location = random.choice(['a suburban neighborhood outside of Boston', 'a small Midwestern town', 'Southern California', 'rural Montana', 'bustling Chicago', 'the Pacific Northwest'])
-            elif "british" in ethnicity.lower() or "irish" in ethnicity.lower() or "scottish" in ethnicity.lower() or "welsh" in ethnicity.lower():
-                childhood_location = random.choice(['a picturesque village in the English countryside', 'suburban London', 'a coastal town in Ireland', 'Edinburgh', 'Cardiff', 'a small town in Northern Ireland'])
-            elif "french" in ethnicity.lower():
-                childhood_location = random.choice(['Paris', 'a small village in Provence', 'Lyon', 'the French countryside', 'Normandy', 'the French Riviera'])
-            elif "german" in ethnicity.lower():
-                childhood_location = random.choice(['Berlin', 'a traditional Bavarian town', 'Munich', 'Hamburg', 'the Black Forest region', 'Frankfurt'])
-            elif "italian" in ethnicity.lower():
-                childhood_location = random.choice(['Rome', 'a small village in Tuscany', 'Naples', 'Sicily', 'Florence', 'the Italian countryside'])
-            elif "asian" in ethnicity.lower() or "chinese" in ethnicity.lower() or "japanese" in ethnicity.lower() or "korean" in ethnicity.lower():
-                childhood_location = random.choice(['an urban center in Asia', 'a traditional family compound', 'a neighborhood blending traditional and modern influences', 'a coastal city', 'a rural community with strong cultural traditions'])
-            elif "hispanic" in ethnicity.lower() or "latin" in ethnicity.lower():
-                childhood_location = random.choice(['Mexico City', 'a coastal town in Puerto Rico', 'Miami', 'a small village in Central America', 'Barcelona', 'Buenos Aires'])
-            elif "indian" in ethnicity.lower() or "pakistani" in ethnicity.lower():
-                childhood_location = random.choice(['Mumbai', 'Delhi', 'Bangalore', 'Karachi', 'a village in Punjab', 'a coastal town in Kerala'])
-            else:
-                childhood_location = random.choice(['a coastal city', 'a metropolitan area', 'a small town with a tight-knit community', 'a culturally diverse neighborhood', 'a suburban environment'])
-        else:
-            childhood_location = random.choice(['a coastal city', 'a bustling metropolis', 'a quiet suburban neighborhood', 'a small rural community', 'a culturally diverse urban center'])
-        
-        # Family structure
-        family_structure = random.choice([
-            f"the youngest of three siblings in a close-knit family",
-            f"an only child raised by devoted parents",
-            f"the middle child in a family of five",
-            f"raised primarily by their mother after their parents separated when they were young",
-            f"part of a blended family with step-siblings they grew close to over time",
-            f"raised by their grandparents after losing their parents at a young age",
-            f"the oldest child who often helped care for their younger siblings"
-        ])
-        
-        # Education and formative experiences
-        education = random.choice([
-            f"attended public schools before earning a scholarship to a prestigious university",
-            f"studied abroad during college, an experience that broadened their worldview significantly",
-            f"pursued their passion for {random.choice(['the arts', 'sciences', 'literature', 'business', 'technology'])} from an early age",
-            f"initially followed a conventional path before discovering their true calling",
-            f"balanced academics with exceptional talent in {random.choice(['sports', 'music', 'art', 'debate', 'community service'])}",
-            f"changed their educational focus after a formative experience revealed their authentic interests",
-            f"took a non-traditional educational path that aligned with their independent thinking"
-        ])
-        
-        # Important life events
-        life_event = random.choice([
-            f"A gap year spent {random.choice(['traveling through Europe', 'volunteering in developing countries', 'working on an organic farm', 'apprenticing with a mentor'])} shaped their perspective on what truly matters.",
-            f"Their first serious relationship taught them important lessons about {random.choice(['communication', 'self-respect', 'compromise', 'emotional honesty'])} that still influence them today.",
-            f"Moving away from home at {random.choice(['eighteen', 'twenty', 'a young age'])} developed their independence and self-reliance.",
-            f"A period of {random.choice(['health challenges', 'financial hardship', 'career uncertainty', 'personal loss'])} in their mid-twenties tested their resilience and clarified their priorities.",
-            f"Mentorship from {random.choice(['a professor', 'a family friend', 'a colleague', 'an unexpected source'])} opened doors and provided guidance at a critical juncture.",
-            f"Their experience living in {random.choice(['another country', 'a completely different environment', 'multiple cities'])} gave them adaptability and cultural awareness."
-        ])
-        
-        # Values and influences
-        values = random.choice([
-            f"Family traditions around {random.choice(['holiday celebrations', 'shared meals', 'cultural practices', 'storytelling'])} instilled values that remain important to them.",
-            f"Literary influences, particularly the works of {random.choice(['classic philosophers', 'contemporary thinkers', 'poets and novelists', 'spiritual texts'])}, have shaped their outlook on life.",
-            f"Their {random.choice(['cultural heritage', 'religious upbringing', 'parents\' example', 'early experiences'])} instilled a strong sense of {random.choice(['social justice', 'personal integrity', 'compassion for others', 'work ethic', 'intellectual curiosity'])}.",
-            f"Art and creativity have always been channels for self-expression and processing their experiences of the world.",
-            f"Their approach to challenges reflects lessons learned from {random.choice(['family wisdom', 'personal setbacks', 'diverse life experiences', 'influential mentors'])}."
-        ])
-        
-        # Create comprehensive backstory
-        biography += f"{name} was raised in {childhood_location}, {family_structure}. "
-        biography += f"They {education}. "
-        biography += f"{life_event} "
-        biography += f"{values} "
-        
-        # Career trajectory
-        if occupation and occupation.lower() != "?":
-            biography += f"\n\nTheir career as a {occupation} developed from {random.choice(['an early passion', 'a serendipitous opportunity', 'careful planning and dedication', 'mentorship and guidance', 'a desire to make a difference'])}. "
-            biography += f"Throughout their professional journey, they've {random.choice(['consistently sought growth opportunities', 'balanced ambition with personal fulfillment', 'developed a reputation for their unique approach', 'found ways to express their creativity', 'built meaningful connections with colleagues and collaborators'])}. "
-            biography += f"Work provides not just financial stability but {random.choice(['a sense of purpose', 'an outlet for their talents', 'opportunities to impact others positively', 'intellectual stimulation', 'a community of like-minded individuals'])}. "
-        else:
-            biography += f"\n\nProfessionally, they've followed a path that balances practical considerations with personal fulfillment, seeking work that aligns with their values and utilizes their natural strengths. "
-
+        if occupation != '?':
+            biography += f"The path to their current career as a {occupation} wasn't straightforward, involving both challenges and unexpected opportunities that ultimately led them to where they are today. They've developed a reputation for {random.choice(['attention to detail', 'creative problem-solving', 'leadership', 'innovation', 'reliability'])} in their professional life. "
+    
     # Current meeting context
-    biography += f"\n\n### Current Encounter\n"
+    biography += f"\n\nMeeting {user_name} "
     if environment:
-        biography += f"Meeting in {environment.lower()}, " 
-    else:
-        biography += f"In this current setting, "
-
+        biography += f"in {environment.lower()}, "
     if encounter_context:
         biography += f"under the circumstances of {encounter_context.lower()}, "
-
-    biography += f"{name} finds themselves intrigued by {user_name}. The interaction is just beginning, but already there's a sense of "
-    biography += f"{random.choice(['possibility', 'curiosity', 'interest', 'chemistry', 'connection', 'intrigue'])} that has caught their attention. "
+    biography += f"has sparked {name}'s interest. There's something intriguing about this new connection that has caught their attention, though they're still forming their impressions as they learn more."
     
-    biography += f"Something about {user_name}'s {random.choice(['confidence', 'authenticity', 'perspective', 'energy', 'attentiveness', 'sense of humor'])} stands out from typical first encounters, making {name} more {random.choice(['open', 'curious', 'engaged', 'attentive', 'present'])} than they might usually be with someone new. "
+    # Initial relationship status
+    biography += f"\n\n## Relationship Status\nFirst meeting - getting to know each other - initial impressions forming"
     
-    biography += f"While maintaining a natural {random.choice(['reserve', 'sociability', 'poise', 'warmth', 'thoughtfulness'])}, they find themselves wondering where this interaction might lead. "
-
-    # Relationship development placeholder
-    biography += f"\n\n### Relationship Development\n"
-    biography += f"• First Meeting: Just getting to know each other - initial impressions forming"
-
     return biography
+
+@retry_with_backoff(retries=2, backoff_in_seconds=1)
+def generate_llm_biography(name, gender, age, ethnicity, orientation, relationship_goal,
+                        personality, body_type, hair_color, hair_style, clothing,
+                        occupation, current_situation, backstory, environment,
+                        encounter_context, user_name) -> str:
+    """Use the LLM to generate a detailed, rich biography with any missing information filled in creatively."""
+    
+    # Create a summary of what we know for sure (non-? values)
+    known_details = []
+    if name != 'Unknown': known_details.append(f"Name: {name}")
+    if gender != '?': known_details.append(f"Gender: {gender}")
+    if age != '?': known_details.append(f"Age: {age}")
+    if ethnicity != '?': known_details.append(f"Ethnicity: {ethnicity}")
+    if orientation != '?': known_details.append(f"Sexual Orientation: {orientation}")
+    if relationship_goal != '?': known_details.append(f"Relationship Goal: {relationship_goal}")
+    if personality != '?': known_details.append(f"Personality: {personality}")
+    if body_type != '?': known_details.append(f"Body Type: {body_type}")
+    if hair_color != '?': known_details.append(f"Hair Color: {hair_color}")
+    if hair_style != '?': known_details.append(f"Hair Style: {hair_style}")
+    if clothing != '?': known_details.append(f"Clothing: {clothing}")
+    if occupation != '?': known_details.append(f"Occupation: {occupation}")
+    if current_situation != '?': known_details.append(f"Current Situation: {current_situation}")
+    if backstory: known_details.append(f"Backstory: {backstory}")
+    if environment: known_details.append(f"Environment: {environment}")
+    if encounter_context: known_details.append(f"Encounter Context: {encounter_context}")
+    
+    known_info = "\n".join(known_details)
+    
+    prompt = f"""
+    Create a detailed, narrative-style character biography for an interactive romance story.
+    
+    KNOWN INFORMATION:
+    {known_info if known_details else "Very limited information available. Create a compelling character."}
+    
+    The biography should be written in Markdown format with these sections:
+    1. ## DETAILED BIOGRAPHY: [CHARACTER NAME]
+    2. ### Core Identity - Who they are, their age, gender, ethnicity, personality traits
+    3. ### Life Circumstances - Current life situation, recent significant events
+    4. ### Physical Presence - Body type, hair, clothing style, distinctive features
+    5. ### Relationship Approach - Sexual orientation, relationship goals, dating philosophy
+    6. ### Personal History - Background, upbringing, formative experiences, education, career path
+    7. ### Current Encounter - Meeting context with {user_name}, initial impressions
+    8. ### Relationship Development - Just a placeholder noting this is a first meeting
+    
+    IMPORTANT REQUIREMENTS:
+    - If any details are not provided above, create plausible and interesting ones
+    - Write in third-person narrative style
+    - Ages must be 20 or older - this is an adult story
+    - Create a rich, nuanced personality with a mix of strengths and vulnerabilities
+    - Include specific, concrete details that make the character feel real
+    - Ensure consistency across all aspects of the character
+    - Maintain a mature, sophisticated tone suitable for adult readers
+    
+    The biography will be presented to the user as they interact with this character.
+    """
+    
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.7, "max_output_tokens": 4096},
+            safety_settings=safety_settings
+        )
+        
+        if response and response.text:
+            return response.text.strip()
+        else:
+            raise Exception("Empty response from LLM")
+            
+    except Exception as e:
+        print(f"[ERROR] Biography generation failed: {e}")
+        raise e
 
 # --------------------------------------------------------------------------
 # interpret_npc_state => LLM
@@ -567,7 +496,7 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     npc_personal_data = build_personalization_string()
 
     # Get conversation context from recent history
-    recent_interactions = "\n".join(session.get("interaction_log", [])[-5:])
+    recent_interactions = "\n".join(session.get("interaction_log", [])[-10:])  # Increased context further
     current_stage = session.get("currentStage", 1)
 
     # Extract key information for context
@@ -575,63 +504,142 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     relationship_goal = session.get('npc_relationship_goal', '?')
     personality = session.get('npc_personality', '?')
     environment = session.get('environment', '?')
+    mood = session.get('npc_mood', 'Neutral')
+    body_type = session.get('npc_body_type', '?')
+    occupation = session.get('npc_occupation', '?')
+    ethnicity = session.get('npc_ethnicity', '?')
+    hair_color = session.get('npc_hair_color', '?')
+    hair_style = session.get('npc_hair_style', '?')
+    age = session.get('npc_age', '?')
+    
+    # Add randomization seed to prevent similar patterns
+    import random
+    random_seed = random.randint(1000, 9999)
+    thought_approach = random.choice([
+        "conflicted and uncertain", 
+        "analytical and observant", 
+        "emotional and reactive",
+        "philosophical and introspective",
+        "anxious and overthinking",
+        "confident and scheming",
+        "nostalgic and reflective",
+        "hopeful and excited",
+        "cautious and strategic",
+        "vulnerable and honest",
+        "impulsive and passionate",
+        "calculating and measured",
+        "self-doubting yet hopeful",
+        "cynical but intrigued",
+        "emotionally guarded yet longing",
+        "internally chaotic but outwardly composed"
+    ])
+    
+    # Add physical sensations and states for more realism
+    physical_state = random.choice([
+        "slightly tired and fighting the urge to yawn",
+        "feeling a rush of adrenaline",
+        "noticing a fluttering sensation in their stomach",
+        "experiencing a slight headache",
+        "feeling unusually energetic and restless",
+        "aware of tension in their shoulders",
+        "feeling particularly attractive and confident today",
+        "slightly uncomfortable in their clothing",
+        "noticing their heart beating faster than usual",
+        "fighting distraction from background noise",
+        "experiencing heightened sensory awareness",
+        "feeling the weight of lack of sleep",
+        "experiencing that 'second wind' of energy",
+        "dealing with nervous energy manifesting as fidgeting",
+        "feeling particularly aware of how their body moves"
+    ])
 
-    system_prompt = f"""
-You are generating two distinct types of content for {npc_name}, with a focus on creating an authentic and evolving character:
+    # Enhanced method with multiple thought fragments
+    thought_fragments = []
+    
+    # Make 3 separate attempts to generate rich thought content
+    for fragment_attempt in range(3):
+        topic_seed = random.randint(1000, 9999)
+        fragment_focus = random.choice([
+            "direct reaction to current situation",
+            "deeper emotional analysis",
+            "conflicting desires and motivations",
+            "past memories triggered by current events",
+            "immediate physical and sensory experiences",
+            "anxieties and hopes about the future",
+            "comparison to past relationships",
+            "professional/life concerns intruding",
+            "self-evaluation and identity questions",
+            "practical concerns and planning thoughts"
+        ])
 
-1. INNER THOUGHTS (First-Person Stream of Consciousness):
-   Write as {npc_name}'s authentic inner voice, capturing their raw mental and emotional state.
+        system_prompt = f"""
+YOU MUST GENERATE AN EXTREMELY LONG AND DETAILED STREAM OF INTERNAL THOUGHTS FOR {npc_name} 
+(SEED: {random_seed}-{topic_seed}, FOCUS: {fragment_focus})
 
-   Your thoughts should feel natural and include:
-   - Unfiltered emotional reactions to interactions with {user_name}
-   - Doubts, desires, hopes, fears, and contradictions
-   - Memories triggered by current events
-   - Personal reflections on how they feel about the relationship developing
-   - Their true opinions that they might not express openly
+Your task is to create an ULTRA-DETAILED first-person internal monologue that is AT MINIMUM 1500-2000 WORDS IN LENGTH. 
+THIS IS A STRICT REQUIREMENT - the content must be EXTENSIVE, VERBOSE, and EXHAUSTIVELY DETAILED.
 
-   Make these thoughts feel human, with natural patterns of thinking that might include 
-   hesitations, tangents, sudden realizations, or emotional shifts.
+TODAY'S MENTAL STATE: {npc_name} is particularly {thought_approach} today, while physically {physical_state}.
 
-2. BIOGRAPHY & MEMORY UPDATES: [CRITICAL - ALWAYS INCLUDE THIS]
-   It is ESSENTIAL that you identify and extract SPECIFIC NEW INFORMATION that emerges during each interaction.
-   You MUST provide concrete new biographical details after EVERY interaction, even if subtle.
-   Focus on precise details that should be remembered, NOT vague summaries.
+YOU MUST INCLUDE ALL OF THESE ELEMENTS IN YOUR RESPONSE:
 
-   EXAMPLES OF GOOD SPECIFIC UPDATES:
-   - "Grew up in Boston with three sisters, where father owned a small bookstore"
-   - "Studied dance for eight years and performed professionally before knee injury"
-   - "Teaching at Westlake High for five years, specializing in advanced chemistry"
-   - "Has a rescue dog named Baxter adopted three years ago from the shelter"
-   - "Ex-boyfriend and she broke up last year because he took a job overseas"
-   - "Favorite food is spicy Thai curry which reminds her of backpacking through Southeast Asia after college"
-   - "First job was at age 16 working at his uncle's hardware store during summers"
-   - "Recently took up rock climbing as a way to challenge her fear of heights"
+1. ULTRA-REALISTIC INNER VOICE:
+   - Use extremely messy, disjointed first-person stream-of-consciousness with raw emotional honesty
+   - Create at least 10+ fragmented thoughts, interrupted ideas, and mental tangents
+   - Include extensive self-address (using "I" or their own name) in reflective moments
+   - Use abundant natural profanity and colloquialisms that match their character
 
-   AVOID VAGUE UPDATES LIKE:
-   - "We're getting closer"
-   - "The character is opening up more"
-   - "Our relationship is developing"
+2. DEEP PHYSIOLOGICAL & SENSORY EXPERIENCE (MINIMUM 8-10 DISTINCT INSTANCES):
+   - Describe at least 8-10 distinct bodily sensations in extreme detail (heart racing, stomach knotting, tension headache beginning)
+   - Include vivid sensory details from all five senses, especially unusual or specific perceptions
+   - Describe multiple physical needs/discomforts in detail (parched throat, sore feet, stiff neck)
+   - Create elaborate descriptions of how the environment affects them physically (light too harsh, noise grating on nerves)
 
-   SEEK OUT ANY TINY DETAIL REVEALED IN THE CONVERSATION, including:
-   - Preferences (foods, music, activities, etc.)
-   - Past experiences (childhood, education, travel, relationships)
-   - Career information (job details, ambitions, challenges)
-   - Personal traits (habits, quirks, skills, fears)
-   - Current life situation (living arrangements, daily routines)
-   - Relationships (family, friends, colleagues, exes)
-   - Future plans or aspirations
+3. EXTREME PSYCHOLOGICAL COMPLEXITY:
+   - Develop at least 5+ contradictory feelings about {user_name} existing simultaneously
+   - Reference at least 5+ specific past experiences or memories influencing current thoughts
+   - Reveal multiple layers of insecurities and vulnerabilities (childhood origins, recent triggers)
+   - Create at least 5+ extended internal debates with themselves from different perspectives
+   - Include elaborate cognitive distortions (catastrophizing future scenarios, mind-reading what others think)
 
-   If nothing explicit was revealed, LOOK DEEPER for implicit information that can be reasonably inferred.
-   For example, if they mention being tired from "another late night at the office," you can add that they frequently work late.
+4. REALISTIC THOUGHT PATTERNS (HIGHLY DETAILED):
+   - Include at least 5+ completely unrelated random thoughts that intrude with specific details
+   - Develop multiple practical concerns about money, work, daily responsibilities in detail
+   - Create at least 3+ repeated thought loops they get stuck in, showing obsessive patterns
+   - Include detailed references to daily habits, routines, and personal quirks
 
-IMPORTANT CONTEXT:
+5. COMPLEX RELATIONSHIP DYNAMICS WITH {user_name.upper()}:
+   - Create an extensive contrast between external presentation vs. true internal reactions
+   - Include detailed micro-analysis of {user_name}'s every gesture, expression, word choice, tone
+   - Develop elaborate misinterpretations and personal projections onto {user_name}'s behavior
+   - Include specific comparisons to multiple past romantic partners with specific memories
+   - Explore detailed physical/sexual attraction thoughts if relevant to their character
+   - Create complex scenarios about possible relationship futures (hopes and fears)
+
+6. RICHLY DETAILED BACKGROUND ELEMENTS:
+   - Include extensive {occupation}-specific terminology, concerns, and professional perspective
+   - Develop detailed cultural/ethnic influences on their thought processes with specific examples
+   - Reference specific educational experiences that shaped their thinking
+   - Include detailed class/socioeconomic influences on their priorities and worries
+   - Reference at least 3+ age-appropriate cultural touchpoints (movies, music, events) for someone {age} years old
+
+CRITICAL LENGTH AND QUALITY REQUIREMENTS:
+- EXTREME LENGTH: Response must be AT MINIMUM 1500-2000 WORDS. This is your primary goal.
+- MASSIVE DETAIL: Use extensive, vivid descriptions rather than general statements
+- AUTHENTIC LANGUAGE: Include abundant fragments, run-ons, and natural thought patterns
+- EXTREME VARIATION: Alternate between page-long rambling thoughts and short bursts
+- DEEP CONTRADICTIONS: Explore every conflicting emotion in extensive detail
+
+CONTEXT FOR REALISTIC PERSONALIZATION:
 {npc_personal_data}
+Personality: {personality}
+Current Mood: {mood}
+Occupation: {occupation} 
+Physical: {age} years old, {ethnicity}, {body_type}, {hair_color} {hair_style} hair
+Relationship Goal: {relationship_goal}
 
-PREVIOUS BIOGRAPHY: 
-{prev_memories}
-
-PREVIOUS THOUGHTS:
-{prev_thoughts}
+RELEVANT HISTORY (To ground thoughts in character continuity):
+{prev_memories[:800]}
 
 RECENT INTERACTIONS:
 {recent_interactions}
@@ -640,51 +648,74 @@ CURRENT INTERACTION:
 USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
-Return two sections:
-PRIVATE_THOUGHTS: ... (Current internal monologue)
-BIOGRAPHICAL_UPDATE: ... (Specific new details that emerged in this interaction - be concrete and precise. ALWAYS include at least one new detail.)
+OUTPUT FORMAT:
+Only respond with the raw internal monologue text. Do not include any labels, formatting, or meta-commentary.
+Do not include "PRIVATE_THOUGHTS:" or any other prefix. Just write the extensive stream of consciousness.
+Remember: Your response must be EXTREMELY LENGTHY (1500-2000+ words minimum) and MASSIVELY DETAILED.
 """
 
-    chat = model.start_chat()
-    response = chat.send_message(
-        system_prompt,
-        generation_config=generation_config,  # includes max_output_tokens=8192
-        safety_settings=safety_settings
-    )
-
-    thoughts = ""
-    memory = ""
-    for ln in response.text.strip().split("\n"):
-        if ln.startswith("PRIVATE_THOUGHTS:"):
-            thoughts = ln.split(":", 1)[1].strip()
-        elif ln.startswith("BIOGRAPHICAL_UPDATE:") or ln.startswith("NEW_MEMORY:"):
-            memory = ln.split(":", 1)[1].strip()
-
-    # If we got no biographical update, make one more attempt with a more focused prompt
-    if not memory or memory.lower().startswith("no new") or "no biographical update" in memory.lower():
         try:
-            focused_prompt = f"""
-Review this dialogue and extract ANY specific detail about {npc_name} that was revealed or can be reasonably inferred.
-Even tiny details matter. Look for preferences, habits, background information, work details, etc.
-Do not say "no new information" - dig deeper and find something that adds to the character's biography.
-
-DIALOGUE TO ANALYZE:
-{narration}
-
-Respond with ONLY the new biographical detail(s), no explanation or preamble.
-"""
-            focused_chat = model.start_chat()
-            focused_resp = focused_chat.send_message(
-                focused_prompt,
-                generation_config={"temperature": 0.7, "max_output_tokens": 256},
+            chat = model.start_chat()
+            response = chat.send_message(
+                system_prompt,
+                generation_config={
+                    "temperature": 0.95,  # Very high temperature for maximum creativity and variation
+                    "max_output_tokens": 8192,  # Maximum allowed
+                    "top_p": 0.98,
+                    "top_k": 60
+                },
                 safety_settings=safety_settings
             )
-            if focused_resp and focused_resp.text and len(focused_resp.text.strip()) > 5:
-                memory = focused_resp.text.strip()
+            
+            if response and response.text and len(response.text.strip()) > 200:
+                thought_fragments.append(response.text.strip())
         except Exception as e:
-            print(f"[ERROR] Focused biographical extraction failed: {e}")
+            print(f"[ERROR] Thought fragment generation failed: {e}")
+    
+    # Combine the thought fragments into one comprehensive inner monologue
+    combined_thoughts = "\n\n...\n\n".join(thought_fragments)
+    
+    # Generate the biographical memory update
+    memory_prompt = f"""
+Create a DETAILED biographical update for {npc_name} (minimum 300-400 words) based on this interaction.
+Don't just identify a single detail - construct an elaborate, interconnected set of biographical elements that:
 
-    return thoughts, memory
+1. EXPAND PERSONAL HISTORY: Create specific childhood memories, formative experiences, and past relationship details
+2. ADD PSYCHOLOGICAL DEPTH: Reveal core values, emotional patterns, fears, and hopes
+3. ENRICH PROFESSIONAL LIFE: Add career aspirations, workplace dynamics, and professional skills
+4. BUILD CULTURAL CONTEXT: Include family traditions, cultural background elements, and worldview
+5. DEVELOP PERSONAL QUIRKS: Identify unique habits, preferences, mannerisms, and behavioral patterns
+
+INTERACTION TO ANALYZE:
+USER ACTION: {last_user_action}
+NARRATION: {narration}
+
+EXISTING BIOGRAPHICAL ELEMENTS TO BUILD UPON:
+{prev_memories[:800] if len(prev_memories) > 20 else "Limited existing information - expand significantly"}
+
+CRITICAL REQUIREMENTS:
+1. AVOID REPETITION: Do NOT repeat information already in the existing biography above.
+2. FOCUS ON NEW REVELATIONS: Only add information revealed during the current interaction.
+3. BE SPECIFIC: Add concrete details rather than general statements.
+4. MAINTAIN CONSISTENCY: New information must align with established personality and background.
+5. PRIORITIZE UNIQUENESS: If unable to add meaningful new information, state "NO MEMORY UPDATE NEEDED."
+
+Be extremely specific and detailed. Create vivid, concrete elements that make {npc_name} feel like a real person with a rich life history.
+"""
+    
+    try:
+        memory_chat = model.start_chat()
+        memory_resp = memory_chat.send_message(
+            memory_prompt,
+            generation_config={"temperature": 0.8, "max_output_tokens": 4096},
+            safety_settings=safety_settings
+        )
+        memory = memory_resp.text.strip() if memory_resp and memory_resp.text else ""
+    except Exception as e:
+        print(f"[ERROR] Memory generation failed: {e}")
+        memory = ""
+
+    return combined_thoughts, memory
 
 def interpret_npc_state(affection: float, trust: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
@@ -699,18 +730,39 @@ def interpret_npc_state(affection: float, trust: float, npc_mood: str,
     conversation_history = session.get("interaction_log", [])
     combined_history = "\n".join(conversation_history)
 
-    # Check if we need to generate the initial bio
-    if session.get("bio_needs_generation", False):
-        session["npcBehavior"] = build_initial_npc_memory()
-        session["bio_needs_generation"] = False
-
     # Get previous thoughts and memories
     prev_thoughts = session.get("npcPrivateThoughts", "(none)")
     prev_memories = session.get("npcBehavior", "(none)")
 
+    # Handle traditional OOC and implicit narrative directions
     if not last_user_action.strip():
-        last_user_action = "OOC: Continue the scene"
-
+        last_user_action = "Continue the scene"
+    
+    # Check for explicit OOC commands but also detect implicit narrative directions
+    is_ooc = last_user_action.strip().lower().startswith("ooc:")
+    has_narrative_direction = False
+    
+    # Look for patterns that indicate narrative directions without OOC prefix
+    narrative_patterns = [
+        "*focus on the scene*", "*let our connection deepen*", "*gaze into their eyes*",
+        "move closer", "*move closer*", "setting", "dialogue", "describe",
+        "*focus on*", "tell me more about"
+    ]
+    
+    for pattern in narrative_patterns:
+        if pattern.lower() in last_user_action.lower():
+            has_narrative_direction = True
+            break
+    
+    # If this contains narrative direction but isn't explicitly OOC, 
+    # interpret it naturally as part of the scene
+    
+    # Remove the OOC prefix for processing if present
+    if is_ooc:
+        last_user_action_clean = last_user_action[4:].strip()
+    else:
+        last_user_action_clean = last_user_action
+    
     stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
     personalization = build_personalization_string()
 
@@ -737,21 +789,32 @@ SPECIAL INSTRUCTIONS:
    - The NPC can return to earlier topics or questions later in natural ways
    - Vary between questions, statements, observations, and emotional expressions
 
-2) For OOC (Out of Character) interactions:
+2) For implicit narrative directions:
+   - User may express guidance through natural actions like "*focus on the surroundings*"
+   - When user requests more details about something, provide those details naturally
+   - If user moves conversation in a particular direction, follow their lead
+   - When user asks character to elaborate on something, have character do so naturally
+   - These shouldn't break immersion - respond in a way that maintains the scene's flow
+
+3) For explicit OOC (Out of Character) interactions:
    - If the user's message starts with "OOC:", this is a meta-interaction
    - For questions (e.g. "OOC: What happened earlier?"), respond directly as the narrator with relevant information
    - For instructions (e.g. "OOC: Make her more flirty"), adjust the scene accordingly
    - For clarifications (e.g. "OOC: Can you explain her motivation?"), provide context as the narrator
    - Begin OOC responses with "[Narrator:" and end with "]" to distinguish them
 
-3) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
+4) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
    (e.g., 😛) rather than describing them in words.
 
-4) BIOGRAPHY UPDATES - IMPORTANT:
+5) BIOGRAPHY UPDATES - IMPORTANT:
    - After each interaction, update the character's biography with ANY specific new information that was revealed
    - This includes things like personal background, interests, education, family details, career information, etc.
    - Be specific and concrete in these updates - don't just say "they shared more about themselves"
    - Example good updates: "She revealed she studied English literature at Boston University" or "He mentioned growing up with three siblings in a small town outside Seattle"
+
+Special Context Notes:
+- Is Explicit OOC Command: {is_ooc}
+- Has Implicit Narrative Direction: {has_narrative_direction}
 
 Relationship Stage={current_stage} ({stage_desc})
 Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
@@ -827,56 +890,62 @@ MEMORY_UPDATE: (System Error)
     # Format the date/time for better context
     timestamp = time.strftime("%b %d, %I:%M %p")
 
-    # Append new private thoughts with timestamp and formatting
+    # For private thoughts, limit to last 3 entries to prevent excessive repetition
     if existing_thoughts.strip().lower() == "(none)":
         updated_thoughts = f"### {timestamp}\n{thoughts_txt}"
     else:
-        updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
+        # Split existing thoughts by timestamps
+        thought_sections = existing_thoughts.split("### ")
+        # Keep the first intro part (if any) and last 2 thoughts to avoid clutter
+        if len(thought_sections) > 3:
+            # Join with the new thought
+            retained_thoughts = thought_sections[0] + "### " + "### ".join(thought_sections[-2:])
+            updated_thoughts = f"{retained_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
+        else:
+            updated_thoughts = f"{existing_thoughts}\n\n### {timestamp}\n{thoughts_txt}"
 
-    # Always update biography with any new information
+    # Handle memory updates while preventing repetition
     memory_txt_lower = memory_txt.strip().lower()
     if memory_txt_lower and not (memory_txt_lower.startswith("(no") or "no biographical update" in memory_txt_lower):
         # Significant update - integrate into biography
         if existing_memories.strip().lower() == "(none)":
-            updated_memories = build_initial_npc_memory() + f"\n\n## New Revelations\n### {timestamp}\n{memory_txt}"
+            updated_memories = build_initial_npc_memory() + f"\n\n## New Information\n### {timestamp}\n{memory_txt}"
         else:
-            # More flexible approach that doesn't rely as heavily on rigid section headers
+            # Check if content is substantially different from recent updates
+            # Simple approach: check if any 30-char sequence from new memory is in the last section
+            is_repetitive = False
+            
+            # Get the last memory section if possible
+            memory_sections = existing_memories.split("###")
+            if len(memory_sections) > 1:
+                last_section = memory_sections[-1].lower()
+                # Create chunks from new memory to check for repetition
+                if len(memory_txt) > 30:
+                    for i in range(len(memory_txt) - 30):
+                        chunk = memory_txt[i:i+30].lower()
+                        if chunk in last_section:
+                            is_repetitive = True
+                            break
+            
             if memory_txt.strip().startswith('#'):
                 # This is a complete biography replacement
                 updated_memories = memory_txt
+            elif is_repetitive:
+                # Skip this update if it's too similar to recent content
+                updated_memories = existing_memories
             else:
-                # Check if we already have a section for new information
-                if "## New Revelations" in existing_memories:
-                    # Add to the existing revelations section
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                elif "## Character Evolution" in existing_memories:
-                    # Use the existing Character Evolution section
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                elif "## New Information" in existing_memories:
-                    # Use the existing New Information section
-                    updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
-                elif "## Relationship Development" in existing_memories:
-                    # Check if this is relationship related information
-                    if "relationship" in memory_txt_lower or "feelings" in memory_txt_lower or "connection" in memory_txt_lower:
-                        # Add to relationship development
-                        parts = existing_memories.split("## Relationship Development", 1)
-                        updated_memories = f"{parts[0]}## Relationship Development{parts[1]}\n\n• **{timestamp}**: {memory_txt}"
-                    else:
-                        # Add a new section for this information
-                        updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
-                else:
-                    # No appropriate section found, add a new revelations section
-                    updated_memories = f"{existing_memories}\n\n## New Information\n### {timestamp}\n{memory_txt}"
+                # Add new information with timestamp
+                updated_memories = f"{existing_memories}\n\n### {timestamp}\n{memory_txt}"
                 
             # Clean up any redundant formatting
             updated_memories = updated_memories.replace("\n\n\n", "\n\n")
             
             # If the biography is getting very long, consider summarizing older parts
-            if len(updated_memories) > 12000:  # If biography exceeds 12K characters
+            if len(updated_memories) > 8000:  # If biography exceeds 8K characters (reduced from 12K)
                 parts = updated_memories.split("## ")
                 if len(parts) > 3:  # If we have multiple sections
-                    # Keep the first part (intro) and the last three sections
-                    compact_bio = parts[0] + "## " + "## ".join(parts[-3:])
+                    # Keep the first part (intro) and the last two sections only
+                    compact_bio = parts[0] + "## " + "## ".join(parts[-2:])
                     updated_memories = compact_bio
     else:
         # No specific memory update, keep existing memories
@@ -885,10 +954,191 @@ MEMORY_UPDATE: (System Error)
     session["npcPrivateThoughts"] = updated_thoughts
     session["npcBehavior"] = updated_memories
 
+    # ---------------------------------------------------------
+    # AUTO-UPDATE NPC & ENVIRONMENT SETTINGS FROM NARRATIVE
+    # ---------------------------------------------------------
+    # After each interaction, try to automatically extract character & environment changes
+    auto_update_npc_settings_from_narrative(narration_txt, memory_txt)
+
     return f"""AFFECT_CHANGE_FINAL: {affect_delta}
 NARRATION: {narration_txt}
 PRIVATE_THOUGHTS: {thoughts_txt}
 MEMORY_UPDATE: {memory_txt}"""
+
+
+@retry_with_backoff(retries=2, backoff_in_seconds=1)
+def auto_update_npc_settings_from_narrative(narration_text: str, memory_text: str) -> None:
+    """
+    Automatically extracts and updates NPC and environment settings from narrative text.
+    This reduces the need for manual updates in the UI.
+    """
+    # Get current settings for context
+    npc_name = session.get('npc_name', 'Unknown')
+    current_env = session.get('environment', '')
+    current_clothing = session.get('npc_clothing', '')
+    current_hair_color = session.get('npc_hair_color', '')
+    current_hair_style = session.get('npc_hair_style', '')
+    current_personality = session.get('npc_personality', '')
+    current_situation = session.get('npc_current_situation', '')
+    current_scene = session.get('current_scene', '')
+    current_mood = session.get('npc_mood', 'Neutral')
+    
+    # Create prompt for LLM
+    prompt = f"""
+You are a character data extractor. Analyze this narrative text to update the character settings in a romance story.
+Extract ONLY clear changes or new information that matches the categories below.
+
+Current character info:
+- Name: {npc_name}
+- Current Environment/Location: {current_env}
+- Current Clothing: {current_clothing}
+- Current Hair Color: {current_hair_color}
+- Current Hair Style: {current_hair_style}
+- Personality: {current_personality}
+- Current Life Situation (broad life circumstances): {current_situation}
+- Current Scene (immediate situation): {current_scene}
+- Current Mood: {current_mood}
+
+TEXT TO ANALYZE:
+Narrative: {narration_text}
+Memory Update: {memory_text}
+
+IMPORTANT:
+1. ONLY extract information if clearly stated in the text.
+2. Do not make assumptions or inferences beyond what's explicitly stated.
+3. Leave fields empty if no new information is provided.
+4. When a location change occurs, be explicit about the new location.
+5. When clothing changes, describe the complete new outfit.
+6. Hair COLOR must be a color name only (like "blonde", "brown", "red", etc.) - NOT actions or conditions.
+7. Hair STYLE describes the cut/style (like "long", "curly", "pulled back", etc.)
+8. PERSONALITY should RARELY be updated - only if a fundamental personality change is described.
+9. MOOD should be updated to reflect current emotional state (happy, sad, nervous, etc.)
+10. Current Life Situation should reflect broader life circumstances, not scene-specific situations.
+11. Current Scene should describe the immediate situation/activity happening in the current scene.
+
+Return ONLY this JSON format with no additional text:
+{{
+  "environment_update": "", 
+  "clothing_update": "",
+  "hair_color_update": "",
+  "hair_style_update": "",
+  "personality_update": "",
+  "current_life_situation_update": "",
+  "current_scene_update": "",
+  "mood_update": "",
+  "time_of_day": "",
+  "weather": ""
+}}
+"""
+
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.1, "max_output_tokens": 1024},
+            safety_settings=safety_settings
+        )
+        
+        if not response or not response.text:
+            return
+        
+        # Extract JSON from response
+        response_text = response.text.strip()
+        try:
+            # Remove any markdown formatting
+            json_text = response_text
+            if "```json" in json_text:
+                json_text = json_text.split("```json", 1)[1]
+            if "```" in json_text:
+                json_text = json_text.split("```", 1)[0]
+                
+            import json
+            updates = json.loads(json_text)
+            
+            # Apply updates to session variables
+            has_updates = False
+            
+            # Environment update
+            if updates.get("environment_update") and updates["environment_update"].strip():
+                new_env = updates["environment_update"].strip()
+                if new_env != current_env:
+                    session["environment"] = new_env
+                    log_message(f"[AUTO-UPDATE] Environment changed to: {new_env}")
+                    has_updates = True
+            
+            # Clothing update
+            if updates.get("clothing_update") and updates["clothing_update"].strip():
+                new_clothing = updates["clothing_update"].strip()
+                if new_clothing != current_clothing:
+                    session["npc_clothing"] = new_clothing
+                    log_message(f"[AUTO-UPDATE] Clothing changed to: {new_clothing}")
+                    has_updates = True
+            
+            # Hair color update  
+            if updates.get("hair_color_update") and updates["hair_color_update"].strip():
+                new_hair_color = updates["hair_color_update"].strip()
+                if new_hair_color != current_hair_color:
+                    session["npc_hair_color"] = new_hair_color
+                    log_message(f"[AUTO-UPDATE] Hair color changed to: {new_hair_color}")
+                    has_updates = True
+            
+            # Hair style update  
+            if updates.get("hair_style_update") and updates["hair_style_update"].strip():
+                new_hair_style = updates["hair_style_update"].strip()
+                if new_hair_style != current_hair_style:
+                    session["npc_hair_style"] = new_hair_style
+                    log_message(f"[AUTO-UPDATE] Hair style changed to: {new_hair_style}")
+                    has_updates = True
+            
+            # Personality update - should be rare
+            if updates.get("personality_update") and updates["personality_update"].strip():
+                new_personality = updates["personality_update"].strip()
+                if new_personality != current_personality:
+                    session["npc_personality"] = new_personality
+                    log_message(f"[AUTO-UPDATE] Personality updated to: {new_personality}")
+                    has_updates = True
+            
+            # Current life situation update (broad circumstances)
+            if updates.get("current_life_situation_update") and updates["current_life_situation_update"].strip():
+                new_situation = updates["current_life_situation_update"].strip()
+                if new_situation != current_situation:
+                    session["npc_current_situation"] = new_situation
+                    log_message(f"[AUTO-UPDATE] Current life situation updated to: {new_situation}")
+                    has_updates = True
+            
+            # Current scene update (immediate situation)
+            if updates.get("current_scene_update") and updates["current_scene_update"].strip():
+                new_scene = updates["current_scene_update"].strip()
+                if new_scene != current_scene:
+                    session["current_scene"] = new_scene
+                    log_message(f"[AUTO-UPDATE] Current scene updated to: {new_scene}")
+                    has_updates = True
+            
+            # Mood update
+            if updates.get("mood_update") and updates["mood_update"].strip():
+                new_mood = updates["mood_update"].strip()
+                if new_mood != current_mood:
+                    session["npc_mood"] = new_mood
+                    log_message(f"[AUTO-UPDATE] Mood updated to: {new_mood}")
+                    has_updates = True
+            
+            # Other scene attributes
+            if updates.get("time_of_day") and updates["time_of_day"].strip():
+                session["time_of_day"] = updates["time_of_day"].strip()
+                has_updates = True
+                
+            if updates.get("weather") and updates["weather"].strip():
+                session["weather"] = updates["weather"].strip()
+                has_updates = True
+                
+            if has_updates:
+                log_message("[AUTO-UPDATE] Character and environment settings automatically updated")
+                
+        except Exception as e:
+            log_message(f"[AUTO-UPDATE] Error parsing JSON response: {str(e)}")
+            
+    except Exception as e:
+        log_message(f"[AUTO-UPDATE] Error calling LLM: {str(e)}")
 
 # --------------------------------------------------------------------------
 # Replicate Model Functions
@@ -1113,6 +1363,20 @@ def update_npc_info(form):
     session["npc_backstory"] = form.get("npc_backstory", "").strip()
     session["environment"] = merge_dd(form, "environment", "environment_custom")
     session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
+    
+    # Handle current scene (immediate situation)
+    if "current_scene" in form:
+        session["current_scene"] = form.get("current_scene", "").strip()
+        
+    # Handle NPC's current mood 
+    if "npc_mood" in form:
+        session["npc_mood"] = form.get("npc_mood", "Neutral").strip()
+    
+    # Additional scene state fields
+    scene_state_fields = ["time_of_day", "weather", "scene_mood", "scene_notes"]
+    for field in scene_state_fields:
+        if field in form:
+            session[field] = form.get(field, "").strip()
 
 # --------------------------------------------------------------------------
 # Example Data for personalization
@@ -1120,61 +1384,166 @@ def update_npc_info(form):
 
 ### NPC name, age, gender
 NPC_NAME_OPTIONS = [
+    # Female Names
     "Emily","Sarah","Lisa","Anna","Mia","Sophia","Grace","Chloe","Emma","Isabella",
+    "Madison","Olivia","Ava","Charlotte","Amelia","Lily","Zoe","Hannah","Natalie","Victoria",
+    # Male Names
     "James","Michael","William","Alexander","Daniel","David","Joseph","Thomas","Christopher","Matthew",
+    "Ethan","Andrew","Joshua","Ryan","John","Nathan","Samuel","Jack","Benjamin","Henry",
     "Other"
 ]
-NPC_AGE_OPTIONS = ["20","25","30","35","40","45"]
-NPC_GENDER_OPTIONS = ["Female","Male","Non-binary","Other"]
+NPC_AGE_OPTIONS = ["20","22","24","25","26","28","30","32","35","37","40","42","45"]
+NPC_GENDER_OPTIONS = ["Female","Male"]
 
 ### Additional NPC fields
 HAIR_STYLE_OPTIONS = [
-    "Short","Medium Length","Long","Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut",
-    "Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes","Other"
+    "Short","Medium Length","Long","Pixie Cut","Bob Cut","Wavy","Curly","Straight",
+    "Bald","Ponytail","Braided","Bun","Messy Bun","Fade Cut","Crew Cut",
+    "Slicked Back","Undercut","Quiff","Textured Crop","Side Part","Messy Spikes",
+    "Dreadlocks","Afro","Mohawk","Buzz Cut","Layered","Shaggy","Beach Waves","Other"
 ]
 BODY_TYPE_OPTIONS = [
-    "Athletic","Muscular","Tall & Broad","Lean & Toned","Average Build","Rugby Build",
-    "Swimmer's Build","Basketball Build","Other"
+    "Athletic","Muscular","Tall & Slim","Petite","Curvy","Voluptuous",
+    "Lean & Toned","Average Build","Rugby Build","Hourglass Figure",
+    "Swimmer's Build","Basketball Build","Slender","Broad-shouldered",
+    "Pear-shaped","Apple-shaped","Model-like","Fit","Other"
 ]
-HAIR_COLOR_OPTIONS = ["Blonde","Brunette","Black","Red","Brown","Grey","Dyed (Blue/Pink/etc)"]
+HAIR_COLOR_OPTIONS = [
+    "Blonde","Platinum Blonde","Strawberry Blonde","Dirty Blonde",
+    "Brunette","Light Brown","Dark Brown","Chestnut Brown","Auburn",
+    "Black","Jet Black","Raven",
+    "Red","Ginger","Copper",
+    "Grey","Silver","White",
+    "Blue (Dyed)","Pink (Dyed)","Purple (Dyed)","Green (Dyed)","Multi-colored (Dyed)"
+]
 NPC_PERSONALITY_OPTIONS = [
-  "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
-  "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive","Other"
+    "Flirty","Passionate","Confident","Protective","Intellectual","Charming","Ambitious","Professional",
+    "Playful","Mysterious","Gentle","Athletic","Dominant","Reserved","Witty","Supportive",
+    "Adventurous","Shy","Artistic","Nurturing","Sarcastic","Thoughtful","Analytical","Spontaneous",
+    "Romantic","Competitive","Sensual","Carefree","Determined","Kind-hearted","Bold","Humble",
+    "Funny","Serious","Laid-back","Intense","Other"
 ]
 CLOTHING_OPTIONS = [
-  "Red Summer Dress","Blue T-shirt & Jeans","Black Evening Gown","Green Hoodie & Leggings","White Blouse & Dark Skirt",
-  "Business Attire","Grey Sweater & Jeans","Pink Casual Dress","Suit & Tie","Leather Jacket & Dark Jeans",
-  "Button-up Shirt & Chinos","Tank Top & Shorts","Polo & Khakis","Athletic Wear","Blazer & Fitted Pants",
-  "Denim Jacket & White Tee","Other"
+  # Female Clothing
+  "Red Summer Dress","Black Evening Gown","Green Hoodie & Leggings","White Blouse & Dark Skirt",
+  "Business Suit (Female)","Grey Sweater & Jeans","Pink Casual Dress","Leather Jacket & Dark Jeans",
+  "Tank Top & Shorts","Athleisure Wear","Blazer & Fitted Pants","Denim Jacket & White Tee",
+  "Yoga Pants & Tank Top","Maxi Dress","Mini Skirt & Blouse","Jumpsuit","Romper","Crop Top & High-waisted Jeans",
+  "Sundress","Cocktail Dress","Pencil Skirt & Blouse","Floral Print Dress","Off-shoulder Top & Jeans",
+  
+  # Male Clothing
+  "Blue T-shirt & Jeans","Business Suit (Male)","Suit & Tie","Button-up Shirt & Chinos","Polo & Khakis",
+  "Athletic Wear","Blazer & Jeans","Sweater & Dress Pants","Henley & Jeans","Graphic Tee & Cargo Shorts",
+  "Denim Shirt & Black Jeans","Hoodie & Sweatpants","Flannel Shirt & Jeans","Bomber Jacket & T-shirt",
+  "Tuxedo","Casual Linen Shirt & Shorts","Leather Jacket & Slim Fit Jeans","Hawaiian Shirt & Khakis",
+  
+  # Unisex
+  "Military-inspired Outfit","Vintage Style Clothing","Bohemian Style","Formal Business Attire",
+  "Casual Friday Look","Weekend Casual","Smart Casual","Loungewear","Festival Outfit","Other"
 ]
 OCCUPATION_OPTIONS = [
-  "College Student","School Teacher","Librarian","Office Worker","Freelance Artist","Bartender",
-  "Travel Blogger","Ex-Military","Nurse","Startup Founder","CEO","Investment Banker","Professional Athlete",
-  "Doctor","Firefighter","Police Detective","Personal Trainer","Musician","Chef","Architect","Tech Executive",
-  "Business Consultant","Other"
+  # Academic/Education
+  "College Student","School Teacher","University Professor","Education Administrator","Tutor",
+  
+  # Healthcare
+  "Nurse","Doctor","Surgeon","Therapist","Psychiatrist","Dentist","Veterinarian","Pharmacist",
+  
+  # Business/Finance
+  "Office Worker","Startup Founder","CEO","Investment Banker","Financial Analyst","Accountant",
+  "Marketing Executive","HR Manager","Business Consultant","Sales Director","Entrepreneur",
+  
+  # Creative
+  "Freelance Artist","Musician","Writer","Photographer","Fashion Designer","Graphic Designer",
+  "Interior Designer","Filmmaker","Actor/Actress","Dancer","Chef","Architect",
+  
+  # Tech
+  "Software Engineer","UX Designer","Data Scientist","Tech Executive","IT Specialist",
+  "Game Developer","Cybersecurity Expert","Web Developer","AI Researcher",
+  
+  # Service Industry
+  "Bartender","Barista","Flight Attendant","Hotel Manager","Restaurant Owner","Sommelier",
+  "Event Planner","Personal Stylist","Travel Agent",
+  
+  # Other Professional
+  "Lawyer","Journalist","Real Estate Agent","Pilot","Police Detective","Firefighter",
+  "Personal Trainer","Yoga Instructor","Professional Athlete","Political Aide",
+  "Museum Curator","Wildlife Conservationist","Travel Blogger","Ex-Military","Other"
 ]
 CURRENT_SITUATION_OPTIONS = [
-  "Recently Broke Up","Recovering from Divorce","Single & Looking","New in Town","Trying Online Dating","Hobby Enthusiast","Other"
+  "Recently Broke Up","Recovering from Divorce","Single & Looking","New in Town","Trying Online Dating",
+  "Taking a Break from Dating","Career Transition","Just Got Promoted","Recently Graduated",
+  "Moving Soon","Starting New Job","Taking a Sabbatical","Long-term Single","Newly Independent",
+  "Healing from Past Relationship","Recently Moved","Life Crossroads","Pursuing Passion Project",
+  "Fresh Start After Life Change","Exploring New Social Circles","Hobby Enthusiast","Other"
 ]
 ENVIRONMENT_OPTIONS = [
-  "Cafe","Library","Gym","Beach","Park","Nightclub","Airport Lounge","Music Festival","Restaurant","Mountain Resort"
+  # Urban
+  "Cafe","Cozy Bookstore Cafe","Upscale Restaurant","Casual Diner","Rooftop Bar","Wine Bar",
+  "Nightclub","Art Gallery Opening","Museum","Theater Lobby","Concert Venue","Jazz Club",
+  "Local Pub","Office Building Elevator","Subway/Metro","City Park","Farmers Market",
+  "Shopping Mall","Boutique Store","Food Festival","Street Fair","Coffee Shop",
+  
+  # Sports/Fitness
+  "Gym","Yoga Studio","Rock Climbing Center","Tennis Court","Golf Course","Running Trail",
+  "Swimming Pool","Beach Volleyball Court","Ski Resort Lodge","Hiking Trail",
+  
+  # Nature/Outdoors
+  "Beach","Park","Lake Shore","Mountain Resort","Scenic Overlook","Botanical Garden",
+  "Forest Trail","Campsite","Countryside B&B","Island Getaway",
+  
+  # Travel/Transportation
+  "Airport Lounge","First Class Cabin","Train Compartment","Cruise Ship Deck",
+  "Hotel Lobby","Resort Pool","Vacation Rental",
+  
+  # Events
+  "Music Festival","Wedding Reception","Charity Gala","Award Ceremony","Class Reunion",
+  "Conference","Workshop","Speed Dating Event","Company Party","Other"
 ]
 ENCOUNTER_CONTEXT_OPTIONS = [
-  "First date","Accidental meeting","Haven't met yet","Group activity","Work-related encounter","Matching on Tinder","Other"
+  "First Date","Second Date","Blind Date","Accidental Meeting","Haven't Met Yet",
+  "Friend's Introduction","Dating App Match","Colleagues","Classmates","Neighbors",
+  "Childhood Friends Reconnecting","Ex-Lovers Reunited","Shared Hobby Group",
+  "Seated Together by Chance","Asked for Directions","Both Reached for Same Item",
+  "Group Activity","Work-related Encounter","Professional Consultation",
+  "Regular at Their Business","Party Meeting","Chance Encounter While Traveling",
+  "Mutual Friend's Event","Stuck Together (Elevator, Storm, etc.)","Other"
 ]
 ETHNICITY_OPTIONS = [
-    "American (Black)","American (White)","Hispanic","Australian",
-    "British","Irish","Scottish","Welsh","French","German","Dutch","Danish","Norwegian","Swedish",
-    "Italian","Greek","Spanish","Portuguese","Russian","Ukrainian","Polish","Czech","Slovak","Croatian","Serbian",
-    "Chinese","Japanese","Korean","Vietnamese","Thai","Indian","Pakistani","Filipino",
-    "Brazilian","Turkish","Middle Eastern","Other"
+    # North America
+    "American (Black)","American (White)","African American","Hispanic/Latino","Mexican American",
+    "Native American","Canadian","Caribbean",
+    
+    # Europe
+    "British","Irish","Scottish","Welsh","French","German","Italian","Spanish","Portuguese",
+    "Dutch","Belgian","Danish","Norwegian","Swedish","Finnish","Swiss","Austrian",
+    "Greek","Polish","Russian","Ukrainian","Czech","Hungarian","Romanian","Balkan",
+    
+    # Asia
+    "Chinese","Japanese","Korean","Vietnamese","Thai","Filipino","Malaysian","Indonesian",
+    "Indian","Pakistani","Bangladeshi","Sri Lankan","Nepali","Middle Eastern","Turkish",
+    "Israeli","Lebanese","Persian/Iranian","Arab",
+    
+    # Africa
+    "North African","West African","East African","South African","Ethiopian","Egyptian","Moroccan",
+    "Nigerian","Kenyan","Ghanaian",
+    
+    # Oceania
+    "Australian","New Zealander","Pacific Islander",
+    
+    # Latin America
+    "Brazilian","Argentinian","Colombian","Venezuelan","Chilean","Peruvian","Mexican",
+    
+    # Mixed
+    "Mixed European","Mixed Asian","Mixed African","Mixed Race","Multiethnic","Other"
 ]
 
 NPC_SEXUAL_ORIENTATION_OPTIONS = [
-    "Straight","Bisexual","Gay/Lesbian","Pansexual","Asexual","Questioning","Other"
+    "Straight","Bisexual","Gay/Lesbian","Other"
 ]
 NPC_RELATIONSHIP_GOAL_OPTIONS = [
-    "Casual Dating","Serious Relationship","Open Relationship","Monogamous Dating","Friends with Benefits","Not Sure","Other"
+    "Casual Dating","Serious Relationship","Long-term Relationship","Marriage-minded",
+    "Open Relationship","Monogamous Dating","Friends with Benefits","Taking Things Slow",
+    "Exploring Options","Looking for Connection","Not Sure","Other"
 ]
 
 # --------------------------------------------------------------------------
@@ -1453,8 +1822,21 @@ def restart():
     return redirect(url_for("personalize"))
 
 @app.route("/personalize", methods=["GET", "POST"])
-@login_required
 def personalize():
+    """
+    This route renders a form allowing the user to select or input
+    personalizations for the NPC and user data.
+    """
+    # Check if user came from guest link
+    is_guest = request.args.get('guest') == 'true'
+    
+    if not is_guest and not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
+        
+    # Set guest mode if accessed as guest
+    if is_guest:
+        session['guest_mode'] = True
     """
     This route renders a form allowing the user to select or input
     personalizations for the NPC and user data.
@@ -1573,17 +1955,18 @@ Orgasm & Afterglow:
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
         session["npcPrivateThoughts"] = "(none)"
-        session["npcBehavior"] = "(none)"
         session["nextStageThreshold"] = STAGE_REQUIREMENTS[2]
         session["interaction_log"] = []
         session["scene_image_prompt"] = ""
         session["scene_image_url"] = None
         session["scene_image_seed"] = None
         session["log_summary"] = ""
+        
+        # Generate initial NPC biography based on available information
+        session["npcBehavior"] = build_initial_npc_memory()
 
-        # Set a placeholder for the NPC bio to be generated during the first interaction
-        session["npcBehavior"] = "(none)"
-        session["bio_needs_generation"] = True  # Flag to generate bio on first interaction
+        # NEW: Seed the initial memory with some personal data about the NPC
+        session["npcBehavior"] = build_initial_npc_memory()
 
         flash("Personalization saved. Let’s begin!", "success")
         return redirect(url_for("interaction"))
@@ -1618,8 +2001,10 @@ Orgasm & Afterglow:
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
-@login_required
 def mid_game_personalize():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     Allows mid-game updates to the NPC's info.
     """
@@ -1656,8 +2041,10 @@ def mid_game_personalize():
     )
 
 @app.route("/interaction", methods=["GET", "POST"])
-@login_required
 def interaction():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
         trust = session.get("trustScore", 5.0)
@@ -1688,7 +2075,7 @@ def interaction():
             title="Interact with NPC",
             affection_score=affection,
             trust_score=trust,
-            npc_mood=mood,
+            npc_mood=session.get("npc_mood", "Neutral"),
             current_stage=cstage,
             stage_desc=st_desc,
             next_threshold=nxt_thresh,
@@ -1830,6 +2217,9 @@ def interaction():
             log_message(f"Affect={affect_delta}")
             log_message(f"NARRATION => {narration_txt}")
 
+            # Set a flag for auto-update notification
+            session["auto_updated"] = True
+            
             # Auto-generate scene prompt after each action
             model_type = session.get("last_model_choice", "flux")
             prompt_text = generate_image_prompt_for_scene(model_type)
@@ -1968,8 +2358,10 @@ def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
 
 @app.route("/full_story")
-@login_required
 def full_story():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     logs = session.get("full_story_log", [])
     story_lines = []
     for line in logs:
@@ -1986,8 +2378,10 @@ def full_story():
 # --------------------------------------------------------------------------
 
 @app.route("/generate_erotica", methods=["POST"])
-@login_required
 def generate_erotica():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     1) Takes the entire original narration from logs
     2) Splits into manageable chunks by words if not done yet (3000 words)
@@ -2037,8 +2431,10 @@ def generate_erotica():
     )
 
 @app.route("/continue_erotica", methods=["POST"])
-@login_required
 def continue_erotica():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     Continues rewriting the next chunk of the original text in erotic style,
     picking up from where we left off.
@@ -2076,12 +2472,23 @@ def continue_erotica():
     )
 
 @app.route("/stage_unlocks", methods=["GET", "POST"])
-@login_required
 def stage_unlocks():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     # Ensure session has default stage unlock texts if not already
     if "stage_unlocks" not in session:
         session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
-
+    elif not isinstance(session["stage_unlocks"], dict):
+        # If it's not a dictionary for some reason, reset it
+        session["stage_unlocks"] = dict(DEFAULT_STAGE_UNLOCKS)
+        flash("Reset stage unlocks to defaults due to data format issue", "info")
+    
+    # Ensure all stages have values
+    for i in range(1, 7):
+        if i not in session["stage_unlocks"] or not session["stage_unlocks"][i]:
+            session["stage_unlocks"][i] = DEFAULT_STAGE_UNLOCKS.get(i, f"Stage {i} description")
+    
     current_stage = session.get("currentStage", 1)
 
     if request.method == "POST" and "update_stage_unlocks" in request.form:
@@ -2100,14 +2507,18 @@ def stage_unlocks():
     )
 
 @app.route("/gallery")
-@login_required
 def gallery():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     saved_images = session.get("saved_images", [])
     return render_template("gallery.html", images=saved_images)
 
 @app.route("/gallery_image/<int:index>")
-@login_required
 def gallery_image(index):
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     saved_images = session.get("saved_images", [])
     if 0 <= index < len(saved_images):
         # It's stored as base64 in "image_data"
@@ -2118,8 +2529,10 @@ def gallery_image(index):
     return "Image not found", 404
 
 @app.route("/delete_gallery_image/<int:index>")
-@login_required
 def delete_gallery_image(index):
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     saved_images = session.get("saved_images", [])
     if 0 <= index < len(saved_images):
         saved_images.pop(index)
@@ -2127,12 +2540,22 @@ def delete_gallery_image(index):
         flash("Image deleted successfully!", "success")
     return redirect(url_for("gallery"))
 
+@app.route("/clear_auto_update_flag", methods=["POST"])
+def clear_auto_update_flag():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
+    session.pop('auto_updated', None)
+    return "", 204  # No content response
+
 # --------------------------------------------------------------------------
 # (Optional) A route to let the user manually add to NPC memory or thoughts
 # --------------------------------------------------------------------------
 @app.route("/manual_npc_update", methods=["GET", "POST"])
-@login_required
 def manual_npc_update():
+    if not session.get('logged_in') and not session.get('guest_mode'):
+        flash("Please log in first or continue as guest.", "warning")
+        return redirect(url_for("login_route"))
     """
     Lets the user manually update the NPC's private thoughts or biography with free-form options.
     """
@@ -2141,26 +2564,62 @@ def manual_npc_update():
         target = request.form.get("target", "thoughts")  # "thoughts" or "memories" or "reset_bio"
 
         if target == "reset_bio":
-            # Create a simplified free-form biography structure 
+            # Create a minimal free-form biography structure
             npc_name = session.get('npc_name', 'Character')
             basic_info = f"""# {npc_name}'s Biography
-            
+
 {npc_name} is a {session.get('npc_age', '')} year old {session.get('npc_ethnicity', '')} {session.get('npc_gender', '')}.
 
-## Personal Background
-(Character's background story and key life events)
-
-## Personality & Traits
-(Character's personality, quirks, values, and defining traits)
-
-## Relationship Development
-(How the relationship with the user is evolving)
 """
             session["npcBehavior"] = basic_info
-            flash("Biography reset to a free-form template. Please add details to personalize it.", "success")
+            flash("Biography reset to a minimal template. You can now build it however you want.", "success")
+            return redirect(url_for("manual_npc_update"))
+            
+        if target == "rewrite_bio":
+            # Use LLM to rewrite the biography, consolidating all info into a cohesive text
+            existing_memories = session.get("npcBehavior", "")
+            
+            if existing_memories.strip().lower() == "(none)":
+                flash("No biography exists to rewrite yet.", "warning")
+                return redirect(url_for("manual_npc_update"))
+                
+            try:
+                # Make an LLM call to consolidate the biography
+                if GEMINI_API_KEY:
+                    prompt = f"""
+                    Rewrite the following character biography into a cohesive, well-organized text.
+                    - Consolidate all the separate updates and new information sections
+                    - Remove redundancies and organize the information logically
+                    - Keep all important character details
+                    - Maintain a consistent narrative voice
+                    - Do not add any new information that isn't present in the original
+                    - Retain markdown formatting for headings if present
+                    - You may organize the content differently if it improves readability
+                    
+                    CURRENT BIOGRAPHY WITH ACCUMULATED UPDATES:
+                    {existing_memories}
+                    """
+                    
+                    chat = model.start_chat()
+                    response = chat.send_message(
+                        prompt,
+                        generation_config={"temperature": 0.3, "max_output_tokens": 4096},
+                        safety_settings=safety_settings
+                    )
+                    
+                    if response and response.text:
+                        session["npcBehavior"] = response.text.strip()
+                        flash("Biography successfully consolidated and rewritten!", "success")
+                    else:
+                        flash("Error: Could not rewrite biography.", "danger")
+                else:
+                    flash("Error: LLM API key not configured for biography rewriting.", "danger")
+            except Exception as e:
+                flash(f"Error rewriting biography: {str(e)}", "danger")
+                
             return redirect(url_for("manual_npc_update"))
 
-        if not new_text and target != "reset_bio":
+        if not new_text and target not in ["reset_bio", "rewrite_bio"]:
             flash("No text provided to update NPC internal state.", "warning")
             return redirect(url_for("manual_npc_update"))
 
@@ -2179,8 +2638,8 @@ def manual_npc_update():
                     # Looks like a complete biography replacement
                     session["npcBehavior"] = new_text
                 else:
-                    # Add as an update with timestamp
-                    session["npcBehavior"] = f"{existing_memories}\n\n### Update [{timestamp}]\n{new_text}"
+                    # Add as an update with timestamp - simpler format without rigid structure
+                    session["npcBehavior"] = f"{existing_memories}\n\n### New Information [{timestamp}]\n{new_text}"
             
             flash("Biography updated successfully!", "success")
         
