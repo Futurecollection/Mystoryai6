@@ -1953,7 +1953,7 @@ def interaction():
             title="Interact with NPC",
             affection_score=affection,
             trust_score=trust,
-            npc_mood=mood,
+            npc_mood=session.get("npc_mood", "Neutral"),
             current_stage=cstage,
             stage_desc=st_desc,
             next_threshold=nxt_thresh,
