@@ -100,14 +100,7 @@
   </div>
   <div class="card-body">
     <form method="POST" onsubmit="showLoading()">
-      <!-- Suggestion Chips -->
-      <div class="suggestion-container mb-3">
-        <div class="suggestion-chips">
-          {% for suggestion in suggestions %}
-            <button type="button" class="suggestion-chip" onclick="prefillAction('{{ suggestion }}')">{{ suggestion }}</button>
-          {% endfor %}
-        </div>
-      </div>
+      <!-- Suggestion chips removed as requested -->
 
       <div class="mb-3">
         <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-cursor-text"></i> Type your action or dialogue:</label>

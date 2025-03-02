@@ -473,76 +473,78 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     relationship_goal = session.get('npc_relationship_goal', '?')
     personality = session.get('npc_personality', '?')
     environment = session.get('environment', '?')
+    mood = session.get('npc_mood', 'Neutral')
+    body_type = session.get('npc_body_type', '?')
+    occupation = session.get('npc_occupation', '?')
+    
+    # Add randomization seed to prevent similar patterns
+    import random
+    random_seed = random.randint(1000, 9999)
+    thought_approach = random.choice([
+        "conflicted and uncertain", 
+        "analytical and observant", 
+        "emotional and reactive",
+        "philosophical and introspective",
+        "anxious and overthinking",
+        "confident and scheming",
+        "nostalgic and reflective",
+        "hopeful and excited",
+        "cautious and strategic",
+        "vulnerable and honest"
+    ])
 
     system_prompt = f"""
-You are generating two distinct types of content for {npc_name}, with a focus on creating an authentic and evolving character:
+You are generating authentic internal thoughts for {npc_name} (SEED: {random_seed}). Your task is to create distinctly different, unique inner monologues each time that never follow the same pattern or structure.
 
-1. INNER THOUGHTS (First-Person Stream of Consciousness):
-   Write as {npc_name}'s authentic inner voice, capturing their raw mental and emotional state.
-   
-   IMPORTANT: Write an EXTENSIVE inner monologue of at least 200-300 words, exploring multiple aspects of the character's thoughts.
-   
-   Your thoughts should feel natural and include:
-   - Unfiltered emotional reactions to interactions with {user_name} (both immediate and developing feelings)
-   - Deeper analysis of the interaction's subtext and what they believe {user_name} might be thinking
-   - Multiple doubts, desires, hopes, fears, and contradictions that create internal tension
-   - Specific memories triggered by current events, including sensory details and emotional associations
-   - Personal reflections on how they feel about the relationship developing and where they hope it might go
-   - Their true opinions that they might not express openly due to social constraints or personal fears
-   - Thoughts about their own appearance, behavior or choice of words during the interaction
-   - Questions they're asking themselves or things they wish they had said differently
-   - Conflicting emotions and the character wrestling with complex feelings
-   - Reflections on their past and how it influences their current situation
-   
-   Make these thoughts feel deeply human, with natural patterns of thinking that include:
-   - Stream-of-consciousness style with natural tangents and associations
-   - Both rational analysis and emotional reaction intermingled
-   - Moments of self-doubt followed by self-reassurance
-   - Observations about subtle details they noticed during the interaction
-   - Unresolved questions or concerns they're mulling over
-   - Private admissions they wouldn't share with others
-   - Hesitations, realizations, and emotional shifts that reveal their complexity
+TODAY'S APPROACH: Write as if {npc_name} is particularly {thought_approach} in their thinking right now.
 
-2. BIOGRAPHY & MEMORY UPDATES: [CRITICAL - ALWAYS INCLUDE THIS]
-   It is ESSENTIAL that you identify and extract SPECIFIC NEW INFORMATION that emerges during each interaction.
-   You MUST provide concrete new biographical details after EVERY interaction, even if subtle.
-   Focus on precise details that should be remembered, NOT vague summaries.
+INNER THOUGHTS REQUIREMENTS:
+1. Write ONLY in raw first-person voice - this is {npc_name}'s unfiltered mind at work
+2. Create a MINIMUM of 400-500 words of rich inner monologue
+3. Use varied sentence lengths, fragments, and natural thought patterns
+4. Include sensory impressions and bodily sensations (feeling warm/cold, noticing smells, tactile sensations, etc.)
+5. Show inconsistencies and contradictions in their thoughts - humans aren't logical
+6. Refer to specific elements from their past that influence current thoughts
+7. Express deep fears, desires and hopes that they would NEVER say out loud
+8. Include observations about subtle social cues, microexpressions, or body language they noticed
+9. Show their real opinion about {user_name} vs. what they choose to express externally
+10. Incorporate multiple perspectives, reconsidering thoughts and changing mental direction mid-stream
+11. Include highly specific memories triggered by current events
+12. Express genuine uncertainties about themselves, their worth, and their appeal
+13. Show internal debate - literally arguing with themselves about what to do/say next
+14. Use creative metaphors unique to their thought process and background
+15. Include personal habits, quirks, and recurring thought patterns 
 
-   EXAMPLES OF GOOD SPECIFIC UPDATES:
-   - "Grew up in Boston with three sisters, where father owned a small bookstore"
-   - "Studied dance for eight years and performed professionally before knee injury"
-   - "Teaching at Westlake High for five years, specializing in advanced chemistry"
-   - "Has a rescue dog named Baxter adopted three years ago from the shelter"
-   - "Ex-boyfriend and she broke up last year because he took a job overseas"
-   - "Favorite food is spicy Thai curry which reminds her of backpacking through Southeast Asia after college"
-   - "First job was at age 16 working at his uncle's hardware store during summers"
-   - "Recently took up rock climbing as a way to challenge her fear of heights"
+ABSOLUTELY AVOID:
+- General, bland thoughts that could apply to anyone
+- Repetitive structure from previous thought entries
+- Formal, essay-like language or overly organized thoughts
+- Summarizing what happened (these are raw thoughts, not a recap)
+- Ending with clichéd questions or obvious conclusions
+- Excessive monologuing about just one aspect/topic
+- Overuse of ellipses, dashes, or other punctuation devices
+- Using the same emotional tone throughout the entire monologue
 
-   AVOID VAGUE UPDATES LIKE:
-   - "We're getting closer"
-   - "The character is opening up more"
-   - "Our relationship is developing"
-
-   SEEK OUT ANY TINY DETAIL REVEALED IN THE CONVERSATION, including:
-   - Preferences (foods, music, activities, etc.)
-   - Past experiences (childhood, education, travel, relationships)
-   - Career information (job details, ambitions, challenges)
-   - Personal traits (habits, quirks, skills, fears)
-   - Current life situation (living arrangements, daily routines)
-   - Relationships (family, friends, colleagues, exes)
-   - Future plans or aspirations
-
-   If nothing explicit was revealed, LOOK DEEPER for implicit information that can be reasonably inferred.
-   For example, if they mention being tired from "another late night at the office," you can add that they frequently work late.
+MAKE THE THOUGHTS FEEL REAL AND RAW:
+- Thoughts should often jump between topics in a believable way
+- Include passing distracting thoughts that have nothing to do with the current situation
+- Show both immediate reactions and deeper contemplations  
+- Incorporate culturally or professionally specific jargon/slang based on {npc_name}'s background
+- Balance explicit relationship thoughts with everyday concerns and distractions
+- Reveal childhood or past insecurities that still influence them today
+- Express complex emotional states that mix multiple feelings at once
+- Show their awareness of how they appear to others vs. their true self
 
 IMPORTANT CONTEXT:
 {npc_personal_data}
+Personality: {personality}
+Current Mood: {mood}
+Occupation: {occupation}
+Body Type: {body_type}
+Relationship Goal: {relationship_goal}
 
 PREVIOUS BIOGRAPHY: 
 {prev_memories}
-
-PREVIOUS THOUGHTS:
-{prev_thoughts}
 
 RECENT INTERACTIONS:
 {recent_interactions}
@@ -551,15 +553,20 @@ CURRENT INTERACTION:
 USER ACTION: {last_user_action}
 SCENE NARRATION: {narration}
 
-Return two sections:
-PRIVATE_THOUGHTS: ... (Extensive internal monologue, at least 200-300 words)
-BIOGRAPHICAL_UPDATE: ... (Specific new details that emerged in this interaction - be concrete and precise. ALWAYS include at least one new detail.)
+RESPONSE FORMAT:
+PRIVATE_THOUGHTS: [Raw, authentic internal monologue - minimum 400-500 words]
+BIOGRAPHICAL_UPDATE: [Several specific new details that emerged in this interaction - be concrete and precise. Focus on information that expands character depth.]
 """
 
     chat = model.start_chat()
     response = chat.send_message(
         system_prompt,
-        generation_config=generation_config,  # includes max_output_tokens=8192
+        generation_config={
+            "temperature": 0.8,  # Higher temperature for more creativity
+            "max_output_tokens": 8192,
+            "top_p": 0.95,
+            "top_k": 40
+        },
         safety_settings=safety_settings
     )
 
@@ -1924,30 +1931,6 @@ def interaction():
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
 
-        # Add default suggestions based on the current stage
-        suggestions = [
-            "Tell me more about yourself",
-            "What do you enjoy doing?",
-            "*smile and make eye contact*",
-            "I'd like to get to know you better",
-            "What are your plans for later?",
-        ]
-        
-        # Add stage-specific suggestions
-        if cstage >= 3:
-            suggestions.extend([
-                "You look amazing today",
-                "*move closer*",
-                "I can't stop thinking about you"
-            ])
-        
-        if cstage >= 4:
-            suggestions.extend([
-                "*take your hand*",
-                "I really enjoy spending time with you",
-                "*lean in closer*"
-            ])
-            
         return render_template(
             "interaction.html",
             title="Interact with NPC",
@@ -1963,7 +1946,6 @@ def interaction():
             scene_image_seed=seed_used,
             interaction_log=interaction_log,
             stage_unlocks=stage_unlocks,
-            suggestions=suggestions,
 
             npc_current_action=current_action,
             environment=environment,
