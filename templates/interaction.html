@@ -66,9 +66,9 @@
                 <i class="bi bi-list me-2"></i> Menu
               </button>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuDropdown" style="background-color: #3b0b0b; border: 2px solid #ff5789; font-size: 2.8rem; width: 280px; padding: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.5);">
-                <li><a class="dropdown-item" href="{{ url_for('gallery') }}" style="padding: 12px 16px; border-radius: 8px;"><i class="bi bi-images me-2"></i> Gallery</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('manual_npc_update') }}" style="padding: 12px 16px; border-radius: 8px;"><i class="bi bi-pencil me-2"></i> Edit Memory</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('mid_game_personalize') }}" style="padding: 12px 16px; border-radius: 8px;"><i class="bi bi-gear me-2"></i> Character Settings</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('gallery') }}" style="padding: 12px 16px; border-radius: 8px; color: #f8d0d0;"><i class="bi bi-images me-2"></i> Gallery</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('manual_npc_update') }}" style="padding: 12px 16px; border-radius: 8px; color: #f8d0d0;"><i class="bi bi-pencil me-2"></i> Edit Memory</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('mid_game_personalize') }}" style="padding: 12px 16px; border-radius: 8px; color: #f8d0d0;"><i class="bi bi-gear me-2"></i> Character Settings</a></li>
                 <li><hr class="dropdown-divider" style="border-top: 2px solid #6d1d1d; margin: 8px 0;"></li>
                 <li>
                   <a class="dropdown-item text-danger" href="{{ url_for('restart') }}" 
@@ -589,6 +589,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
   var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
+  });
+  
+  // Initialize Bootstrap dropdowns
+  var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+  var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+    return new bootstrap.Dropdown(dropdownToggleEl)
   });
 });
 </script>
