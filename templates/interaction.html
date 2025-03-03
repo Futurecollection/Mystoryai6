@@ -193,6 +193,7 @@
             <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony SDXL (Highly Customizable)</option>
             <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision (Detailed Renders)</option>
             <option value="sdxl" {% if last_model_choice == 'sdxl' %}selected{% endif %}>SDXL (Advanced Stable Diffusion)</option>
+            <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL (Creative Monster/Creature)</option>
           </select>
         </div>
         <div class="col-md-6">
@@ -291,6 +292,24 @@
           <span class="visually-hidden">Loading...</span>
         </div>
         <span class="ms-2">Generating image... Please wait (30-60 seconds).</span>
+      </div>
+      
+      <!-- Juggernaut XL Options -->
+      <div class="juggernaut-options" style="display: {% if last_model_choice == 'juggernaut' %}block{% else %}none{% endif %};">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Strength:</label>
+            <input type="number" step="0.1" name="juggernaut_strength" class="form-control" value="{{ juggernaut_strength|default(1.0) }}" min="0" max="1" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Guidance Scale:</label>
+            <input type="number" step="0.1" name="juggernaut_guidance_scale" class="form-control" value="{{ juggernaut_guidance_scale|default(7.5) }}" min="1" max="30" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" style="color: #f8d0d0;">Negative Prompt (optional):</label>
+          <textarea name="juggernaut_negative_prompt" rows="2" class="form-control" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;" placeholder="Specify what you don't want in the image..."></textarea>
+        </div>
       </div>
     </form>
   </div>
@@ -543,11 +562,13 @@ function showModelOptions() {
     const ponyOptions = document.querySelector('.pony-options');
     const realisticOptions = document.querySelector('.realistic-options');
     const sdxlOptions = document.querySelector('.sdxl-options');
+    const juggernautOptions = document.querySelector('.juggernaut-options');
 
     // Hide all option sections first
     ponyOptions.style.display = 'none';
     realisticOptions.style.display = 'none';
     sdxlOptions.style.display = 'none';
+    juggernautOptions.style.display = 'none';
 
     // Show only the selected model's options
     switch(modelSelect.value) {
@@ -559,6 +580,9 @@ function showModelOptions() {
         break;
       case 'sdxl':
         sdxlOptions.style.display = 'block';
+        break;
+      case 'juggernaut':
+        juggernautOptions.style.display = 'block';
         break;
       default:
         // For 'flux' or any other model, don't show special options

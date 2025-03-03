@@ -1569,6 +1569,60 @@ def generate_sdxl_image_safely(
         print(f"[ERROR] SDXL call failed: {e}")
         return None
 
+def generate_juggernaut_xl_image_safely(
+    prompt: str,
+    negative_prompt: str = None,
+    seed: int = None,
+    steps: int = 40,
+    width: int = 768,
+    height: int = 1152,
+    guidance_scale: float = 7.0,
+    strength: float = 1.0,
+    num_outputs: int = 1,
+    image_url: str = None
+) -> object:
+    """Generate images using Juggernaut XL model for more creative outputs."""
+    
+    # Build replicate input dictionary
+    replicate_input = {
+        "prompt": prompt,
+        "strength": strength,
+        "num_outputs": num_outputs
+    }
+    
+    # Add optional parameters only if they're provided
+    if seed is not None:
+        replicate_input["seed"] = seed
+    if negative_prompt:
+        replicate_input["negative_prompt"] = negative_prompt
+    if image_url:
+        replicate_input["image"] = image_url
+    if steps:
+        replicate_input["num_inference_steps"] = steps
+    if width and height:
+        replicate_input["width"] = width
+        replicate_input["height"] = height
+    if guidance_scale:
+        replicate_input["guidance_scale"] = guidance_scale
+    
+    # Log the request
+    print(f"[DEBUG] replicate => JUGGERNAUT-XL prompt={prompt}, seed={seed}, strength={strength}")
+    
+    try:
+        # Using Juggernaut XL model
+        result = replicate.run(
+            "asiryan/juggernaut-xl-v7:6a52feace43ce1f6bbc2cdabfc68423cb2319d7444a1a1dae529c5e88b976382",
+            input=replicate_input
+        )
+        
+        if result:
+            # For the UI compatibility, convert to the same format as other models
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
+    except Exception as e:
+        print(f"[ERROR] Juggernaut-XL call failed: {e}")
+        return None
+
 # --------------------------------------------------------------------------
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
@@ -2700,6 +2754,44 @@ You can say hello, start a conversation, or set the scene with an action.
                     session["image_gen_count"] = session.get("image_gen_count", 0) + 1
                     log_message(f"Scene Image Prompt => {user_supplied_prompt}")
                     log_message(f"Image seed={seed_used}, model={chosen_model}, scheduler={chosen_scheduler}, steps={steps}, guidance_scale={guidance_scale}")
+            elif chosen_model == "juggernaut":
+                # Get Juggernaut XL specific parameters
+                try:
+                    guidance_scale = float(request.form.get("juggernaut_guidance_scale", "7.5"))
+                except:
+                    guidance_scale = 7.5
+                session["juggernaut_guidance_scale"] = guidance_scale
+                
+                try:
+                    strength = float(request.form.get("juggernaut_strength", "1.0"))
+                except:
+                    strength = 1.0
+                session["juggernaut_strength"] = strength
+                
+                # Optional parameters
+                negative_prompt = request.form.get("juggernaut_negative_prompt", "")
+                
+                # Handle the image generation with Juggernaut XL
+                result = generate_juggernaut_xl_image_safely(
+                    prompt=user_supplied_prompt,
+                    negative_prompt=negative_prompt if negative_prompt else None,
+                    seed=None if "new_seed" in request.form else session.get("scene_image_seed"),
+                    steps=steps,
+                    width=768,
+                    height=1152,
+                    guidance_scale=guidance_scale,
+                    strength=strength
+                )
+                
+                if result:
+                    _save_image(result)
+                    seed_used = random.randint(100000, 999999) if "new_seed" in request.form else session.get("scene_image_seed", random.randint(100000, 999999))
+                    session["scene_image_url"] = url_for('view_image')
+                    session["scene_image_prompt"] = user_supplied_prompt
+                    session["scene_image_seed"] = seed_used
+                    session["image_gen_count"] = session.get("image_gen_count", 0) + 1
+                    log_message(f"Scene Image Prompt => {user_supplied_prompt}")
+                    log_message(f"Image seed={seed_used}, model={chosen_model}, strength={strength}, steps={steps}, guidance_scale={guidance_scale}")
             else:
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
