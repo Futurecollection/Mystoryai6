@@ -158,6 +158,9 @@
             <button type="submit" name="save_to_gallery" class="btn btn-sm" style="background-color: #5f1c1c; color: #f8d0d0;" {% if session.guest_mode %}disabled{% endif %}>
               <i class="bi bi-bookmark-plus"></i> Save to Gallery
             </button>
+            <button type="submit" name="set_as_profile" class="btn btn-sm" style="background-color: #8a1a1a; color: #f8d0d0;">
+              <i class="bi bi-person-badge"></i> Set as Profile
+            </button>
           </form>
           {% if scene_image_seed %}
             <span class="badge bg-secondary">Seed: {{ scene_image_seed }}</span>
@@ -191,7 +194,6 @@
           <select name="model_type" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
             <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Portrait Style)</option>
             <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony (SDXL)</option>
-            <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision</option>
             <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL</option>
           </select>
         </div>
@@ -223,21 +225,6 @@
             </div>
           </div>
 
-          <!-- Realistic Vision Settings -->
-          <div id="realistic_scheduler_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Scheduler Algorithm:</label>
-            <select name="realistic_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
-              <option value="EulerA" {% if realistic_scheduler == 'EulerA' %}selected{% endif %}>EulerA</option>
-              <option value="MultistepDPM-Solver" {% if realistic_scheduler == 'MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
-            </select>
-
-            <label class="form-label" style="color: #f8d0d0;">Guidance Scale (1–20):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="realistic_cfg_scale" 
-                     value="{{ realistic_cfg_scale|default(5.0) }}" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ realistic_cfg_scale|default(5.0) }}</span>
-            </div>
-          </div>
 
           <!-- Steps Slider (for both Pony & Realistic) -->
           <div id="steps_div" style="display: none;">
@@ -487,7 +474,7 @@
   }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js</script>
 <script>
 function prefillAction(text) {
   document.querySelector('input[name="user_action"]').value = text;

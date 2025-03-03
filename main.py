@@ -2345,8 +2345,6 @@ You can say hello, start a conversation, or set the scene with an action.
         last_model_choice = session.get("last_model_choice", "flux")
         pony_scheduler = session.get("pony_scheduler", "DPM++ 2M SDE Karras")
         pony_cfg_scale = session.get("pony_cfg_scale", 5.0)
-        realistic_scheduler = session.get("realistic_scheduler", "EulerA")
-        realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
         juggernaut_scheduler = session.get("juggernaut_scheduler", "K_EULER_ANCESTRAL")
         juggernaut_cfg_scale = session.get("juggernaut_cfg_scale", 7.0)
 
@@ -2373,8 +2371,6 @@ You can say hello, start a conversation, or set the scene with an action.
             last_model_choice=last_model_choice,
             pony_scheduler=pony_scheduler,
             pony_cfg_scale=pony_cfg_scale,
-            realistic_scheduler=realistic_scheduler,
-            realistic_cfg_scale=realistic_cfg_scale,
             juggernaut_scheduler=juggernaut_scheduler,
             juggernaut_cfg_scale=juggernaut_cfg_scale,
             interaction_mode=session.get("interaction_mode", "narrative")
@@ -2628,6 +2624,21 @@ You can say hello, start a conversation, or set the scene with an action.
             session["saved_images"] = saved_images
             flash("Image saved to gallery!", "success")
             return redirect(url_for("interaction"))
+            
+        elif "set_as_profile" in request.form:
+            # Make sure we have a current image
+            if not os.path.exists(GENERATED_IMAGE_PATH):
+                flash("No image to set as profile!", "warning")
+                return redirect(url_for("interaction"))
+                
+            # Save the current image as the profile picture
+            with open(GENERATED_IMAGE_PATH, 'rb') as f:
+                img_data = base64.b64encode(f.read()).decode('utf-8')
+                
+            session["npc_profile_pic"] = img_data
+            session["npc_profile_pic_timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            flash("Image set as NPC profile picture!", "success")
+            return redirect(url_for("interaction"))
 
         else:
             return "Invalid submission in /interaction", 400
@@ -2636,6 +2647,18 @@ You can say hello, start a conversation, or set the scene with an action.
 @login_required
 def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
+    
+@app.route("/view_profile_pic")
+@login_required
+def view_profile_pic():
+    """Returns the NPC profile picture if it exists"""
+    if session.get("npc_profile_pic"):
+        # Convert base64 back to image
+        img_data = base64.b64decode(session["npc_profile_pic"])
+        return img_data, {'Content-Type': 'image/jpeg'}
+    else:
+        # Return a default placeholder image or 404
+        return "No profile picture set", 404
 
 # Full story and erotica generation routes have been removed
 
