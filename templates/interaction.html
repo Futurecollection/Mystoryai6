@@ -60,25 +60,15 @@
                 <i class="bi bi-toggle-on me-1"></i>{% if interaction_mode == 'dialogue' %}Dialogue{% else %}Narrative{% endif %}
               </button>
             </form>
-            <div class="dropdown me-1 mb-1">
-              <button class="btn dropdown-toggle" type="button" id="menuDropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                      style="background-color: #ff5789; color: white; font-size: 2.5rem !important; padding: 10px 20px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 1050; position: relative;">
-                <i class="bi bi-list me-1"></i> Menu
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuDropdown" style="background-color: #3b0b0b; border: 2px solid #ff5789; font-size: 2.2rem; padding: 8px; box-shadow: 0 6px 15px rgba(0,0,0,0.5); z-index: 1100; position: absolute; transform: translate3d(0px, 40px, 0px) !important; width: 250px;">
-                <li><a class="dropdown-item" href="{{ url_for('gallery') }}" style="padding: 12px 16px; border-radius: 8px; color: #f8d0d0;"><i class="bi bi-images me-2"></i> Gallery</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('manual_npc_update') }}" style="padding: 12px 16px; border-radius: 8px; color: #f8d0d0;"><i class="bi bi-pencil me-2"></i> Edit Memory</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('mid_game_personalize') }}" style="padding: 12px 16px; border-radius: 8px; color: #f8d0d0;"><i class="bi bi-gear me-2"></i> Character Settings</a></li>
-                <li><hr class="dropdown-divider" style="border-top: 2px solid #6d1d1d; margin: 8px 0;"></li>
-                <li>
-                  <a class="dropdown-item text-danger" href="{{ url_for('restart') }}" 
-                     style="padding: 12px 16px; border-radius: 8px; background-color: rgba(220, 53, 69, 0.2);"
-                     onclick="return confirm('Are you sure you want to restart? This will clear your current story.');">
-                    <i class="bi bi-arrow-clockwise me-2"></i> Restart
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <a href="{{ url_for('gallery') }}" class="btn me-1 mb-1" style="background-color: #ff5789; color: white; font-size: 16px !important; padding: 5px 12px;">
+              <i class="bi bi-images me-1"></i> Gallery
+            </a>
+            <a href="{{ url_for('manual_npc_update') }}" class="btn me-1 mb-1" style="background-color: #ff5789; color: white; font-size: 16px !important; padding: 5px 12px;">
+              <i class="bi bi-pencil me-1"></i> Edit Memory
+            </a>
+            <a href="{{ url_for('mid_game_personalize') }}" class="btn me-1 mb-1" style="background-color: #ff5789; color: white; font-size: 16px !important; padding: 5px 12px;">
+              <i class="bi bi-gear me-1"></i> Settings
+            </a>
           </div>
         </div>
       </div>
