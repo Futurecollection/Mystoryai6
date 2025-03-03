@@ -52,8 +52,20 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Please set SUPABASE_URL and SUPABASE_KEY in the environment.")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
+# Create Supabase client with timeout settings
+try:
+    import httpx
+    options = {
+        'timeout': httpx.Timeout(30.0, connect=10.0),  # Total timeout of 30s, connect timeout of 10s
+        'retries': 3,  # Add retries for transient failures
+    }
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY, options=options)
+    app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
+except Exception as e:
+    print(f"Error initializing Supabase client: {e}")
+    # Create a fallback client without custom options if the above fails
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
 
 def login_required(f):
     @wraps(f)
@@ -63,6 +75,21 @@ def login_required(f):
             return redirect(url_for("login_route"))
         return f(*args, **kwargs)
     return decorated_function
+
+def handle_supabase_error(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print(f"Supabase error: {str(e)}")
+            # Check if it's a connection error
+            if "Server disconnected" in str(e) or "RemoteProtocolError" in str(e):
+                flash("Connection to the database was interrupted. Please try again.", "danger")
+            else:
+                flash(f"An error occurred: {str(e)}", "danger")
+            return redirect(url_for("main_home"))
+    return wrapper
 
 # --------------------------------------------------------------------------
 # Gemini + Replicate Setup
@@ -1941,6 +1968,7 @@ def about():
     return render_template("about.html", title="About/Help")
 
 @app.route("/login", methods=["GET", "POST"])
+@handle_supabase_error
 def login_route():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -1969,6 +1997,7 @@ def login_route():
     return render_template("login.html", title="Login")
 
 @app.route("/register", methods=["GET", "POST"])
+@handle_supabase_error
 def register_route():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -1994,6 +2023,7 @@ def logout_route():
 
 @app.route("/continue")
 @login_required
+@handle_supabase_error
 def continue_session():
     if session.get("npc_name"):
         flash("Session loaded from in-memory data!", "info")
