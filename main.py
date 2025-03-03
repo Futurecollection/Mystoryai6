@@ -2286,6 +2286,10 @@ def interaction():
     if not session.get('logged_in') and not session.get('guest_mode'):
         flash("Please log in first or continue as guest.", "warning")
         return redirect(url_for("login_route"))
+    
+    # Clear the profile pic success flag after one view
+    if session.get('profile_pic_success'):
+        session.pop('profile_pic_success', None)
     # Check if fields were auto-completed and show a notification
     if session.get("fields_auto_completed"):
         flash("Some character details were automatically filled in based on your selections.", "info")
@@ -2637,6 +2641,7 @@ You can say hello, start a conversation, or set the scene with an action.
                 
             session["npc_profile_pic"] = img_data
             session["npc_profile_pic_timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            session["profile_pic_success"] = True
             flash("Image set as NPC profile picture!", "success")
             return redirect(url_for("interaction"))
 
@@ -2649,7 +2654,6 @@ def view_image():
     return send_file(GENERATED_IMAGE_PATH, mimetype="image/jpeg")
     
 @app.route("/view_profile_pic")
-@login_required
 def view_profile_pic():
     """Returns the NPC profile picture if it exists"""
     if session.get("npc_profile_pic"):
