@@ -2286,6 +2286,39 @@ def interaction():
     if session.get("fields_auto_completed"):
         flash("Some character details were automatically filled in based on your selections.", "info")
         session.pop("fields_auto_completed", None)
+        
+    # Check if this is a brand new interaction (no narration text yet)
+    # If so, generate an initial scene description
+    if not session.get("narrationText") and session.get("npcBehavior") and request.method == "GET":
+        # Extract key information about the NPC
+        npc_name = session.get('npc_name', 'Unknown')
+        npc_gender = session.get('npc_gender', '?')
+        npc_age = session.get('npc_age', '?')
+        npc_ethnicity = session.get('npc_ethnicity', '?')
+        npc_body_type = session.get('npc_body_type', '?')
+        npc_hair = f"{session.get('npc_hair_color', '?')} {session.get('npc_hair_style', '?')}"
+        npc_clothing = session.get('npc_clothing', '?')
+        npc_personality = session.get('npc_personality', '?')
+        environment = session.get('environment', '?')
+        
+        # Format a welcome scene
+        welcome_scene = f"""
+# Getting Started with {npc_name}
+
+{npc_name} is a {npc_age}-year-old {npc_gender} with {npc_hair} hair. 
+They have a {npc_body_type} physique and are currently wearing {npc_clothing}.
+
+You're currently at {environment}.
+
+## Character Biography
+{session.get('npcBehavior', '(No biography generated yet)')}
+
+## How would you like to start the scene?
+Type your first message below to begin interacting with {npc_name}. 
+You can say hello, start a conversation, or set the scene with an action.
+"""
+        session["narrationText"] = welcome_scene
+        
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
         trust = session.get("trustScore", 5.0)
