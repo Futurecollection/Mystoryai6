@@ -130,9 +130,6 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
     return cust_val if cust_val else dd_val
 
 def _save_image(result):
-    print(f"[DEBUG] _save_image => Received result type: {type(result)}")
-    
-    # Case 1: Dictionary with "output" key
     if isinstance(result, dict) and "output" in result:
         final_url = result["output"]
         print("[DEBUG] _save_image => Received dict with output:", final_url)
@@ -140,72 +137,40 @@ def _save_image(result):
             r = requests.get(final_url)
             with open(GENERATED_IMAGE_PATH, "wb") as f:
                 f.write(r.content)
-            print("[DEBUG] _save_image => Successfully saved image from dict output")
-            return
         except Exception as e:
             print("[ERROR] _save_image => Error downloading from output key:", e)
-            return
-    
-    # Case 2: File-like object with read method
+        return
     if hasattr(result, "read"):
         print("[DEBUG] _save_image => File-like object received.")
-        try:
-            content = result.read()
-            with open(GENERATED_IMAGE_PATH, "wb") as f:
-                f.write(content)
-            print("[DEBUG] _save_image => Successfully saved file-like object")
-            return
-        except Exception as e:
-            print("[ERROR] _save_image => Error saving file-like object:", e)
-            return
-    
-    # Case 3: List of results (take the first one)
+        with open(GENERATED_IMAGE_PATH, "wb") as f:
+            f.write(result.read())
+        return
     if isinstance(result, list) and result:
-        print(f"[DEBUG] _save_image => List received with {len(result)} items")
-        
-        # Try the first item in the list (most models return the best result first)
-        first_item = result[0]
-        
-        # If it's a file-like object
-        if hasattr(first_item, "read"):
+        final_item = result[-1]
+        if isinstance(final_item, str):
+            print("[DEBUG] _save_image => Received list; using final item:", final_item)
             try:
-                with open(GENERATED_IMAGE_PATH, "wb") as f:
-                    f.write(first_item.read())
-                print("[DEBUG] _save_image => Successfully saved file-like object from list")
-                return
-            except Exception as e:
-                print(f"[ERROR] _save_image => Error with file-like object in list: {e}")
-                # Fall through to try other methods
-        
-        # If it's a string URL
-        if isinstance(first_item, str) and first_item.startswith(('http://', 'https://')):
-            try:
-                r = requests.get(first_item)
+                r = requests.get(final_item)
                 with open(GENERATED_IMAGE_PATH, "wb") as f:
                     f.write(r.content)
-                print("[DEBUG] _save_image => Successfully saved URL from list")
                 return
             except Exception as e:
-                print(f"[ERROR] _save_image => Error downloading from list URL: {e}")
+                print("[ERROR] _save_image => Error downloading from list item:", e)
                 return
-    
-    # Case 4: Direct string URL
-    if isinstance(result, str) and result.startswith(('http://', 'https://')):
-        print("[DEBUG] _save_image => Received URL string:", result)
+        else:
+            print("[ERROR] _save_image => List item is not a string:", final_item)
+            return
+    if isinstance(result, str):
+        print("[DEBUG] _save_image => Received string:", result)
         try:
             r = requests.get(result)
             with open(GENERATED_IMAGE_PATH, "wb") as f:
                 f.write(r.content)
-            print("[DEBUG] _save_image => Successfully saved from direct URL")
-            return
         except Exception as e:
-            print("[ERROR] _save_image => Error downloading from string URL:", e)
-            return
+            print("[ERROR] _save_image => Error downloading from string:", e)
+        return
 
-    # If we got here, we couldn't handle the result
-    print("[ERROR] _save_image => Could not process result type:", type(result))
-    if isinstance(result, list):
-        print("[ERROR] _save_image => List contents types:", [type(x) for x in result])
+    print("[ERROR] _save_image => Unknown result type:", type(result))
 
 def check_stage_up_down(new_aff: float):
     if "currentStage" not in session:
@@ -1494,9 +1459,46 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         print("[ERROR] Pony-SDXL call failed:", e)
         return None
 
+def generate_realistic_vision_image_safely(
+    prompt: str,
+    seed: int = 0,
+    steps: int = 20,
+    width: int = 768,
+    height: int = 1152,
+    guidance: float = 5.0,
+    scheduler: str = "EulerA"
+) -> object:
+    negative_prompt_text = (
+        "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), "
+        "text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, "
+        "mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, "
+        "dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, "
+        "missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck"
+    )
+    replicate_input = {
+        "seed": seed,
+        "steps": steps,
+        "width": width,
+        "height": height,
+        "prompt": prompt,
+        "guidance": guidance,
+        "scheduler": scheduler,
+        "negative_prompt": negative_prompt_text
+    }
+    print(f"[DEBUG] replicate => RealisticVision prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance={guidance}, width=768, height=1152")
+    try:
+        result = replicate.run(
+            "lucataco/realistic-vision-v5.1:2c8e954decbf70b7607a4414e5785ef9e4de4b8c51d50fb8b8b349160e0ef6bb",
+            replicate_input
+        )
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
+    except Exception as e:
+        print(f"[ERROR] RealisticVision call failed: {e}")
+        return None
 
-
-def generate_juggernaut_xl_image_safely(
+def generate_sdxl_image_safely(
     prompt: str,
     negative_prompt: str = None,
     seed: int = None,
@@ -1504,70 +1506,67 @@ def generate_juggernaut_xl_image_safely(
     width: int = 768,
     height: int = 1152,
     guidance_scale: float = 7.0,
-    strength: float = 1.0,
+    scheduler: str = "K_EULER_ANCESTRAL",
     num_outputs: int = 1,
-    image_url: str = None
+    lora_scale: float = 0.6,
+    lora_weights: str = None,
+    image_url: str = None,
+    mask_url: str = None,
+    strength: float = 0.8
 ) -> object:
-    """Generate images using Juggernaut XL model for more creative outputs."""
+    """Generate images using SDXL with support for img2img, inpainting, and LoRA weights."""
+    
+    # Default negative prompt if none provided
+    if not negative_prompt:
+        negative_prompt = (
+            "(worst quality, low quality, normal quality, lowres, low details, oversaturated, undersaturated, "
+            "overexposed, underexposed, grayscale, bw, bad photo, bad photography, bad art:1.4), "
+            "(watermark, signature, text font, username, error, logo, words, letters, digits, autograph, trademark, name:1.2), "
+            "(blur, blurry, grainy), morbid, ugly, asymmetrical, mutated malformed, mutilated, poorly lit, bad shadow, "
+            "draft, cropped, out of frame, cut off, censored, jpeg artifacts, out of focus, glitch, duplicate, "
+            "(airbrushed, cartoon, anime, semi-realistic, cgi, render, blender, digital art, manga, amateur:1.3), "
+            "(3D ,3D Game, 3D Game Scene, 3D Character:1.1), (bad hands, bad anatomy, bad body, bad face, bad teeth, "
+            "bad arms, bad legs, deformities:1.3)"
+        )
     
     # Build replicate input dictionary
     replicate_input = {
         "prompt": prompt,
-        "strength": strength,
-        "num_outputs": num_outputs
+        "negative_prompt": negative_prompt,
+        "num_inference_steps": steps,
+        "width": width,
+        "height": height,
+        "guidance_scale": guidance_scale,
+        "scheduler": scheduler,
+        "num_outputs": num_outputs,
     }
     
     # Add optional parameters only if they're provided
     if seed is not None:
         replicate_input["seed"] = seed
-    if negative_prompt:
-        replicate_input["negative_prompt"] = negative_prompt
+    if lora_weights:
+        replicate_input["lora_weights"] = lora_weights
+        replicate_input["lora_scale"] = lora_scale
     if image_url:
         replicate_input["image"] = image_url
-    if steps:
-        replicate_input["num_inference_steps"] = steps
-    if width and height:
-        replicate_input["width"] = width
-        replicate_input["height"] = height
-    if guidance_scale:
-        replicate_input["guidance_scale"] = guidance_scale
+        replicate_input["strength"] = strength
+    if mask_url and image_url:  # Mask only works with img2img mode
+        replicate_input["mask"] = mask_url
     
     # Log the request
-    print(f"[DEBUG] replicate => JUGGERNAUT-XL prompt={prompt}, seed={seed}, strength={strength}")
-    print(f"[DEBUG] replicate => Full parameters: {replicate_input}")
+    print(f"[DEBUG] replicate => SDXL prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance_scale={guidance_scale}, width={width}, height={height}")
     
     try:
-        # Using Juggernaut XL model
+        # Using a general SDXL model - replace with the specific model ID you want
         result = replicate.run(
-            "asiryan/juggernaut-xl-v7:6a52feace43ce1f6bbc2cdabfc68423cb2319d7444a1a1dae529c5e88b976382",
-            input=replicate_input
+            "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+            replicate_input
         )
-        
-        print(f"[DEBUG] Juggernaut raw result: {result}")
-        
         if result:
-            # Process the result properly based on its type
-            if isinstance(result, list) and result:
-                # If it's a list with content, use the first item
-                if hasattr(result[0], 'read'):
-                    # If it's a file-like object
-                    return result[0]
-                elif isinstance(result[0], str) and result[0].startswith(('http://', 'https://')):
-                    # If it's a URL
-                    return {"output": result[0]}
-                else:
-                    return {"output": result[0]}
-            elif isinstance(result, str) and result.startswith(('http://', 'https://')):
-                # If it's a URL string
-                return {"output": result}
-            else:
-                # Otherwise return as is
-                return result
+            return {"output": result[0] if isinstance(result, list) else result}
         return None
     except Exception as e:
-        print(f"[ERROR] Juggernaut-XL call failed: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"[ERROR] SDXL call failed: {e}")
         return None
 
 # --------------------------------------------------------------------------
@@ -1576,37 +1575,24 @@ def generate_juggernaut_xl_image_safely(
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
-                                        save_to_gallery: bool = False,
-                                        guidance_scale: float = None,
-                                        strength: float = None):
-    """
-    Unified handler for all image generation models.
-    
-    Args:
-        prompt_text: The prompt to generate an image from
-        force_new_seed: Whether to force a new random seed
-        model_type: "flux" | "pony" | "juggernaut"
-        scheduler: Used by pony and juggernaut
-        steps: Number of inference steps
-        cfg_scale: Used by pony
-        guidance_scale: Used by juggernaut
-        strength: Used by juggernaut
-        save_to_gallery: Whether to save the image to gallery
-    """
+                                        save_to_gallery: bool = False):
     # Check image generation limit
     gen_count = session.get("image_gen_count", 0)
     if gen_count >= 5:
         log_message("[SYSTEM] Image generation limit reached (5 per story)")
         return None
-    
+    """
+    model_type: flux | pony | realistic
+    scheduler: used by pony or realistic
+    steps: int for pony or realistic
+    cfg_scale: float for pony (cfg_scale), or realistic (guidance)
+    """
     # Validate age content
     is_blocked, reason = validate_age_content(prompt_text)
     if is_blocked:
         log_message("[SYSTEM] Blocked image generation due to potential underage content")
         session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
         return None
-    
-    # Determine seed
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
         seed_used = existing_seed
@@ -1615,10 +1601,7 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         seed_used = random.randint(100000, 999999)
         log_message(f"SYSTEM: new seed => {seed_used}")
 
-    # Generate based on selected model
     result = None
-    print(f"[DEBUG] Generating image with model: {model_type}")
-    
     if model_type == "pony":
         final_steps = steps if steps is not None else 60
         final_cfg = cfg_scale if cfg_scale is not None else 5.0
@@ -1627,28 +1610,27 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             prompt_text, seed=seed_used, steps=final_steps,
             scheduler=chosen_sched, cfg_scale=final_cfg
         )
-    elif model_type == "juggernaut":
-        # Juggernaut XL model
-        final_steps = steps if steps is not None else 40
-        final_guidance = guidance_scale if guidance_scale is not None else 7.0
-        final_strength = strength if strength is not None else 1.0
-        
-        result = generate_juggernaut_xl_image_safely(
+    elif model_type == "realistic":
+        steps_final = steps if steps is not None else 20
+        final_scheduler = scheduler if scheduler else "EulerA"
+        final_guidance = cfg_scale if cfg_scale is not None else 5.0
+        result = generate_realistic_vision_image_safely(
             prompt=prompt_text,
             seed=seed_used,
-            steps=final_steps,
-            guidance_scale=final_guidance,
-            strength=final_strength
+            steps=steps_final,
+            width=768,
+            height=1152,
+            guidance=final_guidance,
+            scheduler=final_scheduler
         )
     else:
-        # Default to flux
+        # flux
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
         log_message("[SYSTEM] replicate returned invalid or empty result.")
         return None
 
-    # Save the image
     _save_image(result)
     session["scene_image_url"] = url_for('view_image')
     session["scene_image_prompt"] = prompt_text
@@ -1659,28 +1641,17 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
 
     if save_to_gallery:
         saved_images = session.get("saved_images", [])
-        try:
-            with open(GENERATED_IMAGE_PATH, 'rb') as f:
-                img_data = f.read()
-                
-            saved_images.append({
-                "prompt": prompt_text,
-                "seed": seed_used,
-                "model": model_type,
-                "timestamp": datetime.now().isoformat(),
-                "image_data": base64.b64encode(img_data).decode('utf-8')
-            })
-            session["saved_images"] = saved_images
-        except Exception as e:
-            log_message(f"[ERROR] Failed to save to gallery: {e}")
+        saved_images.append({
+            "prompt": prompt_text,
+            "seed": seed_used,
+            "model": model_type,
+            "timestamp": datetime.now().isoformat(),
+            "image_data": open(GENERATED_IMAGE_PATH, 'rb').read()
+        })
+        session["saved_images"] = saved_images
 
-    # Log information about the generation
     log_message(f"Scene Image Prompt => {prompt_text}")
-    if model_type == "juggernaut":
-        log_message(f"Image seed={seed_used}, model={model_type}, steps={steps}, guidance_scale={guidance_scale}, strength={strength}")
-    else:
-        log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
-    
+    log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
     return result
 
 # --------------------------------------------------------------------------
@@ -1937,7 +1908,11 @@ You are an AI assistant specializing in producing a short prompt for a Stable Di
 
 """
 
+REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
+You are an AI assistant creating a prompt for Realistic Vision (SD1.5).
+Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data like the NPC's personal details (age, hair, clothing, etc.) and descriptions plus relevant story narration details. 
 
+"""
 
 def get_image_prompt_system_instructions(model_type: str) -> str:
     mt = model_type.lower()
@@ -1945,6 +1920,8 @@ def get_image_prompt_system_instructions(model_type: str) -> str:
         return FLUX_IMAGE_SYSTEM_PROMPT
     elif mt == "pony":
         return PONY_IMAGE_SYSTEM_PROMPT
+    elif mt == "realistic":
+        return REALISTICVISION_IMAGE_SYSTEM_PROMPT
     else:
         return FLUX_IMAGE_SYSTEM_PROMPT
 
@@ -2625,9 +2602,7 @@ You can say hello, start a conversation, or set the scene with an action.
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
 
-            # Fix model selection - ensure we're getting the correct value from the dropdown
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
-            print(f"[DEBUG] Selected model from form: {chosen_model}")
             session["last_model_choice"] = chosen_model
 
             try:
@@ -2655,43 +2630,68 @@ You can say hello, start a conversation, or set the scene with an action.
                     steps=steps,
                     cfg_scale=pony_cfg
                 )
-            
-            elif chosen_model == "juggernaut":
-                # Get Juggernaut XL specific parameters
+
+            elif chosen_model == "realistic":
+                chosen_scheduler = request.form.get("realistic_scheduler", "EulerA")
+                valid_schedulers = ["EulerA", "MultistepDPM-Solver"]
+                if chosen_scheduler not in valid_schedulers:
+                    chosen_scheduler = "EulerA"
+                session["realistic_scheduler"] = chosen_scheduler
+
                 try:
-                    guidance_scale = float(request.form.get("juggernaut_guidance_scale", "7.5"))
+                    real_cfg = float(request.form.get("realistic_cfg_scale", "5.0"))
                 except:
-                    guidance_scale = 7.5
-                session["juggernaut_guidance_scale"] = guidance_scale
+                    real_cfg = 5.0
+                session["realistic_cfg_scale"] = real_cfg
+
+                handle_image_generation_from_prompt(
+                    prompt_text=user_supplied_prompt,
+                    force_new_seed=("new_seed" in request.form),
+                    model_type=chosen_model,
+                    scheduler=chosen_scheduler,
+                    steps=steps,
+                    cfg_scale=real_cfg
+                )
+            elif chosen_model == "sdxl":
+                # Get SDXL specific parameters
+                chosen_scheduler = request.form.get("sdxl_scheduler", "K_EULER_ANCESTRAL")
+                valid_schedulers = ["DDIM", "DPMSolverMultistep", "HeunDiscrete", "KarrasDPM", 
+                                   "K_EULER_ANCESTRAL", "K_EULER", "PNDM"]
+                if chosen_scheduler not in valid_schedulers:
+                    chosen_scheduler = "K_EULER_ANCESTRAL"
+                session["sdxl_scheduler"] = chosen_scheduler
                 
                 try:
-                    strength = float(request.form.get("juggernaut_strength", "1.0"))
+                    guidance_scale = float(request.form.get("sdxl_guidance_scale", "7.0"))
                 except:
-                    strength = 1.0
-                session["juggernaut_strength"] = strength
+                    guidance_scale = 7.0
+                session["sdxl_guidance_scale"] = guidance_scale
                 
                 # Optional parameters
-                negative_prompt = request.form.get("juggernaut_negative_prompt", "")
+                negative_prompt = request.form.get("sdxl_negative_prompt", "")
+                lora_weights = request.form.get("sdxl_lora_weights", "")
                 
-                # Debug logging
-                print(f"[DEBUG] Generating Juggernaut XL image with prompt: {user_supplied_prompt}")
-                print(f"[DEBUG] Parameters: guidance_scale={guidance_scale}, strength={strength}, steps={steps}")
+                try:
+                    lora_scale = float(request.form.get("sdxl_lora_scale", "0.6")) 
+                except:
+                    lora_scale = 0.6
+                session["sdxl_lora_scale"] = lora_scale
                 
-                # Handle the image generation with Juggernaut XL
-                seed_value = None if "new_seed" in request.form else session.get("scene_image_seed")
-                result = generate_juggernaut_xl_image_safely(
+                # Handle the image generation with SDXL
+                result = generate_sdxl_image_safely(
                     prompt=user_supplied_prompt,
                     negative_prompt=negative_prompt if negative_prompt else None,
-                    seed=seed_value,
+                    seed=None if "new_seed" in request.form else session.get("scene_image_seed"),
                     steps=steps,
                     width=768,
                     height=1152,
                     guidance_scale=guidance_scale,
-                    strength=strength
+                    scheduler=chosen_scheduler,
+                    lora_weights=lora_weights if lora_weights else None,
+                    lora_scale=lora_scale
                 )
                 
                 if result:
-                    print(f"[DEBUG] Juggernaut result received: {type(result)}")
                     _save_image(result)
                     seed_used = random.randint(100000, 999999) if "new_seed" in request.form else session.get("scene_image_seed", random.randint(100000, 999999))
                     session["scene_image_url"] = url_for('view_image')
@@ -2699,12 +2699,8 @@ You can say hello, start a conversation, or set the scene with an action.
                     session["scene_image_seed"] = seed_used
                     session["image_gen_count"] = session.get("image_gen_count", 0) + 1
                     log_message(f"Scene Image Prompt => {user_supplied_prompt}")
-                    log_message(f"Image seed={seed_used}, model={chosen_model}, strength={strength}, steps={steps}, guidance_scale={guidance_scale}")
-                else:
-                    print("[ERROR] Juggernaut XL returned no result")
-                    flash("Image generation failed. Please try again or try a different model.", "danger")
+                    log_message(f"Image seed={seed_used}, model={chosen_model}, scheduler={chosen_scheduler}, steps={steps}, guidance_scale={guidance_scale}")
             else:
-                # Flux or any other model (default case)
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
                     force_new_seed=("new_seed" in request.form),

@@ -191,7 +191,8 @@
           <select name="model_type" class="form-select" id="model-select" onchange="showModelOptions()" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
             <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Photorealistic Portrait)</option>
             <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony SDXL (Highly Customizable)</option>
-            <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL (Creative Monster/Creature)</option>
+            <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision (Detailed Renders)</option>
+            <option value="sdxl" {% if last_model_choice == 'sdxl' %}selected{% endif %}>SDXL (Advanced Stable Diffusion)</option>
           </select>
         </div>
         <div class="col-md-6">
@@ -221,8 +222,25 @@
         </div>
       </div>
 
-      <!-- Juggernaut XL Options -->
-      <div class="juggernaut-options" style="display: {% if last_model_choice == 'juggernaut' %}block{% else %}none{% endif %};">
+      <!-- Realistic Vision Options -->
+      <div class="realistic-options" style="display: {% if last_model_choice == 'realistic' %}block{% else %}none{% endif %};">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Scheduler:</label>
+            <select name="realistic_scheduler" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+              <option value="EulerA" {% if realistic_scheduler == 'EulerA' %}selected{% endif %}>EulerA</option>
+              <option value="MultistepDPM-Solver" {% if realistic_scheduler == 'MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Guidance Scale:</label>
+            <input type="number" step="0.1" name="realistic_cfg_scale" class="form-control" value="{{ realistic_cfg_scale }}" min="1" max="20" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+        </div>
+      </div>
+
+      <!-- SDXL Options -->
+      <div class="sdxl-options" style="display: {% if last_model_choice == 'sdxl' %}block{% else %}none{% endif %};">
         <div class="row mb-3">
           <div class="col-md-6">
             <label class="form-label" style="color: #f8d0d0;">Scheduler:</label>
@@ -273,24 +291,6 @@
           <span class="visually-hidden">Loading...</span>
         </div>
         <span class="ms-2">Generating image... Please wait (30-60 seconds).</span>
-      </div>
-      
-      <!-- Juggernaut XL Options -->
-      <div class="juggernaut-options" style="display: {% if last_model_choice == 'juggernaut' %}block{% else %}none{% endif %};">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label" style="color: #f8d0d0;">Strength:</label>
-            <input type="number" step="0.1" name="juggernaut_strength" class="form-control" value="{{ juggernaut_strength|default(1.0) }}" min="0" max="1" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" style="color: #f8d0d0;">Guidance Scale:</label>
-            <input type="number" step="0.1" name="juggernaut_guidance_scale" class="form-control" value="{{ juggernaut_guidance_scale|default(7.5) }}" min="1" max="30" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label" style="color: #f8d0d0;">Negative Prompt (optional):</label>
-          <textarea name="juggernaut_negative_prompt" rows="2" class="form-control" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;" placeholder="Specify what you don't want in the image..."></textarea>
-        </div>
       </div>
     </form>
   </div>
@@ -541,29 +541,37 @@ function toggleAdvancedSettings() {
 function showModelOptions() {
     const modelSelect = document.getElementById('model-select');
     const ponyOptions = document.querySelector('.pony-options');
-    const juggernautOptions = document.querySelector('.juggernaut-options');
-    
-    // For debugging
-    console.log("Selected model:", modelSelect.value);
+    const realisticOptions = document.querySelector('.realistic-options');
+    const sdxlOptions = document.querySelector('.sdxl-options');
 
     // Hide all option sections first
-    if (ponyOptions) ponyOptions.style.display = 'none';
-    if (juggernautOptions) juggernautOptions.style.display = 'none';
-    
-    // Only show the selected model's options
-    if (modelSelect.value === 'pony' && ponyOptions) {
+    ponyOptions.style.display = 'none';
+    realisticOptions.style.display = 'none';
+    sdxlOptions.style.display = 'none';
+
+    // Show only the selected model's options
+    switch(modelSelect.value) {
+      case 'pony':
         ponyOptions.style.display = 'block';
-    } else if (modelSelect.value === 'juggernaut' && juggernautOptions) {
-        juggernautOptions.style.display = 'block';
+        break;
+      case 'realistic':
+        realisticOptions.style.display = 'block';
+        break;
+      case 'sdxl':
+        sdxlOptions.style.display = 'block';
+        break;
+      default:
+        // For 'flux' or any other model, don't show special options
+        break;
     }
-    // For 'flux' or any other model, don't show special options
-}
+  }
 
 // Add event listeners when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize model visibility based on selected dropdown
+  // Initialize model visibility based on selected radio
+  const selectedModel = document.querySelector('input[name="model_type"]:checked')?.value || 'flux';
   showModelOptions();
-  
+
   // Handle all forms
   document.querySelectorAll('form').forEach(function(form) {
     form.addEventListener('submit', function(event) {
