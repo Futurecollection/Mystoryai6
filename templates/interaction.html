@@ -90,7 +90,7 @@
             <div style="color: #f8d0d0;">
               <h3 style="color: #ff5789;">{{ bio_parts[0].split('\n', 1)[0] }}</h3>
               <div class="mb-3">{{ bio_parts[0].split('\n', 1)[1] }}</div>
-              
+
               {% for part in bio_parts[1:] %}
                 {% if part.strip() %}
                   <h4 style="color: #ff9fa3;">{{ part.split('\n', 1)[0] }}</h4>
@@ -187,20 +187,13 @@
       <!-- Model Selection -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="model_type" id="model_type_flux" value="flux" {% if last_model_choice == 'flux' %}checked{% endif %} onchange="toggleVisibilityForModel('flux')">
-            <label class="form-check-label" for="model_type_flux" style="color: #f8d0d0;">
-              Fast Photorealistic Portraits
-            </label>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="model_type" id="model_type_pony" value="pony" {% if last_model_choice == 'pony' %}checked{% endif %} onchange="toggleVisibilityForModel('pony')">
-            <label class="form-check-label" for="model_type_pony" style="color: #f8d0d0;">
-              Detailed NSFW-capable Images
-            </label>
-          </div>
+          <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-brush"></i> Model:</label>
+          <select name="model_type" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+            <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Portrait Style)</option>
+            <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony (SDXL)</option>
+            <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision</option>
+            <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL</option>
+          </select>
         </div>
       </div>
 
@@ -498,7 +491,7 @@ function showAutoUpdateNotification() {
   const badge = document.getElementById('auto-update-badge');
   if (badge) {
     badge.style.display = 'inline-block';
-    setTimeout(() => {
+    setTimeout(()=> {
       badge.style.display = 'none';
     }, 5000); // Hide after 5 seconds
   }

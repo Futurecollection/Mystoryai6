@@ -1498,6 +1498,51 @@ def generate_realistic_vision_image_safely(
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
 
+def generate_juggernaut_xl_image_safely(
+    prompt: str,
+    seed: int = None,
+    steps: int = 40,
+    width: int = 768,
+    height: int = 1152,
+    guidance_scale: float = 7.0,
+    scheduler: str = "K_EULER_ANCESTRAL"
+) -> object:
+    negative_prompt_text = (
+        "(worst quality, low quality, normal quality, lowres, low details, oversaturated, undersaturated, overexposed, underexposed, grayscale, bw, bad photo, bad photography, bad art:1.4), "
+        "(watermark, signature, text font, username, error, logo, words, letters, digits, autograph, trademark, name:1.2), "
+        "(blur, blurry, grainy), morbid, ugly, asymmetrical, mutated malformed, mutilated, poorly lit, bad shadow, draft, cropped, out of frame, cut off, censored, jpeg artifacts, out of focus, glitch, duplicate, "
+        "(airbrushed, cartoon, anime, semi-realistic, cgi, render, blender, digital art, manga, amateur:1.3), (3D ,3D Game, 3D Game Scene, 3D Character:1.1), "
+        "(bad hands, bad anatomy, bad body, bad face, bad teeth, bad arms, bad legs, deformities:1.3)"
+    )
+    replicate_input = {
+        "prompt": prompt,
+        "negative_prompt": negative_prompt_text,
+        "width": width,
+        "height": height,
+        "num_inference_steps": steps,
+        "guidance_scale": guidance_scale,
+        "scheduler": scheduler,
+        "num_outputs": 1
+    }
+    
+    # Add seed only if provided (otherwise let it be random)
+    if seed is not None:
+        replicate_input["seed"] = seed
+    
+    print(f"[DEBUG] replicate => Juggernaut XL prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance_scale={guidance_scale}, width={width}, height={height}")
+    
+    try:
+        result = replicate.run(
+            "lucataco/juggernaut-xl:6c00f81e332dfa657aa5ed4e21bfa52190b9b58d3e66a5536043d5d2ee37ba76",
+            replicate_input
+        )
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
+    except Exception as e:
+        print(f"[ERROR] Juggernaut XL call failed: {e}")
+        return None
+
 # --------------------------------------------------------------------------
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
@@ -1511,10 +1556,10 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         log_message("[SYSTEM] Image generation limit reached (5 per story)")
         return None
     """
-    model_type: flux | pony | realistic
-    scheduler: used by pony or realistic
-    steps: int for pony or realistic
-    cfg_scale: float for pony (cfg_scale), or realistic (guidance)
+    model_type: flux | pony | realistic | juggernaut
+    scheduler: used by pony, realistic, or juggernaut
+    steps: int for pony, realistic, or juggernaut
+    cfg_scale: float for pony (cfg_scale), realistic (guidance), or juggernaut (guidance_scale)
     """
     # Validate age content
     is_blocked, reason = validate_age_content(prompt_text)
@@ -1550,6 +1595,19 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             width=768,
             height=1152,
             guidance=final_guidance,
+            scheduler=final_scheduler
+        )
+    elif model_type == "juggernaut":
+        steps_final = steps if steps is not None else 40
+        final_scheduler = scheduler if scheduler else "K_EULER_ANCESTRAL"
+        final_guidance = cfg_scale if cfg_scale is not None else 7.0
+        result = generate_juggernaut_xl_image_safely(
+            prompt=prompt_text,
+            seed=seed_used,
+            steps=steps_final,
+            width=768,
+            height=1152,
+            guidance_scale=final_guidance,
             scheduler=final_scheduler
         )
     else:
@@ -1843,6 +1901,15 @@ Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal da
 
 """
 
+JUGGERNAUT_IMAGE_SYSTEM_PROMPT = """
+You are an AI assistant creating a prompt for the Juggernaut XL image model.
+Create a detailed, artistic description that incorporates the NPC's personal details (age, hair, clothing, etc.) 
+and the current scene context. Focus on visual elements that would create a compelling portrait or scene.
+Be descriptive about lighting, atmosphere, emotion, and composition.
+Respond with only the artistic prompt for the Juggernaut XL model.
+Do not include any prefixes, explanations or additional text.
+"""
+
 def get_image_prompt_system_instructions(model_type: str) -> str:
     mt = model_type.lower()
     if mt == "flux":
@@ -1851,6 +1918,8 @@ def get_image_prompt_system_instructions(model_type: str) -> str:
         return PONY_IMAGE_SYSTEM_PROMPT
     elif mt == "realistic":
         return REALISTICVISION_IMAGE_SYSTEM_PROMPT
+    elif mt == "juggernaut":
+        return JUGGERNAUT_IMAGE_SYSTEM_PROMPT
     else:
         return FLUX_IMAGE_SYSTEM_PROMPT
 
@@ -2334,6 +2403,8 @@ You can say hello, start a conversation, or set the scene with an action.
         pony_cfg_scale = session.get("pony_cfg_scale", 5.0)
         realistic_scheduler = session.get("realistic_scheduler", "EulerA")
         realistic_cfg_scale = session.get("realistic_cfg_scale", 5.0)
+        juggernaut_scheduler = session.get("juggernaut_scheduler", "K_EULER_ANCESTRAL")
+        juggernaut_cfg_scale = session.get("juggernaut_cfg_scale", 7.0)
 
         return render_template(
             "interaction.html",
@@ -2360,6 +2431,8 @@ You can say hello, start a conversation, or set the scene with an action.
             pony_cfg_scale=pony_cfg_scale,
             realistic_scheduler=realistic_scheduler,
             realistic_cfg_scale=realistic_cfg_scale,
+            juggernaut_scheduler=juggernaut_scheduler,
+            juggernaut_cfg_scale=juggernaut_cfg_scale,
             interaction_mode=session.get("interaction_mode", "narrative")
         )
     else:
@@ -2580,6 +2653,27 @@ You can say hello, start a conversation, or set the scene with an action.
                     scheduler=chosen_scheduler,
                     steps=steps,
                     cfg_scale=real_cfg
+                )
+            elif chosen_model == "juggernaut":
+                juggernaut_sched = request.form.get("juggernaut_scheduler", "K_EULER_ANCESTRAL")
+                valid_schedulers = ["DDIM", "DPMSolverMultistep", "HeunDiscrete", "KarrasDPM", "K_EULER_ANCESTRAL", "K_EULER", "PNDM"]
+                if juggernaut_sched not in valid_schedulers:
+                    juggernaut_sched = "K_EULER_ANCESTRAL"
+                session["juggernaut_scheduler"] = juggernaut_sched
+
+                try:
+                    juggernaut_cfg = float(request.form.get("juggernaut_cfg_scale", "7.0"))
+                except:
+                    juggernaut_cfg = 7.0
+                session["juggernaut_cfg_scale"] = juggernaut_cfg
+
+                handle_image_generation_from_prompt(
+                    prompt_text=user_supplied_prompt,
+                    force_new_seed=("new_seed" in request.form),
+                    model_type=chosen_model,
+                    scheduler=juggernaut_sched,
+                    steps=steps,
+                    cfg_scale=juggernaut_cfg
                 )
             else:
                 handle_image_generation_from_prompt(
