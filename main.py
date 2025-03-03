@@ -1868,11 +1868,10 @@ You are an AI assistant specializing in producing a short prompt for a Stable Di
 """
 
 JUGGERNAUT_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant creating a prompt for the Juggernaut XL image model.
-Create a detailed, artistic description that incorporates the NPC's personal details (age, hair, clothing, etc.) 
-and the current scene context. Focus on visual elements that would create a compelling portrait or scene.
-Be descriptive about lighting, atmosphere, emotion, and composition.
-Respond with only the artistic prompt for the Juggernaut XL model.
+You are an AI assistant specializing in producing a photorealistic image promptfor the 'Flux' diffusion model.
+Include the NPC's personal details (age, hair, clothing, etc.) and descriptions to convey the scene's action or setting and environment. 
+Use words like "photo" or "photograph" for realism, and avoid painting/anime references.
+Respond with only the photorealistic scene description for the Flux model. 
 Do not include any prefixes, explanations or additional text.
 """
 
