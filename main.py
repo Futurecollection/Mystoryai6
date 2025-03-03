@@ -242,7 +242,7 @@ def auto_complete_missing_fields():
     Automatically fills in any missing NPC fields based on already provided information.
     This is used when a user hasn't specified all personalization options.
     """
-    # Check if we need to autofill (if at least one field is marked with "?")
+    # Check if we need to autofill (if fields are empty or marked with "?")
     npc_name = session.get('npc_name', '?')
     npc_gender = session.get('npc_gender', '?')
     needs_autofill = False
@@ -256,16 +256,22 @@ def auto_complete_missing_fields():
         "npc_current_situation", "environment", "encounter_context"
     ]
     
-    # Count how many fields are missing
+    # Count how many fields are missing or empty
     missing_count = 0
     for field in fields_to_check:
-        if session.get(field, "?") == "?":
+        field_value = session.get(field, "?")
+        if field_value == "?" or field_value == "" or field_value is None:
             missing_count += 1
             needs_autofill = True
+            # Make sure fields with empty strings are marked with "?" for consistency
+            if field_value == "" or field_value is None:
+                session[field] = "?"
     
     # If nothing needs to be filled, just return
     if not needs_autofill:
         return
+    
+    print(f"[DEBUG] Auto-completing {missing_count} missing fields")
     
     # If we have a name but no gender, make an educated guess based on common name gender associations
     if npc_name != "?" and npc_gender == "?":
@@ -333,6 +339,16 @@ def auto_complete_missing_fields():
                     "Suit & Tie"
                 ])
     
+    # Auto-fill ethnicity if missing
+    if session.get("npc_ethnicity", "?") == "?":
+        session["npc_ethnicity"] = random.choice([
+            "Caucasian", 
+            "Hispanic/Latino", 
+            "Asian",
+            "Black/African",
+            "Mixed Race"
+        ])
+    
     # Auto-fill personality if missing
     if session.get("npc_personality", "?") == "?":
         session["npc_personality"] = random.choice([
@@ -394,6 +410,9 @@ def auto_complete_missing_fields():
             session["npc_sexual_orientation"] = "Straight"
         else:
             session["npc_sexual_orientation"] = random.choice(["Straight", "Bisexual"])
+    
+    # Log that auto-completion happened
+    log_message("[SYSTEM] Auto-completed missing personalization fields using basic rules.")
 
 def autofill_using_llm():
     """
@@ -1593,10 +1612,27 @@ def update_npc_info(form):
         "npc_current_situation"
     ]
     for key in npc_fields:
-        session[key] = merge_dd(form, key, key + "_custom")
+        value = merge_dd(form, key, key + "_custom")
+        # Mark empty values with "?" to ensure they get auto-filled
+        if value.strip() == "":
+            session[key] = "?"
+        else:
+            session[key] = value
+            
     session["npc_backstory"] = form.get("npc_backstory", "").strip()
-    session["environment"] = merge_dd(form, "environment", "environment_custom")
-    session["encounter_context"] = merge_dd(form, "encounter_context", "encounter_context_custom")
+    
+    # Environment and encounter context
+    env_value = merge_dd(form, "environment", "environment_custom")
+    if env_value.strip() == "":
+        session["environment"] = "?"
+    else:
+        session["environment"] = env_value
+        
+    context_value = merge_dd(form, "encounter_context", "encounter_context_custom")
+    if context_value.strip() == "":
+        session["encounter_context"] = "?"
+    else:
+        session["encounter_context"] = context_value
     
     # Handle current scene (immediate situation)
     if "current_scene" in form:
@@ -1604,16 +1640,26 @@ def update_npc_info(form):
         
     # Handle NPC's current mood 
     if "npc_mood" in form:
-        session["npc_mood"] = form.get("npc_mood", "Neutral").strip()
+        mood_value = form.get("npc_mood", "Neutral").strip()
+        session["npc_mood"] = mood_value if mood_value else "Neutral"
     
     # Additional scene state fields
     scene_state_fields = ["time_of_day", "weather", "scene_mood", "scene_notes"]
     for field in scene_state_fields:
         if field in form:
             session[field] = form.get(field, "").strip()
+    
+    # Check if we have empty fields that need auto-completion
+    has_empty_fields = False
+    for key in npc_fields + ["environment", "encounter_context"]:
+        if session.get(key, "?") == "?":
+            has_empty_fields = True
+            break
             
     # Auto-fill any missing fields by calling the auto-complete function
-    auto_complete_missing_fields()
+    if has_empty_fields:
+        print("[DEBUG] Found empty fields, running auto-completion")
+        auto_complete_missing_fields()
 
 # --------------------------------------------------------------------------
 # Example Data for personalization
@@ -2019,6 +2065,11 @@ def personalize():
 
         # NPC personalization
         update_npc_info(request.form)
+        
+        # Handle bio text from premade templates if present
+        if "bioText" in request.form and request.form.get("bioText", "").strip():
+            session["npc_backstory"] = request.form.get("bioText").strip()
+            log_message("[SYSTEM] Added backstory from template")
 
         npc_gender = session.get("npc_gender", "").lower()
         if npc_gender == "male":
