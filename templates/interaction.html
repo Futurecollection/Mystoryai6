@@ -191,8 +191,6 @@
           <select name="model_type" class="form-select" id="model-select" onchange="showModelOptions()" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
             <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Photorealistic Portrait)</option>
             <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony SDXL (Highly Customizable)</option>
-            <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision (Detailed Renders)</option>
-            <option value="sdxl" {% if last_model_choice == 'sdxl' %}selected{% endif %}>SDXL (Advanced Stable Diffusion)</option>
             <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL (Creative Monster/Creature)</option>
           </select>
         </div>
@@ -223,25 +221,8 @@
         </div>
       </div>
 
-      <!-- Realistic Vision Options -->
-      <div class="realistic-options" style="display: {% if last_model_choice == 'realistic' %}block{% else %}none{% endif %};">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label" style="color: #f8d0d0;">Scheduler:</label>
-            <select name="realistic_scheduler" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-              <option value="EulerA" {% if realistic_scheduler == 'EulerA' %}selected{% endif %}>EulerA</option>
-              <option value="MultistepDPM-Solver" {% if realistic_scheduler == 'MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" style="color: #f8d0d0;">Guidance Scale:</label>
-            <input type="number" step="0.1" name="realistic_cfg_scale" class="form-control" value="{{ realistic_cfg_scale }}" min="1" max="20" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          </div>
-        </div>
-      </div>
-
-      <!-- SDXL Options -->
-      <div class="sdxl-options" style="display: {% if last_model_choice == 'sdxl' %}block{% else %}none{% endif %};">
+      <!-- Juggernaut XL Options -->
+      <div class="juggernaut-options" style="display: {% if last_model_choice == 'juggernaut' %}block{% else %}none{% endif %};">
         <div class="row mb-3">
           <div class="col-md-6">
             <label class="form-label" style="color: #f8d0d0;">Scheduler:</label>
