@@ -7,14 +7,17 @@
     <p class="lead">Create immersive romantic interactions with customizable characters</p>
   </div>
 
+  <!-- Flash messages will only show important system messages, not model usage banners -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="flash-messages mb-4">
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }} fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
+          {% if "image" not in message.lower() and "model" not in message.lower() %}
+            <div class="alert alert-{{ category }} fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
     {% endif %}
@@ -27,7 +30,7 @@
           {% if session.logged_in %}
             <div class="user-welcome mb-4">
               <h4>Welcome back, {{ session.user_email }}</h4>
-              <p>You're logged in. Your stories and settings will be saved.</p>
+              <p>Ready to continue your adventure?</p>
             </div>
             
             <div class="action-buttons">
@@ -38,8 +41,8 @@
               {% endif %}
               
               <a href="{{ url_for('personalize') }}" class="btn btn-lg btn-success btn-block mb-3">
-                <i class="bi bi-plus-circle-fill me-2"></i>Create New Story
-              </a>
+                  <i class="bi bi-plus-circle-fill me-2"></i>Create New Story
+                </a>
               
               <a href="{{ url_for('logout_route') }}" class="btn btn-outline-danger">
                 <i class="bi bi-box-arrow-right me-2"></i>Logout
@@ -69,7 +72,7 @@
                       <h5 class="card-title">Try as Guest</h5>
                       <p class="card-text">Start immediately, but your progress won't be saved</p>
                       <div class="mt-3">
-                        <a href="{{ url_for('personalize') }}" class="btn btn-success">Get Started</a>
+                        <a href="{{ url_for('personalize') }}?guest=true" class="btn btn-success">Get Started</a>
                       </div>
                     </div>
                   </div>
@@ -121,12 +124,14 @@
     border: none;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     background-color: rgba(30, 5, 5, 0.4);
+    border-radius: 15px;
   }
   
   .feature-card {
     background-color: rgba(30, 5, 5, 0.3);
     border: none;
     margin-top: 1.5rem;
+    border-radius: 15px;
   }
   
   .option-card {
@@ -141,28 +146,79 @@
   }
   
   .feature-icon {
-    font-size: 2rem;
+    font-size: 2.2rem;
     margin-bottom: 0.5rem;
     color: #ff5789;
   }
   
   .feature-item {
-    padding: 1rem;
+    padding: 1.2rem;
     border-radius: 10px;
     background-color: rgba(40, 10, 10, 0.3);
+    transition: transform 0.2s;
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-3px);
+    background-color: rgba(50, 15, 15, 0.4);
   }
   
   .header-section h1 {
     color: #ff9fa3;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-size: 4rem;
+    font-weight: 700;
+  }
+  
+  .header-section p {
+    color: #ffd0d0;
+    font-size: 1.8rem;
   }
   
   .action-buttons .btn {
     transition: transform 0.2s;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
   }
   
   .action-buttons .btn:hover {
     transform: scale(1.03);
+  }
+  
+  .btn-primary {
+    background-color: #ff5789 !important;
+    border: none !important;
+  }
+  
+  .btn-success {
+    background-color: #4dbbab !important;
+    border: none !important;
+  }
+  
+  .btn-outline-danger {
+    color: #ff5789 !important;
+    border-color: #ff5789 !important;
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: rgba(255, 87, 137, 0.1) !important;
+  }
+  
+  .user-welcome {
+    background-color: rgba(255, 87, 137, 0.1);
+    border-left: 4px solid #ff5789;
+    padding: 1.5rem;
+    border-radius: 0 10px 10px 0;
+  }
+  
+  .user-welcome h4 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .flash-messages {
+    max-width: 800px;
+    margin: 0 auto;
   }
 </style>
 {% endblock %}
