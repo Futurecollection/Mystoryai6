@@ -760,6 +760,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a dedicated LLM call to generate high-quality NPC thoughts and memories.
        This is the primary function for creating the NPC's internal narrative.
+       Keeps thoughts and memory updates concise (200-300 words).
        
        Returns:
          - thoughts: First-person stream of consciousness
@@ -879,44 +880,42 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
 
     # THOUGHTS GENERATION
     thoughts_prompt = f"""
-Generate a detailed and authentic first-person internal monologue for {npc_name}.
+Generate a concise and authentic first-person internal monologue for {npc_name} (200-300 words maximum).
 
 THE CHARACTER'S CURRENT STATE:
 - Mood: {mood}
 - Emotional Approach: {thought_approach}
 - Physical State: {physical_state}
 - Relationship Stage: {current_stage} ({stage_desc})
-- Affection Level: {affection}, Trust Level: {trust}
+- Affection Level: {affection}
 - Personality: {personality}
 - Occupation: {occupation}
 - Relationship Goal: {relationship_goal}
 
 FOCUS THIS MONOLOGUE ON: {emotional_focus}
 
-CREATE A REALISTIC INNER VOICE WITH THESE ELEMENTS:
+CREATE A CONCISE YET REALISTIC INNER VOICE WITH THESE ELEMENTS:
 1. Raw, unfiltered stream-of-consciousness
 2. Genuine internal contradictions and emotional complexity
 3. Specific reactions to what just happened
 4. Natural language patterns including incomplete thoughts
 5. References to sensory experiences and bodily sensations
-6. Authentic psychological depth (mixed emotions, confusion, clarity)
-7. Brief intrusions of unrelated thoughts
-8. References to past experiences that influence current feelings
-9. Analysis of {user_name}'s words, actions, or body language
-10. Questions they're asking themselves
+6. Analysis of {user_name}'s words, actions, or body language
+7. Questions they're asking themselves
 
 AVOID:
 - Repetition of the same thoughts or phrases from previous entries
 - Overly formal or structured thinking
 - Generic descriptions instead of specific personal reactions
 - Information dumps that don't feel like natural thoughts
+- Exceeding 300 words - be concise but meaningful
 
 RECENT INTERACTION CONTEXT:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
 
 PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
-{prev_thoughts[:500] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
+{prev_thoughts[:300] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
 """
 
     # Generate internal thoughts
@@ -944,15 +943,13 @@ PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
     # MEMORY/BIOGRAPHY GENERATION
     # Use a separate memory-focused prompt that incorporates BOTH thoughts and narration
     memory_prompt = f"""
-Create a DETAILED MEMORY UPDATE for {npc_name} based on this interaction, analyzing internal thoughts, narration, and user actions.
+Create a CONCISE MEMORY UPDATE for {npc_name} based on this interaction (200-300 words maximum).
 
 IMPORTANT GUIDELINES:
-1. Create a COMPREHENSIVE update that captures:
+1. Create a FOCUSED update that captures only the most important:
    - New biographical facts revealed explicitly
    - Emotional developments and reactions to the user
-   - Shifts in attitude, comfort level, or feelings toward {user_name}
    - Key moments that might influence future interactions
-   - Insights into the character's personality revealed through their reactions
    - Meaningful developments in the relationship dynamic
 
 2. Consider THREE sources of information:
@@ -961,22 +958,17 @@ IMPORTANT GUIDELINES:
    - The user's actions and what they reveal about the relationship
 
 3. Write in third-person, past tense, biographical style
-4. Be specific and detailed rather than generic
-5. Organize into 2-3 paragraphs when appropriate
+4. Be specific but concise - aim for 200-300 words total
+5. Organize into 1-2 short paragraphs
 6. If truly nothing significant happened, respond with "(No meaningful updates to record at this time)"
 
 SOURCES TO ANALYZE:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
-INTERNAL THOUGHTS: {thoughts[:500] if len(thoughts) > 10 else "No recorded thoughts."}
-
-EXAMPLES OF COMPREHENSIVE MEMORY UPDATES:
-- "During their conversation at the café, Sarah revealed her passion for marine biology and her undergraduate studies at the University of Washington. When discussing her previous relationships, she became noticeably guarded, suggesting unresolved feelings about past romantic experiences. Though she maintained a casual tone, her internal hesitation about opening up fully to someone new became apparent, especially when the topic shifted to future plans."
-
-- "Alex's comfort level with Michael increased significantly during their walk through the park. While initially reserved, he gradually opened up about his childhood in rural Vermont and his complicated relationship with his father. The conversation marked the first time Alex had shared personal family history, indicating growing trust. Despite his outward confidence, his internal thoughts revealed lingering vulnerability about these memories."
+INTERNAL THOUGHTS: {thoughts[:300] if len(thoughts) > 10 else "No recorded thoughts."}
 
 EXISTING BIOGRAPHY ELEMENTS (DO NOT REPEAT THESE):
-{memory_summary[:800] if len(memory_summary) > 20 else "Limited existing information."}
+{memory_summary[:500] if len(memory_summary) > 20 else "Limited existing information."}
 
 Current Relationship Stage: {current_stage} ({stage_desc})
 """
@@ -999,12 +991,12 @@ Current Relationship Stage: {current_stage} ({stage_desc})
 
     return thoughts, memory
 
-def interpret_npc_state(affection: float, trust: float, npc_mood: str,
+def interpret_npc_state(affection: float, npc_mood: str,
                         current_stage: int, last_user_action: str) -> str:
     """
     Produces exactly 4 lines:
       Line 1 => AFFECT_CHANGE_FINAL: (float)
-      Line 2 => NARRATION: ... (at least 300 characters)
+      Line 2 => NARRATION: ... (at least 200 characters)
       Line 3 => PRIVATE_THOUGHTS: ...
       Line 4 => MEMORY_UPDATE: ...
     """
@@ -1082,14 +1074,14 @@ Special Context Notes:
 - Has Implicit Narrative Direction: {has_narrative_direction}
 
 Relationship Stage={current_stage} ({stage_desc})
-Stats: Affection={affection}, Trust={trust}, Mood={npc_mood}
+Stats: Affection={affection}, Mood={npc_mood}
 
 Background (do not contradict):
 {personalization}
 
 Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
-Line 2 => NARRATION: ... (must be at least 300 characters describing the NPC's reaction, setting, dialogue, and actions)
+Line 2 => NARRATION: ... (must be at least 200 characters describing the NPC's reaction, setting, dialogue, and actions)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
@@ -2172,7 +2164,6 @@ Orgasm & Afterglow:
 
         # Initialize stats
         session["affectionScore"] = 0.0
-        session["trustScore"] = 5.0
         session["npcMood"] = "Neutral"
         session["currentStage"] = 1
         session["npcPrivateThoughts"] = "(none)"
@@ -2390,7 +2381,6 @@ You can say hello, start a conversation, or set the scene with an action.
         elif "submit_action" in request.form:
             user_action = request.form.get("user_action", "").strip()
             affection = session.get("affectionScore", 0.0)
-            trust = session.get("trustScore", 5.0)
             mood = session.get("npcMood", "Neutral")
             cstage = session.get("currentStage", 1)
             interaction_mode = session.get("interaction_mode", "narrative")
@@ -2404,7 +2394,6 @@ You can say hello, start a conversation, or set the scene with an action.
             for attempt in range(max_retry_attempts):
                 result_text = interpret_npc_state(
                     affection=affection,
-                    trust=trust,
                     npc_mood=mood,
                     current_stage=cstage,
                     last_user_action=user_action
