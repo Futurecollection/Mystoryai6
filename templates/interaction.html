@@ -12,6 +12,22 @@
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-body">
     <div class="row align-items-center">
+      <!-- Profile Picture (if exists) -->
+      <div class="col-md-2 text-center mb-3 mb-md-0">
+        {% if session.get('npc_profile_pic') %}
+          <div class="position-relative">
+            <img src="{{ url_for('view_profile_pic') }}" alt="Profile" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #ff5789;">
+            {% if session.get('profile_pic_success') %}
+              <span class="position-absolute top-0 end-0 badge rounded-pill bg-success">
+                <i class="bi bi-check-circle"></i>
+              </span>
+            {% endif %}
+          </div>
+          <div class="mt-1">
+            <small style="color: #ff9fa3;">{{ session.get('npc_name', 'Character') }}</small>
+          </div>
+        {% endif %}
+      </div>
       <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
         <h5 style="color: #ff9fa3; margin-bottom: 5px;">Relationship Stats</h5>
         <div class="d-flex flex-column flex-md-row gap-2">
@@ -370,7 +386,12 @@
 <div id="character-info" class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
     <div class="d-flex justify-content-between align-items-center">
-      <h4 style="margin-bottom: 0;">{{ session.get('npc_name', 'Character') }}</h4>
+      <div class="d-flex align-items-center">
+        {% if session.get('npc_profile_pic') %}
+          <img src="{{ url_for('view_profile_pic') }}" alt="Profile" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #ff5789;">
+        {% endif %}
+        <h4 style="margin-bottom: 0;">{{ session.get('npc_name', 'Character') }}</h4>
+      </div>
       <div>
         <span id="auto-update-badge" class="badge bg-success me-2" style="display: none;">
           <i class="bi bi-magic"></i> Auto-updated
