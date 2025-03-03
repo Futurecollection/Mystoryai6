@@ -3,6 +3,7 @@ import random
 import requests
 import time
 import json
+import io
 from functools import wraps
 from flask import (
     Flask, request, render_template,
@@ -2643,7 +2644,7 @@ def view_profile_pic():
     if session.get("npc_profile_pic"):
         # Convert base64 back to image
         img_data = base64.b64decode(session["npc_profile_pic"])
-        return img_data, {'Content-Type': 'image/jpeg'}
+        return send_file(io.BytesIO(img_data), mimetype="image/jpeg")
     else:
         # Return a default placeholder image or 404
         return "No profile picture set", 404
