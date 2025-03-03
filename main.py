@@ -1514,6 +1514,8 @@ def generate_juggernaut_xl_image_safely(
         "(airbrushed, cartoon, anime, semi-realistic, cgi, render, blender, digital art, manga, amateur:1.3), (3D ,3D Game, 3D Game Scene, 3D Character:1.1), "
         "(bad hands, bad anatomy, bad body, bad face, bad teeth, bad arms, bad legs, deformities:1.3)"
     )
+    
+    # Updated model ID to the most recent version
     replicate_input = {
         "prompt": prompt,
         "negative_prompt": negative_prompt_text,
@@ -1532,8 +1534,9 @@ def generate_juggernaut_xl_image_safely(
     print(f"[DEBUG] replicate => Juggernaut XL prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance_scale={guidance_scale}, width={width}, height={height}")
     
     try:
+        # Using the latest version of the model
         result = replicate.run(
-            "lucataco/juggernaut-xl:6c00f81e332dfa657aa5ed4e21bfa52190b9b58d3e66a5536043d5d2ee37ba76",
+            "lucataco/juggernaut-xl:b2a308a5a8a48bf0ef2e19afd27ddcf0d2182e19f02a6d79a5e7f4c854282113",
             replicate_input
         )
         if result:

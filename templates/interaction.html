@@ -248,6 +248,27 @@
               <span style="min-width: 40px; text-align: center; color: #f8d0d0;">50</span>
             </div>
           </div>
+
+          <!-- Juggernaut XL Settings -->
+          <div id="juggernaut_div" style="display: none;">
+            <label class="form-label" style="color: #f8d0d0;">Scheduler Algorithm:</label>
+            <select name="juggernaut_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
+              <option value="DDIM" {% if juggernaut_scheduler == 'DDIM' %}selected{% endif %}>DDIM</option>
+              <option value="DPMSolverMultistep" {% if juggernaut_scheduler == 'DPMSolverMultistep' %}selected{% endif %}>DPMSolverMultistep</option>
+              <option value="HeunDiscrete" {% if juggernaut_scheduler == 'HeunDiscrete' %}selected{% endif %}>HeunDiscrete</option>
+              <option value="KarrasDPM" {% if juggernaut_scheduler == 'KarrasDPM' %}selected{% endif %}>KarrasDPM</option>
+              <option value="K_EULER_ANCESTRAL" {% if juggernaut_scheduler == 'K_EULER_ANCESTRAL' %}selected{% endif %}>K_EULER_ANCESTRAL</option>
+              <option value="K_EULER" {% if juggernaut_scheduler == 'K_EULER' %}selected{% endif %}>K_EULER</option>
+              <option value="PNDM" {% if juggernaut_scheduler == 'PNDM' %}selected{% endif %}>PNDM</option>
+            </select>
+
+            <label class="form-label" style="color: #f8d0d0;">Guidance Scale (1–20):</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="juggernaut_cfg_scale" 
+                     value="{{ juggernaut_cfg_scale|default(7.0) }}" oninput="this.nextElementSibling.textContent = this.value">
+              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ juggernaut_cfg_scale|default(7.0) }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -433,7 +454,7 @@
   }
 
   .suggestion-container {
-    background-color: rgba(40, 10, 10, 0.5);
+    background-color: rgba(40, 10,10, 0.5);
     border-radius: 8px;
     padding: 10px;
     border: 1px solid #6d1d1d;
@@ -517,23 +538,36 @@ function toggleAdvancedSettings() {
 function toggleVisibilityForModel(model) {
   var stepsDiv = document.getElementById('steps_div');
   var ponyDiv = document.getElementById('pony_div');
+  var juggernautDiv = document.getElementById('juggernaut_div');
+  var realisticDiv = document.getElementById('realistic_scheduler_div');
 
-  // Steps range visible only if pony
-  if (model === 'pony') {
+  // Steps range visible only if pony or realistic
+  if (model === 'pony' || model === 'realistic') {
     stepsDiv.style.display = 'block';
-    ponyDiv.style.display = 'block';
+    ponyDiv.style.display = model === 'pony';
+    juggernautDiv.style.display = 'none';
+    realisticDiv.style.display = model === 'realistic';
   } 
+  // Juggernaut
+  else if (model === 'juggernaut') {
+    stepsDiv.style.display = 'block';
+    ponyDiv.style.display = 'none';
+    juggernautDiv.style.display = 'block';
+    realisticDiv.style.display = 'none';
+  }
   // Flux (or anything else)
   else {
     stepsDiv.style.display = 'none';
     ponyDiv.style.display = 'none';
+    juggernautDiv.style.display = 'none';
+    realisticDiv.style.display = 'none';
   }
 }
 
 // Add event listeners when page loads
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize model visibility based on selected radio
-  const selectedModel = document.querySelector('input[name="model_type"]:checked')?.value || 'flux';
+  const selectedModel = document.querySelector('select[name="model_type"]')?.value || 'flux';
   toggleVisibilityForModel(selectedModel);
 
   // Handle all forms
@@ -551,8 +585,8 @@ document.addEventListener('DOMContentLoaded', function() {
   {% endif %}
 
   // Add event listeners to radio buttons
-  document.querySelectorAll('input[name="model_type"]').forEach(function(radio) {
-    radio.addEventListener('change', function() {
+  document.querySelectorAll('select[name="model_type"]').forEach(function(select) {
+    select.addEventListener('change', function() {
       toggleVisibilityForModel(this.value);
     });
   });
