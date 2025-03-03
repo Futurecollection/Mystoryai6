@@ -94,9 +94,9 @@
           {% set parts = npc_narration.split('\n\n') %}
           {% for part in parts %}
             {% if '*' in part %}
-              <div style="margin-bottom: 1.2rem; color: #ff9fa3; font-style: italic; font-size: 2rem;">{{ part }}</div>
+              <div style="margin-bottom: 0.5rem; color: #ff9fa3; font-style: italic; font-size: 2.4rem;">{{ part }}</div>
             {% else %}
-              <div style="margin-bottom: 1.2rem; color: #f8d0d0; font-size: 2rem;">{{ part }}</div>
+              <div style="margin-bottom: 0.5rem; color: #f8d0d0; font-size: 2.4rem;">{{ part }}</div>
             {% endif %}
           {% endfor %}
         {% else %}
