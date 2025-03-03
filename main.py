@@ -597,8 +597,8 @@ def build_personalization_string() -> str:
     return user_data + npc_data + env_data
 
 def build_initial_npc_memory() -> str:
-    """Construct a detailed biography for the NPC using all available personalization data.
-    If limited information is available, use the LLM to generate additional details."""
+    """Generate a dynamic, LLM-created biography for the NPC using available personalization data.
+    The biography is created without rigid templates for more natural and varied results."""
     name = session.get('npc_name','Unknown')
     gender = session.get('npc_gender','?')
     age = session.get('npc_age','?')
@@ -617,15 +617,9 @@ def build_initial_npc_memory() -> str:
     encounter_context = session.get('encounter_context', '')
     user_name = session.get('user_name', 'the user')
     
-    # Check if we have enough basic information or need LLM to fill in missing details
-    missing_key_fields = (
-        name == 'Unknown' or gender == '?' or age == '?' or 
-        personality == '?' or occupation == '?' or 
-        hair_color == '?' or clothing == '?'
-    )
-    
-    # If missing key fields, use LLM to generate a complete biography
-    if missing_key_fields and GEMINI_API_KEY:
+    # Always use the LLM to generate a complete biography 
+    # regardless of whether fields are filled in or not
+    if GEMINI_API_KEY:
         try:
             return generate_llm_biography(
                 name, gender, age, ethnicity, orientation, relationship_goal,
@@ -635,77 +629,19 @@ def build_initial_npc_memory() -> str:
             )
         except Exception as e:
             print(f"[ERROR] LLM biography generation failed: {e}")
-            # Fall back to narrative approach if LLM fails
-    
-    # Format a narrative-style biography without rigid section structure
-    biography = f"# {name}'s Biography\n\n"
-    
-    # Opening paragraph with core details
-    biography += f"{name} is a {age}-year-old {ethnicity} {gender} with {hair_color.lower() if hair_color != '?' else ''} {hair_style.lower() if hair_style != '?' else 'hair'} and a {body_type.lower() if body_type != '?' else 'distinctive'} physique. "
-    biography += f"Working as a {occupation}, their {personality.lower() if personality != '?' else 'unique'} personality shines through in how they approach both their professional and personal life. "
-    
-    # Current life situation
-    if current_situation and current_situation != '?':
-        if "broke up" in current_situation.lower():
-            biography += f"Having recently ended a relationship, {name} is navigating the complex emotions that come with moving on. The breakup left some unresolved feelings, but also opened up possibilities for new connections. "
-        elif "divorce" in current_situation.lower():
-            biography += f"Still processing a recent divorce, {name} is rediscovering who they are as an individual again. The experience changed their perspective on relationships, making them more thoughtful about what they truly want. "
-        elif "single" in current_situation.lower():
-            biography += f"Currently single, {name} has been focused on personal growth and self-discovery. While comfortable with independence, there's a natural desire for meaningful connection that brings them to social settings. "
-        elif "new in town" in current_situation.lower():
-            biography += f"New to the area, {name} is still finding their footing. The excitement of new beginnings mixes with occasional homesickness, creating a unique openness to new experiences and connections. "
-        else:
-            biography += f"Currently {current_situation.lower()}, {name} is in a transitional period that has them reflecting on their priorities and desires. "
+            # Fall back to a very simple biography if LLM fails
+            return f"# {name}'s Biography\n\nA {age}-year-old {gender} who works as a {occupation}. They have {hair_color} {hair_style} hair and a {body_type} physique. Meeting {user_name} has sparked their interest, and they're looking forward to getting to know them better.\n\n## Relationship Status\nFirst meeting - getting to know each other."
     else:
-        biography += f"At this point in their life, {name} is navigating a period of personal growth and change. "
-    
-    # Appearance and style
-    if clothing and clothing != '?':
-        biography += f"Today they're wearing {clothing.lower()}, which reflects their personal style and the image they want to project. The way they present themselves—confident yet approachable—draws attention in subtle ways. "
-    else:
-        biography += f"Their style is distinctive and carefully considered, reflecting both practicality and a subtle flair that makes them memorable. "
-    
-    # Relationship approach and orientation
-    if orientation != '?' and relationship_goal != '?':
-        biography += f"\n\n{name} identifies as {orientation.lower()} and is looking for {relationship_goal.lower()}. "
-        if "casual" in relationship_goal.lower():
-            biography += f"They value their independence and prefer relationships that allow for spontaneity without heavy expectations. Past experiences have taught them that forced commitment often leads to disappointment, so they approach connections with honesty about their intentions. "
-        elif "serious" in relationship_goal.lower():
-            biography += f"Having experienced enough surface-level connections, they're seeking something with genuine depth and potential for growth. They believe in taking the time to build trust before fully investing emotionally. "
-        else:
-            biography += f"Their approach to dating is straightforward and authentic—they believe in being clear about intentions while remaining open to how connections naturally evolve. "
-    else:
-        biography += f"\n\n{name}'s approach to relationships balances caution with genuine openness. Past experiences have shaped their expectations, making them value authenticity above all else in potential partners. "
-    
-    # Background/history
-    if backstory:
-        biography += f"\n\n{backstory}\n"
-    else:
-        biography += f"\n\n{name} was raised in a {random.choice(['coastal town with stunning ocean views', 'bustling metropolitan area', 'close-knit suburban community', 'rural setting surrounded by nature'])}, which significantly shaped their worldview and values. "
-        biography += f"Their upbringing instilled a strong sense of {random.choice(['independence and self-reliance', 'community and connection to others', 'ambition and determination', 'creativity and expression'])}. "
-        
-        if occupation != '?':
-            biography += f"The path to their current career as a {occupation} wasn't straightforward, involving both challenges and unexpected opportunities that ultimately led them to where they are today. They've developed a reputation for {random.choice(['attention to detail', 'creative problem-solving', 'leadership', 'innovation', 'reliability'])} in their professional life. "
-    
-    # Current meeting context
-    biography += f"\n\nMeeting {user_name} "
-    if environment:
-        biography += f"in {environment.lower()}, "
-    if encounter_context:
-        biography += f"under the circumstances of {encounter_context.lower()}, "
-    biography += f"has sparked {name}'s interest. There's something intriguing about this new connection that has caught their attention, though they're still forming their impressions as they learn more."
-    
-    # Initial relationship status
-    biography += f"\n\n## Relationship Status\nFirst meeting - getting to know each other - initial impressions forming"
-    
-    return biography
+        # Very simple fallback if no API key is available
+        return f"# {name}'s Biography\n\nA {age}-year-old {gender} who works as a {occupation}. They have {hair_color} {hair_style} hair and a {body_type} physique. Meeting {user_name} has sparked their interest, and they're looking forward to getting to know them better.\n\n## Relationship Status\nFirst meeting - getting to know each other."
 
 @retry_with_backoff(retries=2, backoff_in_seconds=1)
 def generate_llm_biography(name, gender, age, ethnicity, orientation, relationship_goal,
                         personality, body_type, hair_color, hair_style, clothing,
                         occupation, current_situation, backstory, environment,
                         encounter_context, user_name) -> str:
-    """Use the LLM to generate a detailed, rich biography with any missing information filled in creatively."""
+    """Use the LLM to generate a creative, unique biography with available information, 
+    filled with personality and avoiding rigid templates."""
     
     # Create a summary of what we know for sure (non-? values)
     known_details = []
@@ -728,39 +664,65 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
     
     known_info = "\n".join(known_details)
     
+    # Add some randomness to make each biography truly unique
+    biography_styles = [
+        "vivid and descriptive, focusing on sensory details and emotional depth",
+        "introspective and philosophical, revealing inner thoughts and motivations",
+        "dynamic and energetic, highlighting formative experiences and pivotal moments",
+        "mysterious and intriguing, with hints of untold stories and hidden depths",
+        "warm and personable, emphasizing connections and relationships"
+    ]
+    
+    writing_approaches = [
+        "literary and poetic, with rich metaphors and vivid imagery",
+        "conversational and approachable, as if shared between friends",
+        "detailed and methodical, weaving a complex tapestry of experiences",
+        "intimate and revealing, sharing vulnerabilities and authentic emotions",
+        "crisp and modern, with contemporary references and relatable situations"
+    ]
+    
+    selected_style = random.choice(biography_styles)
+    selected_approach = random.choice(writing_approaches)
+    
     prompt = f"""
-    Create a detailed, narrative-style character biography for an interactive romance story.
+    Create a unique, compelling character biography for an interactive romance story. 
+    Make this biography feel authentic and natural—not like a template or form.
     
-    KNOWN INFORMATION:
-    {known_info if known_details else "Very limited information available. Create a compelling character."}
+    KNOWN CHARACTER DETAILS:
+    {known_info if known_details else "Limited information available. Create a compelling character from scratch."}
     
-    The biography should be written in Markdown format with these sections:
-    1. ## DETAILED BIOGRAPHY: [CHARACTER NAME]
-    2. ### Core Identity - Who they are, their age, gender, ethnicity, personality traits
-    3. ### Life Circumstances - Current life situation, recent significant events
-    4. ### Physical Presence - Body type, hair, clothing style, distinctive features
-    5. ### Relationship Approach - Sexual orientation, relationship goals, dating philosophy
-    6. ### Personal History - Background, upbringing, formative experiences, education, career path
-    7. ### Current Encounter - Meeting context with {user_name}, initial impressions
-    8. ### Relationship Development - Just a placeholder noting this is a first meeting
+    CREATIVE DIRECTION:
+    - Writing style should be {selected_style}
+    - Approach should be {selected_approach}
+    - Avoid obvious section headers or formulaic structure
+    - Create organic flow between different aspects of the character
+    - The only required header should be the character's name at the beginning
+    - May include a brief "Relationship Status" note at the end
+    
+    STORYTELLING GUIDELINES:
+    - Weave details together naturally rather than listing traits
+    - Create meaningful connections between different aspects (how their work influences their personality, etc.)
+    - Develop a sense of history and lived experience
+    - Include small, specific details that make the character feel real (habits, preferences, quirks)
+    - Reference 1-2 formative experiences that shaped who they are
+    - If appropriate, hint at hidden depths or unexplored aspects of their personality
     
     IMPORTANT REQUIREMENTS:
-    - If any details are not provided above, create plausible and interesting ones
-    - Write in third-person narrative style
-    - Ages must be 20 or older - this is an adult story
-    - Create a rich, nuanced personality with a mix of strengths and vulnerabilities
-    - Include specific, concrete details that make the character feel real
-    - Ensure consistency across all aspects of the character
-    - Maintain a mature, sophisticated tone suitable for adult readers
+    - Ensure all characters are adults (20+ years old)
+    - If details are missing, create plausible and interesting ones that fit the character
+    - Maintain internal consistency (personality, background, etc.)
+    - Include their initial impressions of meeting {user_name}
+    - Use Markdown formatting only when it enhances readability
+    - Make the biography between 300-500 words - concise but rich with detail
     
-    The biography will be presented to the user as they interact with this character.
+    The biography should feel like a unique creation for this specific character, not something mass-produced.
     """
     
     try:
         chat = model.start_chat()
         response = chat.send_message(
             prompt,
-            generation_config={"temperature": 0.7, "max_output_tokens": 4096},
+            generation_config={"temperature": 0.8, "max_output_tokens": 4096},
             safety_settings=safety_settings
         )
         
