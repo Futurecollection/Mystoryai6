@@ -1459,45 +1459,6 @@ def generate_pony_sdxl_image_safely(prompt: str, seed: int = None, steps: int = 
         print("[ERROR] Pony-SDXL call failed:", e)
         return None
 
-def generate_realistic_vision_image_safely(
-    prompt: str,
-    seed: int = 0,
-    steps: int = 20,
-    width: int = 768,
-    height: int = 1152,
-    guidance: float = 5.0,
-    scheduler: str = "EulerA"
-) -> object:
-    negative_prompt_text = (
-        "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), "
-        "text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, "
-        "mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, "
-        "dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, "
-        "missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck"
-    )
-    replicate_input = {
-        "seed": seed,
-        "steps": steps,
-        "width": width,
-        "height": height,
-        "prompt": prompt,
-        "guidance": guidance,
-        "scheduler": scheduler,
-        "negative_prompt": negative_prompt_text
-    }
-    print(f"[DEBUG] replicate => RealisticVision prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance={guidance}, width=768, height=1152")
-    try:
-        result = replicate.run(
-            "lucataco/realistic-vision-v5.1:2c8e954decbf70b7607a4414e5785ef9e4de4b8c51d50fb8b8b349160e0ef6bb",
-            replicate_input
-        )
-        if result:
-            return {"output": result[0] if isinstance(result, list) else result}
-        return None
-    except Exception as e:
-        print(f"[ERROR] RealisticVision call failed: {e}")
-        return None
-
 def generate_juggernaut_xl_image_safely(
     prompt: str,
     seed: int = None,
@@ -1515,7 +1476,7 @@ def generate_juggernaut_xl_image_safely(
         "(bad hands, bad anatomy, bad body, bad face, bad teeth, bad arms, bad legs, deformities:1.3)"
     )
     
-    # Updated model ID to the most recent version
+    # Updated model ID to the latest version
     replicate_input = {
         "prompt": prompt,
         "negative_prompt": negative_prompt_text,
@@ -1524,7 +1485,8 @@ def generate_juggernaut_xl_image_safely(
         "num_inference_steps": steps,
         "guidance_scale": guidance_scale,
         "scheduler": scheduler,
-        "num_outputs": 1
+        "num_outputs": 1,
+        "strength": 1
     }
     
     # Add seed only if provided (otherwise let it be random)
@@ -1534,9 +1496,9 @@ def generate_juggernaut_xl_image_safely(
     print(f"[DEBUG] replicate => Juggernaut XL prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance_scale={guidance_scale}, width={width}, height={height}")
     
     try:
-        # Using the latest version of the model
+        # Using the updated version of the model
         result = replicate.run(
-            "lucataco/juggernaut-xl:b2a308a5a8a48bf0ef2e19afd27ddcf0d2182e19f02a6d79a5e7f4c854282113",
+            "asiryan/juggernaut-xl-v7:6a52feace43ce1f6bbc2cdabfc68423cb2319d7444a1a1dae529c5e88b976382",
             replicate_input
         )
         if result:
@@ -1559,10 +1521,10 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         log_message("[SYSTEM] Image generation limit reached (5 per story)")
         return None
     """
-    model_type: flux | pony | realistic | juggernaut
-    scheduler: used by pony, realistic, or juggernaut
-    steps: int for pony, realistic, or juggernaut
-    cfg_scale: float for pony (cfg_scale), realistic (guidance), or juggernaut (guidance_scale)
+    model_type: flux | pony | juggernaut
+    scheduler: used by pony or juggernaut
+    steps: int for pony or juggernaut
+    cfg_scale: float for pony (cfg_scale) or juggernaut (guidance_scale)
     """
     # Validate age content
     is_blocked, reason = validate_age_content(prompt_text)
@@ -1586,19 +1548,6 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         result = generate_pony_sdxl_image_safely(
             prompt_text, seed=seed_used, steps=final_steps,
             scheduler=chosen_sched, cfg_scale=final_cfg
-        )
-    elif model_type == "realistic":
-        steps_final = steps if steps is not None else 20
-        final_scheduler = scheduler if scheduler else "EulerA"
-        final_guidance = cfg_scale if cfg_scale is not None else 5.0
-        result = generate_realistic_vision_image_safely(
-            prompt=prompt_text,
-            seed=seed_used,
-            steps=steps_final,
-            width=768,
-            height=1152,
-            guidance=final_guidance,
-            scheduler=final_scheduler
         )
     elif model_type == "juggernaut":
         steps_final = steps if steps is not None else 40
@@ -1898,12 +1847,6 @@ You are an AI assistant specializing in producing a short prompt for a Stable Di
 
 """
 
-REALISTICVISION_IMAGE_SYSTEM_PROMPT = """
-You are an AI assistant creating a prompt for Realistic Vision (SD1.5).
-Start with "RAW photo," or "RAW photograph," and incorporate the NPC personal data like the NPC's personal details (age, hair, clothing, etc.) and descriptions plus relevant story narration details. 
-
-"""
-
 JUGGERNAUT_IMAGE_SYSTEM_PROMPT = """
 You are an AI assistant creating a prompt for the Juggernaut XL image model.
 Create a detailed, artistic description that incorporates the NPC's personal details (age, hair, clothing, etc.) 
@@ -1919,8 +1862,6 @@ def get_image_prompt_system_instructions(model_type: str) -> str:
         return FLUX_IMAGE_SYSTEM_PROMPT
     elif mt == "pony":
         return PONY_IMAGE_SYSTEM_PROMPT
-    elif mt == "realistic":
-        return REALISTICVISION_IMAGE_SYSTEM_PROMPT
     elif mt == "juggernaut":
         return JUGGERNAUT_IMAGE_SYSTEM_PROMPT
     else:
@@ -2636,27 +2577,6 @@ You can say hello, start a conversation, or set the scene with an action.
                     cfg_scale=pony_cfg
                 )
 
-            elif chosen_model == "realistic":
-                chosen_scheduler = request.form.get("realistic_scheduler", "EulerA")
-                valid_schedulers = ["EulerA", "MultistepDPM-Solver"]
-                if chosen_scheduler not in valid_schedulers:
-                    chosen_scheduler = "EulerA"
-                session["realistic_scheduler"] = chosen_scheduler
-
-                try:
-                    real_cfg = float(request.form.get("realistic_cfg_scale", "5.0"))
-                except:
-                    real_cfg = 5.0
-                session["realistic_cfg_scale"] = real_cfg
-
-                handle_image_generation_from_prompt(
-                    prompt_text=user_supplied_prompt,
-                    force_new_seed=("new_seed" in request.form),
-                    model_type=chosen_model,
-                    scheduler=chosen_scheduler,
-                    steps=steps,
-                    cfg_scale=real_cfg
-                )
             elif chosen_model == "juggernaut":
                 juggernaut_sched = request.form.get("juggernaut_scheduler", "K_EULER_ANCESTRAL")
                 valid_schedulers = ["DDIM", "DPMSolverMultistep", "HeunDiscrete", "KarrasDPM", "K_EULER_ANCESTRAL", "K_EULER", "PNDM"]
