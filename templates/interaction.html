@@ -541,42 +541,29 @@ function toggleAdvancedSettings() {
 function showModelOptions() {
     const modelSelect = document.getElementById('model-select');
     const ponyOptions = document.querySelector('.pony-options');
-    const realisticOptions = document.querySelector('.realistic-options');
-    const sdxlOptions = document.querySelector('.sdxl-options');
     const juggernautOptions = document.querySelector('.juggernaut-options');
+    
+    // For debugging
+    console.log("Selected model:", modelSelect.value);
 
     // Hide all option sections first
-    ponyOptions.style.display = 'none';
-    realisticOptions.style.display = 'none';
-    sdxlOptions.style.display = 'none';
-    juggernautOptions.style.display = 'none';
-
-    // Show only the selected model's options
-    switch(modelSelect.value) {
-      case 'pony':
+    if (ponyOptions) ponyOptions.style.display = 'none';
+    if (juggernautOptions) juggernautOptions.style.display = 'none';
+    
+    // Only show the selected model's options
+    if (modelSelect.value === 'pony' && ponyOptions) {
         ponyOptions.style.display = 'block';
-        break;
-      case 'realistic':
-        realisticOptions.style.display = 'block';
-        break;
-      case 'sdxl':
-        sdxlOptions.style.display = 'block';
-        break;
-      case 'juggernaut':
+    } else if (modelSelect.value === 'juggernaut' && juggernautOptions) {
         juggernautOptions.style.display = 'block';
-        break;
-      default:
-        // For 'flux' or any other model, don't show special options
-        break;
     }
-  }
+    // For 'flux' or any other model, don't show special options
+}
 
 // Add event listeners when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize model visibility based on selected radio
-  const selectedModel = document.querySelector('input[name="model_type"]:checked')?.value || 'flux';
+  // Initialize model visibility based on selected dropdown
   showModelOptions();
-
+  
   // Handle all forms
   document.querySelectorAll('form').forEach(function(form) {
     form.addEventListener('submit', function(event) {

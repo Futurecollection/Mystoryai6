@@ -2529,7 +2529,9 @@ You can say hello, start a conversation, or set the scene with an action.
                 flash("No image prompt provided.", "danger")
                 return redirect(url_for("interaction"))
 
+            # Fix model selection - ensure we're getting the correct value from the dropdown
             chosen_model = request.form.get("model_type", session.get("last_model_choice","flux"))
+            print(f"[DEBUG] Selected model from form: {chosen_model}")
             session["last_model_choice"] = chosen_model
 
             try:
@@ -2557,7 +2559,6 @@ You can say hello, start a conversation, or set the scene with an action.
                     steps=steps,
                     cfg_scale=pony_cfg
                 )
-
             
             elif chosen_model == "juggernaut":
                 # Get Juggernaut XL specific parameters
@@ -2598,6 +2599,7 @@ You can say hello, start a conversation, or set the scene with an action.
                     log_message(f"Scene Image Prompt => {user_supplied_prompt}")
                     log_message(f"Image seed={seed_used}, model={chosen_model}, strength={strength}, steps={steps}, guidance_scale={guidance_scale}")
             else:
+                # Flux or any other model (default case)
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
                     force_new_seed=("new_seed" in request.form),
