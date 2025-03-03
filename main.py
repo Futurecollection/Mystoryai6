@@ -52,20 +52,13 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Please set SUPABASE_URL and SUPABASE_KEY in the environment.")
 
-# Create Supabase client with timeout settings
-try:
-    import httpx
-    options = {
-        'timeout': httpx.Timeout(30.0, connect=10.0),  # Total timeout of 30s, connect timeout of 10s
-        'retries': 3,  # Add retries for transient failures
-    }
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY, options=options)
-    app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
-except Exception as e:
-    print(f"Error initializing Supabase client: {e}")
-    # Create a fallback client without custom options if the above fails
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
+# Create Supabase client without custom options first
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+app.session_interface = SupabaseSessionInterface(supabase_client=supabase)
+
+# If you need custom options, you can add them after the basic setup is working
+# For now, we're using the default client configuration to resolve the 'headers' error
+print(f"Successfully initialized Supabase client")
 
 def login_required(f):
     @wraps(f)
