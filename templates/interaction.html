@@ -24,9 +24,6 @@
       </div>
       <div class="col-md-8 text-md-end text-center">
         <div class="btn-group mb-2">
-          <a href="{{ url_for('full_story') }}" class="btn btn-sm" style="background-color: #5f1c1c; color: #f8d0d0;">
-            <i class="bi bi-book"></i> Story Log
-          </a>
           <a href="{{ url_for('gallery') }}" class="btn btn-sm" style="background-color: #5f1c1c; color: #f8d0d0;">
             <i class="bi bi-images"></i> Gallery
           </a>
@@ -73,7 +70,7 @@
         <small style="opacity: 0.8;">Direct dialogue and actions from the character</small>
       {% endif %}
     </div>
-    <a href="{{ url_for('full_story') }}" class="btn btn-sm" style="background-color: #3b0b0b; color: #f8d0d0;">View Full Story</a>
+    <!--Removed View Full Story Button-->
   </div>
   <div class="card-body">
     <div class="border p-3 mb-3" style="white-space: pre-line; background-color: #3b0b0b; color: #f8d0d0; border-radius: 8px; border: 1px solid #6d1d1d; {% if interaction_mode == 'dialogue' %}font-size: 1.4rem; line-height: 1.5;{% endif %}">
@@ -415,9 +412,7 @@
       <i class="bi bi-journal-text"></i> <span class="d-none d-md-inline">View/Edit</span> Biography & Thoughts
     </a>
   </div>
-  <a href="{{ url_for('full_story') }}" class="btn btn-sm mb-2" style="background-color: #5f1c1c; color: #f8d0d0;">
-    <i class="bi bi-journals"></i> View Full Story
-  </a>
+  <!--Removed View Full Story Button-->
 </div>
 
 <style>
