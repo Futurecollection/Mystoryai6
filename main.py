@@ -1517,8 +1517,8 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
                                         save_to_gallery: bool = False):
     # Check image generation limit
     gen_count = session.get("image_gen_count", 0)
-    if gen_count >= 5:
-        log_message("[SYSTEM] Image generation limit reached (5 per story)")
+    if gen_count >= 20:
+        log_message("[SYSTEM] Image generation limit reached (20 per story)")
         return None
     """
     model_type: flux | pony | juggernaut
