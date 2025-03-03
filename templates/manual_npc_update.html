@@ -20,7 +20,7 @@
       </div>
       <div class="collapse show" id="thoughtsCollapse">
         <div class="card-body" style="background-color: #3b0b0b;">
-          <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+          <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 3.2rem; line-height: 1.6; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@
       </div>
       <div class="collapse show" id="bioCollapse">
         <div class="card-body" style="background-color: #3b0b0b;">
-          <div class="markdown-content" style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
+          <div class="markdown-content" style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 3.2rem; line-height: 1.6; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
         </div>
       </div>
     </div>
@@ -215,7 +215,7 @@
     const textareas = document.querySelectorAll('textarea');
     textareas.forEach(textarea => {
       textarea.style.minHeight = '150px';
-      textarea.style.fontSize = '2.8rem';
+      textarea.style.fontSize = '3.8rem';
       
       // Auto-resize function
       const adjustHeight = () => {
