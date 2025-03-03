@@ -2,6 +2,7 @@ import os
 import random
 import requests
 import time
+import json
 from functools import wraps
 from flask import (
     Flask, request, render_template,
@@ -236,6 +237,290 @@ def validate_age_content(text: str) -> tuple[bool, str]:
 # --------------------------------------------------------------------------
 # Build Personalization String
 # --------------------------------------------------------------------------
+def auto_complete_missing_fields():
+    """
+    Automatically fills in any missing NPC fields based on already provided information.
+    This is used when a user hasn't specified all personalization options.
+    """
+    # Check if we need to autofill (if at least one field is marked with "?")
+    npc_name = session.get('npc_name', '?')
+    npc_gender = session.get('npc_gender', '?')
+    needs_autofill = False
+    
+    # These are the fields we'll check and potentially autofill
+    fields_to_check = [
+        "npc_gender", "npc_age", "npc_ethnicity", 
+        "npc_sexual_orientation", "npc_relationship_goal", 
+        "npc_body_type", "npc_hair_color", "npc_hair_style",
+        "npc_personality", "npc_clothing", "npc_occupation",
+        "npc_current_situation", "environment", "encounter_context"
+    ]
+    
+    # Count how many fields are missing
+    missing_count = 0
+    for field in fields_to_check:
+        if session.get(field, "?") == "?":
+            missing_count += 1
+            needs_autofill = True
+    
+    # If nothing needs to be filled, just return
+    if not needs_autofill:
+        return
+    
+    # If we have a name but no gender, make an educated guess based on common name gender associations
+    if npc_name != "?" and npc_gender == "?":
+        # This is a very simple approach - in a production system you'd use a more
+        # sophisticated name gender database
+        female_sounding_names = set([name.lower() for name in NPC_NAME_OPTIONS[:20]])
+        male_sounding_names = set([name.lower() for name in NPC_NAME_OPTIONS[20:40]])
+        
+        if npc_name.lower() in female_sounding_names:
+            session["npc_gender"] = "Female"
+            npc_gender = "Female"
+        elif npc_name.lower() in male_sounding_names:
+            session["npc_gender"] = "Male"  
+            npc_gender = "Male"
+    
+    # If we don't have much to go on (less than 3 fields) or have many missing fields, use LLM
+    if missing_count > 3 and GEMINI_API_KEY:
+        try:
+            autofill_using_llm()
+            log_message("[SYSTEM] Used LLM to auto-complete missing personalization fields.")
+            return
+        except Exception as e:
+            print(f"[ERROR] LLM autofill failed: {e}")
+            # Fall back to basic rules if LLM fails
+            
+    # Otherwise, use some basic rules for common fields
+    
+    # If gender is specified but other appearance fields aren't
+    if npc_gender != "?":
+        # Auto-fill age if missing
+        if session.get("npc_age", "?") == "?":
+            session["npc_age"] = random.choice(["24", "26", "28", "30"])
+        
+        # Auto-fill body type based on gender
+        if session.get("npc_body_type", "?") == "?":
+            if npc_gender == "Female":
+                session["npc_body_type"] = random.choice(["Slender", "Athletic", "Petite", "Curvy"])
+            else:
+                session["npc_body_type"] = random.choice(["Athletic", "Muscular", "Tall & Slim", "Average Build"])
+        
+        # Auto-fill hair color and style based on gender
+        if session.get("npc_hair_color", "?") == "?":
+            session["npc_hair_color"] = random.choice(["Blonde", "Brunette", "Black", "Light Brown", "Dark Brown"])
+            
+        if session.get("npc_hair_style", "?") == "?":
+            if npc_gender == "Female":
+                session["npc_hair_style"] = random.choice(["Long and Straight", "Long and Wavy", "Medium Length", "Short Bob"])
+            else:
+                session["npc_hair_style"] = random.choice(["Short", "Medium Length", "Fade Cut", "Crew Cut"])
+        
+        # Auto-fill clothing based on gender
+        if session.get("npc_clothing", "?") == "?":
+            if npc_gender == "Female":
+                session["npc_clothing"] = random.choice([
+                    "Casual - Jeans and T-shirt", 
+                    "Summer Dress", 
+                    "Business Casual - Blouse and Skirt",
+                    "White Blouse & Dark Skirt"
+                ])
+            else:
+                session["npc_clothing"] = random.choice([
+                    "Casual - Jeans and T-shirt", 
+                    "Button-up Shirt & Chinos", 
+                    "Business Casual - Blazer",
+                    "Suit & Tie"
+                ])
+    
+    # Auto-fill personality if missing
+    if session.get("npc_personality", "?") == "?":
+        session["npc_personality"] = random.choice([
+            "Confident and Outgoing", 
+            "Flirty and Playful", 
+            "Kind and Nurturing",
+            "Shy and Reserved"
+        ])
+    
+    # Auto-fill occupation if missing
+    if session.get("npc_occupation", "?") == "?":
+        session["npc_occupation"] = random.choice([
+            "Office Worker", 
+            "College Student", 
+            "Graphic Designer",
+            "Marketing Executive",
+            "Teacher"
+        ])
+    
+    # Auto-fill environment if missing
+    if session.get("environment", "?") == "?":
+        session["environment"] = random.choice([
+            "Coffee Shop", 
+            "Restaurant", 
+            "Bar/Nightclub",
+            "Park"
+        ])
+    
+    # Auto-fill encounter context if missing
+    if session.get("encounter_context", "?") == "?":
+        session["encounter_context"] = random.choice([
+            "First Date", 
+            "Dating App Match", 
+            "Random Encounter",
+            "Friend's Introduction"
+        ])
+    
+    # Auto-fill relationship details if missing
+    if session.get("npc_relationship_goal", "?") == "?":
+        session["npc_relationship_goal"] = random.choice([
+            "Casual Dating",
+            "Serious Relationship",
+            "Taking Things Slow"
+        ])
+        
+    if session.get("npc_current_situation", "?") == "?":
+        session["npc_current_situation"] = random.choice([
+            "Single for a while",
+            "New in Town",
+            "Recently out of relationship"
+        ])
+    
+    # Set sexual orientation if missing (based on gender)
+    if session.get("npc_sexual_orientation", "?") == "?":
+        user_gender = session.get("user_gender", "Male")  # Assume user is male by default
+        if npc_gender == "Female" and user_gender == "Male":
+            session["npc_sexual_orientation"] = "Straight"
+        elif npc_gender == "Male" and user_gender == "Female":
+            session["npc_sexual_orientation"] = "Straight"
+        else:
+            session["npc_sexual_orientation"] = random.choice(["Straight", "Bisexual"])
+
+def autofill_using_llm():
+    """
+    Uses Gemini to intelligently fill in any missing personalization fields
+    based on the information already provided by the user.
+    """
+    # Create a dictionary of current field values
+    current_fields = {}
+    for key in [
+        "npc_name", "npc_gender", "npc_age", "npc_ethnicity", 
+        "npc_sexual_orientation", "npc_relationship_goal", 
+        "npc_body_type", "npc_hair_color", "npc_hair_style",
+        "npc_personality", "npc_clothing", "npc_occupation",
+        "npc_current_situation", "environment", "encounter_context"
+    ]:
+        value = session.get(key, "?")
+        if value != "?":
+            # Format the key name nicely
+            nice_key = key.replace("npc_", "").replace("_", " ").title()
+            current_fields[nice_key] = value
+    
+    # Prepare the LLM prompt
+    prompt = f"""
+    Based on the following provided character details, create a complete character profile by filling in any missing details.
+    Make your choices realistic and cohesive with the provided information.
+    
+    PROVIDED CHARACTER DETAILS:
+    {json.dumps(current_fields, indent=2)}
+    
+    FILL IN THESE MISSING DETAILS:
+    """
+    
+    # Add the fields that need to be filled in
+    for key in [
+        "npc_gender", "npc_age", "npc_ethnicity", 
+        "npc_sexual_orientation", "npc_relationship_goal", 
+        "npc_body_type", "npc_hair_color", "npc_hair_style",
+        "npc_personality", "npc_clothing", "npc_occupation",
+        "npc_current_situation", "environment", "encounter_context"
+    ]:
+        if session.get(key, "?") == "?":
+            nice_key = key.replace("npc_", "").replace("_", " ").title()
+            prompt += f"\n- {nice_key}: "
+    
+    prompt += """
+    
+    IMPORTANT:
+    1. Return results as JSON in this exact format:
+    {
+      "gender": "...",
+      "age": "...",
+      "ethnicity": "...",
+      ... (all missing fields)
+    }
+    2. Make sure your answers are realistic and consistent with the existing information
+    3. For gender, use "Female" or "Male"
+    4. For age, provide a number between 20-45
+    5. Use proper capitalization
+    6. Do not include fields that were already provided
+    """
+    
+    # Make the LLM call
+    try:
+        chat = model.start_chat()
+        response = chat.send_message(
+            prompt,
+            generation_config={"temperature": 0.7, "max_output_tokens": 2048},
+            safety_settings=safety_settings
+        )
+        
+        if not response or not response.text:
+            return
+        
+        # Extract the JSON part
+        result_text = response.text
+        try:
+            import json
+            import re
+            
+            # Extract json block if it's formatted with backticks
+            json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', result_text)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                # If no code block, try to find JSON directly
+                json_match = re.search(r'(\{[\s\S]*\})', result_text)
+                if json_match:
+                    json_str = json_match.group(1)
+                else:
+                    json_str = result_text
+                    
+            # Parse the JSON
+            completion_data = json.loads(json_str)
+            
+            # Map the returned fields to the session variables
+            mapping = {
+                "gender": "npc_gender",
+                "age": "npc_age",
+                "ethnicity": "npc_ethnicity",
+                "sexual orientation": "npc_sexual_orientation",
+                "relationship goal": "npc_relationship_goal",
+                "body type": "npc_body_type",
+                "hair color": "npc_hair_color",
+                "hair style": "npc_hair_style",
+                "personality": "npc_personality",
+                "clothing": "npc_clothing",
+                "occupation": "npc_occupation",
+                "current situation": "npc_current_situation",
+                "environment": "environment",
+                "encounter context": "encounter_context"
+            }
+            
+            # Update session with the AI-generated values
+            for key, value in completion_data.items():
+                key_lower = key.lower()
+                for map_key, session_key in mapping.items():
+                    if map_key in key_lower and session.get(session_key, "?") == "?":
+                        session[session_key] = value
+                        break
+                        
+        except Exception as e:
+            print(f"[ERROR] Failed to parse LLM response: {e}")
+            print(f"Response was: {result_text}")
+            
+    except Exception as e:
+        print(f"[ERROR] LLM call failed: {e}")
+
 def build_personalization_string() -> str:
     """
     Returns a multi-line string describing the NPC and user data
@@ -1326,6 +1611,9 @@ def update_npc_info(form):
     for field in scene_state_fields:
         if field in form:
             session[field] = form.get(field, "").strip()
+            
+    # Auto-fill any missing fields by calling the auto-complete function
+    auto_complete_missing_fields()
 
 # --------------------------------------------------------------------------
 # Example Data for personalization
@@ -1844,6 +2132,22 @@ Orgasm & Afterglow:
         session["scene_image_seed"] = None
         session["log_summary"] = ""
         
+        # Auto-complete any missing fields
+        missing_fields_before = sum(1 for f in ["npc_gender", "npc_age", "npc_body_type", "npc_hair_color", "npc_hair_style", 
+                                               "npc_clothing", "npc_personality", "npc_occupation", 
+                                               "environment", "encounter_context"] if session.get(f, "?") == "?")
+        
+        auto_complete_missing_fields()
+        
+        # Check if fields were auto-completed and set a flag if so
+        missing_fields_after = sum(1 for f in ["npc_gender", "npc_age", "npc_body_type", "npc_hair_color", "npc_hair_style", 
+                                               "npc_clothing", "npc_personality", "npc_occupation", 
+                                               "environment", "encounter_context"] if session.get(f, "?") == "?")
+        
+        if missing_fields_before > missing_fields_after:
+            session["fields_auto_completed"] = True
+            log_message("[SYSTEM] Auto-completed missing personalization fields.")
+        
         # Generate initial NPC biography based on available information
         session["npcBehavior"] = build_initial_npc_memory()
 
@@ -1927,6 +2231,10 @@ def interaction():
     if not session.get('logged_in') and not session.get('guest_mode'):
         flash("Please log in first or continue as guest.", "warning")
         return redirect(url_for("login_route"))
+    # Check if fields were auto-completed and show a notification
+    if session.get("fields_auto_completed"):
+        flash("Some character details were automatically filled in based on your selections.", "info")
+        session.pop("fields_auto_completed", None)
     if request.method == "GET":
         affection = session.get("affectionScore", 0.0)
         trust = session.get("trustScore", 5.0)
