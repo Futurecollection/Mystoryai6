@@ -130,6 +130,9 @@ def merge_dd(form, dd_key: str, cust_key: str) -> str:
     return cust_val if cust_val else dd_val
 
 def _save_image(result):
+    print(f"[DEBUG] _save_image => Received result type: {type(result)}")
+    
+    # Case 1: Dictionary with "output" key
     if isinstance(result, dict) and "output" in result:
         final_url = result["output"]
         print("[DEBUG] _save_image => Received dict with output:", final_url)
@@ -137,40 +140,72 @@ def _save_image(result):
             r = requests.get(final_url)
             with open(GENERATED_IMAGE_PATH, "wb") as f:
                 f.write(r.content)
+            print("[DEBUG] _save_image => Successfully saved image from dict output")
+            return
         except Exception as e:
             print("[ERROR] _save_image => Error downloading from output key:", e)
-        return
+            return
+    
+    # Case 2: File-like object with read method
     if hasattr(result, "read"):
         print("[DEBUG] _save_image => File-like object received.")
-        with open(GENERATED_IMAGE_PATH, "wb") as f:
-            f.write(result.read())
-        return
+        try:
+            content = result.read()
+            with open(GENERATED_IMAGE_PATH, "wb") as f:
+                f.write(content)
+            print("[DEBUG] _save_image => Successfully saved file-like object")
+            return
+        except Exception as e:
+            print("[ERROR] _save_image => Error saving file-like object:", e)
+            return
+    
+    # Case 3: List of results (take the first one)
     if isinstance(result, list) and result:
-        final_item = result[-1]
-        if isinstance(final_item, str):
-            print("[DEBUG] _save_image => Received list; using final item:", final_item)
+        print(f"[DEBUG] _save_image => List received with {len(result)} items")
+        
+        # Try the first item in the list (most models return the best result first)
+        first_item = result[0]
+        
+        # If it's a file-like object
+        if hasattr(first_item, "read"):
             try:
-                r = requests.get(final_item)
                 with open(GENERATED_IMAGE_PATH, "wb") as f:
-                    f.write(r.content)
+                    f.write(first_item.read())
+                print("[DEBUG] _save_image => Successfully saved file-like object from list")
                 return
             except Exception as e:
-                print("[ERROR] _save_image => Error downloading from list item:", e)
+                print(f"[ERROR] _save_image => Error with file-like object in list: {e}")
+                # Fall through to try other methods
+        
+        # If it's a string URL
+        if isinstance(first_item, str) and first_item.startswith(('http://', 'https://')):
+            try:
+                r = requests.get(first_item)
+                with open(GENERATED_IMAGE_PATH, "wb") as f:
+                    f.write(r.content)
+                print("[DEBUG] _save_image => Successfully saved URL from list")
                 return
-        else:
-            print("[ERROR] _save_image => List item is not a string:", final_item)
-            return
-    if isinstance(result, str):
-        print("[DEBUG] _save_image => Received string:", result)
+            except Exception as e:
+                print(f"[ERROR] _save_image => Error downloading from list URL: {e}")
+                return
+    
+    # Case 4: Direct string URL
+    if isinstance(result, str) and result.startswith(('http://', 'https://')):
+        print("[DEBUG] _save_image => Received URL string:", result)
         try:
             r = requests.get(result)
             with open(GENERATED_IMAGE_PATH, "wb") as f:
                 f.write(r.content)
+            print("[DEBUG] _save_image => Successfully saved from direct URL")
+            return
         except Exception as e:
-            print("[ERROR] _save_image => Error downloading from string:", e)
-        return
+            print("[ERROR] _save_image => Error downloading from string URL:", e)
+            return
 
-    print("[ERROR] _save_image => Unknown result type:", type(result))
+    # If we got here, we couldn't handle the result
+    print("[ERROR] _save_image => Could not process result type:", type(result))
+    if isinstance(result, list):
+        print("[ERROR] _save_image => List contents types:", [type(x) for x in result])
 
 def check_stage_up_down(new_aff: float):
     if "currentStage" not in session:
@@ -1499,6 +1534,7 @@ def generate_juggernaut_xl_image_safely(
     
     # Log the request
     print(f"[DEBUG] replicate => JUGGERNAUT-XL prompt={prompt}, seed={seed}, strength={strength}")
+    print(f"[DEBUG] replicate => Full parameters: {replicate_input}")
     
     try:
         # Using Juggernaut XL model
@@ -1507,12 +1543,31 @@ def generate_juggernaut_xl_image_safely(
             input=replicate_input
         )
         
+        print(f"[DEBUG] Juggernaut raw result: {result}")
+        
         if result:
-            # For the UI compatibility, convert to the same format as other models
-            return {"output": result[0] if isinstance(result, list) else result}
+            # Process the result properly based on its type
+            if isinstance(result, list) and result:
+                # If it's a list with content, use the first item
+                if hasattr(result[0], 'read'):
+                    # If it's a file-like object
+                    return result[0]
+                elif isinstance(result[0], str) and result[0].startswith(('http://', 'https://')):
+                    # If it's a URL
+                    return {"output": result[0]}
+                else:
+                    return {"output": result[0]}
+            elif isinstance(result, str) and result.startswith(('http://', 'https://')):
+                # If it's a URL string
+                return {"output": result}
+            else:
+                # Otherwise return as is
+                return result
         return None
     except Exception as e:
         print(f"[ERROR] Juggernaut-XL call failed: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 # --------------------------------------------------------------------------
@@ -1521,24 +1576,37 @@ def generate_juggernaut_xl_image_safely(
 def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool = False,
                                         model_type: str = "flux", scheduler: str = None,
                                         steps: int = None, cfg_scale: float = None,
-                                        save_to_gallery: bool = False):
+                                        save_to_gallery: bool = False,
+                                        guidance_scale: float = None,
+                                        strength: float = None):
+    """
+    Unified handler for all image generation models.
+    
+    Args:
+        prompt_text: The prompt to generate an image from
+        force_new_seed: Whether to force a new random seed
+        model_type: "flux" | "pony" | "juggernaut"
+        scheduler: Used by pony and juggernaut
+        steps: Number of inference steps
+        cfg_scale: Used by pony
+        guidance_scale: Used by juggernaut
+        strength: Used by juggernaut
+        save_to_gallery: Whether to save the image to gallery
+    """
     # Check image generation limit
     gen_count = session.get("image_gen_count", 0)
     if gen_count >= 5:
         log_message("[SYSTEM] Image generation limit reached (5 per story)")
         return None
-    """
-    model_type: flux | pony
-    scheduler: used by pony
-    steps: int for pony
-    cfg_scale: float for pony
-    """
+    
     # Validate age content
     is_blocked, reason = validate_age_content(prompt_text)
     if is_blocked:
         log_message("[SYSTEM] Blocked image generation due to potential underage content")
         session["scene_image_prompt"] = f"🚫 IMAGE BLOCKED: {reason}"
         return None
+    
+    # Determine seed
     existing_seed = session.get("scene_image_seed")
     if not force_new_seed and existing_seed:
         seed_used = existing_seed
@@ -1547,7 +1615,10 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
         seed_used = random.randint(100000, 999999)
         log_message(f"SYSTEM: new seed => {seed_used}")
 
+    # Generate based on selected model
     result = None
+    print(f"[DEBUG] Generating image with model: {model_type}")
+    
     if model_type == "pony":
         final_steps = steps if steps is not None else 60
         final_cfg = cfg_scale if cfg_scale is not None else 5.0
@@ -1556,14 +1627,28 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
             prompt_text, seed=seed_used, steps=final_steps,
             scheduler=chosen_sched, cfg_scale=final_cfg
         )
+    elif model_type == "juggernaut":
+        # Juggernaut XL model
+        final_steps = steps if steps is not None else 40
+        final_guidance = guidance_scale if guidance_scale is not None else 7.0
+        final_strength = strength if strength is not None else 1.0
+        
+        result = generate_juggernaut_xl_image_safely(
+            prompt=prompt_text,
+            seed=seed_used,
+            steps=final_steps,
+            guidance_scale=final_guidance,
+            strength=final_strength
+        )
     else:
-        # flux
+        # Default to flux
         result = generate_flux_image_safely(prompt_text, seed=seed_used)
 
     if not result:
         log_message("[SYSTEM] replicate returned invalid or empty result.")
         return None
 
+    # Save the image
     _save_image(result)
     session["scene_image_url"] = url_for('view_image')
     session["scene_image_prompt"] = prompt_text
@@ -1574,17 +1659,28 @@ def handle_image_generation_from_prompt(prompt_text: str, force_new_seed: bool =
 
     if save_to_gallery:
         saved_images = session.get("saved_images", [])
-        saved_images.append({
-            "prompt": prompt_text,
-            "seed": seed_used,
-            "model": model_type,
-            "timestamp": datetime.now().isoformat(),
-            "image_data": open(GENERATED_IMAGE_PATH, 'rb').read()
-        })
-        session["saved_images"] = saved_images
+        try:
+            with open(GENERATED_IMAGE_PATH, 'rb') as f:
+                img_data = f.read()
+                
+            saved_images.append({
+                "prompt": prompt_text,
+                "seed": seed_used,
+                "model": model_type,
+                "timestamp": datetime.now().isoformat(),
+                "image_data": base64.b64encode(img_data).decode('utf-8')
+            })
+            session["saved_images"] = saved_images
+        except Exception as e:
+            log_message(f"[ERROR] Failed to save to gallery: {e}")
 
+    # Log information about the generation
     log_message(f"Scene Image Prompt => {prompt_text}")
-    log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
+    if model_type == "juggernaut":
+        log_message(f"Image seed={seed_used}, model={model_type}, steps={steps}, guidance_scale={guidance_scale}, strength={strength}")
+    else:
+        log_message(f"Image seed={seed_used}, model={model_type}, scheduler={scheduler}, steps={steps}, cfg_scale={cfg_scale}")
+    
     return result
 
 # --------------------------------------------------------------------------
@@ -2577,11 +2673,16 @@ You can say hello, start a conversation, or set the scene with an action.
                 # Optional parameters
                 negative_prompt = request.form.get("juggernaut_negative_prompt", "")
                 
+                # Debug logging
+                print(f"[DEBUG] Generating Juggernaut XL image with prompt: {user_supplied_prompt}")
+                print(f"[DEBUG] Parameters: guidance_scale={guidance_scale}, strength={strength}, steps={steps}")
+                
                 # Handle the image generation with Juggernaut XL
+                seed_value = None if "new_seed" in request.form else session.get("scene_image_seed")
                 result = generate_juggernaut_xl_image_safely(
                     prompt=user_supplied_prompt,
                     negative_prompt=negative_prompt if negative_prompt else None,
-                    seed=None if "new_seed" in request.form else session.get("scene_image_seed"),
+                    seed=seed_value,
                     steps=steps,
                     width=768,
                     height=1152,
@@ -2590,6 +2691,7 @@ You can say hello, start a conversation, or set the scene with an action.
                 )
                 
                 if result:
+                    print(f"[DEBUG] Juggernaut result received: {type(result)}")
                     _save_image(result)
                     seed_used = random.randint(100000, 999999) if "new_seed" in request.form else session.get("scene_image_seed", random.randint(100000, 999999))
                     session["scene_image_url"] = url_for('view_image')
@@ -2598,6 +2700,9 @@ You can say hello, start a conversation, or set the scene with an action.
                     session["image_gen_count"] = session.get("image_gen_count", 0) + 1
                     log_message(f"Scene Image Prompt => {user_supplied_prompt}")
                     log_message(f"Image seed={seed_used}, model={chosen_model}, strength={strength}, steps={steps}, guidance_scale={guidance_scale}")
+                else:
+                    print("[ERROR] Juggernaut XL returned no result")
+                    flash("Image generation failed. Please try again or try a different model.", "danger")
             else:
                 # Flux or any other model (default case)
                 handle_image_generation_from_prompt(
