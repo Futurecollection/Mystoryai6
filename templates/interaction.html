@@ -90,7 +90,7 @@
             <div style="color: #f8d0d0;">
               <h3 style="color: #ff5789;">{{ bio_parts[0].split('\n', 1)[0] }}</h3>
               <div class="mb-3">{{ bio_parts[0].split('\n', 1)[1] }}</div>
-              
+
               {% for part in bio_parts[1:] %}
                 {% if part.strip() %}
                   <h4 style="color: #ff9fa3;">{{ part.split('\n', 1)[0] }}</h4>
@@ -187,74 +187,91 @@
       <!-- Model Selection -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="model_type" id="model_type_flux" value="flux" {% if last_model_choice == 'flux' %}checked{% endif %} onchange="toggleVisibilityForModel('flux')">
-            <label class="form-check-label" for="model_type_flux" style="color: #f8d0d0;">
-              Fast Photorealistic Portraits
-            </label>
-          </div>
+          <label class="form-label" style="color: #f8d0d0;">Model:</label>
+          <select name="model_type" class="form-select" id="model-select" onchange="showModelOptions()" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+            <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Photorealistic Portrait)</option>
+            <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony SDXL (Highly Customizable)</option>
+            <option value="realistic" {% if last_model_choice == 'realistic' %}selected{% endif %}>Realistic Vision (Detailed Renders)</option>
+            <option value="sdxl" {% if last_model_choice == 'sdxl' %}selected{% endif %}>SDXL (Advanced Stable Diffusion)</option>
+          </select>
         </div>
         <div class="col-md-6">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="model_type" id="model_type_pony" value="pony" {% if last_model_choice == 'pony' %}checked{% endif %} onchange="toggleVisibilityForModel('pony')">
-            <label class="form-check-label" for="model_type_pony" style="color: #f8d0d0;">
-              Detailed NSFW-capable Images
-            </label>
-          </div>
+          <label class="form-label" style="color: #f8d0d0;">Steps:</label>
+          <input type="number" name="num_steps" class="form-control" value="40" min="10" max="150" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
         </div>
       </div>
 
-      <!-- Advanced Settings (hidden by default) -->
-      <div class="card mb-3" style="background-color: #3b0b0b; border: 1px solid #6d1d1d;">
-        <div class="card-header" style="background-color: #2a0a0a; color: #f8d0d0; cursor: pointer;" onclick="toggleAdvancedSettings()">
-          <i class="bi bi-sliders"></i> Advanced Settings <i id="advancedToggleIcon" class="bi bi-chevron-down float-end"></i>
-        </div>
-        <div class="card-body" id="advancedSettingsBody" style="display: none;">
-          <!-- Pony Settings -->
-          <div id="pony_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Sampler Algorithm:</label>
-            <select name="pony_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
+      <!-- Pony SDXL Options -->
+      <div class="pony-options" style="display: {% if last_model_choice == 'pony' %}block{% else %}none{% endif %};">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Pony Scheduler:</label>
+            <select name="pony_scheduler" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+              <option value="DPM++ 2M SDE Karras" {% if pony_scheduler == 'DPM++ 2M SDE Karras' %}selected{% endif %}>DPM++ 2M SDE Karras</option>
               <option value="DPM++ SDE Karras" {% if pony_scheduler == 'DPM++ SDE Karras' %}selected{% endif %}>DPM++ SDE Karras</option>
               <option value="DPM++ 3M SDE Karras" {% if pony_scheduler == 'DPM++ 3M SDE Karras' %}selected{% endif %}>DPM++ 3M SDE Karras</option>
-              <option value="DPM++ 2M SDE Karras" {% if pony_scheduler == 'DPM++ 2M SDE Karras' %}selected{% endif %}>DPM++ 2M SDE Karras</option>
               <option value="DPM++ 2S a Karras" {% if pony_scheduler == 'DPM++ 2S a Karras' %}selected{% endif %}>DPM++ 2S a Karras</option>
               <option value="DPM2 a" {% if pony_scheduler == 'DPM2 a' %}selected{% endif %}>DPM2 a</option>
               <option value="Euler a" {% if pony_scheduler == 'Euler a' %}selected{% endif %}>Euler a</option>
             </select>
-
-            <label class="form-label" style="color: #f8d0d0;">CFG Scale (1–20):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="pony_cfg_scale" 
-                     value="{{ pony_cfg_scale|default(5.0) }}" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ pony_cfg_scale|default(5.0) }}</span>
-            </div>
           </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">CFG Scale:</label>
+            <input type="number" step="0.1" name="pony_cfg_scale" class="form-control" value="{{ pony_cfg_scale }}" min="1" max="20" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+        </div>
+      </div>
 
-          <!-- Realistic Vision Settings -->
-          <div id="realistic_scheduler_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Scheduler Algorithm:</label>
-            <select name="realistic_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
+      <!-- Realistic Vision Options -->
+      <div class="realistic-options" style="display: {% if last_model_choice == 'realistic' %}block{% else %}none{% endif %};">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Scheduler:</label>
+            <select name="realistic_scheduler" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
               <option value="EulerA" {% if realistic_scheduler == 'EulerA' %}selected{% endif %}>EulerA</option>
               <option value="MultistepDPM-Solver" {% if realistic_scheduler == 'MultistepDPM-Solver' %}selected{% endif %}>MultistepDPM-Solver</option>
             </select>
-
-            <label class="form-label" style="color: #f8d0d0;">Guidance Scale (1–20):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="realistic_cfg_scale" 
-                     value="{{ realistic_cfg_scale|default(5.0) }}" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ realistic_cfg_scale|default(5.0) }}</span>
-            </div>
           </div>
-
-          <!-- Steps Slider (for both Pony & Realistic) -->
-          <div id="steps_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Generation Steps (10-100):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="10" max="100" step="5" name="num_steps" 
-                     value="50" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">50</span>
-            </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Guidance Scale:</label>
+            <input type="number" step="0.1" name="realistic_cfg_scale" class="form-control" value="{{ realistic_cfg_scale }}" min="1" max="20" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
           </div>
+        </div>
+      </div>
+
+      <!-- SDXL Options -->
+      <div class="sdxl-options" style="display: {% if last_model_choice == 'sdxl' %}block{% else %}none{% endif %};">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Scheduler:</label>
+            <select name="sdxl_scheduler" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+              <option value="K_EULER_ANCESTRAL" {% if sdxl_scheduler == 'K_EULER_ANCESTRAL' %}selected{% endif %}>K_EULER_ANCESTRAL</option>
+              <option value="K_EULER" {% if sdxl_scheduler == 'K_EULER' %}selected{% endif %}>K_EULER</option>
+              <option value="DDIM" {% if sdxl_scheduler == 'DDIM' %}selected{% endif %}>DDIM</option>
+              <option value="DPMSolverMultistep" {% if sdxl_scheduler == 'DPMSolverMultistep' %}selected{% endif %}>DPMSolverMultistep</option>
+              <option value="HeunDiscrete" {% if sdxl_scheduler == 'HeunDiscrete' %}selected{% endif %}>HeunDiscrete</option>
+              <option value="KarrasDPM" {% if sdxl_scheduler == 'KarrasDPM' %}selected{% endif %}>KarrasDPM</option>
+              <option value="PNDM" {% if sdxl_scheduler == 'PNDM' %}selected{% endif %}>PNDM</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">Guidance Scale:</label>
+            <input type="number" step="0.1" name="sdxl_guidance_scale" class="form-control" value="{{ sdxl_guidance_scale|default(7.0) }}" min="1" max="50" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">LoRA Weights (optional):</label>
+            <input type="text" name="sdxl_lora_weights" class="form-control" placeholder="LoRA weights URL..." style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0;">LoRA Scale:</label>
+            <input type="number" step="0.1" name="sdxl_lora_scale" class="form-control" value="{{ sdxl_lora_scale|default(0.6) }}" min="0" max="1" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" style="color: #f8d0d0;">Negative Prompt (optional):</label>
+          <textarea name="sdxl_negative_prompt" rows="2" class="form-control" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;" placeholder="Specify what you don't want in the image..."></textarea>
         </div>
       </div>
 
@@ -521,27 +538,39 @@ function toggleAdvancedSettings() {
   }
 }
 
-function toggleVisibilityForModel(model) {
-  var stepsDiv = document.getElementById('steps_div');
-  var ponyDiv = document.getElementById('pony_div');
+function showModelOptions() {
+    const modelSelect = document.getElementById('model-select');
+    const ponyOptions = document.querySelector('.pony-options');
+    const realisticOptions = document.querySelector('.realistic-options');
+    const sdxlOptions = document.querySelector('.sdxl-options');
 
-  // Steps range visible only if pony
-  if (model === 'pony') {
-    stepsDiv.style.display = 'block';
-    ponyDiv.style.display = 'block';
-  } 
-  // Flux (or anything else)
-  else {
-    stepsDiv.style.display = 'none';
-    ponyDiv.style.display = 'none';
+    // Hide all option sections first
+    ponyOptions.style.display = 'none';
+    realisticOptions.style.display = 'none';
+    sdxlOptions.style.display = 'none';
+
+    // Show only the selected model's options
+    switch(modelSelect.value) {
+      case 'pony':
+        ponyOptions.style.display = 'block';
+        break;
+      case 'realistic':
+        realisticOptions.style.display = 'block';
+        break;
+      case 'sdxl':
+        sdxlOptions.style.display = 'block';
+        break;
+      default:
+        // For 'flux' or any other model, don't show special options
+        break;
+    }
   }
-}
 
 // Add event listeners when page loads
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize model visibility based on selected radio
   const selectedModel = document.querySelector('input[name="model_type"]:checked')?.value || 'flux';
-  toggleVisibilityForModel(selectedModel);
+  showModelOptions();
 
   // Handle all forms
   document.querySelectorAll('form').forEach(function(form) {
@@ -560,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add event listeners to radio buttons
   document.querySelectorAll('input[name="model_type"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
-      toggleVisibilityForModel(this.value);
+      showModelOptions();
     });
   });
 });

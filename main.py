@@ -1498,6 +1498,77 @@ def generate_realistic_vision_image_safely(
         print(f"[ERROR] RealisticVision call failed: {e}")
         return None
 
+def generate_sdxl_image_safely(
+    prompt: str,
+    negative_prompt: str = None,
+    seed: int = None,
+    steps: int = 40,
+    width: int = 768,
+    height: int = 1152,
+    guidance_scale: float = 7.0,
+    scheduler: str = "K_EULER_ANCESTRAL",
+    num_outputs: int = 1,
+    lora_scale: float = 0.6,
+    lora_weights: str = None,
+    image_url: str = None,
+    mask_url: str = None,
+    strength: float = 0.8
+) -> object:
+    """Generate images using SDXL with support for img2img, inpainting, and LoRA weights."""
+    
+    # Default negative prompt if none provided
+    if not negative_prompt:
+        negative_prompt = (
+            "(worst quality, low quality, normal quality, lowres, low details, oversaturated, undersaturated, "
+            "overexposed, underexposed, grayscale, bw, bad photo, bad photography, bad art:1.4), "
+            "(watermark, signature, text font, username, error, logo, words, letters, digits, autograph, trademark, name:1.2), "
+            "(blur, blurry, grainy), morbid, ugly, asymmetrical, mutated malformed, mutilated, poorly lit, bad shadow, "
+            "draft, cropped, out of frame, cut off, censored, jpeg artifacts, out of focus, glitch, duplicate, "
+            "(airbrushed, cartoon, anime, semi-realistic, cgi, render, blender, digital art, manga, amateur:1.3), "
+            "(3D ,3D Game, 3D Game Scene, 3D Character:1.1), (bad hands, bad anatomy, bad body, bad face, bad teeth, "
+            "bad arms, bad legs, deformities:1.3)"
+        )
+    
+    # Build replicate input dictionary
+    replicate_input = {
+        "prompt": prompt,
+        "negative_prompt": negative_prompt,
+        "num_inference_steps": steps,
+        "width": width,
+        "height": height,
+        "guidance_scale": guidance_scale,
+        "scheduler": scheduler,
+        "num_outputs": num_outputs,
+    }
+    
+    # Add optional parameters only if they're provided
+    if seed is not None:
+        replicate_input["seed"] = seed
+    if lora_weights:
+        replicate_input["lora_weights"] = lora_weights
+        replicate_input["lora_scale"] = lora_scale
+    if image_url:
+        replicate_input["image"] = image_url
+        replicate_input["strength"] = strength
+    if mask_url and image_url:  # Mask only works with img2img mode
+        replicate_input["mask"] = mask_url
+    
+    # Log the request
+    print(f"[DEBUG] replicate => SDXL prompt={prompt}, seed={seed}, steps={steps}, scheduler={scheduler}, guidance_scale={guidance_scale}, width={width}, height={height}")
+    
+    try:
+        # Using a general SDXL model - replace with the specific model ID you want
+        result = replicate.run(
+            "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+            replicate_input
+        )
+        if result:
+            return {"output": result[0] if isinstance(result, list) else result}
+        return None
+    except Exception as e:
+        print(f"[ERROR] SDXL call failed: {e}")
+        return None
+
 # --------------------------------------------------------------------------
 # handle_image_generation_from_prompt => multi-model
 # --------------------------------------------------------------------------
@@ -2581,6 +2652,54 @@ You can say hello, start a conversation, or set the scene with an action.
                     steps=steps,
                     cfg_scale=real_cfg
                 )
+            elif chosen_model == "sdxl":
+                # Get SDXL specific parameters
+                chosen_scheduler = request.form.get("sdxl_scheduler", "K_EULER_ANCESTRAL")
+                valid_schedulers = ["DDIM", "DPMSolverMultistep", "HeunDiscrete", "KarrasDPM", 
+                                   "K_EULER_ANCESTRAL", "K_EULER", "PNDM"]
+                if chosen_scheduler not in valid_schedulers:
+                    chosen_scheduler = "K_EULER_ANCESTRAL"
+                session["sdxl_scheduler"] = chosen_scheduler
+                
+                try:
+                    guidance_scale = float(request.form.get("sdxl_guidance_scale", "7.0"))
+                except:
+                    guidance_scale = 7.0
+                session["sdxl_guidance_scale"] = guidance_scale
+                
+                # Optional parameters
+                negative_prompt = request.form.get("sdxl_negative_prompt", "")
+                lora_weights = request.form.get("sdxl_lora_weights", "")
+                
+                try:
+                    lora_scale = float(request.form.get("sdxl_lora_scale", "0.6")) 
+                except:
+                    lora_scale = 0.6
+                session["sdxl_lora_scale"] = lora_scale
+                
+                # Handle the image generation with SDXL
+                result = generate_sdxl_image_safely(
+                    prompt=user_supplied_prompt,
+                    negative_prompt=negative_prompt if negative_prompt else None,
+                    seed=None if "new_seed" in request.form else session.get("scene_image_seed"),
+                    steps=steps,
+                    width=768,
+                    height=1152,
+                    guidance_scale=guidance_scale,
+                    scheduler=chosen_scheduler,
+                    lora_weights=lora_weights if lora_weights else None,
+                    lora_scale=lora_scale
+                )
+                
+                if result:
+                    _save_image(result)
+                    seed_used = random.randint(100000, 999999) if "new_seed" in request.form else session.get("scene_image_seed", random.randint(100000, 999999))
+                    session["scene_image_url"] = url_for('view_image')
+                    session["scene_image_prompt"] = user_supplied_prompt
+                    session["scene_image_seed"] = seed_used
+                    session["image_gen_count"] = session.get("image_gen_count", 0) + 1
+                    log_message(f"Scene Image Prompt => {user_supplied_prompt}")
+                    log_message(f"Image seed={seed_used}, model={chosen_model}, scheduler={chosen_scheduler}, steps={steps}, guidance_scale={guidance_scale}")
             else:
                 handle_image_generation_from_prompt(
                     prompt_text=user_supplied_prompt,
