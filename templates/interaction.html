@@ -92,13 +92,15 @@
     <div class="border p-3 mb-3" style="white-space: pre-line; background-color: #3b0b0b; color: #f8d0d0; border-radius: 8px; border: 1px solid #6d1d1d; font-size: 1.8rem; line-height: 1.6;">
       {% if interaction_mode == 'dialogue' %}
           {% set parts = npc_narration.split('\n\n') %}
-          {% for part in parts %}
-            {% if '*' in part %}
-              <div style="margin-bottom: 0.5rem; color: #ff9fa3; font-style: italic; font-size: 2.4rem;">{{ part }}</div>
-            {% else %}
-              <div style="margin-bottom: 0.5rem; color: #f8d0d0; font-size: 2.4rem;">{{ part }}</div>
-            {% endif %}
-          {% endfor %}
+          <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+            {% for part in parts %}
+              {% if '*' in part %}
+                <div style="color: #ff9fa3; font-style: italic; font-size: 2.4rem;">{{ part }}</div>
+              {% else %}
+                <div style="color: #f8d0d0; font-size: 2.4rem;">{{ part }}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
         {% else %}
           {% if "Getting Started with" in npc_narration and "## How would you like to start the scene?" in npc_narration %}
             <!-- Special formatted initial biography scene -->
@@ -366,14 +368,14 @@
     <div class="row">
       <div class="col-md-6">
         <h5 style="color: #ff9fa3;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h5>
-        <div style="white-space: pre-wrap; max-height: 350px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 15px; border-radius: 8px; font-size: 1.6rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+        <div style="white-space: pre-wrap; max-height: 350px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 15px; border-radius: 8px; font-size: 2.4rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
         <div class="mt-2" style="color: #ff9fa3; font-style: italic;">
           <small><i class="bi bi-info-circle"></i> These thoughts will guide the NPC's actions in the next scene</small>
         </div>
       </div>
       <div class="col-md-6">
         <h5 style="color: #ff9fa3;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Memories</h5>
-        <div style="white-space: pre-wrap; max-height: 350px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 15px; border-radius: 8px; font-size: 1.6rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
+        <div style="white-space: pre-wrap; max-height: 350px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 15px; border-radius: 8px; font-size: 2.4rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
         <div class="mt-2" style="color: #ff9fa3; font-style: italic;">
           <small><i class="bi bi-info-circle"></i> Biography & memories reference in future conversations</small>
         </div>
