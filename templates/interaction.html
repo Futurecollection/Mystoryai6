@@ -41,42 +41,42 @@
   </div>
 </div>
 
-<!-- Top Controls Bar -->
+<!-- Main Controls Bar -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-body">
-    <div class="row align-items-center">
-      <div class="col-md-12 text-center">
+    <div class="row">
+      <div class="col-12">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-          <!-- Main NPC Info -->
-          <div>
-            <h3 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 5px;">{{ session.get('npc_name', 'Character') }}</h3>
-            <span class="badge bg-danger" style="font-size: 2.3rem; padding: 0.5rem 1rem;">Affection: {{ affection_score|round(1) }}</span>
-            <span class="badge bg-info" style="font-size: 2.3rem; padding: 0.5rem 1rem;">Stage: {{ current_stage }}</span>
+          <!-- Character Status -->
+          <div class="me-2">
+            <span class="badge bg-danger" style="font-size: 3rem; padding: 0.5rem 1rem; margin-right: 5px;">Affection: {{ affection_score|round(1) }}</span>
+            <span class="badge bg-info" style="font-size: 3rem; padding: 0.5rem 1rem;">Stage: {{ current_stage }}</span>
           </div>
           
-          <!-- Main Controls -->
-          <div>
-            <div class="btn-group mb-2">
-              <a href="{{ url_for('gallery') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important;">
-                <i class="bi bi-images"></i> Gallery
-              </a>
-              <a href="{{ url_for('manual_npc_update') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important;">
-                <i class="bi bi-pencil"></i> Edit Memory
-              </a>
-              <a href="{{ url_for('restart') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important;" 
-                onclick="return confirm('Are you sure you want to restart? This will clear your current story.');">
-                <i class="bi bi-arrow-clockwise"></i> Restart
-              </a>
-              <form method="POST" class="d-inline">
-                <button type="submit" name="toggle_mode" class="btn" style="background-color: #ff5789; color: white; font-size: 2.3rem !important;">
-                  <i class="bi bi-toggle-on"></i> 
-                  {% if interaction_mode == 'dialogue' %}
-                    Dialogue
-                  {% else %}
-                    Narrative
-                  {% endif %}
-                </button>
-              </form>
+          <!-- Core Controls -->
+          <div class="d-flex flex-wrap">
+            <form method="POST" class="me-2 mb-2">
+              <button type="submit" name="toggle_mode" class="btn" style="background-color: #ff5789; color: white; font-size: 3rem !important; padding: 0.5rem 1.5rem;">
+                <i class="bi bi-toggle-on me-2"></i>{% if interaction_mode == 'dialogue' %}Dialogue{% else %}Narrative{% endif %}
+              </button>
+            </form>
+            <div class="dropdown me-2 mb-2">
+              <button class="btn dropdown-toggle" type="button" id="menuDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                      style="background-color: #5f1c1c; color: #f8d0d0; font-size: 3rem !important; padding: 0.5rem 1.5rem;">
+                <i class="bi bi-three-dots-vertical"></i> Menu
+              </button>
+              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuDropdown" style="background-color: #3b0b0b; border: 1px solid #ff5789; font-size: 2.8rem;">
+                <li><a class="dropdown-item" href="{{ url_for('gallery') }}"><i class="bi bi-images me-2"></i> Gallery</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('manual_npc_update') }}"><i class="bi bi-pencil me-2"></i> Edit Memory</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('mid_game_personalize') }}"><i class="bi bi-gear me-2"></i> Character Settings</a></li>
+                <li><hr class="dropdown-divider" style="border-top: 1px solid #6d1d1d;"></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="{{ url_for('restart') }}" 
+                     onclick="return confirm('Are you sure you want to restart? This will clear your current story.');">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Restart
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -143,30 +143,30 @@
 <!-- User Action Panel -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0"><i class="bi bi-chat-dots"></i> Your Response</h3>
+    <h3 style="margin-bottom: 0; font-size: 3.2rem;"><i class="bi bi-chat-dots me-2"></i> Your Response</h3>
   </div>
   <div class="card-body">
     <form method="POST" onsubmit="showLoading()">
-      <!-- Suggestion chips removed as requested -->
-
       <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-cursor-text"></i> Type your action or dialogue:</label>
-        <div class="input-group">
-          <input type="text" class="form-control" name="user_action" placeholder="How do you want to respond?" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-          <button type="submit" name="submit_action" class="btn" style="background-color: #ff5789; color: white;">
-            <i class="bi bi-send"></i> Send
+        <label class="form-label" style="color: #f8d0d0; font-size: 2.8rem;"><i class="bi bi-cursor-text me-2"></i> Type your action or dialogue:</label>
+        <div class="input-group input-group-lg">
+          <input type="text" class="form-control" name="user_action" placeholder="How do you want to respond?" 
+                 style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d; font-size: 2.8rem; padding: 12px 15px; height: auto;">
+          <button type="submit" name="submit_action" class="btn" 
+                  style="background-color: #ff5789; color: white; font-size: 2.8rem; padding: 0 1.5rem;">
+            <i class="bi bi-send"></i>
           </button>
         </div>
       </div>
-      <div id="moveLoading" style="display: none; margin-top: 10px; color: #ff5789;">
-        <div class="spinner-border text-success spinner-border-sm" role="status">
+      <div id="moveLoading" style="display: none; margin-top: 10px; color: #ff5789; font-size: 2.6rem;">
+        <div class="spinner-border text-success" role="status" style="width: 2rem; height: 2rem;">
           <span class="visually-hidden">Loading...</span>
         </div>
         <span class="ms-2">Generating response... Please wait.</span>
       </div>
       {% if session.guest_mode %}
-        <div class="alert alert-warning mt-2">
-          <i class="bi bi-info-circle me-2"></i> You are in guest mode.  Progress will not be saved.
+        <div class="alert alert-warning mt-3" style="font-size: 2.6rem;">
+          <i class="bi bi-info-circle me-2"></i> You are in guest mode. Progress will not be saved.
         </div>
       {% endif %}
     </form>
@@ -176,136 +176,86 @@
 <!-- Scene Image Panel -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0"><i class="bi bi-image"></i> Scene Visualization</h3>
-    <span class="badge bg-warning text-dark">
+    <h3 style="margin-bottom: 0; font-size: 3.2rem;"><i class="bi bi-image"></i> Scene Visualization</h3>
+    <span class="badge bg-warning text-dark" style="font-size: 2.5rem; padding: 8px 12px;">
       <i class="bi bi-lightning"></i> Images: {{ session.get('image_gen_count', 0) }}/5
     </span>
   </div>
   <div class="card-body">
     {% if scene_image_url %}
       <div class="text-center mb-3">
-        <img src="{{ url_for('view_image') }}" alt="Scene Image" class="img-fluid rounded" style="max-width: 90%; border: 2px solid #ff5789; box-shadow: 0 0 15px rgba(255, 87, 137, 0.5);">
-        <div class="mt-2">
-          <form method="POST" class="d-inline">
-            <button type="submit" name="save_to_gallery" class="btn btn-sm" style="background-color: #5f1c1c; color: #f8d0d0;" {% if session.guest_mode %}disabled{% endif %}>
-              <i class="bi bi-bookmark-plus"></i> Save to Gallery
-            </button>
+        <img src="{{ url_for('view_image') }}" alt="Scene Image" class="img-fluid rounded" style="max-width: 95%; border: 3px solid #ff5789; box-shadow: 0 0 20px rgba(255, 87, 137, 0.5);">
+        <div class="mt-3 d-flex justify-content-center">
+          <div class="btn-group">
             <form method="POST" class="d-inline">
-              <button type="submit" name="set_as_profile" class="btn btn-sm" style="background-color: #8a1a1a; color: #f8d0d0;" onclick="this.classList.add('active'); this.innerHTML = '<i class=\'bi bi-hourglass\'></i> Setting...'">
-                <i class="bi bi-person-badge"></i> Set as Profile
+              <button type="submit" name="save_to_gallery" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem; padding: 0.5rem 1rem;" {% if session.guest_mode %}disabled{% endif %}>
+                <i class="bi bi-bookmark-plus me-2"></i> Save to Gallery
               </button>
             </form>
-          </form>
-          {% if scene_image_seed %}
-            <span class="badge bg-secondary">Seed: {{ scene_image_seed }}</span>
-          {% endif %}
-          {% if session.guest_mode %}
-            <div class="alert alert-warning mt-2">
-              <i class="bi bi-info-circle me-2"></i> In guest mode, images aren't saved between sessions.
-            </div>
-          {% endif %}
+            <form method="POST" class="d-inline">
+              <button type="submit" name="set_as_profile" class="btn" style="background-color: #8a1a1a; color: #f8d0d0; font-size: 2.8rem; padding: 0.5rem 1rem;" onclick="this.classList.add('active'); this.innerHTML = '<i class=\'bi bi-hourglass me-2\'></i> Setting...'">
+                <i class="bi bi-person-badge me-2"></i> Set as Profile
+              </button>
+            </form>
+          </div>
         </div>
+        {% if scene_image_seed %}
+          <div class="mt-2">
+            <span class="badge bg-secondary" style="font-size: 2.4rem; padding: 5px 12px;">Seed: {{ scene_image_seed }}</span>
+          </div>
+        {% endif %}
+        {% if session.guest_mode %}
+          <div class="alert alert-warning mt-3" style="font-size: 2.4rem;">
+            <i class="bi bi-info-circle me-2"></i> In guest mode, images aren't saved between sessions.
+          </div>
+        {% endif %}
       </div>
     {% else %}
       <div class="text-center mb-3">
-        <div style="height: 200px; display: flex; align-items: center; justify-content: center; background-color: #3b0b0b; border-radius: 8px;">
-          <i class="bi bi-image" style="font-size: 3rem; color: #6d1d1d;"></i>
+        <div style="height: 250px; display: flex; align-items: center; justify-content: center; background-color: #3b0b0b; border-radius: 8px;">
+          <i class="bi bi-image" style="font-size: 4rem; color: #6d1d1d;"></i>
         </div>
-        <p class="mt-2" style="color: #f8d0d0;">No scene image generated yet</p>
+        <p class="mt-3" style="color: #f8d0d0; font-size: th2.8rem;">No scene image generated yet</p>
       </div>
     {% endif %}
 
     <form method="POST" onsubmit="showImageLoading()">
       <div class="mb-3">
-        <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-pencil-square"></i> Image Description:</label>
-        <textarea name="scene_image_prompt" rows="2" class="form-control mb-2" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;" placeholder="Describe what the image should show...">{{ scene_image_prompt }}</textarea>
+        <label class="form-label" style="color: #f8d0d0; font-size: 2.8rem;"><i class="bi bi-pencil-square me-2"></i>Image Description:</label>
+        <textarea name="scene_image_prompt" rows="2" class="form-control mb-3" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d; font-size: 2.8rem; padding: 12px;" placeholder="Describe what the image should show...">{{ scene_image_prompt }}</textarea>
       </div>
 
       <!-- Model Selection -->
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-brush"></i> Model:</label>
-          <select name="model_type" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-            <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Portrait Style)</option>
-            <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony (SDXL)</option>
-            <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL</option>
-          </select>
-        </div>
+      <div class="mb-3">
+        <label class="form-label" style="color: #f8d0d0; font-size: 2.8rem;"><i class="bi bi-brush me-2"></i>Model:</label>
+        <select name="model_type" class="form-select mb-3" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d; font-size: 2.8rem; padding: 12px; height: auto;">
+          <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Portrait Style)</option>
+          <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony (SDXL)</option>
+          <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut XL</option>
+        </select>
       </div>
 
-      <!-- Advanced Settings (hidden entirely for now) -->
-      <div class="card mb-3" style="background-color: #3b0b0b; border: 1px solid #6d1d1d; display: none;">
-        <div class="card-header" style="background-color: #2a0a0a; color: #f8d0d0; cursor: pointer;" onclick="toggleAdvancedSettings()">
-          <i class="bi bi-sliders"></i> Advanced Settings <i id="advancedToggleIcon" class="bi bi-chevron-down float-end"></i>
-        </div>
-        <div class="card-body" id="advancedSettingsBody" style="display: none;">
-          <!-- Pony Settings -->
-          <div id="pony_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Sampler Algorithm:</label>
-            <select name="pony_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
-              <option value="DPM++ SDE Karras" {% if pony_scheduler == 'DPM++ SDE Karras' %}selected{% endif %}>DPM++ SDE Karras</option>
-              <option value="DPM++ 3M SDE Karras" {% if pony_scheduler == 'DPM++ 3M SDE Karras' %}selected{% endif %}>DPM++ 3M SDE Karras</option>
-              <option value="DPM++ 2M SDE Karras" {% if pony_scheduler == 'DPM++ 2M SDE Karras' %}selected{% endif %}>DPM++ 2M SDE Karras</option>
-              <option value="DPM++ 2S a Karras" {% if pony_scheduler == 'DPM++ 2S a Karras' %}selected{% endif %}>DPM++ 2S a Karras</option>
-              <option value="DPM2 a" {% if pony_scheduler == 'DPM2 a' %}selected{% endif %}>DPM2 a</option>
-              <option value="Euler a" {% if pony_scheduler == 'Euler a' %}selected{% endif %}>Euler a</option>
-            </select>
-
-            <label class="form-label" style="color: #f8d0d0;">CFG Scale (1–20):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="pony_cfg_scale" 
-                     value="{{ pony_cfg_scale|default(5.0) }}" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ pony_cfg_scale|default(5.0) }}</span>
-            </div>
+      <!-- Image Generation Buttons -->
+      <div class="d-grid gap-3 mb-3">
+        <button type="submit" name="generate_image" class="btn btn-lg" style="background-color: #ff5789; color: white; font-size: 3rem; padding: 12px;">
+          <i class="bi bi-image me-2"></i> Generate Image
+        </button>
+        <div class="row">
+          <div class="col-6">
+            <button type="submit" name="generate_prompt" class="btn btn-lg w-100" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem;">
+              <i class="bi bi-magic me-2"></i> Generate Prompt
+            </button>
           </div>
-
-
-          <!-- Steps Slider (for both Pony & Realistic) -->
-          <div id="steps_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Generation Steps (10-100):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="10" max="100" step="5" name="num_steps" 
-                     value="50" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">50</span>
-            </div>
-          </div>
-
-          <!-- Juggernaut XL Settings -->
-          <div id="juggernaut_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Scheduler Algorithm:</label>
-            <select name="juggernaut_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
-              <option value="DDIM" {% if juggernaut_scheduler == 'DDIM' %}selected{% endif %}>DDIM</option>
-              <option value="DPMSolverMultistep" {% if juggernaut_scheduler == 'DPMSolverMultistep' %}selected{% endif %}>DPMSolverMultistep</option>
-              <option value="HeunDiscrete" {% if juggernaut_scheduler == 'HeunDiscrete' %}selected{% endif %}>HeunDiscrete</option>
-              <option value="KarrasDPM" {% if juggernaut_scheduler == 'KarrasDPM' %}selected{% endif %}>KarrasDPM</option>
-              <option value="K_EULER_ANCESTRAL" {% if juggernaut_scheduler == 'K_EULER_ANCESTRAL' %}selected{% endif %}>K_EULER_ANCESTRAL</option>
-              <option value="K_EULER" {% if juggernaut_scheduler == 'K_EULER' %}selected{% endif %}>K_EULER</option>
-              <option value="PNDM" {% if juggernaut_scheduler == 'PNDM' %}selected{% endif %}>PNDM</option>
-            </select>
-
-            <label class="form-label" style="color: #f8d0d0;">Guidance Scale (1–20):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="juggernaut_cfg_scale" 
-                     value="{{ juggernaut_cfg_scale|default(7.0) }}" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ juggernaut_cfg_scale|default(7.0) }}</span>
-            </div>
+          <div class="col-6">
+            <button type="submit" name="new_seed" class="btn btn-lg w-100" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem;">
+              <i class="bi bi-shuffle me-2"></i> New Seed
+            </button>
           </div>
         </div>
       </div>
-
-      <div class="d-flex gap-2">
-        <button type="submit" name="generate_prompt" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
-          <i class="bi bi-magic"></i> Generate Prompt
-        </button>
-        <button type="submit" name="generate_image" class="btn" style="background-color: #ff5789; color: white;">
-          <i class="bi bi-image"></i> Generate Image
-        </button>
-        <button type="submit" name="new_seed" class="btn" style="background-color: #5f1c1c; color: #f8d0d0;">
-          <i class="bi bi-shuffle"></i> New Seed
-        </button>
-      </div>
-      <div id="imageLoading" style="display: none; margin-top: 10px; color: #ff5789;">
-        <div class="spinner-border text-danger spinner-border-sm" role="status">
+      
+      <div id="imageLoading" style="display: none; margin-top: 10px; color: #ff5789; font-size: 2.6rem;">
+        <div class="spinner-border text-danger" role="status" style="width: 2rem; height: 2rem;">
           <span class="visually-hidden">Loading...</span>
         </div>
         <span class="ms-2">Generating image... Please wait (30-60 seconds).</span>
@@ -314,94 +264,142 @@
   </div>
 </div>
 
-<!-- Settings & Tools (Simplified at Bottom) -->
+<!-- Character & Relationship Settings -->
 <div class="card mt-5 mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789; font-size: 2.6rem;">
-    <i class="bi bi-gear-fill"></i> Character & Relationship Settings
+  <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+    <h3 style="margin-bottom: 0; font-size: 3.2rem;"><i class="bi bi-gear-fill me-2"></i> Character & Relationship</h3>
+    <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#settingsContent" aria-expanded="true" aria-controls="settingsContent"
+            style="background-color: transparent; border: none; color: #f8d0d0; font-size: 2.6rem;">
+      <i class="bi bi-chevron-up" id="settingsChevron"></i>
+    </button>
   </div>
-  <div class="card-body">
-    <div class="row">
-      <!-- Character Info Column -->
-      <div class="col-md-6 mb-4">
-        <h4 style="color: #ff9fa3; font-size: 2.6rem; margin-bottom: 15px;"><i class="bi bi-person"></i> Character Details</h4>
-        <div style="font-size: 2.2rem; color: #ffd0d0;">
-          <p><strong>Name:</strong> {{ session.get('npc_name', 'Character') }}</p>
-          <p><strong>Age:</strong> {{ session.get('npc_age', '?') }}</p>
-          <p><strong>Current Mood:</strong> {{ npc_mood }}</p>
-          <p><strong>Current Scene:</strong> {{ session.get('current_scene', 'Not specified') }}</p>
-          <p>
-            <strong>Current Setting:</strong> 
-            {{ session.get('environment', 'Not specified') }}
-            {% if session.get('time_of_day') %}
-              <span>{{ session.get('time_of_day') }}</span>
-            {% endif %}
-            {% if session.get('weather') %}
-              <span>({{ session.get('weather') }})</span>
-            {% endif %}
-          </p>
-        </div>
-        <div class="mt-4">
-          <a href="{{ url_for('mid_game_personalize') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important;">
-            <i class="bi bi-pencil-square"></i> Edit Character & Environment
-          </a>
-        </div>
-      </div>
-      
-      <!-- Relationship Controls Column -->
-      <div class="col-md-6">
-        <h4 style="color: #ff9fa3; font-size: 2.6rem; margin-bottom: 15px;"><i class="bi bi-heart"></i> Relationship Controls</h4>
-        <div style="font-size: 2.2rem; color: #ffd0d0;">
-          <p><strong>Current Stage:</strong> {{ current_stage }}</p>
-          <p style="line-height: 1.4;"><strong>Stage Description:</strong><br>{{ stage_unlocks.get(current_stage, "Unknown stage") }}</p>
-          <p><strong>Affection Score:</strong> {{ "%.1f"|format(affection_score) }}</p>
+  <div class="collapse show" id="settingsContent">
+    <div class="card-body">
+      <div class="row">
+        <!-- Character Info Column -->
+        <div class="col-md-6 mb-4">
+          <div class="d-flex align-items-center mb-3">
+            <h4 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 0;"><i class="bi bi-person me-2"></i> Character Details</h4>
+          </div>
+          <div style="font-size: 2.6rem; color: #ffd0d0;">
+            <p class="mb-2"><strong>Name:</strong> {{ session.get('npc_name', 'Character') }}</p>
+            <p class="mb-2"><strong>Age:</strong> {{ session.get('npc_age', '?') }}</p>
+            <p class="mb-2"><strong>Current Mood:</strong> {{ npc_mood }}</p>
+            <p class="mb-2">
+              <strong>Current Setting:</strong> 
+              {{ session.get('environment', 'Not specified') }}
+              {% if session.get('time_of_day') %}
+                <span>{{ session.get('time_of_day') }}</span>
+              {% endif %}
+              {% if session.get('weather') %}
+                <span>({{ session.get('weather') }})</span>
+              {% endif %}
+            </p>
+          </div>
+          <div class="mt-4">
+            <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-lg w-100" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem; padding: 10px;">
+              <i class="bi bi-pencil-square me-2"></i> Edit Character Details
+            </a>
+          </div>
         </div>
         
-        <form method="POST" onsubmit="showLoading()" class="mt-3">
-          <div class="row align-items-center">
-            <div class="col-md-7">
-              <label class="form-label" style="color: #f8d0d0; font-size: 2.2rem;">Modify Affection:</label>
-              <input type="number" step="0.1" class="form-control mb-2" name="affection_new" value="{{ affection_score }}" 
-                    style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d; font-size: 2.3rem !important;">
-            </div>
-            <div class="col-md-5 mt-3 mt-md-0">
-              <button type="submit" name="update_affection" value="true" class="btn" style="background-color: #ff5789; color: white; font-size: 2.3rem !important;">
+        <!-- Relationship Controls Column -->
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <h4 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 0;"><i class="bi bi-heart me-2"></i> Relationship Controls</h4>
+          </div>
+          <div style="font-size: 2.6rem; color: #ffd0d0;">
+            <p class="mb-2"><strong>Current Stage:</strong> {{ current_stage }}</p>
+            <p class="mb-2" style="line-height: 1.4;"><strong>Description:</strong> {{ stage_unlocks.get(current_stage, "Unknown stage") }}</p>
+            <p class="mb-3"><strong>Affection Score:</strong> {{ "%.1f"|format(affection_score) }}</p>
+          </div>
+          
+          <form method="POST" onsubmit="showLoading()" class="mb-3">
+            <div class="input-group">
+              <input type="number" step="0.1" class="form-control" name="affection_new" value="{{ affection_score }}" 
+                    style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d; font-size: 2.8rem; padding: 10px 15px; height: auto;">
+              <button type="submit" name="update_affection" value="true" class="btn" style="background-color: #ff5789; color: white; font-size: 2.8rem; padding: 0 1.5rem;">
                 <i class="bi bi-check2-circle"></i> Update
               </button>
             </div>
+          </form>
+          
+          <div>
+            <a href="{{ url_for('stage_unlocks') }}" class="btn btn-lg w-100" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem; padding: 10px;">
+              <i class="bi bi-sliders me-2"></i> Edit Relationship Stages
+            </a>
           </div>
-        </form>
-        
-        <div class="mt-3">
-          <a href="{{ url_for('stage_unlocks') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important;">
-            <i class="bi bi-sliders"></i> Edit Relationship Stages
-          </a>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- NPC Internal State -->
+<!-- NPC Internal State (Collapsible) -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
-  <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h4 style="margin-bottom: 0; font-size: 2.8rem;"><i class="bi bi-brain"></i> NPC Internal State - Influences Future Interactions</h4>
-    <div style="opacity: 0.9; font-size: 2.2rem;">Thoughts and memories directly shape how the NPC will respond in future scenes</div>
+  <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+    <div>
+      <h3 style="margin-bottom: 0; font-size: 3.2rem;"><i class="bi bi-brain me-2"></i> Character's Internal State</h3>
+      <div style="opacity: 0.9; font-size: 2.6rem;">Shapes future interactions & responses</div>
+    </div>
+    <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#internalStateContent" aria-expanded="true" aria-controls="internalStateContent"
+            style="background-color: transparent; border: none; color: #f8d0d0; font-size: 2.6rem;">
+      <i class="bi bi-chevron-up" id="internalStateChevron"></i>
+    </button>
   </div>
-  <div class="card-body" style="background-color: #3b0b0b;">
-    <div class="row">
-      <div class="col-md-6 mb-4">
-        <h5 style="color: #ff9fa3; font-size: 2.5rem; margin-bottom: 15px;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h5>
-        <div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.4rem; line-height: 1.6; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
-        <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 2rem;">
-          <i class="bi bi-info-circle"></i> These thoughts will guide the NPC's actions in the next scene
+  <div class="collapse show" id="internalStateContent">
+    <div class="card-body" style="background-color: #3b0b0b;">
+      <!-- Tabs for smaller screens -->
+      <ul class="nav nav-tabs d-md-none mb-3" id="internalStateTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="thoughts-tab" data-bs-toggle="tab" data-bs-target="#thoughts" type="button" role="tab" 
+                  style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem; border: none; border-bottom: 2px solid #ff5789;">
+            Thoughts
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="memories-tab" data-bs-toggle="tab" data-bs-target="#memories" type="button" role="tab"
+                  style="background-color: #4a0d0d; color: #f8d0d0; font-size: 2.8rem; border: none;">
+            Memories
+          </button>
+        </li>
+      </ul>
+      
+      <!-- Tab content for mobile -->
+      <div class="tab-content d-md-none">
+        <div class="tab-pane fade show active" id="thoughts" role="tabpanel" aria-labelledby="thoughts-tab">
+          <h5 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 15px;"><i class="bi bi-lightbulb me-2"></i> Private Thoughts</h5>
+          <div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.8rem; line-height: 1.6; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+        </div>
+        <div class="tab-pane fade" id="memories" role="tabpanel" aria-labelledby="memories-tab">
+          <h5 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 15px;"><i class="bi bi-journal-text me-2"></i> Memories & Biography</h5>
+          <div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.8rem; line-height: 1.6; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);">{{ session.get('npcBehavior', '(None)') }}</div>
         </div>
       </div>
-      <div class="col-md-6">
-        <h5 style="color: #ff9fa3; font-size: 2.5rem; margin-bottom: 15px;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Memories</h5>
-        <div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.4rem; line-height: 1.6; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);">{{ session.get('npcBehavior', '(None)') }}</div>
-        <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 2rem;">
-          <i class="bi bi-info-circle"></i> Biography & memories reference in future conversations
+      
+      <!-- Desktop layout -->
+      <div class="row d-none d-md-flex">
+        <div class="col-md-6 mb-4">
+          <h4 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 15px;"><i class="bi bi-lightbulb me-2"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h4>
+          <div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.8rem; line-height: 1.6; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+          <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 2.4rem;">
+            <i class="bi bi-info-circle me-1"></i> These thoughts guide future actions
+          </div>
         </div>
+        <div class="col-md-6">
+          <h4 style="color: #ff9fa3; font-size: 3rem; margin-bottom: 15px;"><i class="bi bi-journal-text me-2"></i> {{ session.get('npc_name', 'Character') }}'s Memories</h4>
+          <div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.8rem; line-height: 1.6; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);">{{ session.get('npcBehavior', '(None)') }}</div>
+          <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 2.4rem;">
+            <i class="bi bi-info-circle me-1"></i> Biography referenced in conversations
+          </div>
+        </div>
+      </div>
+      
+      <!-- Edit button -->
+      <div class="text-center mt-3">
+        <a href="{{ url_for('manual_npc_update') }}" class="btn btn-lg" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.8rem; padding: 12px 20px;">
+          <i class="bi bi-pencil me-2"></i> Edit Thoughts & Memories
+        </a>
       </div>
     </div>
   </div>
@@ -539,6 +537,22 @@ function toggleVisibilityForModel(model) {
   }
 }
 
+// Handle collapse toggle icons
+function updateCollapseIcon(collapseId, iconId) {
+  const collapse = document.getElementById(collapseId);
+  const icon = document.getElementById(iconId);
+  
+  if (collapse) {
+    collapse.addEventListener('show.bs.collapse', function () {
+      if (icon) icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+    });
+    
+    collapse.addEventListener('hide.bs.collapse', function () {
+      if (icon) icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+    });
+  }
+}
+
 // Add event listeners when page loads
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize model visibility based on selected radio
@@ -559,11 +573,21 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/clear_auto_update_flag', { method: 'POST' });
   {% endif %}
 
-  // Add event listeners to radio buttons
+  // Add event listeners to model type selectors
   document.querySelectorAll('select[name="model_type"]').forEach(function(select) {
     select.addEventListener('change', function() {
       toggleVisibilityForModel(this.value);
     });
+  });
+  
+  // Set up collapsible section icon handling
+  updateCollapseIcon('settingsContent', 'settingsChevron');
+  updateCollapseIcon('internalStateContent', 'internalStateChevron');
+  
+  // Initialize Bootstrap tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
   });
 });
 </script>

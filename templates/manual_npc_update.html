@@ -201,13 +201,34 @@
       </div>
 
       <div class="text-center">
-        <a href="{{ url_for('interaction') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; padding: 10px 20px; border-radius: 30px;">
-          <i class="bi bi-arrow-left"></i> Return to Story
+        <a href="{{ url_for('interaction') }}" class="btn btn-lg" style="background-color: #5f1c1c; color: #f8d0d0; padding: 15px 30px; border-radius: 30px; font-size: 3rem;">
+          <i class="bi bi-arrow-left me-2"></i> Return to Story
         </a>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+  // Automatically adjust textarea height to fit content
+  document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+      textarea.style.minHeight = '150px';
+      textarea.style.fontSize = '2.8rem';
+      
+      // Auto-resize function
+      const adjustHeight = () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+      };
+      
+      // Call once to initialize and then on input events
+      setTimeout(adjustHeight, 100);
+      textarea.addEventListener('input', adjustHeight);
+    });
+  });
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
