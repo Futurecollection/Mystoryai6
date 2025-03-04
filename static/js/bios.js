@@ -1,4 +1,5 @@
-// Complete character data structures for each pre-made bio
+
+// Character data structures for pre-made bios
 const characterBios = {
   // Tech CEO - Emma
   "emma": {
@@ -23,119 +24,119 @@ const characterBios = {
     environment: "Upscale Wine Bar",
     encounter_context: "Mutual Friend's Introduction"
   },
-
+  
   // Hollywood Actress - Scarlett
   "scarlett": {
-    bio: `Scarlett Winters is a 28-year-old rising Hollywood actress who's just landed her breakthrough role in an acclaimed director's newest film. With flowing auburn hair that catches the light, captivating green eyes, and a smile that's graced countless magazine covers, she has a natural beauty that transcends the screen. At 5'6" with a graceful figure, she moves with an elegance cultivated through years of dance training. Today she's dressed down in designer jeans and a casual silk top, trying to remain incognito despite her growing fame. Beneath the glamorous exterior, Scarlett is surprisingly down-to-earth, with a quick wit and infectious laugh. While her career is soaring, she's increasingly aware of the hollowness of Hollywood connections and craves something authentic—someone who sees the woman behind the roles she plays.`,
+    bio: `Scarlett Winters, 28, is a rising Hollywood actress known for her breakout roles in indie films that have recently caught mainstream attention. With her wavy auburn hair that falls just past her shoulders, emerald green eyes, and a graceful presence, she stands out even in a city of beautiful people. She maintains her toned physique through dance and pilates, combining strength with elegant movement. Scarlett typically dresses in bohemian-inspired outfits when off-set - flowing dresses or vintage jeans with artsy tops, always with her signature constellation pendant. Behind her glamorous career, she's surprisingly down-to-earth, with a quick wit and genuine curiosity about people and their stories. Between filming locations and auditions, she's looking for someone authentic who values her for more than her rising fame, someone who can be her anchor in an industry known for its superficiality.`,
 
     name: "Scarlett Winters",
     gender: "Female",
     age: "28",
-    ethnicity: "Caucasian",
-    sexual_orientation: "Bisexual",
-    relationship_goal: "Looking for Connection",
-    body_type: "Slender and Graceful",
+    ethnicity: "Irish American",
+    sexual_orientation: "Straight",
+    relationship_goal: "Serious Relationship",
+    body_type: "Toned",
     hair_color: "Auburn",
-    hair_style: "Long and Flowing",
-    personality: "Witty and Outgoing",
-    clothing: "Designer jeans and casual silk top",
+    hair_style: "Wavy, shoulder-length",
+    personality: "Genuine and Quick-witted",
+    clothing: "Bohemian-inspired outfits",
     occupation: "Actress",
-    current_situation: "Career taking off",
-
-    environment: "Quiet Corner Restaurant",
-    encounter_context: "Chance Meeting"
+    current_situation: "Career on the rise",
+    
+    environment: "Exclusive Rooftop Bar",
+    encounter_context: "Industry Party"
   },
-
-  // Fashion Designer - Zendaya
+  
+  // Fashion Designer - Zendaya 
   "zendaya": {
-    bio: `Zendaya Coleman is a 26-year-old fashion designer whose bold, avant-garde creations have made her the industry's newest darling. With her signature cloud of natural curls, warm brown eyes that miss no detail, and flawless skin, she embodies the artistic vision that defines her work. Standing tall at 5'10", her willowy frame showcases her own designs—today, a structured jumpsuit in a rich emerald tone that complements her complexion perfectly. Zendaya speaks with passionate intensity about her creative process but listens just as intently, finding inspiration in unexpected conversations. While her career demands extensive travel between Paris, Milan, and New York, she's hoping to find someone who appreciates both her ambitious drive and her need for quiet moments of creativity—a partner who understands that her occasional distraction isn't distance but the spark of new ideas taking form.`,
+    bio: `Zendaya Coleman, 25, is an innovative fashion designer whose bold, multicultural-inspired collections have taken the industry by storm. With her natural curly hair styled in various creative ways, deep brown eyes that miss no detail, and flawless dark skin, she embodies the artistic vision she brings to her work. Standing 5'10" with a graceful model-like figure from her earlier years in the industry, she moves with effortless confidence. Zendaya dresses in avant-garde outfits of her own design, turning heads with unexpected color combinations and structural elements. Her personality balances artistic sensitivity with business savvy, and she's known for her infectious laugh and ability to see beauty in unexpected places. Between international fashion weeks and designing her next collection, she seeks someone who appreciates art and culture, who can both support her creative journey and introduce new perspectives to inspire her work.`,
 
     name: "Zendaya Coleman",
     gender: "Female",
-    age: "26",
+    age: "25",
     ethnicity: "Black/African American",
     sexual_orientation: "Straight",
-    relationship_goal: "Serious Relationship",
-    body_type: "Tall and Willowy",
-    hair_color: "Dark Brown",
-    hair_style: "Natural Curls",
-    personality: "Creative and Passionate",
-    clothing: "Structured jumpsuit in emerald",
+    relationship_goal: "Taking Things Slow",
+    body_type: "Slender",
+    hair_color: "Black",
+    hair_style: "Natural curls",
+    personality: "Creative and Confident",
+    clothing: "Avant-garde, self-designed outfits",
     occupation: "Fashion Designer",
-    current_situation: "Frequent traveler for work",
-
+    current_situation: "Building her brand",
+    
     environment: "Art Gallery Opening",
-    encounter_context: "Professional Event"
+    encounter_context: "Chance Encounter"
   },
-
+  
   // International Journalist - Natalia
   "natalie": {
-    bio: `Natalia Petrova is a 30-year-old international journalist known for her fearless frontline reporting and insightful political analysis. Her shoulder-length dark blonde hair is usually pulled back in a practical style, framing intense blue eyes that have witnessed events that changed history. With a toned physique from years of navigating challenging terrain, she carries herself with easy confidence. Having just returned from an assignment abroad, she's dressed in a simple blue button-down and well-worn jeans, her only adornment a vintage camera pendant—a gift from her mentor. Natalia speaks five languages fluently and has an uncanny ability to make anyone feel heard and understood. Though her schedule is unpredictable and she's often called away on assignments with little notice, she's reached a point where she's seeking something—or someone—worth coming home to.`,
+    bio: `Natalia Petrova, 31, is an award-winning international journalist known for her fearless reporting from conflict zones. With her striking platinum blonde hair typically pulled back in a practical bun, piercing blue eyes that seem to look right through you, and subtle Eastern European features, she has a memorable presence. Her athletic build comes from years of training for unpredictable field situations, giving her both strength and endurance. When not in field gear, Natalia favors sleek, minimalist clothing in neutral tones with statement accessories acquired during her global assignments. Fluent in five languages, she's equally comfortable in palace briefings or remote villages. Despite her tough exterior, close friends know her for her dry humor and surprising sentimentality about small kindnesses. Between assignments, she's looking for someone who understands her unpredictable schedule and passion for truth-telling, who can provide a sense of home no matter where in the world she returns from.`,
 
     name: "Natalia Petrova",
     gender: "Female",
-    age: "30",
+    age: "31",
     ethnicity: "Russian",
-    sexual_orientation: "Straight",
-    relationship_goal: "Open Relationship",
-    body_type: "Toned",
-    hair_color: "Dark Blonde",
-    hair_style: "Practical shoulder-length",
-    personality: "Intense and Intelligent",
-    clothing: "Simple blue button-down and jeans",
+    sexual_orientation: "Bisexual",
+    relationship_goal: "Meaningful Connection",
+    body_type: "Athletic",
+    hair_color: "Platinum Blonde",
+    hair_style: "Practical bun",
+    personality: "Brave and Perceptive",
+    clothing: "Sleek minimalist with statement accessories",
     occupation: "International Journalist",
-    current_situation: "Just returned from assignment",
-
-    environment: "Quiet Cafe",
-    encounter_context: "Random Encounter"
+    current_situation: "Between global assignments",
+    
+    environment: "Quiet Literary Cafe",
+    encounter_context: "Professional Interview turned personal"
   },
-
+  
   // Fitness Entrepreneur - Henry
   "henry": {
-    bio: `Henry Cavill is a 34-year-old former professional athlete who now runs a successful chain of boutique fitness studios. With his muscular 6'2" frame, close-cropped dark hair, and striking blue eyes, he still looks the part of the championship athlete he once was. A small scar above his right eyebrow tells of past competitive intensity. Today he's wearing fitted athletic wear from his own brand—simple, high-quality pieces that emphasize functionality. Henry's serious demeanor breaks easily into a warm, genuine smile, especially when discussing topics he's passionate about: physical well-being, entrepreneurship, and his nonprofit providing sports opportunities to underprivileged youth. Despite his professional success, years focused solely on his career have left little room for meaningful connection, something he's increasingly aware of as his business stabilizes and he looks to what's next in his life journey.`,
+    bio: `Henry Fielding, 34, is the charismatic founder of a rapidly expanding fitness enterprise combining traditional training with cutting-edge sports science. With his broad shoulders, powerful build, and easy smile, he's the natural face of his brand. His dark hair is kept in a short, professional cut that highlights his strong jawline and intense brown eyes. At 6'2", his physique shows his commitment to his philosophy of functional strength and balanced wellness. Henry typically dresses in tailored athletic wear that bridges the gap between professional and fitness-ready. Despite his success, he maintains a down-to-earth approach, personally teaching classes and connecting with clients. His passion for helping others transform their lives stems from his own journey overcoming childhood health issues. Between opening new locations and developing new training programs, he's looking for someone who shares his active lifestyle but can also help him embrace moments of relaxation and appreciation for how far he's come.`,
 
-    name: "Henry Cavill",
+    name: "Henry Fielding",
     gender: "Male",
     age: "34",
-    ethnicity: "British",
+    ethnicity: "Mixed European",
     sexual_orientation: "Straight",
-    relationship_goal: "Long-term Relationship",
+    relationship_goal: "Long-term Partnership",
     body_type: "Muscular",
     hair_color: "Dark Brown",
-    hair_style: "Close-cropped",
-    personality: "Determined and Passionate",
-    clothing: "Fitted athletic wear",
+    hair_style: "Short professional cut",
+    personality: "Charismatic and Driven",
+    clothing: "Tailored athletic wear",
     occupation: "Fitness Entrepreneur",
-    current_situation: "Business owner seeking balance",
-
-    environment: "Charity Gala",
-    encounter_context: "Friend's Introduction"
+    current_situation: "Expanding business nationally",
+    
+    environment: "High-end Health Club",
+    encounter_context: "Personal Training Session"
   },
-
+  
   // Marine Biologist - Chris
   "chris": {
-    bio: `Chris Hemsworth is a 31-year-old marine biologist whose groundbreaking research on coral reef preservation has recently earned him international recognition. His sun-streaked blonde hair and tanned skin reveal countless hours spent on research vessels and underwater expeditions. Standing at 6'3" with broad shoulders and an easy, confident stance, he has the powerful build of someone who spends their days swimming and diving. His most striking feature is his expressive blue-green eyes that light up when discussing his work. Chris is dressed casually in a well-worn henley and khaki shorts, with a handmade bracelet of salvaged fishing line from his last expedition. Despite his scientific precision at work, he approaches life with laid-back humor and genuine curiosity about others' experiences. After years of prioritizing remote research locations, he's taking a sabbatical to write a book and, perhaps, find someone who shares his passion for protecting the natural world.`,
+    bio: `Chris Hemsworth, 30, is a marine biologist whose groundbreaking research on coral reef restoration has recently gained international attention. With sun-lightened dirty blonde hair often tousled from being in and out of water, bright blue eyes that crinkle when he smiles, and tan skin from days spent in the ocean, he has a natural, rugged appeal. His 6'3" frame carries a swimmer's build - broad shoulders, strong arms, and the lean physique of someone constantly in motion. Chris typically dresses casually in board shorts and scientific expedition t-shirts when working, upgrading to simple but quality button-downs and jeans for rare evenings out. His easygoing Australian charm belies a deeply analytical mind that can become completely absorbed in the underwater ecosystems he studies. His passion for ocean conservation is infectious, and he's happiest when sharing the wonders of marine life with others. Between research expeditions and grant proposals, he's looking for someone who appreciates both intellectual depth and simple pleasures, who might be willing to join him sometimes on his boat under star-filled skies far from shore.`,
 
     name: "Chris Hemsworth",
     gender: "Male",
-    age: "31",
+    age: "30",
     ethnicity: "Australian",
     sexual_orientation: "Straight",
-    relationship_goal: "Taking Things Slow",
-    body_type: "Athletic and Tanned",
-    hair_color: "Sun-streaked Blonde",
-    hair_style: "Casual medium length",
-    personality: "Laid-back and Passionate",
-    clothing: "Henley and khaki shorts",
+    relationship_goal: "Genuine Connection",
+    body_type: "Athletic Swimmer's Build",
+    hair_color: "Dirty Blonde",
+    hair_style: "Tousled",
+    personality: "Easygoing and Passionate",
+    clothing: "Casual beachwear to simple button-downs",
     occupation: "Marine Biologist",
-    current_situation: "Taking a sabbatical",
-
-    environment: "Beachfront Cafe",
-    encounter_context: "Chance Meeting"
+    current_situation: "Research breakthrough",
+    
+    environment: "Beachfront Restaurant",
+    encounter_context: "Fundraising Event for Ocean Conservation"
   }
 };
 
-// Function to update bio text and character attributes in the form
+// Function to update bio text based on selection
 function updateBioText() {
     const selectedBio = document.getElementById('predefinedBios').value;
     const bioTextArea = document.getElementById('bioTextArea');
@@ -144,17 +145,9 @@ function updateBioText() {
     if (selectedBio && characterBios[selectedBio]) {
         bioTextArea.value = characterBios[selectedBio].bio;
         bioText.value = characterBios[selectedBio].bio;
-
-        // Populate other form fields here (example)
-        document.getElementById('name').value = characterBios[selectedBio].name;
-        document.getElementById('age').value = characterBios[selectedBio].age;
-        // Add more form field updates as needed...
-
     } else {
         bioTextArea.value = '';
         bioText.value = '';
-        // Clear other form fields as needed...
-
     }
 }
 
