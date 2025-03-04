@@ -426,8 +426,7 @@
     <ul class="nav nav-tabs d-md-none mb-4" id="stateTab" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="thoughts-tab" data-bs-toggle="tab" data-bs-target="#thoughts" type="button" role="tab" 
-                style="background-color: #3b0b0b; color: #ff9fa3; border-color: #ff5789; font-size: 2.4rem;">
-          <i class="bi bi-lightbulb"></i> Thoughts
+                style="background-color: #3b0b0b; color: #ff9fa3; border-color: #ff5789; font-size: 2.4rem;"><i class="bi bi-lightbulb"></i> Thoughts
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -440,21 +439,21 @@
 
     <!-- Tab content for mobile -->
     <div class="tab-content d-md-none" id="stateTabContent">
-      <div class="tab-pane fade show active" id="thoughts" role="tabpanel">
-        <h5 style="color: #ff9fa3; font-size: 2.5rem; margin-bottom: 15px;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h5>
-        <div style="white-space: pre-wrap; min-height: 400px; max-height: 650px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 1.9rem; line-height: 1.5; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6); width: 100%;">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
-        <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 1.6rem;">
-          <i class="bi bi-info-circle"></i> These thoughts will guide the NPC's actions in the next scene
+        <div class="tab-pane fade show active" id="thoughts" role="tabpanel">
+          <h5 style="color: #ff9fa3; font-size: 3.2rem; margin-bottom: 15px;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h5>
+          <div style="white-space: pre-wrap; min-height: 500px; max-height: 800px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.4rem; line-height: 1.5; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6); width: 100%;">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+          <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 2.0rem;">
+            <i class="bi bi-info-circle"></i> These thoughts will guide the NPC's actions in the next scene
+          </div>
+        </div>
+        <div class="tab-pane fade" id="memories" role="tabpanel">
+          <h5 style="color: #ff9fa3; font-size: 3.2rem; margin-bottom: 15px;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Memories</h5>
+          <div style="white-space: pre-wrap; min-height: 500px; max-height: 800px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 2.4rem; line-height: 1.5; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6); width: 100%;">{{ session.get('npcBehavior', '(None)') }}</div>
+          <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 2.0rem;">
+            <i class="bi bi-info-circle"></i> Biography & memories reference in future conversations
+          </div>
         </div>
       </div>
-      <div class="tab-pane fade" id="memories" role="tabpanel">
-        <h5 style="color: #ff9fa3; font-size: 2.5rem; margin-bottom: 15px;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Memories</h5>
-        <div style="white-space: pre-wrap; min-height: 400px; max-height: 650px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; padding: 25px; border-radius: 10px; font-size: 1.9rem; line-height: 1.5; font-weight: 500; box-shadow: inset 0 0 15px rgba(0,0,0,0.6); width: 100%;">{{ session.get('npcBehavior', '(None)') }}</div>
-        <div class="mt-3" style="color: #ff9fa3; font-style: italic; font-size: 1.6rem;">
-          <i class="bi bi-info-circle"></i> Biography & memories reference in future conversations
-        </div>
-      </div>
-    </div>
 
     <!-- Desktop view with tabs -->
     <div class="d-none d-md-block">
@@ -501,7 +500,7 @@
     <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-sm mb-2" style="background-color: #5f1c1c; color: #f8d0d0;">
       <i class="bi bi-gear"></i> Update NPC
     </a>
-    <a href="{{ url_for('manual_npc_update') }}" class="btn btn-sm mb-2" style="background-color#5f1c1c; color: #f8d0d0; border-left: 1px solid #f8d0d0;">
+    <a href="{{ url_for('manual_npc_update') }}" class="btn btn-sm mb-2" style="background-color:#5f1c1c; color: #f8d0d0; border-left: 1px solid #f8d0d0;">
       <i class="bi bi-journal-text"></i> <span class="d-none d-md-inline">View/Edit</span> Biography & Thoughts
     </a>
   </div>
