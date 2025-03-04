@@ -19,7 +19,7 @@
         <small style="opacity: 0.8;">The character's internal monologue, emotional reactions, and reasoning process</small>
       </div>
       <div class="collapse show" id="thoughtsCollapse">
-        <div class="card-body" style="background-color: #3b0b0b;">
+        <div class="card-body" style="background-color: #3b0b0b; padding: 25px;">
           <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
         </div>
       </div>
@@ -41,7 +41,7 @@
         <small style="opacity: 0.8;">Key biographical information, past experiences, and relationship developments</small>
       </div>
       <div class="collapse show" id="bioCollapse">
-        <div class="card-body" style="background-color: #3b0b0b;">
+        <div class="card-body" style="background-color: #3b0b0b; padding: 25px;">
           <div class="markdown-content" style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
         </div>
       </div>
