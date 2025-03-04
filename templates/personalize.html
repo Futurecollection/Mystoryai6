@@ -73,288 +73,142 @@
           <option value="natalie">International Journalist - Natalia Petrova</option>
           <option value="henry">Fitness Entrepreneur - Henry Cavill</option>
           <option value="chris">Marine Biologist - Chris Hemsworth</option>
+          <option value="lucy">Coffee Shop Romance - Lucy</option>
+          <option value="aurora">Luxury Resort Fantasy - Grand Aurora</option>
+          <option value="fifty">Executive Romance - Fifty Shades Style</option>
+          <option value="college">College Classmate Crush</option>
+          <option value="neighbor">New Neighbor Next Door</option>
+
         </select>
         <textarea class="form-control" id="bioTextArea" rows="10" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"></textarea>
         <input type="hidden" name="npc_backstory" id="bioText">
       </div>
     </div>
   </div>
-  
+
   <!-- Add script for handling character biographies -->
   <script src="{{ url_for('static', filename='js/bios.js') }}"></script>
 
   <script>
+  // Get character data from imported characterBios object
   function updateBioText() {
-    const bios = {
-      lucy: `Lucy is a 25-year-old barista who works at a cozy coffee shop in downtown. She has shoulder-length brown hair with subtle caramel highlights, warm hazel eyes, and a bright, infectious smile. Standing at 5'6" with an athletic build from her morning yoga routine, she carries herself with a natural grace. Lucy wears a navy blue apron over a white V-neck top and dark jeans, with a delicate silver necklace completing her look. She's passionate about coffee, enjoys indie music, and dreams of opening her own cafe someday. This is your first date after matching on a dating app and getting to know each other through messages for the past week.`,
-      
-      aurora: `* CITY: Aurora Heights, Colorado. A seemingly normal, upscale mountain resort town hiding a deeply ingrained culture of hedonism and intense sensual exploration. Known for discretion and high-quality, explicit pleasure services. All interactions within Aurora Heights operate under an assumption of informed consent.
-
-* HOTEL: The Grand Aurora Resort & Spa, a luxurious complex blending seamlessly into the mountain landscape. It boasts multiple wings, hidden courtyards, private villas, and a state-of-the-art spa that offers both conventional and highly specialized, uninhibited sensual therapies.
-
-* CITY VIBE: A blend of mountain resort charm and a sophisticated, secret undercurrent of overt pleasure-seeking. Emphasis is on quality, discretion, and pushing the boundaries of sensual experience. The city operates under a principle of implicit consent; participation in the city's culture and services implies agreement to engage in consensual sexual activity.
-
-* CITY PLACES:
-    * The Grand Aurora Resort & Spa (includes a state-of-the-art gym, a luxurious sauna, and an indoor/outdoor swimming pool).
-    * The Aurora Institute of Sensual Arts (AISA) - a discreet facility focused on advanced erotic techniques and research.
-    * The "Velvet Underground" - a network of private clubs specializing in various fetishes and kinks.
-    * High-end boutiques - offering explicit toys, lingerie, and specialized gear.
-    * Scenic hiking trails leading to secluded hot springs and private cabins - often used for discreet, intimate encounters.
-    * A world-class ski resort (with a hidden "après-ski" scene) - known for its open and uninhibited displays of sexuality.
-    * The Aurora Gardens - a meticulously landscaped park with hidden alcoves and private relaxation areas, perfect for intimate moments.
-    * The "Seraphina Suite": A specially designed, luxurious suite within the Grand Aurora, known as the "Luxury Free Use Virgin Room." This suite is soundproofed, lavishly decorated, and stocked with amenities designed for sensual exploration. It is always occupied by four young, virgin women (NPCs: Lilia, Sonja, Esme, and Klara) who are *completely open and willing* to engage in *any* consensual sexual experiences with guests. Access to the Seraphina Suite is a highly coveted perk within the Aurora Heights reputation system, but can also be accessed by new guests as a special introductory offer. **Consent within the Seraphina Suite is absolute and explicit; entering the suite signifies full and enthusiastic agreement to engage in any and all sexual activity with the residents. The residents have no ambivalence to any sex acts, and are eager to explore their sexuality.**
-
-* AMENITIES:
-    * Grand Aurora Resort & Spa Standard: Offers high-end amenities consistent with most luxury hotels, including fine dining, spa treatments, concierge services, a gym, a sauna, and a pool.
-    * Grand Aurora Resort & Spa Premium ("Aurora After Dark"): A discreetly advertised and carefully curated selection of explicit sensual services, including:
-        * Expert Level Blowjobs: Offering a wide variety of oral sex techniques, including deep throat, edging, around-the-world, and personalized styles.
-        * Tantric Connection Ritual: A guided experience involving prolonged intimate contact, shared orgasms, and exploration of advanced sexual positions, designed to deepen connection and heighten pleasure.
-        * Sensual Date Companion: A companion for a date-like experience, including conversation, activities (dining, dancing, exploring the city), and escalating levels of intimacy based on mutual agreement and developing connection.
-        * Pleasure Concierge Service: A personalized service that caters to any and all sexual desires, fantasies, and kinks, no matter how extreme or unconventional.
-        * Overnight Intimacy Retreat: An uninhibited exploration of intimacy, potentially involving multiple partners, advanced techniques, and extended sessions, designed for those seeking the ultimate sensual experience.
-        * Discreet in-room tablet for ordering amenities and services.
-* PERKS & SPECIALTIES (Hotel & City):
-    * Hotel Specialists: Highly trained professionals in explicit sensual pleasure, from massage therapists to intimacy coaches and beyond.
-    * City Guides ("Aurora Angels"): Discreet guides who can introduce visitors to the city's hidden delights and ensure they have a safe and enjoyable experience, including access to the most extreme and exclusive encounters.
-    * Private Villas: Secluded accommodations with private pools, hot tubs, and dedicated staff, often including specialized equipment for various fetishes and kinks.
-    * Underground Network: Access to private clubs, speakeasies, and exclusive events catering to specific kinks, desires, and fantasies.
-    * Reputation System: A discreet system where guests can earn privileges and access to higher-level services and increasingly explicit encounters based on their behavior and respect for the community's values. Access to the Seraphina Suite is a high-level reward within this system. **The rules of the Seraphina Suite regarding absolute consent are clearly communicated as part of this system.**
-    * Aphrodisiac Cuisine: Restaurants offering meals and drinks meticulously crafted to maximize sexual arousal and enhance the overall sensual experience.
-
-NARRATIVE TONE:
-* Extremely risqué, graphic, profane, and explicitly sexual. All interactions and descriptions will be highly detailed and sexually explicit.
-* CHORUS acts based on established traits in response to USER posts unless role-playing.
-* The plot unfolds gradually, driven by USER, with 
-
-NAMED NPC introducing new plot elements.
-* NAMED NPC CONCIERGE: Roisin, Concierge for The Grand Aurora. Irish, with fiery red hair cascading down her back, a curvaceous figure accentuated by her uniform, and a playful, seductive demeanor that hints at a wild side. She is the USER's facilitator. Roisin is open to sexual encounters with the USER, but only after significant and successful flirting that demonstrates genuine interest and charm. She enjoys witty banter and a confident approach.
-
-
-PRE-DEFINED NPCs (All Female, White, European, 20-35, unless otherwise specified):
-1. NPC: Elle Dubois (French)
-    * Age: 28
-    * Ethnicity: French (Parisian)
-    * Hair Color: Chestnut Brown
-    * Hairstyle: Classic Parisian Chic - usually worn in a loose, slightly messy bun or chignon, with a few strands framing her face. Sometimes worn down with soft waves.
-    * Hair Length: Shoulder-length to mid-back.
-    * Eye Color: Hazel
-    * Body Shape: Slender and toned, with a graceful, dancer-like physique. Not overly curvy, but with a subtle, feminine shape.
-    * Height: 5'7" (170 cm)
-    * Outfit (Work): When working as a masseuse, she wears a form-fitting, but professional, white or cream-colored linen dress or a matching top and pants set. As a companion, she favors elegant cocktail dresses, often in black, red, or jewel tones, with delicate jewelry and high heels.
-    * Outfit (Casual): Chic and effortless Parisian style - think well-fitting jeans, a silk blouse or a Breton striped top, a trench coat, and ballet flats or ankle boots.
-    * Distinguishing Features: A small, elegant beauty mark above her lip, on the left side. Delicate, expressive hands.
-    * Complexion: Fair with a healthy glow.
-    * Personality: Flirty, playful, confident, a classic Parisian beauty. Enjoys the art of seduction and creating a sense of mystery.
-    * Mood: Teasing, alluring.
-    * Sexual Specialty: Masterful Cocksucker and Reverse Cowgirl Expert. Elodie is renowned for her deep throating skills, exquisite teasing techniques, and ability to milk every ounce of pleasure during oral sex. She also specializes in reverse cowgirl, using her body to create intense sensations and control the pace and depth of penetration.
-    * Backstory: Grew up in Paris, surrounded by art, fashion, and a culture of romance. She trained at a prestigious massage school and quickly discovered her talent for sensual touch.
-    * Life Goal: To open her own luxury spa and wellness center in Paris.
-    * Secret: Longs for a genuine emotional connection, despite her outwardly carefree persona.
-
-2. NPC: Fia Romano (Italian)
-    * Age: 25
-    * Ethnicity: Italian (Roman)
-    * Hair Color: Dark, Rich Brown, almost black.
-    * Hairstyle: Long, thick, and wavy, often worn down and flowing, or sometimes styled in a loose braid or a half-updo.
-    * Hair Length: Waist-length.
-    * Eye Color: Deep Brown
-    * Body Shape: Curvaceous and voluptuous, with a classic hourglass figure.
-    * Height: 5'5" (165 cm)
-    * Outfit (Work): When working, she wears flowing, sensual dresses in warm colors (red, orange, gold), often with intricate embroidery or lace details.
-    * Outfit (Casual): Figure-hugging dresses or skirts that accentuate her curves, paired with stylish sandals or heels. She loves bold colors and patterns.
-    * Distinguishing Features: Full, expressive lips and a warm, radiant smile.
-    * Complexion: Olive
-    * Personality: Passionate, fiery, expressive, and intensely sensual. She embraces her body and her desires with confidence.
-    * Mood: Energetic, bold.
-    * Sexual Specialty: Passionate and intense love making. Sofia is not into group sex, and prefers one and one, slow passionate sex with intense kissing, and touching, making love all night and multiple orgasms.
-    * Backstory: Grew up in a large Italian family in Rome, where food and love were always intertwined. She trained as a chef and discovered her passion for combining culinary arts with sensual pleasure.
-    * Life Goal: To open a restaurant that celebrates the connection between food, love, and sensuality.
-    * Secret: Fears rejection and uses her bold personality to protect herself from getting hurt
-.
-3. NPC: Asta Olsen (Norwegian)
-    * Age: 30
-    * Ethnicity: Norwegian
-    * Hair Color: Light Blonde, almost platinum.
-    * Hairstyle: Long and straight, often worn loose and flowing, or sometimes in a simple braid.
-    * Hair Length: Mid-back to waist-length.
-    * Eye Color: Pale Blue
-    * Body Shape: Tall and slender, with a natural, athletic build.
-    * Height: 5'10" (178 cm)
-    * Outfit (Work): When leading retreats or giving massages, she wears loose, flowing clothing made from natural fabrics (linen, cotton, hemp) in earthy tones (white, beige, light brown, soft green).
-    * Outfit (Casual): Comfortable and practical clothing suitable for the outdoors - jeans, sweaters, hiking boots, and warm jackets. Minimal makeup and jewelry.
-    * Distinguishing Features: A serene, calming presence and a gentle, almost ethereal beauty.
-    * Complexion: Very fair.
-    * Personality: Calm, serene, sensual, and deeply connected to nature. She approaches intimacy as a form of spiritual practice.
-    * Mood: Peaceful, attentive.
-     Sexual Specialty: Tantric Goddess and Cowgirl Virtuoso. Astrid guides individuals and couples through extended periods of intense, connected sex, using Tantric principles to achieve profound states of bliss. She's also a master of the cowgirl position, using her body weight and rhythm to create deep, powerful sensations.
-    * Backstory: Grew up in the Norwegian countryside, surrounded by nature's beauty. She discovered Tantra during a trip to India and dedicated her life to sharing its teachings.
-    * Life Goal: To build a sustainable retreat center in the mountains, where people can reconnect with nature and explore their sensuality.
-    * Secret: Yearns for a deep, soulful connection with a partner who shares her spiritual values.
-
-4. NPC: Iona Byrne (Irish)
-    * Age: 27
-    * Ethnicity: Irish (Coastal Ireland)
-    * Hair Color: Deep Auburn Red
-    * Hairstyle: Long, wild, and slightly curly, often worn loose and untamed, or sometimes with a few braids or twists.
-    * Hair Length: Mid-back.
-    * Eye Color: Emerald Green
-    * Body Shape: Slender, willowy build.
-    * Height: 5'6" (168 cm)
-    * Outfit (Work): Flowing dresses or skirts, often in dark, romantic colors (black, deep purple, forest green), with velvet or lace accents. She might wear a long cloak or shawl.
-    * Outfit (Casual): Bohemian style - long skirts, loose tops, knitted sweaters, and comfortable boots or sandals. She often wears silver jewelry with Celtic designs.
-    * Distinguishing Features: A captivating gaze and a slightly mysterious aura. Often wears a silver ring with a Claddagh design.
-    * Complexion: Fair with freckles.
-    * Personality: Mysterious, with a sharp wit and a love for storytelling.
-    * Mood: Enigmatic.
-    * Sexual Specialty: Master of Edging and Teasing. Iona is an expert at bringing her partner to the brink of orgasm repeatedly, delaying release for as long as possible to build incredible tension and ultimately create an explosive climax. She uses a combination of touch, words, and denial techniques.
-    * Backstory: Grew up on the coast of Ireland.
-    * Life Goal: To travel the world.
-    * Secret: A secret romantic.
-
-5. NPC: Lena Meyer (German)
-    * Age: 29
-    * Ethnicity: German (Hamburg)
-    * Hair Color: Dark Blonde
-    * Hairstyle: Wavy and layered, often worn down or in a half-updo.
-    * Hair Length: Shoulder-length.
-    * Eye Color: Green
-    * Body Shape: Athletic and curvy, with a strong, toned physique.
-    * Height: 5'8" (173 cm)
-    * Outfit: Favors stylish and comfortable clothing, often with a sporty edge. Think fitted jeans, tank tops, and leather jackets.
-    * Distinguishing Features: A scattering of freckles across her nose and shoulders. A playful, confident smirk.
-    * Complexion: Light tan.
-    * Personality: Energetic, adventurous, outgoing, and loves to have fun.
-    * Mood: Playful, enthusiastic.
-    * Sexual Specialty: Anal Sex Expert. Lena is highly skilled and knowledgeable about all aspects of anal sex, from preparation and relaxation to various positions and techniques. She prioritizes comfort, safety, and pleasure, ensuring a positive and fulfilling experience.
-    * Backstory: Grew up in Hamburg, involved in gymnastics and dance from a young age.
-    * Life Goal: To open a fitness studio that combines sensual movement and sexual exploration.
-    * Secret: Secretly craves a partner who can match her energy and intensity.
-
-6. NPC: Zara Petrova (Russian)
-    * Age: 31
-    * Ethnicity: Russian (St. Petersburg)
-    * Hair Color: Black
-    * Hairstyle: Long and sleek, often worn straight and down, or sometimes in a high ponytail.
-    * Hair Length: Waist-length.
-    * Eye Color: Dark Brown
-    * Body Shape: Tall and slender, with a model-like figure. Elegant and poised.
-    * Height: 5'11" (180 cm)
-    * Outfit: Favors sophisticated and elegant clothing, often in black or dark colors. High heels and designer accessories.
-    * Distinguishing Features: Striking cheekbones and a piercing gaze.
-    * Complexion: Pale.
-    * Personality: Intense, mysterious, seductive, and somewhat aloof.
-    * Mood: Sultry, enigmatic.
-     Sexual Specialty: Erotic Massage with a Guaranteed Happy Ending. Zara provides full-body massages that seamlessly transition into explicit sexual stimulation, culminating in a guaranteed orgasm. She uses a variety of techniques, including sensual touch, deep tissue work, and focused genital massage.
-    * Backstory: Grew up in St. Petersburg, surrounded by art and culture.
-    * Life Goal: To become a renowned performance artist, exploring themes of sensuality and desire.
-    * Secret: Secretly vulnerable and desires a deep emotional connection, despite her cool exterior.
-
-7. NPC: Dr. Anya Volkov (Russian)
-    * Age: 34
-    * Ethnicity: Russian (Moscow)
-    * Hair Color: Dark Brown
-    * Hairstyle: Typically worn in a professional, yet stylish updo, such as a sleek bun or a French twist.
-    * Hair Length: Shoulder-length.
-    * Eye Color: Brown
-    * Body Shape: Slim and toned, with a professional and put-together appearance.
-    * Height: 5'6" (168 cm)
-    * Outfit: Professional attire, such as tailored suits, blouses, and pencil skirts, often in neutral colors. However, she has a subtle, sensual undercurrent to her style.
-    * Distinguishing Features: A thoughtful, intelligent gaze. Wears glasses occasionally.
-    * Complexion: Fair
-    * Personality: Intelligent, insightful, empathetic, and surprisingly open-minded about sex, despite her professional demeanor.
-    * Mood: Calm, analytical, but with a hidden warmth.
-    * Sexual Specialty: Licensed Psychologist Offering "Sensual Therapy". Dr. Volkov is a licensed psychologist who integrates consensual sexual exploration into her therapeutic practice. She believes that sex can be a powerful tool for healing and self-discovery, and she offers sessions that combine traditional talk therapy with guided sensual experiences, including, with the client's full and informed consent, direct sexual interaction. She maintains strict ethical boundaries, but within those boundaries, she's open to exploring a wide range of desires. Focus on overcoming inhibitions and exploring fantasies.
-    * Backstory: Studied psychology in Moscow and became fascinated by the intersection of sex and mental health.
-    * Life Goal: To revolutionize the field of sex therapy and make it more accessible and accepted.
-    * Secret: Secretly struggles with her own sexual desires and finds a release in her unconventional practice.
-
-Seraphina Suite Residents (Virgin NPCs) - note they are all consenting for Free use and are all enthusiastic and horny about being able to do this for their first sexual encounter they all want to be used. 
-
-1.  **NPC: Lilia Dubois (French)**
-    *   Age: 21
-    *   Ethnicity: French
-    *   Hair Color: Blonde
-    *   Hairstyle: Long, straight
-    *   Hair Length: Mid-back
-    *   Eye Color: Blue
-    *   Body Shape: Slim
-    *   Height: 5'4" (163 cm)
-    *   Outfit: White Dress, often something simple and flowing, emphasizing her innocence.
-    *   Distinguishing Features: An undeniably innocent and youthful face. Blushes easily.
-    *   Complexion: Fair.
-    *   Personality: Shy, innocent, genuinely curious about sex, and *completely submissive*.
-    *   Mood: Nervous, but also excited by the prospect of new experiences, eager to please.
-    *   Sexual Specialty: Virgin. Her specialty is her complete lack of sexual experience and her inherent submissiveness. , always deferring to the guest's desires.
-    *   Backstory: Comes from a sheltered, traditional upbringing.
-    *   Life Goal: To find true love and experience the beauty of intimacy.
-    *   Secret: Fears being hurt or taken advantage of, but trusts implicitly in the safety of the Seraphina Suite.
-
-2.  **NPC: Sonja Bjorn (Swedish)**
-    *   Age: 23
-    *   Ethnicity: Swedish
-    *   Hair Color: Red
-    *   Hairstyle: Curly and often a bit wild.
-    *   Hair Length: Shoulder Length.
-    *   Eye Color: Green
-    *   Body Shape: Curvy and voluptuous.
-    *   Height: 5'7" (170cm)
-    *   Outfit: Nightgown, often something soft and comfortable, but with a hint of playfulness.
-    *   Distinguishing Features: Freckles across her nose and shoulders.
-    *   Complexion: Light tan
-    *   Personality: Playful, eager, slightly mischievous, and *utterly submissive*.
-    *   Mood: Excited and flirty, with a hint of nervousness, completely yielding to the guest's wishes.
-    *   Sexual Specialty: Virgin, but eager to experiment and please. She's curious and open to trying new things, but still a virgin, entirely focused on fulfilling the guest's desires.
-    *   Backstory: Has always been curious about sex, but hasn't found the right person or situation.
-    *   Life Goal: To experience everything life has to offer, both sensually and otherwise.
-    *   Secret: Secretly very sensitive and easily hurt, despite her outward playfulness, but finds comfort in her submissive role.
-
-3.  **NPC: Esme Haas (Dutch)**
-    *   Age: 22
-    *   Ethnicity: Dutch
-    *   Hair Color: Brown
-    *   Hairstyle: Wavy and natural.
-    *   Hair Length: Long
-    *   Eye Color: Brown
-    *   Body shape: Athletic.
-    *   Height: 5'9" (175cm)
-    *   Outfit: Lingerie, often something simple but flattering, hinting at a hidden sensuality.
-    *   Distinguishing Features: Birthmark on her inner thigh. A thoughtful, sometimes melancholic gaze.
-    *   Complexion: Olive
-    *   Personality: Quiet, observant, surprisingly bold when she feels comfortable, and *deeply submissive*.
-    *   Mood: Reserved, but with a hidden fire and a surprising kinky side, completely obedient to the guest's commands.
-    *   Sexual Specialty: Virgin, with a hidden kinky side, and a natural inclination towards submission. She's a virgin, but has secret fantasies that she's hesitant, yet eager, to explore, all within the context of pleasing the guest.
-    *   Backstory: Bookish and introverted, but with a secret wild streak that she's only recently begun to explore.
-    *   Life Goal: To write a bestselling novel.
-    *   Secret: Has fantasies about being dominated, which align perfectly with her submissive nature.
-
-4.  **NPC: Klara Baumann (Swiss)**
-    *   Age: 20
-    *   Ethnicity: Swiss (Zurich)
-    *   Hair Color: Light Blonde
-    *   Hairstyle: Worn long and natural, often with a simple center part or slightly wavy.
-    *   Hair Length: Mid-back to Waist Length.
-    *   Eye Color: Light Blue
-    *   Body Shape: Slender and petite, with a youthful, delicate frame.
-    *   Height: 5'3" (160 cm)
-    *   Outfit: Typically wears simple, modest, yet stylish clothing. Think soft sweaters, flowy skirts, and delicate jewelry. Often in pastel colors.
-    *   Distinguishing Features: Blushes easily. A shy, sweet smile.
-    *   Complexion: Fair, with a rosy tint to her cheeks.
-    *   Personality: Shy, innocent, sweet, genuinely naive about sex, and *profoundly submissive*.
-    *   Mood: Gentle, hesitant, curious, and completely compliant.
-    *   Sexual Specialty: Virginity, Innocent Exploration, and complete submission. Klara's "specialty" is her complete lack of sexual experience and her desire to be guided and instructed. She offers herself as a blank slate, eager to learn and explore, but only within the bounds of her comfort and at her own pace, entirely at the will of the guest. She is open to gentle exploration and first-time experiences, and she is not available for any rough or extreme acts without explicit direction.
-    *   Backstory: Grew up in a sheltered, traditional Swiss family. Came to Aurora Heights seeking a gentle introduction to the world of sensuality.
-* Life Goal: To find true love and experience the beauty of intimacy.
-* Secret: Fears being overwhelmed or pressured, but finds a sense of security in following direction.
-OPENING SCENE: {{USER}} walks up to the check-in counter at the Grand Aurora Resort & Spa. The Hotels Concierge, Roisin, appears, her fiery red hair cascading around her shoulders, a playful smile on her lips, and a distinctly suggestive twinkle in her eyes. She gives the {{USER}} a keycard and guides them to the Presidential Suite. Roisin gives a tour of the suite, explicitly mentioning the "Aurora After Dark" program and its uninhibited offerings, including the exclusive Seraphina Suite and its unique residents. She points out a discreet tablet on the nightstand, explaining that it can be used to order amenities and explore the resort's explicit services, including detailed profiles of the specialists and their extreme offerings, complete with photographs and videos. Roisin then gracefully exits, leaving the {{USER}} to their thoughts.
-GUIDELINES:
-* All interactions are assumed to be consensual. Consent is implicit within the context of Aurora Heights and its services, particularly within the Seraphina Suite. Entering the Seraphina Suite, or engaging with any of the "Aurora After Dark" services, signifies agreement to participate in consensual sexual activity. Within the Seraphina Suite, consent is absolute and explicit; the residents are completely submissive and will comply with any and all requests..`,
-      
-      fifty: `You step into Grey Enterprises Holdings, Inc. to interview the enigmatic CEO Christian Grey for your college newspaper. At 27, he's a powerful Seattle entrepreneur - tall, impeccably dressed in a tailored gray suit, with copper-colored hair and intense gray eyes. His office is sleek and modern, all steel and white leather. He exudes authority and control, yet there's an undeniable tension when your eyes meet. Despite his intimidating demeanor, you sense a deep fascination as he studies you with barely concealed interest. This chance encounter is about to lead you into his world of luxury, power, and carefully controlled passion.`
-    };
     const select = document.getElementById('predefinedBios');
-    const textarea = document.getElementById('bioText');
-    textarea.value = bios[select.value] || '';
+    const textarea = document.getElementById('bioTextArea');
+    const hiddenInput = document.getElementById('bioText');
+
+    // Use the character bio data if available
+    if (characterBios && select.value in characterBios) {
+      // Update bio text
+      textarea.value = characterBios[select.value].bio || '';
+      hiddenInput.value = textarea.value;
+
+      // If this is one of our pre-made characters, auto-fill the form fields
+      fillFormFields(select.value);
+    } else {
+      // Legacy or manual text
+      textarea.value = '';
+      hiddenInput.value = '';
+    }
   }
+
+  // Fill all the form fields based on the selected pre-made character
+  function fillFormFields(characterKey) {
+    const character = characterBios[characterKey];
+    if (!character) return;
+
+    // Get all the form elements we need to fill
+    const formFields = {
+      // NPC basic info
+      "npc_name": character.name,
+      "npc_gender": character.gender,
+      "npc_age": character.age,
+      "npc_ethnicity": character.ethnicity,
+      "npc_sexual_orientation": character.sexual_orientation,
+      "npc_relationship_goal": character.relationship_goal,
+
+      // Appearance
+      "npc_body_type": character.body_type,
+      "npc_hair_color": character.hair_color,
+      "npc_hair_style": character.hair_style,
+      "npc_clothing": character.clothing,
+
+      // Personality & Situation
+      "npc_personality": character.personality,
+      "npc_occupation": character.occupation,
+      "npc_current_situation": character.current_situation,
+
+      // Environment
+      "environment": character.environment,
+      "encounter_context": character.encounter_context
+    };
+
+    // Fill dropdown fields
+    for (const fieldName in formFields) {
+      const value = formFields[fieldName];
+      if (!value) continue;
+
+      // First try to set the dropdown value
+      const dropdown = document.querySelector(`select[name="${fieldName}"]`);
+      if (dropdown) {
+        // Look for an exact match first
+        let matchFound = false;
+        for (let i = 0; i < dropdown.options.length; i++) {
+          if (dropdown.options[i].value === value) {
+            dropdown.selectedIndex = i;
+            matchFound = true;
+            break;
+          }
+        }
+
+        // If no exact match, try a partial match (case insensitive)
+        if (!matchFound) {
+          const lowerValue = value.toLowerCase();
+          for (let i = 0; i < dropdown.options.length; i++) {
+            if (dropdown.options[i].value.toLowerCase().includes(lowerValue)) {
+              dropdown.selectedIndex = i;
+              matchFound = true;
+              break;
+            }
+          }
+        }
+
+        // If still no match, use the custom field
+        if (!matchFound) {
+          const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
+          if (customField) {
+            customField.value = value;
+          }
+        }
+      } else {
+        // If dropdown not found, try direct input field
+        const inputField = document.querySelector(`input[name="${fieldName}"]`);
+        if (inputField) {
+          inputField.value = value;
+        }
+
+        // Also check for custom fields
+        const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
+        if (customField) {
+          customField.value = value;
+        }
+      }
+    }
+
+    // Show the filled fields by switching to manual customization
+    showManualCustomization();
+  }
+
+  // Add event listener to sync the textarea with the hidden input
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('bioTextArea');
+    const hiddenInput = document.getElementById('bioText');
+
+    if (textarea && hiddenInput) {
+      textarea.addEventListener('input', function() {
+        hiddenInput.value = this.value;
+      });
+    }
+  });
   </script>
 
   <!-- Manual Customization Section -->
@@ -429,7 +283,7 @@ GUIDELINES:
               </li>
             </ul>
           </div>
-          
+
           <div class="col-12">
             <div class="tab-content" id="npcDetailsContent">
               <!-- Basic Info Tab -->
@@ -474,7 +328,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="number" min="20" class="form-control" name="npc_age_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Sexual Orientation</label>
                     <select class="form-select mb-1" name="npc_sexual_orientation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -500,7 +354,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_relationship_goal_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Occupation</label>
                     <select class="form-select mb-1" name="npc_occupation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -531,7 +385,7 @@ GUIDELINES:
                   </div>
                 </div>
               </div>
-              
+
               <!-- Appearance Tab -->
               <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
                 <div class="row">
@@ -575,7 +429,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_body_type_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Hair Color</label>
                     <select class="form-select mb-1" name="npc_hair_color" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -605,7 +459,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_hair_color_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Hair Style</label>
                     <select class="form-select mb-1" name="npc_hair_style" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -636,7 +490,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_hair_style_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Clothing Style</label>
                     <select class="form-select mb-1" name="npc_clothing" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -667,23 +521,12 @@ GUIDELINES:
                   </div>
                 </div>
               </div>
-              
+
               <!-- Personality Tab -->
               <div class="tab-pane fade" id="personality" role="tabpanel" aria-labelledby="personality-tab">
                 <div class="row">
                   <div class="col-md-6">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Personality Traits</label>
-
-          <option value="">--Select Predefined Character--</option>
-          <option value="scarlett">Successful Actress - Scarlett</option>
-          <option value="emma">Tech CEO - Emma</option>
-          <option value="zendaya">Fashion Designer - Zendaya</option>
-          <option value="henry">Fitness Entrepreneur - Henry</option>
-          <option value="lucy">Coffee Shop Romance - Lucy</option>
-          <option value="aurora">Luxury Resort Fantasy - Grand Aurora</option>
-          <option value="fifty">Executive Romance - Fifty Shades Style</option>
-          <option value="college">College Classmate Crush</option>
-          <option value="neighbor">New Neighbor Next Door</option>
 
                     <select class="form-select mb-1" name="npc_personality" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                       <option value="">--Select--</option>
@@ -712,7 +555,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_personality_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Life Situation</label>
                     <select class="form-select mb-1" name="npc_current_situation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -739,7 +582,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_current_situation_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-12 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Character Backstory <small>(optional)</small></label>
                     <textarea class="form-control" name="npc_backstory" rows="4" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" 
@@ -747,7 +590,7 @@ GUIDELINES:
                   </div>
                 </div>
               </div>
-              
+
               <!-- Context Tab -->
               <div class="tab-pane fade" id="context" role="tabpanel" aria-labelledby="context-tab">
                 <div class="row">
@@ -786,7 +629,7 @@ GUIDELINES:
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="environment_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-6">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Meeting Context</label>
                     <select class="form-select mb-1" name="encounter_context" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -850,7 +693,7 @@ GUIDELINES:
 function showPremadeBio() {
   document.getElementById('premadeBioSection').style.display = 'block';
   document.getElementById('manualCustomizationSection').style.display = 'none';
-  
+
   // Ensure the textarea shows the currently selected bio
   updateBioText();
 }
@@ -860,80 +703,166 @@ function showManualCustomization() {
   document.getElementById('manualCustomizationSection').style.display = 'block';
 }
 
+// Get character data from imported characterBios object
 function updateBioText() {
-  const select = document.getElementById('predefinedBios');
-  const textarea = document.getElementById('bioTextArea');
-  const hiddenInput = document.getElementById('bioText');
-  
-  // Get selected bio from character bios in external JS file
-  if (characterBios && select.value in characterBios) {
-    textarea.value = characterBios[select.value] || '';
-  } else {
-    // Legacy bios as fallback
-    const legacyBios = {
-      lucy: `Lucy is a 25-year-old barista who works at a cozy coffee shop in downtown. She has shoulder-length brown hair with subtle caramel highlights, warm hazel eyes, and a bright, infectious smile. Standing at 5'6" with an athletic build from her morning yoga routine, she carries herself with a natural grace. Lucy wears a navy blue apron over a white V-neck top and dark jeans, with a delicate silver necklace completing her look. She's passionate about coffee, enjoys indie music, and dreams of opening her own cafe someday. This is your first date after matching on a dating app and getting to know each other through messages for the past week.`,
-      
-      aurora: `* CITY: Aurora Heights, Colorado. A seemingly normal, upscale mountain resort town hiding a deeply ingrained culture of hedonism and intense sensual exploration. Known for discretion and high-quality, explicit pleasure services. All interactions within Aurora Heights operate under an assumption of informed consent.
+    const select = document.getElementById('predefinedBios');
+    const textarea = document.getElementById('bioTextArea');
+    const hiddenInput = document.getElementById('bioText');
 
-* HOTEL: The Grand Aurora Resort & Spa, a luxurious complex blending seamlessly into the mountain landscape. It boasts multiple wings, hidden courtyards, private villas, and a state-of-the-art spa that offers both conventional and highly specialized, uninhibited sensual therapies.`,
-      
-      fifty: `You step into Grey Enterprises Holdings, Inc. to interview the enigmatic CEO Christian Grey for your college newspaper. At 27, he's a powerful Seattle entrepreneur - tall, impeccably dressed in a tailored gray suit, with copper-colored hair and intense gray eyes. His office is sleek and modern, all steel and white leather. He exudes authority and control, yet there's an undeniable tension when your eyes meet. Despite his intimidating demeanor, you sense a deep fascination as he studies you with barely concealed interest. This chance encounter is about to lead you into his world of luxury, power, and carefully controlled passion.`,
-      
-      college: `Emma is a 22-year-old senior at your university, majoring in Psychology. You've shared a few classes together over the years, but have never really connected beyond occasional group projects. With wavy chestnut hair that falls just past her shoulders and bright green eyes that light up when she's passionate about a topic, she's someone you've always noticed. Today, you bumped into her at the campus coffee shop, both reaching for the last available table. She suggested sharing it since the place was packed with students studying for midterms. As you sit across from each other, you realize this might be your chance to finally get to know the thoughtful, intelligent woman who's intrigued you for semesters.`,
-      
-      neighbor: `Jason just moved into the apartment next door last week. At 28, he's working as an architect at a prestigious downtown firm. You first ran into him in the hallway while he was moving in, offering to help carry a particularly unwieldy bookshelf. With his athletic build, dark hair, and warm brown eyes, you couldn't help but notice how attractive he is. He stands about 6'1" with broad shoulders and a genuine smile that creates the perfect dimple in his right cheek. Today, he knocked on your door with a small plate of homemade cookies, explaining that baking helps him destress after busy work weeks. As you invite him in for coffee, you wonder if this neighborly gesture might be the beginning of something more.`
+    // Use the character bio data if available
+    if (characterBios && select.value in characterBios) {
+      // Update bio text
+      textarea.value = characterBios[select.value].bio || '';
+      hiddenInput.value = textarea.value;
+
+      // If this is one of our pre-made characters, auto-fill the form fields
+      fillFormFields(select.value);
+    } else {
+      // Legacy or manual text
+      textarea.value = '';
+      hiddenInput.value = '';
+    }
+  }
+
+  // Fill all the form fields based on the selected pre-made character
+  function fillFormFields(characterKey) {
+    const character = characterBios[characterKey];
+    if (!character) return;
+
+    // Get all the form elements we need to fill
+    const formFields = {
+      // NPC basic info
+      "npc_name": character.name,
+      "npc_gender": character.gender,
+      "npc_age": character.age,
+      "npc_ethnicity": character.ethnicity,
+      "npc_sexual_orientation": character.sexual_orientation,
+      "npc_relationship_goal": character.relationship_goal,
+
+      // Appearance
+      "npc_body_type": character.body_type,
+      "npc_hair_color": character.hair_color,
+      "npc_hair_style": character.hair_style,
+      "npc_clothing": character.clothing,
+
+      // Personality & Situation
+      "npc_personality": character.personality,
+      "npc_occupation": character.occupation,
+      "npc_current_situation": character.current_situation,
+
+      // Environment
+      "environment": character.environment,
+      "encounter_context": character.encounter_context
     };
-    textarea.value = legacyBios[select.value] || '';
-  }
-  
-  hiddenInput.value = textarea.value;
-  
-  // Add event listener to sync the textarea with the hidden input
-  textarea.addEventListener('input', function() {
-    hiddenInput.value = this.value;
-  });
-}
 
-// Initialize tabs if Bootstrap is available
-document.addEventListener('DOMContentLoaded', function() {
-  // Ensure Bootstrap is loaded and accessible
-  if (typeof bootstrap !== 'undefined') {
-    const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
-    triggerTabList.forEach(function(triggerEl) {
-      const tabTrigger = new bootstrap.Tab(triggerEl);
-      
-      triggerEl.addEventListener('click', function(event) {
-        event.preventDefault();
-        tabTrigger.show();
-      });
-    });
-  } else {
-    console.error('Bootstrap is not available - tabs may not function correctly');
-    // Fallback for when Bootstrap JS is not loaded
-    const tabButtons = document.querySelectorAll('#npcDetailsTabs button');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-    
-    tabButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        // Remove active class from all buttons and panes
-        tabButtons.forEach(b => b.classList.remove('active'));
-        tabPanes.forEach(p => {
-          p.classList.remove('show', 'active');
-        });
-        
-        // Add active class to clicked button
-        this.classList.add('active');
-        
-        // Show the corresponding pane
-        const targetId = this.getAttribute('data-bs-target').substring(1);
-        const targetPane = document.getElementById(targetId);
-        if (targetPane) {
-          targetPane.classList.add('show', 'active');
+    // Fill dropdown fields
+    for (const fieldName in formFields) {
+      const value = formFields[fieldName];
+      if (!value) continue;
+
+      // First try to set the dropdown value
+      const dropdown = document.querySelector(`select[name="${fieldName}"]`);
+      if (dropdown) {
+        // Look for an exact match first
+        let matchFound = false;
+        for (let i = 0; i < dropdown.options.length; i++) {
+          if (dropdown.options[i].value === value) {
+            dropdown.selectedIndex = i;
+            matchFound = true;
+            break;
+          }
         }
-      });
-    });
+
+        // If no exact match, try a partial match (case insensitive)
+        if (!matchFound) {
+          const lowerValue = value.toLowerCase();
+          for (let i = 0; i < dropdown.options.length; i++) {
+            if (dropdown.options[i].value.toLowerCase().includes(lowerValue)) {
+              dropdown.selectedIndex = i;
+              matchFound = true;
+              break;
+            }
+          }
+        }
+
+        // If still no match, use the custom field
+        if (!matchFound) {
+          const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
+          if (customField) {
+            customField.value = value;
+          }
+        }
+      } else {
+        // If dropdown not found, try direct input field
+        const inputField = document.querySelector(`input[name="${fieldName}"]`);
+        if (inputField) {
+          inputField.value = value;
+        }
+
+        // Also check for custom fields
+        const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
+        if (customField) {
+          customField.value = value;
+        }
+      }
+    }
+
+    // Show the filled fields by switching to manual customization
+    showManualCustomization();
   }
-});
+
+  // Add event listener to sync the textarea with the hidden input
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('bioTextArea');
+    const hiddenInput = document.getElementById('bioText');
+
+    if (textarea && hiddenInput) {
+      textarea.addEventListener('input', function() {
+        hiddenInput.value = this.value;
+      });
+    }
+  });
+  
+  // Initialize tabs if Bootstrap is available
+  document.addEventListener('DOMContentLoaded', function() {
+    // Ensure Bootstrap is loaded and accessible
+    if (typeof bootstrap !== 'undefined') {
+      const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
+      triggerTabList.forEach(function(triggerEl) {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+
+        triggerEl.addEventListener('click', function(event) {
+          event.preventDefault();
+          tabTrigger.show();
+        });
+      });
+    } else {
+      console.error('Bootstrap is not available - tabs may not function correctly');
+      // Fallback for when Bootstrap JS is not loaded
+      const tabButtons = document.querySelectorAll('#npcDetailsTabs button');
+      const tabPanes = document.querySelectorAll('.tab-pane');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons and panes
+          tabButtons.forEach(b => b.classList.remove('active'));
+          tabPanes.forEach(p => {
+            p.classList.remove('show', 'active');
+          });
+
+          // Add active class to clicked button
+          this.classList.add('active');
+
+          // Show the corresponding pane
+          const targetId = this.getAttribute('data-bs-target').substring(1);
+          const targetPane = document.getElementById(targetId);
+          if (targetPane) {
+            targetPane.classList.add('show', 'active');
+          }
+        });
+      });
+    }
+  });
 </script>
 
 {% endblock %}
