@@ -389,7 +389,7 @@
         <h4 style="color: #ff9fa3; font-size: 2.6rem; margin-bottom: 15px;"><i class="bi bi-heart"></i> Relationship Controls</h4>
         <div style="font-size: 2.2rem; color: #ffd0d0;">
           <p><strong>Current Stage:</strong> {{ current_stage }}</p>
-          <p style="line-height: 1.4;"><strong>Stage Description:</strong><br>{{ stage_unlocks.get(current_stage, "Unknown stage") }}</p>
+          <p style="line-height: 1.4;"><strong>Stage Description:</strong><br>{{ stage_desc if stage_desc and stage_desc != "Unknown stage" else stage_unlocks.get(current_stage, "Playful Connection & Getting to Know Each Other") }}</p>
           <p><strong>Affection Score:</strong> {{ "%.1f"|format(affection_score) }}</p>
         </div>
 
