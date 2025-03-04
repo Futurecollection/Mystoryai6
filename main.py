@@ -640,8 +640,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
                         personality, body_type, hair_color, hair_style, clothing,
                         occupation, current_situation, backstory, environment,
                         encounter_context, user_name) -> str:
-    """Use the LLM to generate a creative, unique biography with available information, 
-    filled with personality and avoiding rigid templates."""
+    """Use the LLM to generate a structured, Wikipedia-style biography with available information."""
     
     # Create a summary of what we know for sure (non-? values)
     known_details = []
@@ -664,58 +663,44 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
     
     known_info = "\n".join(known_details)
     
-    # Add some randomness to make each biography truly unique
-    biography_styles = [
-        "vivid and descriptive, focusing on sensory details and emotional depth",
-        "introspective and philosophical, revealing inner thoughts and motivations",
-        "dynamic and energetic, highlighting formative experiences and pivotal moments",
-        "mysterious and intriguing, with hints of untold stories and hidden depths",
-        "warm and personable, emphasizing connections and relationships"
-    ]
-    
-    writing_approaches = [
-        "literary and poetic, with rich metaphors and vivid imagery",
-        "conversational and approachable, as if shared between friends",
-        "detailed and methodical, weaving a complex tapestry of experiences",
-        "intimate and revealing, sharing vulnerabilities and authentic emotions",
-        "crisp and modern, with contemporary references and relatable situations"
-    ]
-    
-    selected_style = random.choice(biography_styles)
-    selected_approach = random.choice(writing_approaches)
-    
     prompt = f"""
-    Create a unique, compelling character biography for an interactive romance story. 
-    Make this biography feel authentic and natural—not like a template or form.
+    Create a structured, Wikipedia-style biography for {name} in an interactive romance story.
+    Use proper Markdown formatting with clear sections and headings.
     
     KNOWN CHARACTER DETAILS:
     {known_info if known_details else "Limited information available. Create a compelling character from scratch."}
     
-    CREATIVE DIRECTION:
-    - Writing style should be {selected_style}
-    - Approach should be {selected_approach}
-    - Avoid obvious section headers or formulaic structure
-    - Create organic flow between different aspects of the character
-    - The only required header should be the character's name at the beginning
-    - May include a brief "Relationship Status" note at the end
+    STRUCTURE REQUIREMENTS:
+    1. Start with "# {name}" as the main heading
+    2. Include a short 2-3 sentence overview paragraph introducing the character
+    3. Organize the biography into the following sections (using ## for section headers):
+       - ## Personal Information
+       - ## Background & History
+       - ## Personality
+       - ## Current Life
+       - ## Appearance
+       - ## Interests & Hobbies
+       - ## Relationship Status
     
-    STORYTELLING GUIDELINES:
-    - Weave details together naturally rather than listing traits
-    - Create meaningful connections between different aspects (how their work influences their personality, etc.)
-    - Develop a sense of history and lived experience
-    - Include small, specific details that make the character feel real (habits, preferences, quirks)
-    - Reference 1-2 formative experiences that shaped who they are
-    - If appropriate, hint at hidden depths or unexplored aspects of their personality
+    CONTENT GUIDELINES:
+    - In "Personal Information" section: Include a structured list of key facts (age, birthplace, occupation, etc.)
+    - In "Background & History" section: Develop a compelling backstory with 1-2 significant life events
+    - In "Personality" section: Elaborate on character traits, strengths, weaknesses, and communication style
+    - In "Current Life" section: Describe their current situation, living arrangements, and daily activities
+    - In "Appearance" section: Detail physical characteristics beyond the basics (mannerisms, style preferences)
+    - In "Interests & Hobbies" section: Include at least 3-5 hobbies or interests that shape their character
+    - In "Relationship Status" section: Mention their current dating status and include initial impressions of meeting {user_name}
     
     IMPORTANT REQUIREMENTS:
     - Ensure all characters are adults (20+ years old)
     - If details are missing, create plausible and interesting ones that fit the character
-    - Maintain internal consistency (personality, background, etc.)
-    - Include their initial impressions of meeting {user_name}
-    - Use Markdown formatting only when it enhances readability
-    - Make the biography between 300-500 words - concise but rich with detail
+    - Maintain internal consistency across all sections
+    - Use fact-based, encyclopedia-like tone but with engaging details
+    - Include specific details that make the character feel real (preferences, habits, quirks)
+    - Total biography should be 400-600 words - thorough but concise
+    - Use Markdown formatting (# for main title, ## for sections, bullet points where appropriate)
     
-    The biography should feel like a unique creation for this specific character, not something mass-produced.
+    The biography should feel like a professional entry about a real person with depth and complexity.
     """
     
     try:
