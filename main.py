@@ -1915,7 +1915,7 @@ def generate_image_prompt_for_scene(model_type: str) -> str:
 # --------------------------------------------------------------------------
 @app.route("/")
 def main_home():
-    return render_template("home.html", title="Destined Encounters")
+    return render_template("home.html", title="MyStoryAI")
 
 @app.route("/about")
 def about():
