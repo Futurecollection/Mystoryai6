@@ -600,6 +600,9 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Fill the form with the character's data
       window.fillFormFields(select.value);
+      console.log("Filling form fields for character:", select.value);
+    } else {
+      console.log("No valid character selected or character data not found");
     }
     
     // Show the manual customization section

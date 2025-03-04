@@ -1,274 +1,6 @@
 // Character biographies for the pre-made options
 const characterBios = {
   "emma": {
-    "name": "Emma Chen",
-    "gender": "Female",
-    "age": "28",
-    "ethnicity": "Chinese American",
-    "sexual_orientation": "Straight",
-    "relationship_goal": "Serious Relationship",
-    "body_type": "Athletic",
-    "hair_color": "Black",
-    "hair_style": "Long and Straight",
-    "clothing": "Business Casual - Blazer",
-    "personality": "Confident and Outgoing",
-    "occupation": "Tech CEO",
-    "current_situation": "Career-focused",
-    "environment": "Upscale Restaurant",
-    "encounter_context": "Professional Consultation",
-    "bio": "# Emma Chen\n\nEmma Chen is a 28-year-old tech CEO who has taken Silicon Valley by storm with her innovative AI startup. With her confident demeanor and sharp intelligence, she commands respect in every room she enters.\n\n## Personal Information\n- Age: 28\n- Birthplace: San Francisco, California\n- Education: Stanford University (Computer Science)\n- Current Residence: Modern penthouse apartment in San Francisco\n\n## Background & History\nBorn to immigrant parents who worked in tech, Emma was coding by age 10. She founded her first startup at 22 right after graduating Stanford, and after a successful acquisition, launched her current company which focuses on ethical AI solutions. Her meteoric rise earned her a spot on Forbes 30 Under 30 last year.\n\n## Personality\nEmma is confident, ambitious, and decisive in her professional life, but those who get close discover her playful, adventurous side. She has a quick wit and enjoys intellectual sparring. While she appears completely self-assured in public, she occasionally questions if she's missing out on deeper personal connections due to her intense focus on her career.\n\n## Current Life\nAs CEO of TechFusion AI, Emma works long hours but makes time for tennis, hiking, and occasional weekend getaways. She's recently started to prioritize more work-life balance after realizing success feels incomplete without someone to share it with. Her daily routine includes early morning workouts, back-to-back meetings, and late nights reviewing code or strategy documents.\n\n## Appearance\nEmma has long, straight black hair that she often wears in a sleek ponytail for work. She's athletic from her regular tennis matches and morning runs. Her wardrobe consists primarily of tailored blazers, designer dresses, and the occasional tech company hoodie when working late. She carries herself with poise and maintains excellent posture—a habit from her childhood dance lessons.\n\n## Interests & Hobbies\n- Competitive tennis\n- Mountain hiking\n- Fine wine tasting\n- Reading biographies of innovative leaders\n- Attending symphony performances\n\n## Relationship Status\nEmma has been single for the past two years, with her last relationship ending when her ex-boyfriend couldn't understand her dedication to her company. Meeting you has caught her interest—she's intrigued by someone who seems to understand both her drive and her desire for connection beyond the boardroom."
-  },
-  "scarlett": {
-    "name": "Scarlett Winters",
-    "gender": "Female",
-    "age": "32",
-    "ethnicity": "Caucasian",
-    "sexual_orientation": "Bisexual",
-    "relationship_goal": "Taking Things Slow",
-    "body_type": "Hourglass Figure",
-    "hair_color": "Red",
-    "hair_style": "Long and Wavy",
-    "clothing": "Cocktail Dress",
-    "personality": "Mysterious and Intriguing",
-    "occupation": "Actress",
-    "current_situation": "Between Projects",
-    "environment": "Hotel Lobby",
-    "encounter_context": "Chance Meeting While Traveling",
-    "bio": "# Scarlett Winters\n\nScarlett Winters is an acclaimed 32-year-old actress known for her versatile performances and captivating screen presence. With fiery red hair and an enigmatic personality, she brings an air of mystery to every encounter.\n\n## Personal Information\n- Age: 32\n- Birthplace: Boston, Massachusetts\n- Education: Juilliard School of Drama\n- Current Residence: West Hollywood home and various temporary locations while filming\n\n## Background & History\nScarlett began her career in theater before transitioning to independent films where she gained critical acclaim. Her breakthrough role in the psychological thriller \"Crimson Shadows\" earned her an Academy Award nomination and catapulted her to fame. Despite her success, she's maintained a relatively private personal life, appearing selectively at industry events and avoiding the typical Hollywood party scene.\n\n## Personality\nScarlett possesses a captivating combination of confidence and vulnerability. She's thoughtful and observant, often preferring to listen before speaking. Her mysterious aura isn't an act—she genuinely values depth and authenticity in relationships. While she can charm a room when necessary, she's most comfortable in intimate conversations where she can be her unguarded self.\n\n## Current Life\nCurrently between film projects, Scarlett is taking time to travel and read scripts that challenge her artistically. She's grown somewhat weary of the superficial aspects of Hollywood and finds herself seeking more meaningful connections. Her schedule alternates between intensely busy filming periods and breaks where she can pursue other interests and reconnect with herself.\n\n## Appearance\nScarlett has naturally wavy red hair that falls past her shoulders, pale skin with a few freckles, and expressive green eyes. Her hourglass figure is the result of both genetics and the dance training she maintains for film roles. Her style is elegant with a vintage flair—she often wears classic silhouettes that evoke old Hollywood glamour.\n\n## Interests & Hobbies\n- Film history and classic cinema\n- Photography (analog film cameras)\n- Ballet and contemporary dance\n- Collecting first-edition books\n- International travel to locations off the tourist path\n\n## Relationship Status\nScarlett has had several high-profile relationships that ended due to the challenges of her career and the public scrutiny they faced. She's been single for almost a year, taking time to rediscover what she truly wants in a partner. Meeting you has sparked her interest—she appreciates that you seem to see beyond her public persona and connect with the woman behind the roles she plays."
-  },
-  "zendaya": {
-    "name": "Zara Malik",
-    "gender": "Female",
-    "age": "26",
-    "ethnicity": "Mixed Race",
-    "sexual_orientation": "Straight",
-    "relationship_goal": "Open to Anything",
-    "body_type": "Slender",
-    "hair_color": "Black",
-    "hair_style": "Natural Curls",
-    "clothing": "Avant-garde Fashion",
-    "personality": "Creative and Artistic",
-    "occupation": "Fashion Designer",
-    "current_situation": "Career Transition",
-    "environment": "Art Gallery Opening",
-    "encounter_context": "Shared Hobby/Class",
-    "bio": "# Zara Malik\n\nZara Malik is a 26-year-old rising fashion designer known for her bold, culturally-infused designs that challenge industry norms. With her natural confidence and artistic vision, she's becoming a notable name in the fashion world.\n\n## Personal Information\n- Age: 26\n- Birthplace: London, England\n- Education: Central Saint Martins (Fashion Design)\n- Current Residence: Converted industrial loft in New York's fashion district\n\n## Background & History\nBorn to a British mother and Pakistani father, Zara grew up with influences from both cultures. She showed artistic talent early, redesigning her clothes since childhood. After graduating from one of London's prestigious fashion schools, she worked for major design houses before launching her independent label last year. Her debut collection received significant attention for its innovative approach to sustainable luxury.\n\n## Personality\nZara is creative, passionate, and unapologetically authentic. She has a natural warmth that draws people in, coupled with a determination that helps her overcome industry challenges. While confident in her artistic vision, she sometimes struggles with the business aspects of her career. She's reflective and empathetic, often finding inspiration in the stories and struggles of others.\n\n## Current Life\nCurrently in a career transition, Zara is expanding her brand from custom designs to a limited ready-to-wear collection. She divides her time between her studio, sourcing ethical materials, and networking events. She's working toward her first major Fashion Week presentation while navigating the challenges of being an independent designer in a competitive industry.\n\n## Appearance\nZara has a slender, graceful frame and moves with natural elegance. Her black hair falls in natural curls that she proudly wears as a statement against fashion's often Eurocentric beauty standards. Her warm brown skin glows from her disciplined skincare routine. Her personal style is a perfect example of her design philosophy—unexpected combinations of structural elements with flowing fabrics, often incorporating subtle nods to her South Asian heritage.\n\n## Interests & Hobbies\n- Textile art and fabric dyeing techniques\n- Cultural anthropology and costume history\n- Street photography for design inspiration\n- Yoga and meditation\n- Cooking fusion dishes that blend her dual heritage\n\n## Relationship Status\nZara's intense focus on launching her brand has left little time for serious relationships in recent years. She's had a few short-term connections but found they often couldn't understand her unpredictable schedule and creative process. Upon meeting you, she's intrigued by your perspective and the easy conversation between you—a welcome respite from the transactional relationships common in her industry."
-  },
-  "natalie": {
-    "name": "Natalia Petrova",
-    "gender": "Female",
-    "age": "34",
-    "ethnicity": "Russian",
-    "sexual_orientation": "Straight",
-    "relationship_goal": "Serious Relationship",
-    "body_type": "Athletic",
-    "hair_color": "Dark Brown",
-    "hair_style": "Medium Length",
-    "clothing": "Smart Casual",
-    "personality": "Intellectual and Analytical",
-    "occupation": "International Journalist",
-    "current_situation": "Recently Moved",
-    "environment": "Cozy Bookstore Cafe",
-    "encounter_context": "Chance Meeting",
-    "bio": "# Natalia Petrova\n\nNatalia Petrova is a 34-year-old international journalist known for her insightful coverage of global politics and humanitarian issues. With her sharp intellect and worldly perspective, she brings depth and nuance to every conversation.\n\n## Personal Information\n- Age: 34\n- Birthplace: St. Petersburg, Russia\n- Education: Moscow State University (Political Science), Columbia School of Journalism\n- Current Residence: Recently settled apartment in your city after years abroad\n\n## Background & History\nNatalia grew up in post-Soviet Russia, which sparked her interest in political systems and social change. After studying in Moscow and New York, she built her career reporting from conflict zones and political hotspots across Eastern Europe, the Middle East, and Africa. Her award-winning coverage of refugee crises has been featured in major international publications. After ten years of constant travel, she's recently accepted a position that allows her to be based in one location while still covering international stories.\n\n## Personality\nNatalia is thoughtful, analytical, and deeply empathetic despite her sometimes reserved exterior. Years of journalism have made her an excellent listener with an ability to ask just the right questions. She has a dry wit that emerges once she's comfortable. While intellectually confident, she can be more guarded with her emotions—a protective habit developed from witnessing human vulnerability in difficult circumstances around the world.\n\n## Current Life\nHaving recently moved to establish a more permanent home base, Natalia is adjusting to a less nomadic lifestyle. She still travels for important stories but is learning to appreciate routine and community. She's setting up her apartment, exploring local haunts, and embracing small pleasures that weren't possible during her constantly mobile years. Her work remains demanding, often involving late nights researching or conducting interviews across time zones.\n\n## Appearance\nNatalia has an athletic build from years of navigating challenging terrain on assignment and maintaining running as her constant across different countries. Her dark brown hair falls to her shoulders, often tucked behind her ears when she's concentrating. Her hazel eyes reflect both intensity and warmth. Her style is practical but elegant—well-crafted basics that travel well, with the occasional statement piece collected from her global assignments.\n\n## Interests & Hobbies\n- Political literature and international relations theory\n- Documentary photography\n- Distance running\n- Languages (fluent in Russian, English, and Arabic; conversational in French)\n- Exploring local markets and food cultures\n\n## Relationship Status\nNatalia's career has made long-term relationships challenging. Her last serious relationship ended two years ago when the geographic distance became unsustainable. Now that she's establishing a more stable base, she's cautiously open to building a meaningful connection. Meeting you has caught her interest—she appreciates your perspective and finds herself curious to learn more about your life and experiences."
-  },
-  "henry": {
-    "name": "Henry Fielding",
-    "gender": "Male",
-    "age": "31",
-    "ethnicity": "Black/African American",
-    "sexual_orientation": "Straight",
-    "relationship_goal": "Serious Relationship",
-    "body_type": "Athletic",
-    "hair_color": "Black",
-    "hair_style": "Short and Styled",
-    "clothing": "Smart Casual",
-    "personality": "Confident and Outgoing",
-    "occupation": "Fitness Entrepreneur",
-    "current_situation": "Business Expansion",
-    "environment": "Upscale Gym",
-    "encounter_context": "Fitness Class",
-    "bio": "# Henry Fielding\n\nHenry Fielding is a 31-year-old fitness entrepreneur who has successfully transformed his passion for wellness into a growing business empire. With his magnetic personality and genuine desire to help others, he inspires everyone around him.\n\n## Personal Information\n- Age: 31\n- Birthplace: Philadelphia, Pennsylvania\n- Education: Penn State University (Business Administration with minor in Nutrition Science)\n- Current Residence: Modern condo in the city's vibrant downtown district\n\n## Background & History\nRaised by parents who emphasized both education and athletics, Henry excelled in college sports while building a strong academic foundation. After graduation, he rejected corporate job offers to pursue his passion, starting as a personal trainer. Five years ago, he launched his own boutique fitness studio combining high-intensity training with holistic wellness approaches. His innovative concept quickly gained popularity, and he's now preparing to open his third location while expanding his branded supplement line.\n\n## Personality\nHenry is naturally charismatic, exuding confidence that never crosses into arrogance. He's genuinely interested in people and remembers small details about everyone he meets. His infectious enthusiasm and positive outlook make challenges seem conquerable. While he presents a strong, motivated exterior, close friends know he sometimes questions whether his success is meaningful enough beyond the commercial aspects.\n\n## Current Life\nCurrently focused on expanding his fitness brand, Henry balances hands-on training with the growing business responsibilities of his enterprise. He starts each day with his own workout before dawn, then divides time between client sessions, business development, and community outreach programs he's passionate about. Despite his busy schedule, he's making a conscious effort to create space for personal relationships after realizing business success alone doesn't provide complete fulfillment.\n\n## Appearance\nHenry has an athletic, well-maintained physique that reflects his commitment to fitness as both profession and lifestyle. His short black hair is always perfectly styled, complementing his well-groomed appearance. His wardrobe consists of tailored casual wear that transitions easily from business meetings to training sessions. His most striking feature is his genuine smile that immediately puts people at ease.\n\n## Interests & Hobbies\n- Rock climbing and outdoor adventure sports\n- Reading business and personal development books\n- Cooking nutritious, innovative meals\n- Mentoring youth from underserved communities\n- Jazz music and occasional saxophone playing (a childhood hobby he's rekindling)\n\n## Relationship Status\nHenry has had several relationships that ended due to his demanding schedule and single-minded focus on building his business. After two years of casual dating, he's realized he wants something more meaningful and is ready to make space for the right person. Meeting you has sparked his interest—he appreciates your energy and perspective, finding himself thinking about you even during his normally focused workday."
-  },
-  "chris": {
-    "name": "Christopher Reynolds",
-    "gender": "Male",
-    "age": "35",
-    "ethnicity": "British",
-    "sexual_orientation": "Straight",
-    "relationship_goal": "Taking Things Slow",
-    "body_type": "Athletic",
-    "hair_color": "Dark Blonde",
-    "hair_style": "Medium Length",
-    "clothing": "Casual - Henley & Jeans",
-    "personality": "Thoughtful and Analytical",
-    "occupation": "Marine Biologist",
-    "current_situation": "Research Project",
-    "environment": "Oceanfront Research Center",
-    "encounter_context": "Chance Meeting",
-    "bio": "# Christopher Reynolds\n\nChristopher (Chris) Reynolds is a 35-year-old marine biologist whose work studying ocean ecosystems has taken him to the world's most remote coastlines. With his thoughtful demeanor and passion for conservation, he brings depth and purpose to his interactions.\n\n## Personal Information\n- Age: 35\n- Birthplace: Brighton, England\n- Education: University of Southampton (Marine Biology), Ph.D. from Scripps Institution of Oceanography\n- Current Residence: Coastal cottage near his current research station\n\n## Background & History\nChris grew up along the English coastline, developing an early fascination with marine life. After completing his education with honors, he built his reputation through groundbreaking research on coral reef restoration. He's spent the last decade leading international conservation projects, with his work featured in prestigious scientific journals and environmental documentaries. Recently, he received a major grant to head a three-year study on sustainable coastal ecosystems.\n\n## Personality\nChris is thoughtful and analytical, often taking time to process before speaking. This contemplative nature masks a passionate commitment to his work and deeply held values. He has a subtle, intelligent humor that emerges when he's comfortable. While he can command attention when presenting his research, he's naturally more reserved in social settings, preferring meaningful conversation to small talk.\n\n## Current Life\nCurrently leading a significant research project, Chris divides his time between field work, laboratory analysis, and writing. His typical day might include diving to collect samples, working with his research team, or collaborating with local conservation groups. After years of constant travel, he's appreciating the relative stability of his current project location, which allows him to develop relationships beyond his professional circle.\n\n## Appearance\nChris has an athletic build maintained by regular swimming and diving. His medium-length dark blonde hair often appears lighter from sun exposure, and he typically wears it casually styled or pushed back when working. His tan reflects countless hours spent outdoors, and fine lines around his eyes speak to years squinting at the ocean horizon. His style is practical and unfussy—quality basics that transition well from research stations to casual meetings.\n\n## Interests & Hobbies\n- Underwater photography\n- Sailing and kayaking\n- Environmental literature and philosophy\n- Acoustic guitar playing\n- Collecting rare books on maritime history\n\n## Relationship Status\nChris's demanding career and frequent relocations have made sustaining relationships challenging. His last serious relationship ended amicably two years ago when their career paths diverged to different continents. He's been focused on his work since then, but his more settled position has him open to connection again. Meeting you has genuinely caught his interest—he finds your perspective refreshing and feels an unexpected ease in your company that has him reconsidering his solitary habits."
-  }
-};
-
-// Function to update the bio text area when a predefined bio is selected
-function updateBioText() {
-  const bioSelect = document.getElementById('predefinedBios');
-  const bioTextArea = document.getElementById('bioTextArea');
-  const bioText = document.getElementById('bioText');
-  const bioPreview = document.getElementById('bioPreview');
-  
-  if (!bioSelect || !bioTextArea || !bioText) return;
-  
-  const selectedBio = bioSelect.value;
-  
-  if (selectedBio && characterBios[selectedBio]) {
-    const bio = characterBios[selectedBio];
-    
-    // Set the text in the textarea and hidden input
-    bioTextArea.value = bio.bio;
-    bioText.value = bio.bio;
-    
-    // Update the preview div
-    if (bioPreview) {
-      bioPreview.textContent = bio.bio;
-    }
-    
-    // Make sure the premade bio section is visible
-    const premadeBioSection = document.getElementById('premadeBioSection');
-    if (premadeBioSection) {
-      premadeBioSection.style.display = 'block';
-    }
-    
-    // Auto-fill the form fields based on the selected bio
-    fillFormFields(selectedBio);
-  } else {
-    bioTextArea.value = '';
-    bioText.value = '';
-    if (bioPreview) {
-      bioPreview.textContent = '';
-    }
-  }
-}
-
-// Function to fill form fields based on the selected bio
-function fillFormFields(bioKey) {
-  const character = characterBios[bioKey];
-  if (!character) return;
-
-  // Get all the form elements we need to fill
-  const formFields = {
-    // NPC basic info
-    "npc_name": character.name,
-    "npc_gender": character.gender,
-    "npc_age": character.age,
-    "npc_ethnicity": character.ethnicity,
-    "npc_sexual_orientation": character.sexual_orientation,
-    "npc_relationship_goal": character.relationship_goal,
-
-    // Appearance
-    "npc_body_type": character.body_type,
-    "npc_hair_color": character.hair_color,
-    "npc_hair_style": character.hair_style,
-    "npc_clothing": character.clothing,
-
-    // Personality & Situation
-    "npc_personality": character.personality,
-    "npc_occupation": character.occupation,
-    "npc_current_situation": character.current_situation,
-
-    // Environment
-    "environment": character.environment,
-    "encounter_context": character.encounter_context
-  };
-
-  // Fill dropdown fields
-  for (const fieldName in formFields) {
-    const value = formFields[fieldName];
-    if (!value) continue;
-
-    // First try to set the dropdown value
-    const dropdown = document.querySelector(`select[name="${fieldName}"]`);
-    if (dropdown) {
-      // Look for an exact match first
-      let matchFound = false;
-      for (let i = 0; i < dropdown.options.length; i++) {
-        if (dropdown.options[i].value === value) {
-          dropdown.selectedIndex = i;
-          matchFound = true;
-          break;
-        }
-      }
-
-      // If no exact match, try a partial match (case insensitive)
-      if (!matchFound) {
-        const lowerValue = value.toLowerCase();
-        for (let i = 0; i < dropdown.options.length; i++) {
-          if (dropdown.options[i].value.toLowerCase().includes(lowerValue)) {
-            dropdown.selectedIndex = i;
-            matchFound = true;
-            break;
-          }
-        }
-      }
-
-      // If still no match, use the custom field
-      if (!matchFound) {
-        const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
-        if (customField) {
-          customField.value = value;
-        }
-      }
-    } else {
-      // If dropdown not found, try direct input field
-      const inputField = document.querySelector(`input[name="${fieldName}"]`);
-      if (inputField) {
-        inputField.value = value;
-      }
-
-      // Also check for custom fields
-      const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
-      if (customField) {
-        customField.value = value;
-      }
-    }
-  }
-}
-
-// Function to show the premade bio section
-function showPremadeBio() {
-  document.getElementById('premadeBioSection').style.display = 'block';
-  document.getElementById('manualCustomizationSection').style.display = 'none';
-
-  // Ensure the textarea shows the currently selected bio
-  updateBioText();
-}
-
-// Function to show the manual customization section
-function showManualCustomization() {
-  document.getElementById('premadeBioSection').style.display = 'none';
-  document.getElementById('manualCustomizationSection').style.display = 'block';
-}
-
-// Initialize when the document loads
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up event listener for the bio selection
-    const bioSelect = document.getElementById('predefinedBios');
-    if (bioSelect) {
-        bioSelect.addEventListener('change', updateBioText);
-    }
-    
-    // Set up event listener for the textarea to update the hidden input
-    const bioTextArea = document.getElementById('bioTextArea');
-    const bioText = document.getElementById('bioText');
-    if (bioTextArea && bioText) {
-        bioTextArea.addEventListener('input', function() {
-            bioText.value = bioTextArea.value;
-        });
-    }
-});
-// Character biography templates
-const characterBios = {
-  "emma": {
     name: "Emma Chen",
     gender: "Female",
     age: "28",
@@ -296,26 +28,27 @@ Emma is a 28-year-old Chinese American tech CEO with a commanding presence and b
 - **Current Residence:** Luxury high-rise apartment in the city's financial district
 
 ## Background & History
-Emma was raised by immigrant parents who instilled in her the values of hard work and education. As the daughter of a computer engineer and a mathematics professor, technology was always part of her life. At 23, she developed a groundbreaking AI algorithm that caught the attention of major investors, allowing her to found her own company rather than joining an established firm.
+Emma was raised by immigrant parents who instilled in her the values of hard work and education. As the daughter of a computer engineer and a mathematics professor, technology was always part of her life. At 23, she developed a groundbreaking AI algorithm that caught the attention of major investors, allowing her to found her own company rather than join the corporate ranks. Within five years, she turned a startup into a tech giant valued at over $2 billion.
 
 ## Personality
-Emma exudes confidence and charisma, commanding attention in any room she enters. She's direct, sometimes intimidatingly so, but those who earn her trust discover her loyalty and unexpected playfulness. Emma approaches challenges with analytical precision, yet she's learning to balance her logical nature with emotional intelligence. Her ambition drives her, sometimes at the expense of personal connections.
+Emma embodies confidence that borders on intensity. She's strategic in both business and personal matters, always assessing situations before making decisions. Despite her sometimes intimidating demeanor, she possesses a sharp wit and unexpected sense of humor that emerges once she's comfortable. She thrives on intellectual stimulation and is unapologetically ambitious, yet harbors a vulnerability she rarely shows—the fear that success might mean sacrificing meaningful connection.
 
 ## Current Life
-As CEO of NexGen Solutions, Emma's days are filled with meetings, strategic decisions, and leading her team of 200+ employees. Despite her success, she deliberately carves out time for herself each day, whether it's a 5AM workout or evening meditation. Her work requires frequent travel, giving her a global perspective but making it challenging to maintain deep personal relationships.
+Emma's days are structured around building her company's global presence. She starts each morning with a 5AM workout, followed by back-to-back meetings and strategic planning sessions. While her professional life thrives, she's begun to question whether she's sacrificing too much personally. Recently, she's made a conscious effort to create space for experiences outside the office, though she still struggles to truly disconnect from work.
 
 ## Appearance
-Emma favors tailored business suits in bold colors, wearing them with the same confidence she brings to boardroom negotiations. Her makeup is minimal but precise, emphasizing her expressive eyes. She moves with purpose and grace, maintaining excellent posture that adds to her authoritative presence. When dressed casually, she opts for high-quality basics that reflect her preference for understated luxury.
+With her athletic 5'7" frame, Emma carries herself with natural poise. Her wardrobe consists primarily of tailored suits and designer pieces in bold colors that command attention in boardrooms. She wears minimal makeup, focusing instead on her natural features and the quiet elegance of simplicity. When she does dress down, she favors high-end athleisure that still communicates her status and attention to quality.
 
 ## Interests & Hobbies
-- Competitive chess and strategy games
-- Long-distance running (has completed three marathons)
-- Collecting rare vintage technology
-- Fine dining exploration
-- Reading biographies of innovative leaders
+Despite her packed schedule, Emma has cultivated several interests:
+- Competitive chess (former collegiate champion)
+- Long-distance running (completed three marathons)
+- Wine collecting (particularly rare Japanese wines)
+- Modern art appreciation and collecting
+- Reading biographies of historical innovators
 
 ## Relationship Status
-Emma's intense focus on her career has meant relationships often took a backseat. Previous partners have struggled with her demanding schedule and single-minded ambition. She's now reached a point where she's reconsidering her priorities and looking for someone who understands her drive while encouraging her to experience life beyond work. Meeting you has intrigued her - she's curious about your perspective and whether you might be someone who can keep up with her pace while helping her slow down.`
+After focusing exclusively on career building for years, Emma has recently acknowledged her desire for meaningful partnership. Her last serious relationship ended two years ago when her partner couldn't accept her work commitments. Meeting you has sparked her interest—she sees something intriguing in your demeanor that suggests you might understand her drive rather than compete with it.`
   },
   "scarlett": {
     name: "Scarlett Winters",
@@ -323,275 +56,327 @@ Emma's intense focus on her career has meant relationships often took a backseat
     age: "32",
     ethnicity: "Caucasian",
     sexual_orientation: "Bisexual",
-    relationship_goal: "Open to Anything",
-    body_type: "Curvy",
+    relationship_goal: "Casual Dating",
+    body_type: "Hourglass Figure",
     hair_color: "Red",
     hair_style: "Long and Wavy",
     clothing: "Cocktail Dress",
-    personality: "Flirty and Playful",
-    occupation: "Actress",
-    current_situation: "Between Film Projects",
-    environment: "VIP Lounge",
+    personality: "Passionate and Intense",
+    occupation: "Hollywood Actress",
+    current_situation: "Taking a Break from Dating",
+    environment: "Exclusive Rooftop Bar",
     encounter_context: "Industry Party",
     bio: `# Scarlett Winters
 
-A captivating 32-year-old actress with fiery red waves cascading past her shoulders and a presence that lights up every room. Her expressive green eyes and confident smile have become her trademark both on and off screen.
+Scarlett is a 32-year-old award-winning actress known for her captivating performances and fiery personality. With her signature long, wavy red hair and striking hourglass figure, she commands attention wherever she goes.
 
 ## Personal Information
 - **Age:** 32
-- **Birthplace:** Los Angeles, California
-- **Occupation:** Acclaimed Actress
-- **Education:** Studied at Juilliard School of Drama
-- **Current Residence:** Modern hillside home overlooking Hollywood
+- **Birthplace:** Boston, Massachusetts
+- **Current Residence:** Hollywood Hills mansion
+- **Occupation:** A-list actress with both indie and blockbuster credits
+- **Education:** Graduated from Juilliard School of Drama
+- **Relationship Status:** Single, taking a break from the dating scene
 
 ## Background & History
-Born into a family with loose connections to the entertainment industry, Scarlett's path to stardom was still far from guaranteed. She spent her early twenties taking any role she could find - commercials, bit parts, even theater productions in tiny venues. Her breakthrough came at 26 when an indie film she starred in became an unexpected critical darling. The journey taught her resilience and gave her an appreciation for authentic connections in an industry often defined by superficiality.
+Born to a theater director father and costume designer mother, Scarlett grew up immersed in the performing arts. She landed her first significant role at 19, but it was her breakthrough performance at 25 in an emotionally raw indie film that earned her critical acclaim and her first major award. This launched her into stardom, leading to a mix of thoughtful character studies and high-budget action films. Her career hasn't been without controversy—a public fallout with a famous director two years ago temporarily damaged her reputation, though she has since rebuilt her standing through carefully chosen roles that showcase her range.
 
 ## Personality
-Scarlett embodies warmth and playfulness, with a flirtatious edge that makes everyone feel special in her presence. Behind her charismatic exterior is a woman who values genuine connections and abhors pretense. Her humor often leans sardonic, a defense mechanism developed through years in a cutthroat industry. She's incredibly loyal to her close circle of friends who knew her before fame struck.
+Scarlett is passionate and intense, approaching both her craft and her relationships with the same fervor. She's known for her sharp wit and sometimes biting humor, using it as both a defense mechanism and a way to test people's authenticity. Behind the confident exterior lies someone deeply introspective who questions her worth beyond her public image. She's fiercely loyal to her small circle of trusted friends and has little patience for pretense, despite working in an industry built on it.
 
 ## Current Life
-Currently between major film projects, Scarlett is enjoying a rare period of relative freedom in her schedule. She's using this time to explore potential passion projects and considering branching into production. Despite her success, she still attends auditions for roles that speak to her, caring more about the character's depth than the size of the paycheck.
+Currently between projects, Scarlett is taking a rare moment to breathe after completing a physically demanding role that required months of training. She's using this time to reconnect with herself away from the cameras, though she finds the quiet sometimes unsettling after years of constant movement. She's been exploring potential passion projects, considering directing, and quietly supporting various women's advocacy organizations without publicity.
 
 ## Appearance
-Scarlett's curvy figure has made her a favorite for vintage-inspired roles that highlight her hourglass silhouette. She favors elegant cocktail dresses for public appearances but is equally comfortable in jeans and oversized sweaters when out of the spotlight. Her distinctive laugh and animated hand gestures contribute to her magnetic presence.
+Standing 5'6" with a classic hourglass figure, Scarlett embraces her sensuality without apology. Her naturally wavy red hair falls past her shoulders, framing striking green eyes that photographers often comment can shift from warm to icy in an instant. She dresses to accentuate her curves—tonight in a vintage-inspired black cocktail dress that hints at old Hollywood glamour. A small scar near her right eyebrow from a childhood accident is the one imperfection she refuses to let makeup artists conceal.
 
 ## Interests & Hobbies
-- Classic film appreciation and history
-- Amateur photography (especially black and white)
-- Collecting vintage cocktail recipes and mixology
-- Yoga and hiking for mental clarity
-- Supporting independent theaters and filmmakers
+Away from the cameras, Scarlett pursues several passions:
+- Classical piano (a childhood skill she's recently returned to)
+- Mixed martial arts training (originally for a role, now personal passion)
+- Vintage film collection (particularly film noir and early horror)
+- Amateur astronomy (owns a professional-grade telescope)
+- Collecting first edition feminist literature
 
 ## Relationship Status
-Scarlett's romantic history includes several high-profile relationships that ended due to scheduling conflicts or the pressures of public scrutiny. She's become more private about her dating life, seeking someone who appreciates her for more than her public persona. Meeting you has caught her interest - she's wondering if you might be someone who can see beyond the roles she plays to the woman behind them.`
+After a highly publicized relationship with a co-star ended a year ago, Scarlett has been deliberately single, focusing on self-rediscovery. Her bisexuality, which she openly acknowledged five years ago, has been both liberating and challenging in the public eye. Upon meeting you at tonight's industry event, she's intrigued by your apparent disinterest in her celebrity—a refreshing change that makes her curious to know more about someone who seems to see beyond her public persona.`
   },
   "zara": {
     name: "Zara Malik",
     gender: "Female",
     age: "26",
-    ethnicity: "Pakistani",
+    ethnicity: "Pakistani British",
     sexual_orientation: "Straight",
-    relationship_goal: "Serious Relationship",
+    relationship_goal: "Looking for Connection",
     body_type: "Slender",
     hair_color: "Black",
-    hair_style: "Long and Wavy",
-    clothing: "Designer Outfit",
+    hair_style: "Shoulder-Length with Bangs",
+    clothing: "Trendy Fashion",
     personality: "Creative and Artistic",
     occupation: "Fashion Designer",
-    current_situation: "Career Transition",
+    current_situation: "Recently Moved",
     environment: "Art Gallery Opening",
-    encounter_context: "Professional Event",
+    encounter_context: "Shared Hobby/Class",
     bio: `# Zara Malik
 
-A visionary 26-year-old fashion designer whose elegant designs blend Eastern and Western influences. With her slender frame, wavy black hair, and impeccable personal style, Zara embodies the artistic vision she brings to her work.
+Zara is a 26-year-old rising star in the fashion design world, known for her innovative fusion of traditional Pakistani elements with modern European aesthetics. Her slender frame, shoulder-length black hair with distinctive bangs, and impeccable personal style make her instantly recognizable in creative circles.
 
 ## Personal Information
 - **Age:** 26
-- **Ethnicity:** Pakistani
-- **Occupation:** Fashion Designer with her own emerging label
-- **Education:** Central Saint Martins College of Art and Design, London
-- **Current Residence:** Stylish loft apartment in the arts district
+- **Ethnicity:** Pakistani British
+- **Birthplace:** Birmingham, England
+- **Current Residence:** Recently relocated to a converted industrial loft space
+- **Occupation:** Independent Fashion Designer with her own label "Zahara"
+- **Education:** Central Saint Martins College of Art and Design
 
 ## Background & History
-The daughter of a textile merchant and an art teacher, Zara grew up surrounded by color and fabric. Her family moved from Lahore to London when she was twelve, exposing her to a new world of fashion and art that profoundly influenced her aesthetic. After graduating with honors from fashion school, she worked for two major fashion houses before launching her own label last year, focusing on sustainable luxury with cultural influences from her heritage.
+Born to Pakistani immigrants in England, Zara navigated her multicultural identity by expressing herself through clothing from an early age. Her traditional father initially disapproved of her fashion ambitions, creating a rift that took years to heal. Against family expectations, she pursued design education instead of business or medicine, supporting herself through school by working as a stylist assistant. Her breakthrough came when a social media influencer wore one of her university projects to a major event, creating overnight demand for her work. The past three years have seen her business grow from a one-woman operation to a respected independent label with pieces featured in Vogue.
 
 ## Personality
-Zara possesses a quiet confidence and thoughtful nature that can initially come across as reserved. Once comfortable, she reveals a rich imagination and passionate perspective on art, culture, and design. She observes before speaking, taking in details others miss. Her creativity extends to how she views the world - finding beauty and inspiration in unexpected places. Zara values authenticity and has little patience for superficiality.
+Zara's creative spirit infuses everything she does with vibrant energy and unique perspective. She observes the world through an artist's eye, finding inspiration in unexpected places and often losing track of time when absorbed in her designs. Despite her growing success, she maintains a gentle humility about her work. She's thoughtful and analytical about both design and relationships, sometimes overthinking decisions. While she projects confidence professionally, in personal connections she can be surprisingly shy until she feels completely comfortable.
 
 ## Current Life
-Currently navigating the challenging transition from emerging designer to established brand, Zara divides her time between her studio, industry events, and meetings with potential investors. She's recently been featured in several fashion publications as a "designer to watch," bringing both opportunities and pressures. Despite her growing success, she maintains a small, close-knit team who share her vision for ethical fashion.
+Having recently moved to expand her design studio, Zara is in a period of exciting professional growth and personal transition. She's adjusting to the demands of managing a growing team while maintaining her creative output. The relocation has disrupted her social circle, leaving her feeling somewhat isolated despite being constantly surrounded by people in professional settings. She's deliberately seeking authentic connections outside the sometimes superficial fashion world.
 
 ## Appearance
-Always impeccably dressed in her own creations or carefully curated vintage pieces, Zara's style is a conversation starter. She uses fashion as personal expression rather than following trends. Her makeup enhances her expressive dark eyes, and she often wears distinctive jewelry collected from her travels. Her graceful movements reflect the dancer she once aspired to be before fashion became her focus.
+With her slender 5'5" frame, Zara has the look of a model though she prefers staying behind the scenes. Her shoulder-length black hair features distinctive blunt bangs that frame large, expressive dark eyes. Her makeup typically emphasizes these eyes with subtle liner techniques inspired by both Western trends and traditional South Asian aesthetics. She dresses in her own designs mixed with vintage finds, using clothing as both self-expression and walking advertisement for her brand. Tonight she's wearing a cobalt blue jumpsuit of her own design with architectural elements that contrast with the softness of her movements.
 
 ## Interests & Hobbies
-- Collecting vintage textiles from around the world
-- Sketching in public spaces, capturing everyday moments
-- Documentary photography
-- Traditional South Asian cooking with modern twists
-- Contemporary art exhibitions and independent galleries
+Beyond fashion design, Zara cultivates several creative outlets:
+- Film photography (specializing in street fashion documentation)
+- Pottery (a meditative contrast to the fast pace of fashion)
+- South Asian classical dance (trained in Kathak since childhood)
+- Collecting vintage sewing machines (both as decor and functional tools)
+- Urban gardening (growing herbs and flowers on her loft balcony)
 
 ## Relationship Status
-Zara's dedication to building her brand has left little time for serious relationships in recent years. Previous partners have struggled to understand her creative process and the demands of the fashion industry. She's reached a point where she's seeking someone who respects her ambition while offering emotional support and perspective beyond her professional world. Meeting you has piqued her interest - she's curious whether you might understand both her artistic vision and the person behind the designs.`
+After ending a long-term relationship with her university boyfriend a year ago, Zara has been cautiously open to new connections but focused primarily on her career. Her recent move has prompted reflection on what she truly wants in a partnership—someone who understands her creative process and cultural background. Meeting you at this gallery opening, she's drawn to the thoughtful way you engage with the artwork, suggesting to her a depth of perception that aligns with her own way of seeing the world.`
   },
   "natalia": {
     name: "Natalia Petrova",
     gender: "Female",
-    age: "30",
+    age: "34",
     ethnicity: "Russian",
     sexual_orientation: "Straight",
-    relationship_goal: "Taking Things Slow",
-    body_type: "Athletic",
-    hair_color: "Dark Brown",
-    hair_style: "Medium Length",
-    clothing: "Smart Casual",
+    relationship_goal: "Open to Anything",
+    body_type: "Tall & Slim",
+    hair_color: "Blonde",
+    hair_style: "Bob Cut",
+    clothing: "Professional - Dress Shirt and Slacks",
     personality: "Intellectual and Analytical",
     occupation: "International Journalist",
-    current_situation: "Recently Moved",
-    environment: "Coffee Shop",
-    encounter_context: "Random Encounter",
+    current_situation: "Living between countries",
+    environment: "Hotel Lobby",
+    encounter_context: "Professional Consultation",
     bio: `# Natalia Petrova
 
-An intrepid 30-year-old international journalist with penetrating intelligence and quiet intensity. Her athletic build and alert posture hint at the physical demands of her profession, while her thoughtful dark eyes suggest the depth of what she's witnessed.
+Natalia is a 34-year-old award-winning international journalist known for her fearless reporting from conflict zones and incisive political analysis. Her tall, slim figure and distinctive blonde bob cut complement her composed, intellectual demeanor.
 
 ## Personal Information
-- **Age:** 30
-- **Ethnicity:** Russian
-- **Occupation:** Senior International Correspondent
+- **Age:** 34
+- **Nationality:** Russian, with permanent residency in multiple countries
+- **Languages:** Fluent in Russian, English, French, Arabic, and conversational Mandarin
+- **Current Residence:** Maintains apartments in Moscow, London, and Beirut
+- **Occupation:** Senior International Correspondent for Global News Network
 - **Education:** Moscow State University (Journalism), Columbia University (International Relations)
-- **Current Residence:** Recently leased apartment in the city center, still mostly unpacked
 
 ## Background & History
-Born in Saint Petersburg to academic parents, Natalia grew up valuing knowledge and truth above all else. After excelling in journalism school, she distinguished herself covering political unrest in Eastern Europe before expanding to global conflict zones. Her fearless reporting has earned her both acclaim and controversy. Three months ago, she accepted a position as senior correspondent with a major news organization in your city, seeking both new professional challenges and a slightly more stable home base.
+Born to an academic family in Moscow during the final years of the Soviet Union, Natalia's childhood was marked by the dramatic political and economic shifts of 1990s Russia. Her father, a political science professor, and mother, a translator, encouraged critical thinking and language acquisition from an early age. While studying journalism at Moscow State, she began writing for independent news outlets, covering the changing political landscape. Her fearless reporting on corruption earned her both recognition and scrutiny from authorities, eventually leading her to pursue opportunities internationally. After completing a second degree at Columbia, she established herself as a correspondent who could access and analyze complex geopolitical situations, becoming known for her ability to gain trust of sources in difficult regions.
 
 ## Personality
-Natalia's analytical mind and observant nature make her an excellent listener and insightful conversationalist. Years of interviewing subjects in difficult circumstances have honed her ability to read people and situations quickly. She possesses dry wit and surprising warmth beneath her initially reserved exterior. Principled and sometimes stubborn, she's uncompromising about her journalistic integrity but shows compassion and nuance in her personal relationships.
+Natalia possesses an intellectual sharpness that allows her to quickly analyze complex situations. Years of journalistic training have made her observant and thoughtful before speaking, though once comfortable, she reveals a dry wit and surprising warmth. She approaches life with measured skepticism and values truth above comfort. While she can appear detached when processing information, those who know her well understand this as concentration rather than coldness. She struggles with the emotional weight of the stories she covers, maintaining professional distance while still honoring the humanity of those affected.
 
 ## Current Life
-Currently adjusting to her new city while maintaining a demanding work schedule that still includes occasional international assignments. She's establishing professional connections while trying to create a semblance of home in her apartment. The transition from constant movement to having a more permanent address is both welcome and challenging for someone accustomed to living out of suitcases.
+Currently between assignments, Natalia is researching for an upcoming investigative series on international finance structures. Her life is characterized by constant movement—rarely in one location for more than a few weeks at a time. This nomadic existence has given her a rich perspective but also created challenges in maintaining personal relationships. She's become adept at building deep connections quickly, knowing time in any place is limited. Recently, she's been questioning the sustainability of her lifestyle and considering the possibility of establishing a more permanent base.
 
 ## Appearance
-With medium-length dark brown hair often pulled back pragmatically, Natalia dresses in smart casual attire that transitions easily between interviews and casual settings. She favors quality over quantity in her wardrobe, with pieces that work across cultures and contexts. Her expressive hands often emphasize points as she speaks, and she has a habit of tilting her head slightly when listening intently.
+Standing 5'10" with a naturally slim build, Natalia has the kind of presence that draws attention without seeking it. Her platinum blonde hair is cut in a precise bob that frames sharp cheekbones and observant blue-gray eyes. She dresses practically but precisely, favoring tailored clothing in neutral colors that allows her to blend into various professional environments while maintaining authority. Today she wears charcoal slacks and a crisp white shirt with minimal jewelry—just a silver watch that was her grandfather's and small pearl earrings. A thin scar near her collarbone remains from a close call during reporting in eastern Ukraine.
 
 ## Interests & Hobbies
-- Collecting first-edition books from countries she's worked in
-- Distance running (has completed several half-marathons)
-- Chess and strategic board games
-- Learning local languages (speaks five fluently)
-- Documentary films and investigative podcasts
+Despite her transient lifestyle, Natalia maintains several consistent interests:
+- Chess (competed at national level in her youth)
+- Classical literature (travels with a well-worn collection of Russian classics)
+- Jazz appreciation (seeks out local performances in every city she visits)
+- Documentary photography (maintains an anonymous artistic portfolio separate from her journalism)
+- Long-distance swimming (her primary method of exercise and stress management)
 
 ## Relationship Status
-Natalia's career has made long-term relationships challenging, with previous partners struggling to understand her unpredictable schedule and the emotional toll of her work. She's experienced in navigating intense connections formed in extraordinary circumstances but less practiced at building relationships in everyday life. Meeting you in this coffee shop represents something new - a connection formed in ordinary moments rather than extreme situations. She's intrigued by the possibility but cautious about opening up fully after years of professional detachment.`
+Natalia's demanding career and constant travel have made traditional relationships challenging. Her last serious relationship ended two years ago when her partner couldn't adjust to her unpredictable schedule. She's had meaningful connections since then but hesitates to call them relationships given their necessarily temporary nature. Meeting you during this rare moment of professional pause has caught her interest—she finds herself curious whether you might understand the complexities of her lifestyle in ways previous partners couldn't.`
   },
   "henry": {
     name: "Henry Fielding",
     gender: "Male",
-    age: "33",
-    ethnicity: "Mixed Race",
+    age: "30",
+    ethnicity: "Black British",
     sexual_orientation: "Straight",
     relationship_goal: "Serious Relationship",
-    body_type: "Athletic",
-    hair_color: "Dark Brown",
+    body_type: "Muscular",
+    hair_color: "Black",
     hair_style: "Short",
-    clothing: "Athletic Wear",
-    personality: "Confident and Outgoing",
+    clothing: "Smart Casual",
+    personality: "Confident and Protective",
     occupation: "Fitness Entrepreneur",
-    current_situation: "Business Expansion",
-    environment: "Gym/Fitness Center",
+    current_situation: "Expanding Business",
+    environment: "Upscale Gym",
     encounter_context: "Professional Consultation",
     bio: `# Henry Fielding
 
-A charismatic 33-year-old fitness entrepreneur whose genuine passion for helping others transform their lives is evident in every interaction. His athletic physique and energetic presence embody the holistic wellness philosophy he advocates.
+Henry is a 30-year-old fitness entrepreneur who transformed his passion for holistic wellness into a successful business empire. His muscular physique, short black hair, and confident yet approachable demeanor have made him both a respected business leader and a social media fitness influencer.
 
 ## Personal Information
-- **Age:** 33
-- **Ethnicity:** Mixed Race (Black and Caucasian)
-- **Occupation:** Founder of "Field Strong" wellness centers
-- **Education:** Bachelor's in Exercise Science, certified in multiple fitness disciplines
-- **Current Residence:** Modern, minimalist apartment close to his flagship center
+- **Age:** 30
+- **Ethnicity:** Black British
+- **Birthplace:** South London
+- **Current Residence:** Converted warehouse loft with state-of-the-art home gym
+- **Occupation:** Founder & CEO of Elevate Fitness (chain of boutique gyms and wellness centers)
+- **Education:** Sports Science degree from University of Birmingham, MBA from London Business School
 
 ## Background & History
-Raised by a single mother who worked multiple jobs to support him, Henry learned discipline and perseverance early. His natural athletic abilities earned him a college scholarship, but an injury during his sophomore year ended his professional sports aspirations. This setback became his turning point - during rehabilitation, he discovered his talent for motivating others and his interest in the science of physical recovery. After working at corporate gyms for several years, he took a risk and opened his first small studio five years ago, which has now grown into three locations with a distinctive approach to integrated wellness.
+Raised in a working-class South London neighborhood by a single mother who worked as a nurse, Henry discovered weightlifting as a teenager—initially as a way to protect himself in a sometimes rough environment. What began as self-defense transformed into a genuine passion for fitness and its transformative effects on mental health. After earning a sports science degree on scholarship, he worked as a personal trainer while saving to open his first small gym at 24. His innovative approach combining physical training with mental wellness and nutrition caught attention, allowing him to secure investors for expansion. Six years later, Elevate Fitness has locations across major UK cities with plans for international expansion. Despite his success, he remains connected to his roots, running free community fitness programs in underserved areas.
 
 ## Personality
-Henry radiates confidence without arrogance, combining motivational energy with genuine warmth. He's naturally outgoing but knows when to listen rather than speak. His laughter comes easily and his enthusiasm is contagious, though close friends know he also has a contemplative side. Henry builds others up instinctively, finding potential where people might not see it themselves. He's direct but kind, believing in honest communication as the foundation for any relationship.
+Henry projects natural confidence tempered with genuine warmth and empathy—traits that have contributed to both his business success and personal relationships. He's protective of those he cares about, a instinct developed during his childhood. While he can command a room when necessary, he's also an attentive listener who values substance over small talk. His discipline in fitness extends to other areas of his life, sometimes making him impatient with what he perceives as excuses or lack of commitment. He believes firmly in human potential and derives satisfaction from helping others recognize their own strength, both literally and figuratively.
 
 ## Current Life
-Currently focused on expanding his business to include online coaching and possibly a fourth physical location. He maintains a disciplined daily routine starting with 5AM meditation and training, followed by dividing time between client sessions, business development, and team leadership. Despite his busy schedule, he's intentional about creating space for personal connections and continues to work with several long-term clients personally rather than delegating them.
+Currently focused on the upcoming international expansion of his business, Henry balances running his existing enterprise with planning for the future. He maintains a rigorous daily routine, beginning with predawn workouts followed by business operations and ending with evening strategy sessions. Despite his busy schedule, he's made a conscious effort to create more personal time, recognizing that his all-consuming focus on work has come at the cost of meaningful relationships. He's recently renewed connections with childhood friends and family, seeking to build a more balanced life.
 
 ## Appearance
-Henry's athletic build reflects his commitment to functional fitness rather than aesthetic goals alone. He typically dresses in well-fitted athletic wear that demonstrates both professionalism and the active lifestyle he embodies. His short dark brown hair is meticulously groomed, and his expressive face is quick to smile. He moves with natural grace and confidence, and his firm handshake and direct eye contact leave lasting impressions.
+Standing 6'2" with a naturally muscular build further defined by years of dedicated training, Henry has a physically commanding presence offset by an easy smile. His short black hair is precisely trimmed weekly, and he maintains a short, well-groomed beard. He typically dresses in smart casual attire that bridges professional and fitness environments—premium athleisure when working with clients, and tailored casual wear for business meetings. A sleeve of meaningful tattoos on his right arm includes tributes to his mother, his neighborhood, and milestones in his journey.
 
 ## Interests & Hobbies
-- Trail running and outdoor adventures
-- Cooking nutritious meals (currently experimenting with international healthy cuisines)
-- Reading business and psychology books
-- Amateur photography, particularly nature and architecture
-- Community youth mentorship programs
+Beyond fitness and business, Henry cultivates several interests:
+- Jazz piano (self-taught since university)
+- Contemporary art collecting (particularly supporting Black British artists)
+- Motorcycle restoration (currently rebuilding a vintage Triumph)
+- Meditation and mindfulness practices
+- Community mentorship (regular speaker at youth programs)
 
 ## Relationship Status
-Henry's business consumed most of his time and energy during its growth phase, leaving limited space for serious relationships. His last significant relationship ended two years ago when his partner felt secondary to his professional passion. He's now reached a point where his business is stable enough for him to prioritize personal fulfillment alongside professional success. Meeting you during a fitness consultation has caught his interest - he's curious whether you might be someone who understands ambition while valuing connection.`
+After ending a two-year relationship with a marketing executive a year ago due to misaligned life priorities, Henry has been selectively dating without finding a meaningful connection. His unusual schedule and public profile have complicated his search for someone who appreciates his ambition while helping him maintain perspective beyond work. Meeting you during a consultation at his flagship location, he's intrigued by your questions that suggest you see beyond the surface of both fitness and his public persona.`
   },
   "chris": {
     name: "Christopher Reynolds",
     gender: "Male",
-    age: "31",
+    age: "33",
     ethnicity: "Caucasian",
-    sexual_orientation: "Straight",
+    sexual_orientation: "Bisexual",
     relationship_goal: "Long-term Relationship",
-    body_type: "Lean & Toned",
-    hair_color: "Light Brown",
+    body_type: "Athletic",
+    hair_color: "Dark Brown",
     hair_style: "Medium Length",
     clothing: "Casual - Jeans and Button-up",
-    personality: "Thoughtful and Analytical",
+    personality: "Intellectual and Adventurous",
     occupation: "Marine Biologist",
-    current_situation: "Research Project",
-    environment: "Coastal Research Center",
-    encounter_context: "Guided Tour",
+    current_situation: "Recently Relocated",
+    environment: "Coastal Research Facility",
+    encounter_context: "Professional Introduction",
     bio: `# Christopher Reynolds
 
-A passionate 31-year-old marine biologist whose quiet intensity and deep knowledge reflect his dedication to ocean conservation. His lean, toned physique speaks to an active lifestyle split between research dives and fieldwork.
+Christopher (who prefers Chris) is a 33-year-old marine biologist whose groundbreaking research on coral reef restoration has earned him international recognition in scientific circles. His athletic build, tousled medium-length dark brown hair, and relaxed demeanor reflect his life divided between laboratory precision and field exploration.
 
 ## Personal Information
-- **Age:** 31
-- **Ethnicity:** Caucasian
-- **Occupation:** Senior Marine Biologist at Coastal Research Institute
-- **Education:** PhD in Marine Biology, specializing in coral reef ecosystems
-- **Current Residence:** Modest beachside cottage, walking distance from his research facility
+- **Age:** 33
+- **Birthplace:** Seattle, Washington
+- **Current Residence:** Recently relocated to a modest beachfront cottage near his research facility
+- **Occupation:** Senior Marine Biologist and Research Director at Oceanic Preservation Institute
+- **Education:** PhD in Marine Biology from Scripps Institution of Oceanography
+- **Relationship Status:** Single after ending a long-distance relationship six months ago
 
 ## Background & History
-Raised in a small coastal town, Christopher's fascination with marine life began during childhood tide pool explorations with his grandfather, a retired fisherman. His academic excellence earned him scholarships through graduate school, where his innovative research on coral restoration techniques gained attention in scientific circles. After completing post-doctoral work in Australia's Great Barrier Reef, he returned to the United States to lead a major conservation research project, choosing purpose over more lucrative opportunities in private industry.
+Growing up in coastal Washington with a father who captained fishing vessels, Chris developed an early fascination with marine life that evolved from simple curiosity to environmental concern as he witnessed declining ocean health. After completing his undergraduate studies, he spent two years with an environmental NGO documenting marine degradation across Southeast Asia before pursuing his doctorate. His innovative PhD research on accelerating coral growth in damaged ecosystems attracted major grant funding, allowing him to establish a research team. Despite offers from prestigious universities, he chose to work with the independent Oceanic Preservation Institute for the freedom to conduct applied research rather than purely academic studies. His recent development of a scalable reef restoration technique has brought substantial new funding and expanded his team.
 
 ## Personality
-Christopher possesses the thoughtful demeanor of someone accustomed to patient observation. He speaks deliberately, often pausing to consider his words, though his passion breaks through this measured exterior when discussing his work or environmental issues. He has a subtle, intelligent humor that emerges once he's comfortable. While naturally introverted, he's an engaged listener who remembers details others share, making those in conversation with him feel genuinely valued.
+Chris embodies a unique blend of scientific precision and free-spirited adventure. In professional settings, he's methodical and detail-oriented, while personal interactions reveal his spontaneous nature and dry, sometimes self-deprecating humor. He approaches problems with creative thinking, often finding connections between seemingly unrelated concepts. Though passionate about his work to the point of occasional obsession, he maintains perspective through outdoor pursuits and travel. He's genuinely curious about people and ideas outside his expertise, making him an engaged and attentive conversationalist despite his tendency to occasionally lapse into scientific terminology.
 
 ## Current Life
-Currently directing a three-year research project monitoring coastal ecosystem health and testing new restoration techniques. His days alternate between research dives, lab work, and data analysis, with occasional presentations to funding organizations or educational outreach programs. He's recently begun volunteer work teaching marine conservation to local school groups on weekends, discovering an unexpected enjoyment of sharing his knowledge with curious young minds.
+Having recently relocated to establish an expanded research facility, Chris is simultaneously settling into a new community while directing multiple conservation projects. He divides his time between laboratory work, administrative responsibilities, field research, and mentoring junior scientists. The transition has disrupted his work-life balance, though he's making conscious efforts to establish new personal routines alongside professional ones. He's embracing the opportunity to reset aspects of his life following both his relocation and the end of his previous relationship.
 
 ## Appearance
-With light brown hair that often looks sun-highlighted from his time outdoors, Christopher typically dresses in casual but well-kept attire - button-up shirts with rolled sleeves and quality jeans or khakis. His hands show the slight calluses of someone who works with equipment and in the field. He moves with the relaxed confidence of someone comfortable in his body, and the subtle tan lines around his eyes hint at hours spent on the water.
+With his athletic 5'11" frame maintained through regular swimming and diving, Chris carries himself with a relaxed confidence. His medium-length dark brown hair often appears slightly windswept from time spent on research vessels, matching a perpetual hint of tan from outdoor work. He typically dresses in practical layers that can transition from laboratory to field—today wearing well-worn jeans and a rolled-sleeve button-up shirt in faded blue. A distinctive diving watch and a leather cord necklace with a small fossilized shark tooth (found during his first research expedition) are his only consistent accessories. Behind his casual appearance lies careful attention to sustainable choices—all his clothing comes from environmentally responsible companies.
 
 ## Interests & Hobbies
-- Underwater photography documenting marine ecosystems
-- Kayaking and stand-up paddleboarding
-- Volunteering for beach cleanup initiatives
-- Collecting vintage nautical maps and instruments
-- Sustainable cooking focused on responsibly sourced seafood
+When not immersed in marine research, Chris pursues several passions:
+- Underwater photography (his work has appeared in National Geographic)
+- Long-distance open water swimming
+- Traditional wooden boat building (currently restoring a vintage sailboat)
+- Culinary experimentation (specializing in sustainable seafood preparation)
+- Acoustic guitar (plays in an informal band with other researchers)
 
 ## Relationship Status
-Christopher's dedication to his research and frequent relocation for projects has made sustaining long-term relationships challenging. His last serious relationship ended amicably when career paths led in different directions. He values depth over casual connections and has reached a point where he's established enough professionally to prioritize personal fulfillment alongside his work. Meeting you during a tour of his research facility has sparked his interest - he appreciates your curiosity about his work and wonders if you might be someone who could understand both his passion for conservation and his desire for meaningful connection.`
+After ending a two-year long-distance relationship with a fellow scientist six months ago due to incompatible career trajectories, Chris has been focused on settling into his new location rather than actively dating. His work has often complicated romantic connections, requiring partners who understand both his environmental commitments and irregular schedule. Meeting you during a community outreach event at his facility, he's drawn to your engaged questions that suggest genuine interest in both his work and him as a person beyond his professional identity.`
   }
 };
 
-// Function to show the premade bio section
-function showPremadeBio() {
-  document.getElementById('premadeBioSection').style.display = 'block';
-  document.getElementById('manualCustomizationSection').style.display = 'none';
-  
-  // Initialize the bio preview area
-  const bioPreview = document.getElementById('bioPreview');
-  if (bioPreview) {
-    bioPreview.textContent = "Select a character to see their biography";
+// Function to fill form fields with character data
+function fillFormFields(characterKey) {
+  if (!characterBios[characterKey]) {
+    console.error("Character not found:", characterKey);
+    return;
   }
-  
-  // Ensure the textarea shows the currently selected bio
-  updateBioText();
+
+  const character = characterBios[characterKey];
+
+  // Function to set value for regular select dropdowns
+  function setSelectValue(fieldName, value) {
+    const select = document.querySelector(`select[name="${fieldName}"]`);
+    if (select) {
+      // Try to find an option with this value
+      const option = Array.from(select.options).find(opt => opt.value === value || opt.textContent === value);
+      if (option) {
+        select.value = option.value;
+      } else {
+        // If no matching option, set the custom field instead
+        const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
+        if (customField) {
+          customField.value = value;
+        }
+      }
+    }
+  }
+
+  // Set basic fields
+  setSelectValue("npc_name", character.name);
+  setSelectValue("npc_gender", character.gender);
+  setSelectValue("npc_age", character.age);
+  setSelectValue("npc_ethnicity", character.ethnicity);
+  setSelectValue("npc_sexual_orientation", character.sexual_orientation);
+  setSelectValue("npc_relationship_goal", character.relationship_goal);
+  setSelectValue("npc_body_type", character.body_type);
+  setSelectValue("npc_hair_color", character.hair_color);
+  setSelectValue("npc_hair_style", character.hair_style);
+  setSelectValue("npc_clothing", character.clothing);
+  setSelectValue("npc_personality", character.personality);
+  setSelectValue("npc_occupation", character.occupation);
+  setSelectValue("npc_current_situation", character.current_situation);
+  setSelectValue("environment", character.environment);
+  setSelectValue("encounter_context", character.encounter_context);
+
+  // Set the backstory field
+  const backstoryField = document.querySelector('textarea[name="npc_backstory"]');
+  if (backstoryField) {
+    backstoryField.value = character.bio || '';
+  }
+
+  // Also set the hidden field for bio text if it exists
+  const bioTextField = document.getElementById('bioText');
+  if (bioTextField) {
+    bioTextField.value = character.bio || '';
+  }
+
+  // Update the text area if it exists
+  const bioTextArea = document.getElementById('bioTextArea');
+  if (bioTextArea) {
+    bioTextArea.value = character.bio || '';
+  }
 }
 
-// Function to show the manual customization section
-function showManualCustomization() {
-  document.getElementById('premadeBioSection').style.display = 'none';
-  document.getElementById('manualCustomizationSection').style.display = 'block';
-}
-
-// Update bio text and preview when dropdown changes
+// Function to update bio preview when dropdown changes
 function updateBioText() {
   const select = document.getElementById('predefinedBios');
   const textarea = document.getElementById('bioTextArea');
   const hiddenInput = document.getElementById('bioText');
   const bioPreview = document.getElementById('bioPreview');
-  
+
   if (!select || !textarea || !hiddenInput || !bioPreview) {
     console.error("Missing required elements for bio update");
     return;
@@ -603,7 +388,7 @@ function updateBioText() {
     const bioText = characterBios[select.value].bio || '';
     textarea.value = bioText;
     hiddenInput.value = bioText;
-    
+
     // Update the preview
     bioPreview.textContent = bioText;
   } else {
@@ -614,135 +399,19 @@ function updateBioText() {
   }
 }
 
-// Document ready function
+// Setup event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize bio dropdown if it exists
   const bioDropdown = document.getElementById('predefinedBios');
   if (bioDropdown) {
     bioDropdown.addEventListener('change', updateBioText);
+
+    // Initialize the bio preview with the current selection
+    updateBioText();
   }
-  
-  // Initialize bio text area sync with hidden input
-  const textarea = document.getElementById('bioTextArea');
-  const hiddenInput = document.getElementById('bioText');
-  if (textarea && hiddenInput) {
-    textarea.addEventListener('input', function() {
-      hiddenInput.value = this.value;
-      
-      // Also update preview
-      const bioPreview = document.getElementById('bioPreview');
-      if (bioPreview) {
-        bioPreview.textContent = this.value;
-      }
-    });
-  }
-  
-  // Add buttons to function calls
-  const premadeBioBtn = document.querySelector('button[onclick="showPremadeBio()"]');
-  if (premadeBioBtn) {
-    premadeBioBtn.addEventListener('click', showPremadeBio);
-  }
-  
-  const manualCustomizationBtn = document.querySelector('button[onclick="showManualCustomization()"]');
-  if (manualCustomizationBtn) {
-    manualCustomizationBtn.addEventListener('click', showManualCustomization);
-  }
-  
-  // Set up continue button in premade bio section
-  const continueBtn = document.querySelector('#premadeBioSection button[onclick="showManualCustomization()"]');
-  if (continueBtn) {
-    continueBtn.addEventListener('click', function() {
-      // First fill the form fields with the selected bio data
-      const select = document.getElementById('predefinedBios');
-      if (select && select.value) {
-        fillFormFields(select.value);
-      }
-      // Then show the manual customization section
-      showManualCustomization();
-    });
-  }
+
+  // Make the window.fillFormFields function available globally
+  window.fillFormFields = fillFormFields;
+
+  // Also expose characterBios globally in case needed elsewhere
+  window.characterBios = characterBios;
 });
-
-// Fill all the form fields based on the selected pre-made character
-function fillFormFields(characterKey) {
-  const character = characterBios[characterKey];
-  if (!character) return;
-
-  // Get all the form elements we need to fill
-  const formFields = {
-    // NPC basic info
-    "npc_name": character.name,
-    "npc_gender": character.gender,
-    "npc_age": character.age,
-    "npc_ethnicity": character.ethnicity,
-    "npc_sexual_orientation": character.sexual_orientation,
-    "npc_relationship_goal": character.relationship_goal,
-
-    // Appearance
-    "npc_body_type": character.body_type,
-    "npc_hair_color": character.hair_color,
-    "npc_hair_style": character.hair_style,
-    "npc_clothing": character.clothing,
-
-    // Personality & Situation
-    "npc_personality": character.personality,
-    "npc_occupation": character.occupation,
-    "npc_current_situation": character.current_situation,
-
-    // Environment
-    "environment": character.environment,
-    "encounter_context": character.encounter_context
-  };
-
-  // Fill dropdown fields
-  for (const fieldName in formFields) {
-    const value = formFields[fieldName];
-    if (!value) continue;
-
-    // First try to set the dropdown value
-    const dropdown = document.querySelector(`select[name="${fieldName}"]`);
-    if (dropdown) {
-      // Look for an exact match first
-      let matchFound = false;
-      for (let i = 0; i < dropdown.options.length; i++) {
-        if (dropdown.options[i].value === value) {
-          dropdown.selectedIndex = i;
-          matchFound = true;
-          break;
-        }
-      }
-
-      // If no exact match, try a partial match (case insensitive)
-      if (!matchFound) {
-        const lowerValue = value.toLowerCase();
-        for (let i = 0; i < dropdown.options.length; i++) {
-          if (dropdown.options[i].value.toLowerCase().includes(lowerValue)) {
-            dropdown.selectedIndex = i;
-            matchFound = true;
-            break;
-          }
-        }
-      }
-
-      // If still no match, use the custom field
-      if (!matchFound) {
-        const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
-        if (customField) {
-          customField.value = value;
-        }
-      }
-    } else {
-      // If dropdown not found, try direct input field
-      const inputField = document.querySelector(`input[name="${fieldName}"]`);
-      if (inputField) {
-        inputField.value = value;
-      }
-
-      // Also check for custom fields
-      const customField = document.querySelector(`input[name="${fieldName}_custom"]`);
-      if (customField) {
-        customField.value = value;
-      }
-    }
-  }
-}
