@@ -5,44 +5,61 @@
   <i class="bi bi-journal-richtext"></i> NPC Memory & Thoughts Editor
 </h1>
 
-<div class="row mb-4">
-  <div class="col-12">
+<!-- Tabs Nav for Both Mobile and Desktop -->
+<ul class="nav nav-tabs mb-4" id="npcDataTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="thoughts-section-tab" data-bs-toggle="tab" data-bs-target="#thoughts-section" type="button" role="tab" 
+            style="background-color: #3b0b0b; color: #ff9fa3; border-color: #ff5789; font-size: 2.4rem;">
+      <i class="bi bi-lightbulb"></i> Private Thoughts
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="bio-section-tab" data-bs-toggle="tab" data-bs-target="#bio-section" type="button" role="tab"
+            style="background-color: #3b0b0b; color: #ff9fa3; border-color: #ff5789; font-size: 2.4rem;">
+      <i class="bi bi-journal-text"></i> Biography & Memories
+    </button>
+  </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content mb-4" id="npcDataTabContent">
+  <!-- Thoughts Tab -->
+  <div class="tab-pane fade show active" id="thoughts-section" role="tabpanel">
     <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
       <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
         <div class="d-flex justify-content-between align-items-center">
-          <h3 style="margin-bottom: 0;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h3>
+          <h3 style="margin-bottom: 0; font-size: 2.6rem;"><i class="bi bi-lightbulb"></i> {{ session.get('npc_name', 'Character') }}'s Private Thoughts</h3>
           <button class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #ff5789;" 
                   data-bs-toggle="collapse" data-bs-target="#thoughtsCollapse" aria-expanded="true">
             <i class="bi bi-chevron-down"></i>
           </button>
         </div>
-        <small style="opacity: 0.8;">The character's internal monologue, emotional reactions, and reasoning process</small>
+        <small style="opacity: 0.8; font-size: 1.8rem;">The character's internal monologue, emotional reactions, and reasoning process</small>
       </div>
       <div class="collapse show" id="thoughtsCollapse">
         <div class="card-body" style="background-color: #3b0b0b; padding: 25px;">
-          <div style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
+          <div style="white-space: pre-wrap; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 2.2rem; line-height: 1.6; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcPrivateThoughts', '(None)') }}</div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
-<div class="row mb-4">
-  <div class="col-12">
+  
+  <!-- Biography Tab -->
+  <div class="tab-pane fade" id="bio-section" role="tabpanel">
     <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
       <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
         <div class="d-flex justify-content-between align-items-center">
-          <h3 style="margin-bottom: 0;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Biography & Memories</h3>
+          <h3 style="margin-bottom: 0; font-size: 2.6rem;"><i class="bi bi-journal-text"></i> {{ session.get('npc_name', 'Character') }}'s Biography & Memories</h3>
           <button class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #ff5789;" 
                   data-bs-toggle="collapse" data-bs-target="#bioCollapse" aria-expanded="true">
             <i class="bi bi-chevron-down"></i>
           </button>
         </div>
-        <small style="opacity: 0.8;">Key biographical information, past experiences, and relationship developments</small>
+        <small style="opacity: 0.8; font-size: 1.8rem;">Key biographical information, past experiences, and relationship developments</small>
       </div>
       <div class="collapse show" id="bioCollapse">
         <div class="card-body" style="background-color: #3b0b0b; padding: 25px;">
-          <div class="markdown-content" style="white-space: pre-wrap; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 1.05rem; line-height: 1.5; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
+          <div class="markdown-content" style="white-space: pre-wrap; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto; background-color: #2a0808; color: #ffd0d0; font-size: 2.2rem; line-height: 1.6; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">{{ session.get('npcBehavior', '(None)') }}</div>
         </div>
       </div>
     </div>
@@ -58,7 +75,7 @@
   <div class="card-body" style="background-color: #3b0b0b;">
     <form method="POST">
       <div class="mb-4">
-        <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 1.1rem;">
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 2.3rem;">
           <i class="bi bi-gear-fill"></i> Choose Update Type:
         </label>
 
@@ -66,22 +83,22 @@
           <div class="col-12">
             <div class="btn-group w-100" role="group" aria-label="Update type options">
               <input type="radio" class="btn-check" name="update-type-btn" id="thoughts-btn" autocomplete="off" checked>
-              <label class="btn" for="thoughts-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='thoughts'; updateFormDisplay();">
+              <label class="btn" for="thoughts-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789; font-size: 2.2rem; padding: 10px 15px;" onclick="document.getElementById('updateTarget').value='thoughts'; updateFormDisplay();">
                 <i class="bi bi-lightbulb"></i> Thoughts
               </label>
 
               <input type="radio" class="btn-check" name="update-type-btn" id="memories-btn" autocomplete="off">
-              <label class="btn" for="memories-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='memories'; updateFormDisplay();">
+              <label class="btn" for="memories-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789; font-size: 2.2rem; padding: 10px 15px;" onclick="document.getElementById('updateTarget').value='memories'; updateFormDisplay();">
                 <i class="bi bi-journal-text"></i> Biography
               </label>
 
               <input type="radio" class="btn-check" name="update-type-btn" id="rewrite-btn" autocomplete="off">
-              <label class="btn" for="rewrite-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='rewrite_bio'; updateFormDisplay();">
+              <label class="btn" for="rewrite-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789; font-size: 2.2rem; padding: 10px 15px;" onclick="document.getElementById('updateTarget').value='rewrite_bio'; updateFormDisplay();">
                 <i class="bi bi-arrow-repeat"></i> Rewrite
               </label>
 
               <input type="radio" class="btn-check" name="update-type-btn" id="reset-btn" autocomplete="off">
-              <label class="btn" for="reset-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;" onclick="document.getElementById('updateTarget').value='reset_bio'; updateFormDisplay();">
+              <label class="btn" for="reset-btn" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789; font-size: 2.2rem; padding: 10px 15px;" onclick="document.getElementById('updateTarget').value='reset_bio'; updateFormDisplay();">
                 <i class="bi bi-arrow-counterclockwise"></i> Reset
               </label>
             </div>
@@ -90,7 +107,7 @@
 
         <div class="card mb-3" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
           <div class="card-body py-2">
-            <select name="target" id="updateTarget" class="form-select" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 1.05rem;">
+            <select name="target" id="updateTarget" class="form-select" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 2.1rem; padding: 12px;">
               <option value="thoughts">Add to Private Thoughts (internal monologue, reactions, feelings)</option>
               <option value="memories">Add to Biography & Memories (new information, experiences, revelations)</option>
               <option value="rewrite_bio">Rewrite Complete Biography (incorporate all information into cohesive text)</option>
@@ -101,20 +118,20 @@
         </div>
 
         <div class="alert alert-info mb-3" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #ff5789;">
-          <i class="bi bi-info-circle-fill"></i> <strong>Action Summary:</strong>
-          <div id="actionDescription" style="margin-top: 5px; font-style: italic;">
+          <i class="bi bi-info-circle-fill" style="font-size: 2rem;"></i> <strong style="font-size: 2.2rem;">Action Summary:</strong>
+          <div id="actionDescription" style="margin-top: 5px; font-style: italic; font-size: 2.1rem;">
             Add new thoughts to the character's private internal monologue. These represent what they're thinking but not saying.
           </div>
         </div>
       </div>
 
       <div class="mb-4" id="textInputSection">
-        <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 1.1rem;">
+        <label class="form-label" style="color: #f8d0d0; font-weight: bold; font-size: 2.3rem;">
           <i class="bi bi-pencil"></i> <span id="contentLabel">Enter New Thoughts:</span>
         </label>
         <div class="card" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
           <div class="card-body">
-            <textarea name="new_text" id="newContentText" class="form-control" rows="12" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 1.8rem; line-height: 1.6;"></textarea>
+            <textarea name="new_text" id="newContentText" class="form-control" rows="12" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; font-size: 2.8rem; line-height: 1.6;"></textarea>
           </div>
         </div>
       </div>
@@ -122,7 +139,7 @@
       <div class="card mb-4" id="tipSection" style="background-color: #2a0808; border: 1px solid #ff5789;">
         <div class="card-header" style="background-color: #3b0b0b; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 style="margin-bottom: 0;"><i class="bi bi-lightbulb-fill"></i> <span id="tipTitle">Tips for Writing Character Thoughts</span></h5>
+            <h5 style="margin-bottom: 0; font-size: 2.4rem;"><i class="bi bi-lightbulb-fill"></i> <span id="tipTitle">Tips for Writing Character Thoughts</span></h5>
             <button class="btn btn-sm" style="background-color: #2a0808; color: #f8d0d0; border: 1px solid #ff5789;" 
                     data-bs-toggle="collapse" data-bs-target="#tipsCollapse" aria-expanded="true">
               <i class="bi bi-chevron-down"></i>
@@ -132,8 +149,8 @@
         <div class="collapse show" id="tipsCollapse">
           <div class="card-body" style="color: #ffd0d0;">
             <div id="thoughtTips">
-              <p>For effective character thoughts, include:</p>
-              <ul class="mb-0">
+              <p style="font-size: 2.2rem;">For effective character thoughts, include:</p>
+              <ul class="mb-0" style="font-size: 2.1rem;">
                 <li>Raw emotional reactions to recent events</li>
                 <li>Unspoken opinions about the user or situation</li>
                 <li>Inner conflicts or contradictions the character is struggling with</li>
@@ -145,8 +162,8 @@
             </div>
 
             <div id="bioTips" style="display: none;">
-              <p>For detailed biography updates, focus on:</p>
-              <ul class="mb-0">
+              <p style="font-size: 2.2rem;">For detailed biography updates, focus on:</p>
+              <ul class="mb-0" style="font-size: 2.1rem;">
                 <li>Concrete details about the character's background (hometown, education, career)</li>
                 <li>Family relationships and history</li>
                 <li>Formative life experiences and how they shaped the character</li>
@@ -158,8 +175,8 @@
             </div>
 
             <div id="rewriteTips" style="display: none;">
-              <p>For a cohesive biography rewrite:</p>
-              <ul class="mb-0">
+              <p style="font-size: 2.2rem;">For a cohesive biography rewrite:</p>
+              <ul class="mb-0" style="font-size: 2.1rem;">
                 <li>The AI will consolidate all existing information into a well-organized narrative</li>
                 <li>All important character details will be preserved</li>
                 <li>Redundancies will be removed</li>
@@ -170,8 +187,8 @@
             </div>
 
             <div id="resetTips" style="display: none;">
-              <p>Warning about biography reset:</p>
-              <ul class="mb-0">
+              <p style="font-size: 2.2rem;">Warning about biography reset:</p>
+              <ul class="mb-0" style="font-size: 2.1rem;">
                 <li>This will clear all existing biography information</li>
                 <li>A minimal template will be created with just the character's name and basic details</li>
                 <li>This is useful if you want to start fresh with a new character direction</li>
@@ -179,8 +196,8 @@
               </ul>
             </div>
             <div id="cleanupTips" style="display: none;">
-              <p>About biography cleanup:</p>
-              <ul class="mb-0">
+              <p style="font-size: 2.2rem;">About biography cleanup:</p>
+              <ul class="mb-0" style="font-size: 2.1rem;">
                 <li>This will remove repetitive or redundant information from the biography.</li>
                 <li>The AI will attempt to preserve the core meaning and details while streamlining the text.</li>
                 <li>This is helpful for refining the biography and improving its clarity.</li>
