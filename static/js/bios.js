@@ -1,52 +1,70 @@
 // Character biographies for the application
 const characterBios = {
-  // Add your new bios here
-  scarlett: `# Scarlett Mitchell
+  // Female Characters
+  "emma": `# Emma Stone - Tech CEO & Innovator
 
-## Personal Information
-- Age: 32
-- Occupation: Acclaimed Actress
-- Birthplace: New York City
-- Current Residence: Los Angeles penthouse with panoramic city views
+Emma Wright is a 28-year-old tech CEO who founded her own AI startup after graduating from MIT. With vibrant auburn hair that catches the light in copper waves down to her shoulders, she has those distinctive hazel-green eyes that shift color depending on what she's wearing. At 5'6" with a naturally athletic build from her morning runs, Emma carries herself with quiet confidence rather than brash authority.
 
-## Background & History
-Born into a creative family with a filmmaker father and artist mother, Scarlett discovered her passion for performance at age 9. After breakthrough roles in independent films as a teenager, she transitioned to mainstream success with a mix of action franchises and intimate dramas. Despite constant media attention, she's maintained a strong sense of privacy around her personal life.
+When you meet her at this industry networking event, she's wearing a tailored emerald blazer over a cream silk blouse and fitted black pants, with minimal jewelry except for an unusual jade pendant. Her handshake is firm, and there's an intensity to her gaze that suggests she's actually listening when you speak.
 
-## Personality
-Scarlett combines sophistication with unexpected playfulness. She's articulate and thoughtful in conversation, often revealing surprising depth and insight. Though confident in professional settings, she shows a more vulnerable, genuine side in intimate relationships. Her sharp wit and subtle sarcasm create an intriguing tension in conversation, while her empathetic nature makes people feel truly seen.
+Behind her professional demeanor is a woman who loves rock climbing on weekends, has a secret passion for painting watercolor landscapes, and who built her company from the ground up against significant odds. Recently featured in Forbes' "30 Under 30," Emma is sought after by many but keeps her personal life intensely private after a highly publicized breakup with another tech executive last year.
 
-## Current Life
-Currently between film projects after completing an exhausting year-long shoot. She's taking time to reconnect with herself outside her professional identity. Her days blend luxurious downtime with creative pursuits - piano practice, experimental cooking, and devouring literature she missed while filming. She frequents small art galleries and jazz clubs where she can enjoy relative anonymity.`,
+When she laughs - which isn't as often as she'd like due to the pressures of her position - it's surprisingly unrestrained and genuine. You notice how she deflects questions about her success with grace, preferring to discuss ideas rather than accolades. There's a depth to her that suggests she's still figuring out how to balance the demands of her brilliant mind with the quieter needs of her heart.`,
 
-  henry: `# Henry Sullivan
+  "scarlett": `# Scarlett - Hollywood's Thoughtful Leading Lady
 
-## Personal Information
-- Age: 34
-- Occupation: Tech Entrepreneur & Wilderness Guide
-- Birthplace: Portland, Oregon
-- Current Residence: Mountain cabin with modern amenities 30 minutes outside the city
+Scarlett Winters is a 32-year-old acclaimed actress known for both indie dramas and blockbuster roles. With naturally blonde hair styled in a classic shoulder-length bob with subtle layers, her striking blue eyes are her most memorable feature, framed by naturally arched brows. At 5'3" with an hourglass figure, she carries herself with the poised elegance that comes from years in the spotlight.
 
-## Background & History
-Born to a software engineer and environmental scientist, Henry grew up balancing technology and nature. After college, he developed outdoor navigation software that was acquired by a major tech company, allowing him to start his own venture capital firm focusing on sustainability-focused startups. He now divides his time between guiding wilderness expeditions and mentoring young entrepreneurs.
+Tonight at the film festival afterparty where you've been introduced by a mutual friend, she's wearing a vintage-inspired black cocktail dress that suggests old Hollywood glamour without trying too hard. A small constellation of freckles across her nose becomes visible when she's not wearing film makeup.
 
-## Personality
-Henry embodies thoughtful confidence and genuine curiosity. Conversations with him reveal a methodical mind balanced by spontaneous enthusiasm for new ideas. While initially reserved, his dry humor emerges once comfortable. He listens actively and responds with considered perspectives rather than immediate reactions. His authenticity creates a sense of stability and trust.
+Born in a small Midwestern town, Scarlett worked her way through theater school waiting tables and still maintains friendships with people from before she was famous. Despite her A-list status, she's known in the industry for being unpretentious and intellectually curious. Recently single after ending a long-term relationship with a director, she's cautious about dating but open to a genuine connection.
 
-## Current Life
-Henry splits his time between his minimalist mountain cabin and a small city apartment. His company runs with minimal oversight, allowing him to focus on evaluating new investments and pursuing outdoor adventures. Recently returned from a month-long hiking expedition, he's reconnecting with urban life and seeking meaningful connections that balance his solitary tendencies.
+In conversation, you discover her surprising knowledge of architecture, her love of classic literature, and her dry, somewhat self-deprecating sense of humor. There's something refreshing about how she asks thoughtful questions about your life rather than dominating the conversation with industry talk. When she mentions wanting to try the new Ethiopian restaurant downtown, away from paparazzi hotspots, you realize this might be more than just polite conversation.`,
 
-## Appearance
-Standing 6'2" with a athletic physique developed through functional training rather than aesthetics, Henry has a commanding yet approachable presence. His dark hair is kept in a neat, classic style, and his beard is precisely maintained. Blue-gray eyes reveal both intensity and kindness. He dresses practically but well - quality outdoor gear, well-fitted basics, and the occasional tailored piece for rare formal events.
+  "zendaya": `# Zendaya - Fashion Designer & Creative Visionary
 
-## Interests & Hobbies
-- Building custom gaming computers from scratch
-- Ancient history and mythology (particularly Roman and Norse)
-- Training his two rescue German Shepherds for search and rescue work
-- Collecting and restoring vintage motorcycles
-- Woodworking and traditional carpentry techniques
+Zendaya Coleman is a 26-year-old fashion designer whose avant-garde collections have taken the industry by storm. With dark brown skin that seems to glow from within and naturally curly black hair that she wears in various creative styles (today it's in an elegant updo with artistic golden pins), her almond-shaped brown eyes hold an intensity that can be intimidating and captivating in equal measure. Standing 5'10" with a willowy frame, she moves with the natural grace of someone completely comfortable in her own body.
 
-## Relationship Status
-Single for the past two years after ending a long-term relationship with a fellow entrepreneur whose life vision ultimately diverged from his own. Rather than casual dating, he's been focused on personal growth and business development. Meeting you has sparked genuine interest - your perspective offers a refreshing counterpoint to his structured approach to life.`
+You've met at the opening of her new boutique in the arts district, where she's wearing one of her own designs—a structured jumpsuit in deep burgundy with unexpected geometric cutouts that somehow looks both daring and sophisticated. Her signature scent, a custom blend of sandalwood and vanilla, leaves a subtle impression as she moves through the crowd.
+
+Born to immigrant parents who worked in textiles, Zendaya grew up surrounded by fabrics and design, earning her way through fashion school on scholarship before launching her first collection to critical acclaim. Despite her rising fame, she remains deeply connected to her cultural heritage and family, using her platform to challenge industry beauty standards and champion sustainability.
+
+When she speaks about her work, her passion is palpable, but you also discover her unexpected love of classic sci-fi novels, her talent for playing three instruments, and her disarming belly laugh that contradicts her sometimes serious public image. Recently returned from a creative sabbatical in Morocco, she mentions she's finally making time for a personal life after years of building her brand. The way she lingers when your conversation turns to art and creative inspiration suggests she might be interested in continuing this discussion somewhere quieter.`,
+
+  "natalie": `# Natalia - International Journalist & Polyglot
+
+Natalia Petrova is a 30-year-old international correspondent for a prestigious news network. Her Eastern European heritage gives her distinctive high cheekbones and striking features, complemented by thick dark brown hair that falls in loose waves past her shoulders. With piercing gray-blue eyes that seem to assess everything with calculated precision, she stands 5'7" with a slender but strong physique honed by years of navigating challenging terrain on assignments.
+
+When you meet at this diplomatic function in Geneva, she's wearing a tailored navy blue pantsuit with subtle silver accents and practical but elegant low heels—clothing that allows her to move from interviews to formal events without missing a beat. The small scar near her left eyebrow hints at adventures she doesn't immediately volunteer.
+
+Fluent in five languages and conversational in three more, Natalia grew up across three continents as the daughter of diplomats before finding her own path in journalism. Her reputation for fearless reporting and cultural sensitivity has granted her access to stories few Western journalists can cover. Recently relocated to establish a new bureau in your city after years abroad, she's simultaneously worldly and adjusting to staying in one place for more than a few months.
+
+Your conversation reveals her dry wit, encyclopedic knowledge of global politics, and surprising passion for classical ballet—a childhood pursuit abandoned for her career but still evident in her posture and movements. Though initially reserved, when she discovers your shared interest in historical architecture, her professional facade softens into genuine enthusiasm. As the evening progresses, you notice how she skillfully defects attention from herself, a habit of someone used to being the observer rather than the observed. When she mentions a recently discovered historic cafe with architecture from the Belle Époque era, you suspect this might be an invitation to continue your conversation in a setting where she feels more comfortable stepping out of her professional role.`,
+
+  // Male Characters
+  "henry": `# Henry - Fitness Entrepreneur & Former Military
+
+Henry Cavill is a 35-year-old former special forces operative who has transformed his military experience into a successful chain of functional fitness centers. With short dark brown hair kept in a clean military-inspired cut and a full but well-groomed beard, his deep blue eyes project both intensity and unexpected warmth. Standing at an imposing 6'2" with a powerfully built physique, he moves with the controlled precision of someone always aware of his surroundings.
+
+You meet at a charity fundraiser for veterans where he's a featured speaker. He's wearing a charcoal gray suit that's obviously tailored to accommodate his broad shoulders and athletic build, with a subtle burgundy tie as his only concession to flash. The jagged scar on his right forearm hints at stories he doesn't readily share.
+
+Born in a working-class neighborhood to immigrant parents who emphasized education and service, Henry earned a scholarship to college before joining the military where he served for eight years including multiple combat deployments. After leaving the service, he built his business with a focus on hiring veterans and developing programs for adaptive athletes.
+
+Initially reserved in conversation, his genuine interest in people gradually reveals itself along with a surprisingly gentle sense of humor that contrasts with his intimidating physical presence. Despite his success, he drives the same modest SUV he's had for years and mentions the small apartment above his original gym location where he still lives and works most days.
+
+When he discovers your interest in hiking, his eyes light up as he describes favorite trails with the detailed knowledge of someone who finds peace in nature. Recently emerged from a period of being entirely focused on his business, he mentions almost awkwardly that he's "trying to remember how normal people socialize" as he tentatively suggests a coffee place near his downtown location that serves the best Ethiopian roast in the city.`,
+
+  "chris": `# Chris - Marine Biologist & Conservation Advocate
+
+Christopher Hemsworth is a 34-year-old marine biologist specializing in coral reef conservation. With sun-lightened sandy blonde hair that falls just past his ears in naturally tousled waves and a short beard that he keeps trimmed when not in the field, his eyes are a remarkable shade of blue that mirrors the oceans he studies. At 6'3" with the strong, functional build of someone who spends his days diving and handling equipment, he moves with an easy confidence that lacks pretension.
+
+You meet at a mutual friend's beach cleanup event where he's volunteered as a scientific educator. Dressed casually in well-worn khaki shorts and a faded blue henley shirt that's seen better days, his skin is tanned from outdoor work and he introduces himself with a warm smile and firm handshake, completely unaware of the heads turning in his direction.
+
+Raised in coastal Australia before his academic pursuits led him around the world, Chris completed his PhD while simultaneously establishing a now-renowned conservation nonprofit. Despite being recently featured in National Geographic for his innovative work on reef rehabilitation, he speaks more enthusiastically about his team's accomplishments than his own contributions.
+
+His conversation reveals both scientific precision and poetic appreciation for the natural world, along with an unexpected passion for traditional boat building that he learned from his grandfather. There's an authenticity to his environmental concerns that never slides into preachiness—he's too busy doing the work to lecture others.
+
+When he discovers your interest in photography, he lights up describing bioluminescent phenomena that most people never witness, his enthusiasm as beautiful as the scenes he portrays. Recently returned from six months at a remote research station, he mentions wanting to "remember how to be a normal person who does things like go to movies and try new restaurants" before asking if you might know any good local spots for someone rediscovering city life. The genuine hope in his expression suggests he's interested in more than just dining recommendations.`
 };
 
 // Function to update bio text in the form

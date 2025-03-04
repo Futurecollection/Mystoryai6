@@ -67,8 +67,12 @@
         </div>
         <select class="form-select mb-3" id="predefinedBios" onchange="updateBioText()" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
           <option value="">--Select Predefined Character--</option>
-          <option value="scarlett">Hollywood Actress - Scarlett</option>
-          <option value="henry">Tech Entrepreneur - Henry</option>
+          <option value="emma">Tech CEO - Emma Stone</option>
+          <option value="scarlett">Hollywood Actress - Scarlett Winters</option>
+          <option value="zendaya">Fashion Designer - Zendaya Coleman</option>
+          <option value="natalie">International Journalist - Natalia Petrova</option>
+          <option value="henry">Fitness Entrepreneur - Henry Cavill</option>
+          <option value="chris">Marine Biologist - Chris Hemsworth</option>
         </select>
         <textarea class="form-control" id="bioTextArea" rows="10" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"></textarea>
         <input type="hidden" name="npc_backstory" id="bioText">
@@ -857,25 +861,31 @@ function showManualCustomization() {
 }
 
 function updateBioText() {
-  const bios = {
-    lucy: `Lucy is a 25-year-old barista who works at a cozy coffee shop in downtown. She has shoulder-length brown hair with subtle caramel highlights, warm hazel eyes, and a bright, infectious smile. Standing at 5'6" with an athletic build from her morning yoga routine, she carries herself with a natural grace. Lucy wears a navy blue apron over a white V-neck top and dark jeans, with a delicate silver necklace completing her look. She's passionate about coffee, enjoys indie music, and dreams of opening her own cafe someday. This is your first date after matching on a dating app and getting to know each other through messages for the past week.`,
-    
-    aurora: `* CITY: Aurora Heights, Colorado. A seemingly normal, upscale mountain resort town hiding a deeply ingrained culture of hedonism and intense sensual exploration. Known for discretion and high-quality, explicit pleasure services. All interactions within Aurora Heights operate under an assumption of informed consent.
-
-* HOTEL: The Grand Aurora Resort & Spa, a luxurious complex blending seamlessly into the mountain landscape. It boasts multiple wings, hidden courtyards, private villas, and a state-of-the-art spa that offers both conventional and highly specialized, uninhibited sensual therapies.`,
-    
-    fifty: `You step into Grey Enterprises Holdings, Inc. to interview the enigmatic CEO Christian Grey for your college newspaper. At 27, he's a powerful Seattle entrepreneur - tall, impeccably dressed in a tailored gray suit, with copper-colored hair and intense gray eyes. His office is sleek and modern, all steel and white leather. He exudes authority and control, yet there's an undeniable tension when your eyes meet. Despite his intimidating demeanor, you sense a deep fascination as he studies you with barely concealed interest. This chance encounter is about to lead you into his world of luxury, power, and carefully controlled passion.`,
-    
-    college: `Emma is a 22-year-old senior at your university, majoring in Psychology. You've shared a few classes together over the years, but have never really connected beyond occasional group projects. With wavy chestnut hair that falls just past her shoulders and bright green eyes that light up when she's passionate about a topic, she's someone you've always noticed. Today, you bumped into her at the campus coffee shop, both reaching for the last available table. She suggested sharing it since the place was packed with students studying for midterms. As you sit across from each other, you realize this might be your chance to finally get to know the thoughtful, intelligent woman who's intrigued you for semesters.`,
-    
-    neighbor: `Jason just moved into the apartment next door last week. At 28, he's working as an architect at a prestigious downtown firm. You first ran into him in the hallway while he was moving in, offering to help carry a particularly unwieldy bookshelf. With his athletic build, dark hair, and warm brown eyes, you couldn't help but notice how attractive he is. He stands about 6'1" with broad shoulders and a genuine smile that creates the perfect dimple in his right cheek. Today, he knocked on your door with a small plate of homemade cookies, explaining that baking helps him destress after busy work weeks. As you invite him in for coffee, you wonder if this neighborly gesture might be the beginning of something more.`
-  };
-
   const select = document.getElementById('predefinedBios');
   const textarea = document.getElementById('bioTextArea');
   const hiddenInput = document.getElementById('bioText');
   
-  textarea.value = bios[select.value] || '';
+  // Get selected bio from character bios in external JS file
+  if (characterBios && select.value in characterBios) {
+    textarea.value = characterBios[select.value] || '';
+  } else {
+    // Legacy bios as fallback
+    const legacyBios = {
+      lucy: `Lucy is a 25-year-old barista who works at a cozy coffee shop in downtown. She has shoulder-length brown hair with subtle caramel highlights, warm hazel eyes, and a bright, infectious smile. Standing at 5'6" with an athletic build from her morning yoga routine, she carries herself with a natural grace. Lucy wears a navy blue apron over a white V-neck top and dark jeans, with a delicate silver necklace completing her look. She's passionate about coffee, enjoys indie music, and dreams of opening her own cafe someday. This is your first date after matching on a dating app and getting to know each other through messages for the past week.`,
+      
+      aurora: `* CITY: Aurora Heights, Colorado. A seemingly normal, upscale mountain resort town hiding a deeply ingrained culture of hedonism and intense sensual exploration. Known for discretion and high-quality, explicit pleasure services. All interactions within Aurora Heights operate under an assumption of informed consent.
+
+* HOTEL: The Grand Aurora Resort & Spa, a luxurious complex blending seamlessly into the mountain landscape. It boasts multiple wings, hidden courtyards, private villas, and a state-of-the-art spa that offers both conventional and highly specialized, uninhibited sensual therapies.`,
+      
+      fifty: `You step into Grey Enterprises Holdings, Inc. to interview the enigmatic CEO Christian Grey for your college newspaper. At 27, he's a powerful Seattle entrepreneur - tall, impeccably dressed in a tailored gray suit, with copper-colored hair and intense gray eyes. His office is sleek and modern, all steel and white leather. He exudes authority and control, yet there's an undeniable tension when your eyes meet. Despite his intimidating demeanor, you sense a deep fascination as he studies you with barely concealed interest. This chance encounter is about to lead you into his world of luxury, power, and carefully controlled passion.`,
+      
+      college: `Emma is a 22-year-old senior at your university, majoring in Psychology. You've shared a few classes together over the years, but have never really connected beyond occasional group projects. With wavy chestnut hair that falls just past her shoulders and bright green eyes that light up when she's passionate about a topic, she's someone you've always noticed. Today, you bumped into her at the campus coffee shop, both reaching for the last available table. She suggested sharing it since the place was packed with students studying for midterms. As you sit across from each other, you realize this might be your chance to finally get to know the thoughtful, intelligent woman who's intrigued you for semesters.`,
+      
+      neighbor: `Jason just moved into the apartment next door last week. At 28, he's working as an architect at a prestigious downtown firm. You first ran into him in the hallway while he was moving in, offering to help carry a particularly unwieldy bookshelf. With his athletic build, dark hair, and warm brown eyes, you couldn't help but notice how attractive he is. He stands about 6'1" with broad shoulders and a genuine smile that creates the perfect dimple in his right cheek. Today, he knocked on your door with a small plate of homemade cookies, explaining that baking helps him destress after busy work weeks. As you invite him in for coffee, you wonder if this neighborly gesture might be the beginning of something more.`
+    };
+    textarea.value = legacyBios[select.value] || '';
+  }
+  
   hiddenInput.value = textarea.value;
   
   // Add event listener to sync the textarea with the hidden input
