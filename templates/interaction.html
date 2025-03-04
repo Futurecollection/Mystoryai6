@@ -226,9 +226,9 @@
         <div class="col-md-6">
           <label class="form-label" style="color: #f8d0d0;"><i class="bi bi-brush"></i> Model:</label>
           <select name="model_type" class="form-select" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #6d1d1d;">
-            <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Portrait Specialist</option>
-            <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Detailed Scene Creator</option>
-            <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Artistic Visualizer</option>
+            <option value="flux" {% if last_model_choice == 'flux' %}selected{% endif %}>Flux (Realistic Photos)</option>
+            <option value="juggernaut" {% if last_model_choice == 'juggernaut' %}selected{% endif %}>Juggernaut (Realistic with Some NSFW)</option>
+            <option value="pony" {% if last_model_choice == 'pony' %}selected{% endif %}>Pony (More NSFW Content)</option>
           </select>
         </div>
       </div>

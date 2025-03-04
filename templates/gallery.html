@@ -19,9 +19,9 @@
         <div class="card-body">
           <p class="card-text"><strong>Prompt:</strong> {{ image.prompt }}</p>
           <p class="card-text"><strong>Model:</strong> 
-            {% if image.model == 'flux' %}Portrait Specialist
-            {% elif image.model == 'pony' %}Detailed Scene Creator
-            {% elif image.model == 'juggernaut' %}Artistic Visualizer
+            {% if image.model == 'flux' %}Flux
+            {% elif image.model == 'pony' %}Pony
+            {% elif image.model == 'juggernaut' %}Juggernaut
             {% else %}{{ image.model }}
             {% endif %}
           </p>
