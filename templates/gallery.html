@@ -18,7 +18,13 @@
         <img src="{{ url_for('gallery_image', index=loop.index0) }}" class="card-img-top" alt="Gallery Image">
         <div class="card-body">
           <p class="card-text"><strong>Prompt:</strong> {{ image.prompt }}</p>
-          <p class="card-text"><strong>Model:</strong> {{ image.model }}</p>
+          <p class="card-text"><strong>Model:</strong> 
+            {% if image.model == 'flux' %}Portrait Specialist
+            {% elif image.model == 'pony' %}Detailed Scene Creator
+            {% elif image.model == 'juggernaut' %}Artistic Visualizer
+            {% else %}{{ image.model }}
+            {% endif %}
+          </p>
           <p class="card-text"><strong>Seed:</strong> {{ image.seed }}</p>
           <p class="card-text"><strong>Created:</strong> {{ image.timestamp }}</p>
           <a href="{{ url_for('delete_gallery_image', index=loop.index0) }}" class="btn btn-danger"
