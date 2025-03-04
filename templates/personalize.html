@@ -78,6 +78,9 @@
       </div>
     </div>
   </div>
+  
+  <!-- Add script for handling character biographies -->
+  <script src="{{ url_for('static', filename='js/bios.js') }}"></script>
 
   <script>
   function updateBioText() {
@@ -669,6 +672,18 @@ GUIDELINES:
                 <div class="row">
                   <div class="col-md-6">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Personality Traits</label>
+
+          <option value="">--Select Predefined Character--</option>
+          <option value="scarlett">Successful Actress - Scarlett</option>
+          <option value="emma">Tech CEO - Emma</option>
+          <option value="zendaya">Fashion Designer - Zendaya</option>
+          <option value="henry">Fitness Entrepreneur - Henry</option>
+          <option value="lucy">Coffee Shop Romance - Lucy</option>
+          <option value="aurora">Luxury Resort Fantasy - Grand Aurora</option>
+          <option value="fifty">Executive Romance - Fifty Shades Style</option>
+          <option value="college">College Classmate Crush</option>
+          <option value="neighbor">New Neighbor Next Door</option>
+
                     <select class="form-select mb-1" name="npc_personality" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                       <option value="">--Select--</option>
                       <option value="Confident and Outgoing">Confident and Outgoing</option>
