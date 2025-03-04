@@ -123,7 +123,7 @@
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
     <div>
-      <h3 style="margin-bottom: 0">
+      <h3 style="margin-bottom: 0; font-size: 2.8rem;">
         {% if interaction_mode == 'dialogue' %}
           <i class="bi bi-chat-quote"></i> Dialogue ({{ session.get('npc_name', 'Character') }})
         {% else %}
@@ -131,7 +131,7 @@
         {% endif %}
       </h3>
       {% if interaction_mode == 'dialogue' %}
-        <small style="opacity: 0.8;">Direct dialogue and actions from the character</small>
+        <small style="opacity: 0.8; font-size: 2.2rem;">Direct dialogue and actions from the character</small>
       {% endif %}
     </div>
     <!--Removed View Full Story Button-->
@@ -210,8 +210,8 @@
 <!-- Scene Image Panel -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h3 style="margin-bottom: 0"><i class="bi bi-image"></i> Scene Visualization</h3>
-    <span class="badge bg-warning text-dark">
+    <h3 style="margin-bottom: 0; font-size: 2.8rem;"><i class="bi bi-image"></i> Scene Visualization</h3>
+    <span class="badge bg-warning text-dark" style="font-size: 1.8rem;">
       <i class="bi bi-lightning"></i> Images: {{ session.get('image_gen_count', 0) }}/5
     </span>
   </div>
