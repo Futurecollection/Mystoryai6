@@ -682,21 +682,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (sampleResponsesPreview) sampleResponsesPreview.style.display = 'none';
     }
   });
-  
-  // Initialize the bio dropdown if it exists
-  const bioDropdown = document.getElementById('predefinedBios');
-  if (bioDropdown) {
-    console.log("Initializing bio dropdown");
-    // If Lucy is in the options, select her by default to show her bio
-    const lucyOption = Array.from(bioDropdown.options).find(opt => opt.value === 'lucy');
-    if (lucyOption) {
-      bioDropdown.value = 'lucy';
-      // Trigger the change event to load Lucy's bio
-      bioDropdown.dispatchEvent(new Event('change'));
-    }
-  }
-  
-  // Ensure Bootstrap is loaded and accessible
+    // Ensure Bootstrap is loaded and accessible
     if (typeof bootstrap !== 'undefined') {
       const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
       triggerTabList.forEach(function(triggerEl) {
