@@ -66,6 +66,10 @@
           <i class="bi bi-eye-fill"></i> Below is a preview of the selected character bio. These details will be used to fill your NPC's information.
         </div>
         <div id="bioPreview" style="max-height: 300px; overflow-y: auto; background-color: #2a0808; padding: 15px; border-radius: 5px; margin-bottom: 15px; white-space: pre-wrap; color: #ffd0d0; font-size: 1.8rem;">Select a character to see their biography</div>
+        <div id="sampleResponsesPreview" style="max-height: 200px; overflow-y: auto; background-color: #2a0808; padding: 15px; border-radius: 5px; margin-bottom: 15px; display: none;">
+          <h4 style="color: #ff5789; margin-bottom: 10px;">Sample Responses</h4>
+          <div class="sample-responses-content" style="color: #ffd0d0;"></div>
+        </div>
         <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
           <i class="bi bi-info-circle"></i> Choose a predefined character or paste your own character biography. The AI will extract all relevant details.
         </div>
@@ -624,16 +628,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const bioPreview = document.getElementById('bioPreview');
     const textarea = document.getElementById('bioTextArea');
     const hiddenInput = document.getElementById('bioText');
+    const sampleResponsesPreview = document.getElementById('sampleResponsesPreview');
+    const sampleResponsesContent = sampleResponsesPreview ? sampleResponsesPreview.querySelector('.sample-responses-content') : null;
     
     if (window.characterBios && this.value in window.characterBios) {
-      const bioText = window.characterBios[this.value].bio || '';
+      const character = window.characterBios[this.value];
+      const bioText = character.bio || '';
+      
+      // Update biography text
       if (bioPreview) bioPreview.textContent = bioText;
       if (textarea) textarea.value = bioText;
       if (hiddenInput) hiddenInput.value = bioText;
+      
+      // Update sample responses if they exist
+      if (sampleResponsesPreview && sampleResponsesContent) {
+        if (character.sample_responses) {
+          // Clear previous content
+          sampleResponsesContent.innerHTML = '';
+          
+          // Create HTML for sample responses
+          for (const [phase, responses] of Object.entries(character.sample_responses)) {
+            // Create phase header
+            const phaseTitle = document.createElement('h5');
+            phaseTitle.style.color = '#ff9bbb';
+            phaseTitle.style.marginTop = '15px';
+            phaseTitle.style.marginBottom = '8px';
+            phaseTitle.textContent = phase.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            sampleResponsesContent.appendChild(phaseTitle);
+            
+            // Create response list
+            const responseList = document.createElement('ul');
+            responseList.style.paddingLeft = '20px';
+            
+            responses.forEach(response => {
+              const responseItem = document.createElement('li');
+              responseItem.textContent = response;
+              responseItem.style.marginBottom = '5px';
+              responseList.appendChild(responseItem);
+            });
+            
+            sampleResponsesContent.appendChild(responseList);
+          }
+          
+          sampleResponsesPreview.style.display = 'block';
+        } else {
+          sampleResponsesPreview.style.display = 'none';
+        }
+      }
     } else {
       if (bioPreview) bioPreview.textContent = "Select a character to see their biography";
       if (textarea) textarea.value = "";
       if (hiddenInput) hiddenInput.value = "";
+      if (sampleResponsesPreview) sampleResponsesPreview.style.display = 'none';
     }
   });
     // Ensure Bootstrap is loaded and accessible
