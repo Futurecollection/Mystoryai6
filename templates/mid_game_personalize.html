@@ -45,6 +45,26 @@
   <div class="col-12">
               <!-- Load required MBTI types script -->
               <script src="{{ url_for('static', filename='js/mbti_types.js') }}"></script>
+              
+              <!-- MBTI Type Selection -->
+              <div class="col-md-12 mt-3">
+                <label class="form-label" style="color: #f8d0d0; font-weight: bold;">MBTI Personality Type</label>
+                <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
+                  <i class="bi bi-info-circle"></i> The Myers-Briggs personality type will influence your character's traits, decision-making process, and interaction style.
+                </div>
+                <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
+                  <option value="">--Select MBTI Type--</option>
+                  {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
+                    <option value="{{ type_code }}" {% if session.get('npc_mbti_type') == type_code %}selected{% endif %}>{{ type_code }} - {{ mbtiTypes[type_code].name.split(" - ")[1] if mbtiTypes and mbtiTypes[type_code] and " - " in mbtiTypes[type_code].name else "The " + type_code }}</option>
+                  {% endfor %}
+                </select>
+                <div class="card mt-2" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
+                  <div class="card-body">
+                    <p id="mbtiDescription" style="color: #ffd0d0; font-style: italic;">Select an MBTI type to view the description.</p>
+                    <p id="mbtiCelebrities" style="color: #ff5789;"></p>
+                  </div>
+                </div>
+              </div>
               <div class="tab-content" id="characterTabContent">
       <!-- Character Tab -->
       <div class="tab-pane fade show active" id="character" role="tabpanel" aria-labelledby="character-tab">
