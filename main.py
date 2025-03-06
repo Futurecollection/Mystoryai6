@@ -2418,7 +2418,7 @@ You can say hello, start a conversation, or set the scene with an action.
                     """Make a separate LLM call to get only dialogue and actions like Replika."""
                     system_prompt = f"""
                     Convert the following narration into ONLY {npc_name}'s dialogue and actions in the style of 
-                    chat apps like Replika.
+                    chat app.
                     
                     RULES:
                     1. Return ONLY what {npc_name} says and does - no narration, no descriptions.
