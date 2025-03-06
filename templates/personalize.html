@@ -458,7 +458,7 @@
                     <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
                       <option value="">--Select MBTI Type--</option>
                       {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
-                        <option value="{{ type_code }}">{{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                        <option value="{{ type_code }}">{{ type_code }} - {{ mbtiTypes[type_code].name.split(" - ")[1] if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
                       {% endfor %}
                     </select>
                     <div class="card mt-2" style="background-color: #2a0808; border: 1px solid #6d1d1d;">

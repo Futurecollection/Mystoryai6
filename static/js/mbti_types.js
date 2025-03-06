@@ -3,99 +3,99 @@
 window.mbtiTypes = {
   "INTJ": {
     name: "INTJ - The Architect",
-    description: "Strategic visionaries with a masterful ability to plan and innovative problem-solving skills. Independent, intellectual, and naturally confident with a hint of mystery.",
-    celebrities: "Female: Natalie Portman, Rooney Mara, Jodie Foster | Male: Henry Cavill, Christian Bale, Benedict Cumberbatch",
+    description: "Strategic thinkers with a plan for everything. Architects are independent, innovative problem-solvers with a natural confidence and an aura of mystery. They blend imagination and reliability.",
+    celebrities: "Female: Natalie Portman, Cate Blanchett, Jodie Foster | Male: Elon Musk, Christopher Nolan, Benedict Cumberbatch",
     traits: "Reserved, analytical, strategic, independent, direct, perfectionist, skeptical, determined"
   },
   "INTP": {
     name: "INTP - The Logician",
     description: "Brilliant inventors with an unquenchable thirst for knowledge and elegant theories. Charismatically quirky with minds that never stop analyzing possibilities.",
-    celebrities: "Female: Emma Watson, Aubrey Plaza, Kristen Stewart | Male: Keanu Reeves, Tom Hiddleston, Jesse Eisenberg",
+    celebrities: "Female: Emma Watson, Tina Fey, Marie Curie | Male: Albert Einstein, Keanu Reeves, Tom Hiddleston",
     traits: "Quiet, analytical, curious, imaginative, flexible, theoretical, absent-minded, objective"
   },
   "ENTJ": {
     name: "ENTJ - The Commander",
     description: "Bold, charismatic leaders who effortlessly take charge and inspire others to follow their vision. Magnetic presence with unshakeable confidence.",
-    celebrities: "Female: Charlize Theron, Tyra Banks, Emma Stone | Male: Chris Evans, Leonardo DiCaprio, George Clooney",
+    celebrities: "Female: Charlize Theron, Oprah Winfrey, Emma Stone | Male: Steve Jobs, Harrison Ford, Gordon Ramsay",
     traits: "Confident, decisive, efficient, strategic, challenging, direct, objective, driven"
   },
   "ENTP": {
     name: "ENTP - The Debater",
-    description: "Charming visionaries with quick wit and a talent for seeing connections others miss. Intellectually playful with a magnetic ability to engage others in their ideas.",
-    celebrities: "Female: Elizabeth Olsen, Jennifer Lawrence, Amy Poehler | Male: Robert Downey Jr., Ryan Reynolds, Neil Patrick Harris",
-    traits: "Charismatic, argumentative, enthusiastic, innovative, spontaneous, analytical, quick-witted, adaptable"
+    description: "Quick-thinking challengers who love playing devil's advocate. Debaters bring innovative solutions through their enthusiasm for intellectual sparring and thinking outside the box.",
+    celebrities: "Female: Amy Poehler, Gillian Anderson, Salma Hayek | Male: Robert Downey Jr., Ryan Reynolds, Leonardo DiCaprio",
+    traits: "Enthusiastic, argumentative, charming, spontaneous, analytical, witty, adaptable, challenging"
   },
   "INFJ": {
     name: "INFJ - The Advocate",
-    description: "Mysterious and insightful with a deep understanding of human nature. Quietly captivating with an alluring depth that draws people in.",
-    celebrities: "Female: Nicole Kidman, Carey Mulligan, Cate Blanchett | Male: Benedict Cumberbatch, Jamie Dornan, Jake Gyllenhaal",
-    traits: "Private, idealistic, principled, creative, insightful, sensitive, contemplative, complex"
+    description: "Quiet visionaries with deep empathy and unwavering dedication to their values. Advocates combine creativity with principle, offering unique insights and genuine connection.",
+    celebrities: "Female: Nicole Kidman, Lady Gaga, Rose Namajunas | Male: Benedict Cumberbatch, Jon Snow, Matthew McConaughey",
+    traits: "Insightful, principled, creative, sensitive, reserved, idealistic, complex, determined"
   },
   "INFP": {
     name: "INFP - The Mediator",
-    description: "Enchanting dreamers with a rich inner world and deep capacity for connection. Their gentle authenticity and emotional depth makes them irresistibly intriguing.",
-    celebrities: "Female: Audrey Hepburn, Zooey Deschanel, Dakota Fanning | Male: Johnny Depp, Timothée Chalamet, Andrew Garfield",
-    traits: "Idealistic, creative, compassionate, sensitive, reserved, adaptable, open-minded, individualistic"
+    description: "Thoughtful idealists with an artistic spirit and profound emotional depth. Mediators see special potential in everyone and everything, dreaming of a world aligned with their inner values.",
+    celebrities: "Female: Audrey Hepburn, Dakota Fanning, Princess Diana | Male: Johnny Depp, Andrew Garfield, Tom Hiddleston",
+    traits: "Idealistic, empathetic, creative, passionate, loyal, adaptable, reserved, thoughtful"
   },
   "ENFJ": {
     name: "ENFJ - The Protagonist",
-    description: "Captivating, warm leaders who naturally inspire devotion. Their genuine charisma and ability to make others feel special creates instant magnetism.",
-    celebrities: "Female: Jennifer Lawrence, Emma Stone, Taylor Swift | Male: Chris Hemsworth, Hugh Jackman, John Krasinski",
-    traits: "Charismatic, empathetic, inspiring, diplomatic, passionate, warm, organized, articulate"
+    description: "Charismatic inspirers who naturally lead others toward growth and fulfillment. Protagonists combine warmth with visionary thinking, bringing people together for a shared purpose.",
+    celebrities: "Female: Jennifer Lawrence, Dakota Johnson, Emma Stone | Male: John Cusack, Ben Affleck, Bono",
+    traits: "Charismatic, empathetic, organized, idealistic, persuasive, diplomatic, affirming, decisive"
   },
   "ENFP": {
     name: "ENFP - The Campaigner",
-    description: "Vibrant free spirits with contagious enthusiasm and charm. Their spontaneous passion and genuine interest in others makes them immediately likable and alluring.",
-    celebrities: "Female: Margot Robbie, Zendaya, Sandra Bullock | Male: Chris Pratt, Tom Holland, Jason Segel",
-    traits: "Enthusiastic, creative, sociable, expressive, warm, spontaneous, perceptive, adaptable"
+    description: "Enthusiastic free spirits with contagious energy and creativity. Campaigners see exciting possibilities everywhere and inspire others with their genuine warmth and passion.",
+    celebrities: "Female: Zendaya, Gigi Hadid, Sandra Bullock | Male: Robert Pattinson, Oscar Isaac, Will Smith",
+    traits: "Enthusiastic, imaginative, spontaneous, caring, perceptive, individualistic, expressive, independent"
   },
   "ISTJ": {
     name: "ISTJ - The Logistician",
-    description: "Dependable and composed with a quiet strength that commands respect. Their reliability and attention to detail creates a compelling steadiness.",
-    celebrities: "Female: Kate Middleton, Anne Hathaway, Michelle Obama | Male: Tom Cruise, Daniel Craig, Chris Evans",
-    traits: "Practical, responsible, loyal, organized, factual, honest, detail-oriented, calm"
+    description: "Reliable realists who value tradition and create stability through meticulous attention to detail. Logisticians bring practical solutions and steadfast dependability.",
+    celebrities: "Female: Natalie Portman, Queen Elizabeth II, Hermione Granger | Male: Denzel Washington, Tom Hanks, Christopher Nolan",
+    traits: "Organized, practical, reliable, traditional, factual, logical, meticulous, reserved"
   },
   "ISFJ": {
     name: "ISFJ - The Defender",
-    description: "Warm protectors with an intuitive understanding of others' needs. Their nurturing attention to detail and quiet devotion creates a deeply attractive stability.",
-    celebrities: "Female: Kate Winslet, Jennifer Aniston, Halle Berry | Male: Ryan Gosling, Chris Pine, Hugh Jackman",
-    traits: "Attentive, detailed, loyal, traditional, observant, supportive, patient, practical"
+    description: "Protective nurturers with an exceptional memory for personal details. Defenders create harmony through practical care, anticipating needs and quietly supporting others.",
+    celebrities: "Female: Kate Middleton, Taylor Swift, Anne Hathaway | Male: Ryan Gosling, Hugh Jackman, Tobey Maguire",
+    traits: "Supportive, practical, reliable, observant, detail-oriented, protective, traditional, humble"
   },
   "ESTJ": {
     name: "ESTJ - The Executive",
-    description: "Confident decision-makers with a commanding presence. Their practical leadership and direct approach creates an appealing sense of security and strength.",
-    celebrities: "Female: Gal Gadot, Lucy Liu, Tyra Banks | Male: Chris Pratt, Dwayne Johnson, Mark Wahlberg",
-    traits: "Organized, practical, direct, structured, traditional, loyal, efficient, decisive"
+    description: "Efficient organizers who excel at turning plans into action. Executives bring structure and reliability, taking charge to ensure traditions and standards are upheld.",
+    celebrities: "Female: Saoirse Ronan, Emma Watson, Judge Judy | Male: John Cena, Frank Sinatra, Dr. Phil",
+    traits: "Organized, practical, direct, structured, loyal, traditional, responsible, decisive"
   },
   "ESFJ": {
     name: "ESFJ - The Consul",
-    description: "Warm socialites with a natural ability to connect with others. Their attentive thoughtfulness and genuine care creates an attractive sense of belonging.",
-    celebrities: "Female: Jennifer Garner, Reese Witherspoon, Selena Gomez | Male: Chris Evans, Hugh Jackman, Justin Timberlake",
-    traits: "Supportive, popular, practical, harmonious, organized, sociable, caring, traditional"
+    description: "Caring connectors who create harmony through practical service. Consuls excel at bringing people together, remembering details, and ensuring everyone feels valued.",
+    celebrities: "Female: Jennifer Garner, Selena Gomez, Taylor Swift | Male: Chris Evans, Hugh Jackman, Bill Clinton",
+    traits: "Supportive, reliable, conscientious, organized, warm, traditional, sociable, practical"
   },
   "ISTP": {
     name: "ISTP - The Virtuoso",
-    description: "Cool problem-solvers with a quiet sense of adventure. Their skilled competence and laid-back confidence creates an effortlessly attractive aura.",
-    celebrities: "Female: Scarlett Johansson, Kristen Stewart, Angelina Jolie | Male: Tom Hardy, Daniel Craig, Channing Tatum",
-    traits: "Adaptable, rational, practical, spontaneous, independent, reserved, hands-on, adventurous"
+    description: "Adaptable troubleshooters with unmatched technical expertise. Virtuosos approach life with quiet curiosity, responding to challenges with cool efficiency and practical solutions.",
+    celebrities: "Female: Scarlett Johansson, Kendall Jenner, Kristen Stewart | Male: Tom Cruise, Christian Bale, Michael Jordan",
+    traits: "Practical, logical, adaptable, observant, independent, spontaneous, calm, analytical"
   },
   "ISFP": {
     name: "ISFP - The Adventurer",
-    description: "Artistic free spirits with a quiet sensuality. Their authentic expression and in-the-moment presence creates a naturally seductive appeal.",
-    celebrities: "Female: Zoe Kravitz, Kendall Jenner, Rihanna | Male: Michael B. Jordan, Liam Hemsworth, Zac Efron",
-    traits: "Artistic, sensitive, passionate, spontaneous, gentle, adventurous, harmonious, independent"
+    description: "Gentle artists with a strong aesthetic sense and quiet passion. Adventurers live in the moment, bringing beauty and kindness through their authentic self-expression.",
+    celebrities: "Female: Beyoncé, Winona Ryder, Rihanna | Male: Michael Jackson, Jude Law, Liam Hemsworth",
+    traits: "Artistic, sensitive, gentle, spontaneous, loyal, adaptable, private, passionate"
   },
   "ESTP": {
     name: "ESTP - The Entrepreneur",
-    description: "Bold thrill-seekers with magnetic charisma. Their spontaneous energy and confident risk-taking creates an irresistible excitement.",
-    celebrities: "Female: Megan Fox, Miley Cyrus, Madonna | Male: Chris Hemsworth, Tom Cruise, Channing Tatum",
-    traits: "Energetic, risk-taking, direct, spontaneous, adaptable, charming, persuasive, observant"
+    description: "Energetic thrill-seekers who excel in dynamic environments. Entrepreneurs solve problems with bold action, bringing charisma and practical intelligence to every challenge.",
+    celebrities: "Female: Madonna, Megan Fox, Ruby Rose | Male: Conor McGregor, Donald Trump, Bruce Willis",
+    traits: "Energetic, risk-taking, practical, persuasive, adaptable, resourceful, straightforward, observant"
   },
   "ESFP": {
     name: "ESFP - The Entertainer",
-    description: "Vibrant performers with an irresistible zest for life. Their spontaneous passion and genuine warmth creates an immediate attraction.",
-    celebrities: "Female: Margot Robbie, Jennifer Lopez, Katy Perry | Male: Ryan Reynolds, Chris Hemsworth, Zac Efron",
-    traits: "Enthusiastic, spontaneous, fun-loving, friendly, charming, practical, stylish, energetic"
+    description: "Spontaneous performers who bring contagious enthusiasm to life. Entertainers live for the moment, creating joy through their warmth, style, and practical approach to fun.",
+    celebrities: "Female: Miley Cyrus, Margot Robbie, Adele | Male: Jamie Foxx, Chris Hemsworth, Leonardo DiCaprio",
+    traits: "Enthusiastic, energetic, adaptable, friendly, practical, spontaneous, observant, stylish"
   }
 };
 
@@ -128,4 +128,4 @@ window.handleMbtiSelection = function(selectedType) {
     mbtiDescription.textContent = personality.description;
     mbtiCelebrities.textContent = "Notable examples: " + personality.celebrities;
   }
-}
+};
