@@ -457,22 +457,9 @@
                     </div>
                     <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
                       <option value="">--Select MBTI Type--</option>
-                      <option value="INTJ">INTJ - The Architect</option>
-                      <option value="INTP">INTP - The Logician</option>
-                      <option value="ENTJ">ENTJ - The Commander</option>
-                      <option value="ENTP">ENTP - The Debater</option>
-                      <option value="INFJ">INFJ - The Advocate</option>
-                      <option value="INFP">INFP - The Mediator</option>
-                      <option value="ENFJ">ENFJ - The Protagonist</option>
-                      <option value="ENFP">ENFP - The Campaigner</option>
-                      <option value="ISTJ">ISTJ - The Logistician</option>
-                      <option value="ISFJ">ISFJ - The Defender</option>
-                      <option value="ESTJ">ESTJ - The Executive</option>
-                      <option value="ESFJ">ESFJ - The Consul</option>
-                      <option value="ISTP">ISTP - The Virtuoso</option>
-                      <option value="ISFP">ISFP - The Adventurer</option>
-                      <option value="ESTP">ESTP - The Entrepreneur</option>
-                      <option value="ESFP">ESFP - The Entertainer</option>
+                      {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
+                        <option value="{{ type_code }}">{{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                      {% endfor %}
                     </select>
                     <div class="card mt-2" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
                       <div class="card-body">

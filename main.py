@@ -2045,6 +2045,23 @@ def personalize():
     # Set guest mode if accessed as guest
     if is_guest:
         session['guest_mode'] = True
+        
+    # Load MBTI types to make them available in the template
+    import json
+    try:
+        with open('static/js/mbti_types.js', 'r') as f:
+            # Extract the JSON part by getting text between first { and last }
+            content = f.read()
+            start = content.find('{')
+            end = content.rfind('}') + 1
+            if start > -1 and end > start:
+                mbti_json = content[start:end]
+                mbti_types = json.loads(mbti_json)
+            else:
+                mbti_types = {}
+    except Exception as e:
+        print(f"Error loading MBTI types: {e}")
+        mbti_types = {}
     """
     This route renders a form allowing the user to select or input
     personalizations for the NPC and user data.
@@ -2225,7 +2242,10 @@ Orgasm & Afterglow:
 
             # Extra orientation/relationship fields
             npc_sexual_orientation_options=NPC_SEXUAL_ORIENTATION_OPTIONS,
-            npc_relationship_goal_options=NPC_RELATIONSHIP_GOAL_OPTIONS
+            npc_relationship_goal_options=NPC_RELATIONSHIP_GOAL_OPTIONS,
+            
+            # MBTI types for dropdown
+            mbtiTypes=mbti_types
         )
 
 @app.route("/mid_game_personalize", methods=["GET", "POST"])
