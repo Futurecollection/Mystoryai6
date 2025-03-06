@@ -263,7 +263,8 @@ window.fillFormFields = function(characterKey) {
             occupation: "College Student/Escort",
             current_situation: "Balancing Studies and Work",
             environment: "Coffee Shop",
-            encounter_context: "Chance Meeting"
+            encounter_context: "Chance Meeting",
+            mbti_type: "ENFP"
         },
         emma: {
             name: "Emma Chen",
@@ -280,7 +281,8 @@ window.fillFormFields = function(characterKey) {
             occupation: "Tech CEO",
             current_situation: "Career-focused",
             environment: "Upscale Restaurant",
-            encounter_context: "Business Meeting"
+            encounter_context: "Business Meeting",
+            mbti_type: "ENTJ"
         },
         scarlett: {
             name: "Scarlett Winters",
@@ -297,7 +299,8 @@ window.fillFormFields = function(characterKey) {
             occupation: "Actress",
             current_situation: "Career on the Rise",
             environment: "Film Festival After-party",
-            encounter_context: "Industry Event"
+            encounter_context: "Industry Event",
+            mbti_type: "ENFJ"
         },
         olivia: {
             name: "Olivia Blake",
@@ -314,7 +317,8 @@ window.fillFormFields = function(characterKey) {
             occupation: "Graduate Student",
             current_situation: "Pursuing Higher Education",
             environment: "University Library",
-            encounter_context: "Study Session"
+            encounter_context: "Study Session",
+            mbti_type: "INFJ"
         },
         jennifer: {
             name: "Jennifer Hayes",
@@ -488,6 +492,11 @@ window.fillFormFields = function(characterKey) {
     setSelectOrCustom('npc_current_situation', character.current_situation);
     setSelectOrCustom('environment', character.environment);
     setSelectOrCustom('encounter_context', character.encounter_context);
+    
+    // Set MBTI type if available
+    if (character.mbti_type) {
+        setSelectOrCustom('npc_mbti_type', character.mbti_type);
+    }
 
     // Helper function to set select or custom input
     function setSelectOrCustom(fieldName, value) {
@@ -503,6 +512,16 @@ window.fillFormFields = function(characterKey) {
                 // If not, set it as a custom value
                 select.value = "";
                 custom.value = value;
+            }
+        } else if (select && !custom) {
+            // For dropdowns without custom input field (like MBTI)
+            if (select.querySelector(`option[value="${value}"]`)) {
+                select.value = value;
+                
+                // If this is the MBTI dropdown, trigger the description update
+                if (fieldName === "npc_mbti_type" && typeof window.handleMbtiSelection === 'function') {
+                    window.handleMbtiSelection(value);
+                }
             }
         }
     }

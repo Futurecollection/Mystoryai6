@@ -101,8 +101,9 @@
     </div>
   </div>
 
-  <!-- Add script for handling character biographies -->
+  <!-- Add script for handling character biographies and MBTI types -->
   <script src="{{ url_for('static', filename='js/bios.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/mbti_types.js') }}"></script>
 
   <!-- Manual Customization Section -->
   <div id="manualCustomizationSection" style="display: none;">
@@ -447,6 +448,38 @@
                     </select>
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_personality_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+                  
+                  <div class="col-md-12 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">MBTI Personality Type</label>
+                    <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
+                      <i class="bi bi-info-circle"></i> The Myers-Briggs personality type will influence your character's traits, decision-making process, and interaction style.
+                    </div>
+                    <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
+                      <option value="">--Select MBTI Type--</option>
+                      <option value="INTJ">INTJ - The Architect</option>
+                      <option value="INTP">INTP - The Logician</option>
+                      <option value="ENTJ">ENTJ - The Commander</option>
+                      <option value="ENTP">ENTP - The Debater</option>
+                      <option value="INFJ">INFJ - The Advocate</option>
+                      <option value="INFP">INFP - The Mediator</option>
+                      <option value="ENFJ">ENFJ - The Protagonist</option>
+                      <option value="ENFP">ENFP - The Campaigner</option>
+                      <option value="ISTJ">ISTJ - The Logistician</option>
+                      <option value="ISFJ">ISFJ - The Defender</option>
+                      <option value="ESTJ">ESTJ - The Executive</option>
+                      <option value="ESFJ">ESFJ - The Consul</option>
+                      <option value="ISTP">ISTP - The Virtuoso</option>
+                      <option value="ISFP">ISFP - The Adventurer</option>
+                      <option value="ESTP">ESTP - The Entrepreneur</option>
+                      <option value="ESFP">ESFP - The Entertainer</option>
+                    </select>
+                    <div class="card mt-2" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
+                      <div class="card-body">
+                        <p id="mbtiDescription" style="color: #ffd0d0; font-style: italic;">Select an MBTI type to view the description.</p>
+                        <p id="mbtiCelebrities" style="color: #ff5789;"></p>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="col-md-6">

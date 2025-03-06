@@ -565,6 +565,12 @@ def build_personalization_string() -> str:
     Returns a multi-line string describing the NPC and user data
     that the LLM should not contradict.
     """
+    mbti_type = session.get('npc_mbti_type', '')
+    mbti_desc = ""
+    
+    if mbti_type:
+        mbti_desc = f"  MBTI Type: {mbti_type}\n"
+        
     npc_data = (
         f"NPC:\n"
         f"  Name: {session.get('npc_name','?')}\n"
@@ -578,6 +584,7 @@ def build_personalization_string() -> str:
         f"  HairStyle: {session.get('npc_hair_style','?')}\n"
         f"  Clothing: {session.get('npc_clothing','?')}\n"
         f"  Personality: {session.get('npc_personality','?')}\n"
+        f"{mbti_desc}"
         f"  Occupation: {session.get('npc_occupation','?')}\n"
         f"  CurrentSituation: {session.get('npc_current_situation','?')}\n"
         f"  Instructions: {session.get('npc_instructions','')}\n"
@@ -642,6 +649,9 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
                         encounter_context, user_name) -> str:
     """Use the LLM to generate a structured, Wikipedia-style biography with available information."""
     
+    # Get MBTI personality type if available
+    mbti_type = session.get('npc_mbti_type', '')
+    
     # Create a summary of what we know for sure (non-? values)
     known_details = []
     if name != 'Unknown': known_details.append(f"Name: {name}")
@@ -663,12 +673,17 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
     
     known_info = "\n".join(known_details)
     
+    # Add MBTI type info to the known details if available
+    mbti_info = ""
+    if mbti_type:
+        mbti_info = f"\nMBTI Personality Type: {mbti_type}"
+        
     prompt = f"""
     Create a structured, Wikipedia-style biography for {name} in an interactive romance story.
     Use proper Markdown formatting with clear sections and headings.
     
     KNOWN CHARACTER DETAILS:
-    {known_info if known_details else "Limited information available. Create a compelling character from scratch."}
+    {known_info if known_details else "Limited information available. Create a compelling character from scratch."}{mbti_info}
     
     STRUCTURE REQUIREMENTS:
     1. Start with "# {name}" as the main heading
@@ -690,6 +705,8 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
     - In "Appearance" section: Detail physical characteristics beyond the basics (mannerisms, style preferences)
     - In "Interests & Hobbies" section: Include at least 3-5 hobbies or interests that shape their character
     - In "Relationship Status" section: Mention their current dating status and include initial impressions of meeting {user_name}
+    
+    {f"IMPORTANT MBTI PERSONALITY GUIDANCE: The character has a {mbti_type} personality type. Ensure their behavior, thinking patterns, decision-making style, and interaction approach are consistent with this type. Include specific MBTI traits in the Personality section." if mbti_type else ""}
     
     IMPORTANT REQUIREMENTS:
     - Ensure all characters are adults (20+ years old)
@@ -1578,7 +1595,8 @@ def update_npc_info(form):
         "npc_personality",
         "npc_clothing",
         "npc_occupation",
-        "npc_current_situation"
+        "npc_current_situation",
+        "npc_mbti_type"
     ]
     for key in npc_fields:
         value = merge_dd(form, key, key + "_custom")
