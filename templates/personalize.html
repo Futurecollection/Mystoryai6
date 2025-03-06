@@ -1,0 +1,745 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if session.npc_name %}
+<div class="mb-4">
+  <a href="{{ url_for('interaction') }}" class="btn btn-success btn-lg">
+    <i class="bi bi-arrow-right-circle"></i> Continue Interaction
+  </a>
+</div>
+{% endif %}
+<h1 class="mb-4" style="color: #ff5789; text-shadow: 1px 1px 3px rgba(0,0,0,0.2);">
+  <i class="bi bi-person-heart"></i> Character Personalization
+</h1>
+
+{% if has_previous_session and session.get('logged_in') %}
+<div class="mb-4">
+  <a href="{{ url_for('continue_session') }}" class="btn btn-success btn-lg">
+    <i class="bi bi-box-arrow-in-right"></i> Continue Previous Session
+  </a>
+</div>
+{% endif %}
+
+<div class="mb-4">
+  <h3 style="color: #f8d0d0; border-bottom: 2px solid #ff5789; padding-bottom: 8px;">
+    <i class="bi bi-palette"></i> Choose Your Creation Method
+  </h3>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+          <h5 class="card-title mb-0"><i class="bi bi-journal-text"></i> Option 1: Premade Character</h5>
+        </div>
+        <div class="card-body" style="background-color: #3b0b0b;">
+          <p class="card-text" style="color: #ffd0d0;">Start with a complete character biography and let the AI interpret the details. Perfect for when you have a specific character in mind.</p>
+          <button type="button" class="btn" style="background-color: #ff5789; color: white; font-weight: bold;" id="premadeBioBtn">
+            <i class="bi bi-file-person"></i> Use Premade Character
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card" style="background-color: #4a0d0d; border: 1px solid #ff5789; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+          <h5 class="card-title mb-0"><i class="bi bi-sliders"></i> Option 2: Custom Creation</h5>
+        </div>
+        <div class="card-body" style="background-color: #3b0b0b;">
+          <p class="card-text" style="color: #ffd0d0;">Build your perfect character trait by trait. Control every aspect of your character's appearance, personality, and background.</p>
+          <button type="button" class="btn" style="background-color: #ff5789; color: white; font-weight: bold;" id="manualCustomizationBtn">
+            <i class="bi bi-tools"></i> Create Custom Character
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form method="POST">
+  <!-- Premade Bio Section -->
+  <div id="premadeBioSection" style="display: none;">
+    <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <h3 class="mb-0"><i class="bi bi-journal-richtext"></i> Character Template</h3>
+      </div>
+      <div class="card-body" style="background-color: #3b0b0b;">
+        <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
+          <i class="bi bi-eye-fill"></i> Below is a preview of the selected character bio. These details will be used to fill your NPC's information.
+        </div>
+        <div id="bioPreview" style="max-height: 300px; overflow-y: auto; background-color: #2a0808; padding: 15px; border-radius: 5px; margin-bottom: 15px; white-space: pre-wrap; color: #ffd0d0; font-size: 1.8rem;">Select a character to see their biography</div>
+        <div id="sampleResponsesPreview" style="max-height: 200px; overflow-y: auto; background-color: #2a0808; padding: 15px; border-radius: 5px; margin-bottom: 15px; display: none;">
+          <h4 style="color: #ff5789; margin-bottom: 10px;">Sample Responses</h4>
+          <div class="sample-responses-content" style="color: #ffd0d0;"></div>
+        </div>
+        <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+          <i class="bi bi-info-circle"></i> Choose a predefined character or paste your own character biography. The AI will extract all relevant details.
+        </div>
+        <select class="form-select mb-3" id="predefinedBios" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+          <option value="">--Select Predefined Character--</option>
+          <!-- Female Characters -->
+          <option value="lily">College Student/Escort - Lily Parker (Explicit)</option>
+          <option value="emma">Tech CEO - Emma Chen</option>
+          <option value="scarlett">Hollywood Actress - Scarlett Winters</option>
+          <option value="olivia">Bookish Student - Olivia Blake (Emma Watson Type)</option>
+          <option value="jennifer">Spacecraft Engineer - Jennifer Hayes (Jennifer Lawrence Type)</option>
+          <option value="sophia">Nightclub Owner - Sophia Rodriguez</option>
+          <option value="cassie">Girl Next Door - Cassie Reynolds</option>
+          <option value="aurora">Sexual & Adventurous - Aurora Miller (Explicit)</option>
+          <option value="alex">Dominant Tattoo Artist - Alexandria Carter (Very Explicit)</option>
+          <!-- Male Characters -->
+          <option value="henry">Fitness Entrepreneur - Henry Fielding</option>
+          <option value="chris">Marine Biologist - Christopher Reynolds</option>
+        </select>
+        <input type="hidden" id="bioTextArea">
+        <input type="hidden" name="bioText" id="bioText">
+        <input type="hidden" name="npc_backstory" id="bioText">
+        <div class="mt-3 text-center">
+          <button type="button" class="btn btn-lg" id="continueToPersonalizationBtn" style="background-color: #ff5789; color: white; font-weight: bold;">
+            <i class="bi bi-arrow-right-circle"></i> Continue to Personalization
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add script for handling character biographies and MBTI types -->
+  <script src="{{ url_for('static', filename='js/bios.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/mbti_types.js') }}"></script>
+
+  <!-- Manual Customization Section -->
+  <div id="manualCustomizationSection" style="display: none;">
+
+    <!-- USER Section -->
+    <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <h3 class="mb-0"><i class="bi bi-person-circle"></i> Your Character</h3>
+      </div>
+      <div class="card-body" style="background-color: #3b0b0b;">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Your Name</label>
+            <select class="form-select mb-1" name="user_name" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+              <option value="">--Select--</option>
+              {% for uname in user_name_options %}
+                <option value="{{ uname }}">{{ uname }}</option>
+              {% endfor %}
+            </select>
+            <label style="color: #f8d0d0;">Or custom:</label>
+            <input type="text" class="form-control" name="user_name_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Your Age</label>
+            <select class="form-select mb-1" name="user_age" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+              <option value="">--Select--</option>
+              {% for uage in user_age_options %}
+                <option value="{{ uage }}">{{ uage }}</option>
+              {% endfor %}
+            </select>
+            <label style="color: #f8d0d0;">Or custom:</label>
+            <input type="number" min="20" class="form-control" name="user_age_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+          </div>
+          <div class="col-md-12 mt-3">
+            <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Your Background <small>(occupation, interests, brief history)</small></label>
+            <textarea class="form-control" name="user_background" rows="3" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NPC Section -->
+    <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <h3 class="mb-0"><i class="bi bi-person-heart"></i> Your Character's Love Interest</h3>
+      </div>
+      <div class="card-body" style="background-color: #3b0b0b;">
+        <div class="row">
+          <!-- Basic Details Tab System -->
+          <div class="col-12 mb-3">
+            <ul class="nav nav-tabs" id="npcDetailsTabs" role="tablist" style="border-bottom: 1px solid #ff5789;">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basics-tab" data-bs-toggle="tab" data-bs-target="#basics" type="button" role="tab" aria-controls="basics" aria-selected="true" style="background-color: #5f1c1c; color: #f8d0d0; border: 1px solid #ff5789;">
+                  Basic Info
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance" type="button" role="tab" aria-controls="appearance" aria-selected="false" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #ff5789;">
+                  Appearance
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="personality-tab" data-bs-toggle="tab" data-bs-target="#personality" type="button" role="tab" aria-controls="personality" aria-selected="false" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #ff5789;">
+                  Personality
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="context-tab" data-bs-toggle="tab" data-bs-target="#context" type="button" role="tab" aria-controls="context" aria-selected="false" style="background-color: #3b0b0b; color: #f8d0d0; border: 1px solid #ff5789;">
+                  Context
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-12">
+            <div class="tab-content" id="npcDetailsContent">
+              <!-- Basic Info Tab -->
+              <div class="tab-pane fade show active" id="basics" role="tabpanel" aria-labelledby="basics-tab">
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Name</label>
+                    <select class="form-select mb-1" name="npc_name" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      {% for nn in npc_name_options %}
+                        <option value="{{ nn }}">{{ nn }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_name_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Gender</label>
+                    <select class="form-select mb-1" name="npc_gender" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_gender_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+      <!-- NPC Sexual Orientation & Relationship Goal -->
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Age</label>
+                    <select class="form-select mb-1" name="npc_age" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      {% for na in npc_age_options %}
+                        <option value="{{ na }}">{{ na }}</option>
+                      {% endfor %}
+                      <option value="22">22</option>
+                      <option value="24">24</option>
+                      <option value="28">28</option>
+                      <option value="32">32</option>
+                      <option value="37">37</option>
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="number" min="20" class="form-control" name="npc_age_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Sexual Orientation</label>
+                    <select class="form-select mb-1" name="npc_sexual_orientation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Straight">Straight</option>
+                      <option value="Bisexual">Bisexual</option>
+                      <option value="Gay/Lesbian">Gay/Lesbian</option>
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_sexual_orientation_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Relationship Goal</label>
+                    <select class="form-select mb-1" name="npc_relationship_goal" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Casual Dating">Casual Dating</option>
+                      <option value="Serious Relationship">Serious Relationship</option>
+                      <option value="Friends with Benefits">Friends with Benefits</option>
+                      <option value="Marriage-Minded">Marriage-Minded</option>
+                      <option value="Open to Anything">Open to Anything</option>
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_relationship_goal_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Occupation</label>
+                    <select class="form-select mb-1" name="npc_occupation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="College Student">College Student</option>
+                      <option value="Teacher">Teacher</option>
+                      <option value="Nurse">Nurse</option>
+                      <option value="Doctor">Doctor</option>
+                      <option value="Lawyer">Lawyer</option>
+                      <option value="Engineer">Engineer</option>
+                      <option value="Artist">Artist</option>
+                      <option value="Musician">Musician</option>
+                      <option value="Chef">Chef</option>
+                      <option value="Business Executive">Business Executive</option>
+                      <option value="Entrepreneur">Entrepreneur</option>
+                      <option value="Fitness Trainer">Fitness Trainer</option>
+                      <option value="Bartender">Bartender</option>
+                      <option value="Writer">Writer</option>
+                      <option value="Model">Model</option>
+                      <option value="Police Officer">Police Officer</option>
+                      <option value="Firefighter">Firefighter</option>
+                      {% for occ in occupation_options %}
+                        <option value="{{ occ }}">{{ occ }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_occupation_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Appearance Tab -->
+              <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Ethnicity</label>
+                    <select class="form-select mb-1" name="npc_ethnicity" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Caucasian">Caucasian</option>
+                      <option value="Black/African">Black/African</option>
+                      <option value="Hispanic/Latina">Hispanic/Latina</option>
+                      <option value="Asian">Asian</option>
+                      <option value="Middle Eastern">Middle Eastern</option>
+                      <option value="Indian">Indian</option>
+                      <option value="Mixed Race">Mixed Race</option>
+                      {% for eth in ethnicity_options %}
+                        <option value="{{ eth }}">{{ eth }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_ethnicity_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+      <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Body Type</label>
+                    <select class="form-select mb-1" name="npc_body_type" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Athletic">Athletic</option>
+                      <option value="Slender">Slender</option>
+                      <option value="Curvy">Curvy</option>
+                      <option value="Voluptuous">Voluptuous</option>
+                      <option value="Petite">Petite</option>
+                      <option value="Toned">Toned</option>
+                      <option value="Muscular">Muscular</option>
+                      <option value="Broad-shouldered">Broad-shouldered</option>
+                      <option value="Slim">Slim</option>
+                      <option value="Tall">Tall</option>
+                      <option value="Average">Average</option>
+                      {% for bopt in body_type_options %}
+                        <option value="{{ bopt }}">{{ bopt }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_body_type_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Hair Color</label>
+                    <select class="form-select mb-1" name="npc_hair_color" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Blonde">Blonde</option>
+                      <option value="Dark Blonde">Dark Blonde</option>
+                      <option value="Platinum Blonde">Platinum Blonde</option>
+                      <option value="Brunette">Brunette</option>
+                      <option value="Light Brown">Light Brown</option>
+                      <option value="Dark Brown">Dark Brown</option>
+                      <option value="Black">Black</option>
+                      <option value="Auburn">Auburn</option>
+                      <option value="Red">Red</option>
+                      <option value="Ginger">Ginger</option>
+                      <option value="Chestnut">Chestnut</option>
+                      <option value="Silver">Silver</option>
+                      <option value="Grey">Grey</option>
+                      <option value="Blue (Dyed)">Blue (Dyed)</option>
+                      <option value="Purple (Dyed)">Purple (Dyed)</option>
+                      <option value="Pink (Dyed)">Pink (Dyed)</option>
+                      <option value="Green (Dyed)">Green (Dyed)</option>
+                      <option value="Multi-colored">Multi-colored</option>
+                      {% for hc in hair_color_options %}
+                        <option value="{{ hc }}">{{ hc }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_hair_color_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Hair Style</label>
+                    <select class="form-select mb-1" name="npc_hair_style" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Long and Straight">Long and Straight</option>
+                      <option value="Long and Wavy">Long and Wavy</option>
+                      <option value="Long and Curly">Long and Curly</option>
+                      <option value="Medium-length Straight">Medium-length Straight</option>
+                      <option value="Medium-length Wavy">Medium-length Wavy</option>
+                      <option value="Bob Cut">Bob Cut</option>
+                      <option value="Pixie Cut">Pixie Cut</option>
+                      <option value="Ponytail">Ponytail</option>
+                      <option value="Bun">Bun</option>
+                      <option value="Short and Styled">Short and Styled</option>
+                      <option value="Buzz Cut">Buzz Cut</option>
+                      <option value="Crew Cut">Crew Cut</option>
+                      <option value="Side Part">Side Part</option>
+                      <option value="Slicked Back">Slicked Back</option>
+                      <option value="Mohawk">Mohawk</option>
+                      <option value="Fade">Fade</option>
+                      <option value="Undercut">Undercut</option>
+                      <option value="Braids">Braids</option>
+                      <option value="Dreadlocks">Dreadlocks</option>
+                      {% for hs in hair_style_options %}
+                        <option value="{{ hs }}">{{ hs }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_hair_style_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Clothing Style</label>
+                    <select class="form-select mb-1" name="npc_clothing" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Casual - Jeans and T-shirt">Casual - Jeans and T-shirt</option>
+                      <option value="Casual - Hoodie and Leggings">Casual - Hoodie and Leggings</option>
+                      <option value="Business Attire - Suit">Business Attire - Suit</option>
+                      <option value="Business Casual - Blazer">Business Casual - Blazer</option>
+                      <option value="Professional - Dress Shirt and Slacks">Professional - Dress Shirt and Slacks</option>
+                      <option value="Formal - Evening Gown">Formal - Evening Gown</option>
+                      <option value="Formal - Tuxedo">Formal - Tuxedo</option>
+                      <option value="Athleisure - Workout Clothes">Athleisure - Workout Clothes</option>
+                      <option value="Summer - Shorts and Tank Top">Summer - Shorts and Tank Top</option>
+                      <option value="Summer Dress">Summer Dress</option>
+                      <option value="Vintage Style">Vintage Style</option>
+                      <option value="Goth/Alternative">Goth/Alternative</option>
+                      <option value="Preppy Style">Preppy Style</option>
+                      <option value="Bohemian/Boho">Bohemian/Boho</option>
+                      <option value="Trendy Fashion">Trendy Fashion</option>
+                      <option value="Smart Casual">Smart Casual</option>
+                      <option value="Uniform">Uniform</option>
+                      {% for copt in clothing_options %}
+                        <option value="{{ copt }}">{{ copt }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_clothing_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Personality Tab -->
+              <div class="tab-pane fade" id="personality" role="tabpanel" aria-labelledby="personality-tab">
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Personality Traits</label>
+
+                    <select class="form-select mb-1" name="npc_personality" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Confident and Outgoing">Confident and Outgoing</option>
+                      <option value="Shy and Reserved">Shy and Reserved</option>
+                      <option value="Flirty and Playful">Flirty and Playful</option>
+                      <option value="Serious and Thoughtful">Serious and Thoughtful</option>
+                      <option value="Kind and Nurturing">Kind and Nurturing</option>
+                      <option value="Ambitious and Driven">Ambitious and Driven</option>
+                      <option value="Creative and Artistic">Creative and Artistic</option>
+                      <option value="Intellectual and Analytical">Intellectual and Analytical</option>
+                      <option value="Adventurous and Spontaneous">Adventurous and Spontaneous</option>
+                      <option value="Passionate and Intense">Passionate and Intense</option>
+                      <option value="Mischievous and Fun">Mischievous and Fun</option>
+                      <option value="Quiet but Confident">Quiet but Confident</option>
+                      <option value="Witty and Sarcastic">Witty and Sarcastic</option>
+                      <option value="Mysterious and Intriguing">Mysterious and Intriguing</option>
+                      <option value="Dominant and Assertive">Dominant and Assertive</option>
+                      <option value="Sweet and Innocent">Sweet and Innocent</option>
+                      <option value="Bad Boy/Girl with Heart of Gold">Bad Boy/Girl with Heart of Gold</option>
+                      <option value="Caring and Supportive">Caring and Supportive</option>
+                      {% for persopt in npc_personality_options %}
+                        <option value="{{ persopt }}">{{ persopt }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_personality_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+                  
+                  <div class="col-md-12 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">MBTI Personality Type</label>
+                    <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
+                      <i class="bi bi-info-circle"></i> The Myers-Briggs personality type will influence your character's traits, decision-making process, and interaction style.
+                    </div>
+                    <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
+                      <option value="">--Select MBTI Type--</option>
+                      {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
+                        <option value="{{ type_code }}">{{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                      {% endfor %}
+                    </select>
+                    <div class="card mt-2" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
+                      <div class="card-body">
+                        <p id="mbtiDescription" style="color: #ffd0d0; font-style: italic;">Select an MBTI type to view the description.</p>
+                        <p id="mbtiCelebrities" style="color: #ff5789;"></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Current Life Situation</label>
+                    <select class="form-select mb-1" name="npc_current_situation" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Single for a while">Single for a while</option>
+                      <option value="Recently out of relationship">Recently out of relationship</option>
+                      <option value="Recovering from breakup">Recovering from breakup</option>
+                      <option value="New in town">New in town</option>
+                      <option value="Career-focused">Career-focused</option>
+                      <option value="In career transition">In career transition</option>
+                      <option value="Finishing studies">Finishing studies</option>
+                      <option value="Recently graduated">Recently graduated</option>
+                      <option value="Taking a sabbatical">Taking a sabbatical</option>
+                      <option value="Exploring life options">Exploring life options</option>
+                      <option value="Pursuing a passion project">Pursuing a passion project</option>
+                      <option value="Long-term single, ready to date">Long-term single, ready to date</option>
+                      <option value="Independent but open to connection">Independent but open to connection</option>
+                      <option value="Living with roommates">Living with roommates</option>
+                      <option value="Just moved into own place">Just moved into own place</option>
+                      {% for cs in current_situation_options %}
+                        <option value="{{ cs }}">{{ cs }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="npc_current_situation_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-12 mt-3">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Character Backstory <small>(optional)</small></label>
+                    <textarea class="form-control" name="npc_backstory" rows="4" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" 
+                              placeholder="Add any additional details about the character's past, interests, or other information that defines them..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Context Tab -->
+              <div class="tab-pane fade" id="context" role="tabpanel" aria-labelledby="context-tab">
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Meeting Location</label>
+                    <select class="form-select mb-1" name="environment" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="Coffee Shop">Coffee Shop</option>
+                      <option value="Restaurant">Restaurant</option>
+                      <option value="Bar/Nightclub">Bar/Nightclub</option>
+                      <option value="Art Gallery">Art Gallery</option>
+                      <option value="Bookstore">Bookstore</option>
+                      <option value="Park">Park</option>
+                      <option value="Beach">Beach</option>
+                      <option value="University Campus">University Campus</option>
+                      <option value="Office Building">Office Building</option>
+                      <option value="Gym/Fitness Center">Gym/Fitness Center</option>
+                      <option value="Music Festival">Music Festival</option>
+                      <option value="Yoga Class">Yoga Class</option>
+                      <option value="Concert">Concert</option>
+                      <option value="Wedding">Wedding</option>
+                      <option value="Friend's House Party">Friend's House Party</option>
+                      <option value="Shopping Mall">Shopping Mall</option>
+                      <option value="Hiking Trail">Hiking Trail</option>
+                      <option value="Ski Resort">Ski Resort</option>
+                      <option value="Airport/Flight">Airport/Flight</option>
+                      <option value="Hotel Lobby">Hotel Lobby</option>
+                      <option value="Library">Library</option>
+                      <option value="Museum">Museum</option>
+                      <option value="Theater">Theater</option>
+                      <option value="Sports Event">Sports Event</option>
+                      {% for envopt in environment_options %}
+                        <option value="{{ envopt }}">{{ envopt }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="environment_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Meeting Context</label>
+                    <select class="form-select mb-1" name="encounter_context" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                      <option value="">--Select--</option>
+                      <option value="First Date">First Date</option>
+                      <option value="Blind Date">Blind Date</option>
+                      <option value="Dating App Match">Dating App Match</option>
+                      <option value="Random Encounter">Random Encounter</option>
+                      <option value="Old Friends Reconnecting">Old Friends Reconnecting</option>
+                      <option value="Coworkers">Coworkers</option>
+                      <option value="Classmates">Classmates</option>
+                      <option value="Neighbors">Neighbors</option>
+                      <option value="Friend's Introduction">Friend's Introduction</option>
+                      <option value="Business Meeting">Business Meeting</option>
+                      <option value="Shared Hobby/Class">Shared Hobby/Class</option>
+                      <option value="Vacation Encounter">Vacation Encounter</option>
+                      <option value="Party Meeting">Party Meeting</option>
+                      <option value="Childhood Friends">Childhood Friends</option>
+                      <option value="Chance Meeting">Chance Meeting</option>
+                      <option value="Professional Consultation">Professional Consultation</option>
+                      <option value="Social Event">Social Event</option>
+                      {% for ctxopt in encounter_context_options %}
+                        <option value="{{ ctxopt }}">{{ ctxopt }}</option>
+                      {% endfor %}
+                    </select>
+                    <label style="color: #f8d0d0;">Or custom:</label>
+                    <input type="text" class="form-control" name="encounter_context_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4 mt-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
+      <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
+        <h3 class="mb-0"><i class="bi bi-gear"></i> Additional Settings</h3>
+      </div>
+      <div class="card-body" style="background-color: #3b0b0b;">
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="use_single_seed" value="yes" id="useSingleSeedCheck" style="border: 1px solid #6d1d1d;">
+          <label class="form-check-label" for="useSingleSeedCheck" style="color: #f8d0d0;">
+            Use the same seed for all images (for consistent character appearance)
+          </label>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End manualCustomizationSection -->
+
+  <div class="text-center mt-4 mb-5">
+    <button type="submit" name="save_personalization" value="true" class="btn btn-lg" style="background-color: #ff5789; color: white; font-weight: bold; padding: 12px 30px; border-radius: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+      <i class="bi bi-heart-fill"></i> Create Your Character
+    </button>
+  </div>
+</form>
+
+<script>
+// Initialize tabs if Bootstrap is available
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up click handlers for the main option buttons
+  document.getElementById('premadeBioBtn').addEventListener('click', function() {
+    document.getElementById('premadeBioSection').style.display = 'block';
+    document.getElementById('manualCustomizationSection').style.display = 'none';
+    
+    // Initialize the bio preview
+    const bioPreview = document.getElementById('bioPreview');
+    if (bioPreview) {
+      bioPreview.textContent = "Select a character to see their biography";
+    }
+  });
+  
+  document.getElementById('manualCustomizationBtn').addEventListener('click', function() {
+    document.getElementById('premadeBioSection').style.display = 'none';
+    document.getElementById('manualCustomizationSection').style.display = 'block';
+  });
+  
+  // Set up the continue button in the premade bio section
+  document.getElementById('continueToPersonalizationBtn').addEventListener('click', function() {
+    const select = document.getElementById('predefinedBios');
+    if (select && select.value && window.characterBios && select.value in window.characterBios) {
+      // Transfer the selected bio to the backstory field
+      const bioText = window.characterBios[select.value].bio || '';
+      document.getElementById('bioText').value = bioText;
+      
+      // Fill the form with the character's data
+      window.fillFormFields(select.value);
+      console.log("Filling form fields for character:", select.value);
+    } else {
+      console.log("No valid character selected or character data not found");
+    }
+    
+    // Show the manual customization section
+    document.getElementById('premadeBioSection').style.display = 'none';
+    document.getElementById('manualCustomizationSection').style.display = 'block';
+  });
+  
+  // Set up the bio selection dropdown
+  const bioDropdown = document.getElementById('predefinedBios');
+  bioDropdown.addEventListener('change', function() {
+    const bioPreview = document.getElementById('bioPreview');
+    const textarea = document.getElementById('bioTextArea');
+    const hiddenInput = document.getElementById('bioText');
+    const sampleResponsesPreview = document.getElementById('sampleResponsesPreview');
+    const sampleResponsesContent = sampleResponsesPreview ? sampleResponsesPreview.querySelector('.sample-responses-content') : null;
+    
+    if (window.characterBios && this.value in window.characterBios) {
+      const character = window.characterBios[this.value];
+      const bioText = character.bio || '';
+      
+      // Update biography text
+      if (bioPreview) bioPreview.textContent = bioText;
+      if (textarea) textarea.value = bioText;
+      if (hiddenInput) hiddenInput.value = bioText;
+      
+      // Update sample responses if they exist
+      if (sampleResponsesPreview && sampleResponsesContent) {
+        if (character.sample_responses) {
+          // Clear previous content
+          sampleResponsesContent.innerHTML = '';
+          
+          // Create HTML for sample responses
+          for (const [phase, responses] of Object.entries(character.sample_responses)) {
+            // Create phase header
+            const phaseTitle = document.createElement('h5');
+            phaseTitle.style.color = '#ff9bbb';
+            phaseTitle.style.marginTop = '15px';
+            phaseTitle.style.marginBottom = '8px';
+            phaseTitle.textContent = phase.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            sampleResponsesContent.appendChild(phaseTitle);
+            
+            // Create response list
+            const responseList = document.createElement('ul');
+            responseList.style.paddingLeft = '20px';
+            
+            responses.forEach(response => {
+              const responseItem = document.createElement('li');
+              responseItem.textContent = response;
+              responseItem.style.marginBottom = '5px';
+              responseList.appendChild(responseItem);
+            });
+            
+            sampleResponsesContent.appendChild(responseList);
+          }
+          
+          sampleResponsesPreview.style.display = 'block';
+        } else {
+          sampleResponsesPreview.style.display = 'none';
+        }
+      }
+    } else {
+      if (bioPreview) bioPreview.textContent = "Select a character to see their biography";
+      if (textarea) textarea.value = "";
+      if (hiddenInput) hiddenInput.value = "";
+      if (sampleResponsesPreview) sampleResponsesPreview.style.display = 'none';
+    }
+  });
+    // Ensure Bootstrap is loaded and accessible
+    if (typeof bootstrap !== 'undefined') {
+      const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
+      triggerTabList.forEach(function(triggerEl) {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+
+        triggerEl.addEventListener('click', function(event) {
+          event.preventDefault();
+          tabTrigger.show();
+        });
+      });
+    } else {
+      console.error('Bootstrap is not available - tabs may not function correctly');
+      // Fallback for when Bootstrap JS is not loaded
+      const tabButtons = document.querySelectorAll('#npcDetailsTabs button');
+      const tabPanes = document.querySelectorAll('.tab-pane');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons and panes
+          tabButtons.forEach(b => b.classList.remove('active'));
+          tabPanes.forEach(p => {
+            p.classList.remove('show', 'active');
+          });
+
+          // Add active class to clicked button
+          this.classList.add('active');
+
+          // Show the corresponding pane
+          const targetId = this.getAttribute('data-bs-target').substring(1);
+          const targetPane = document.getElementById(targetId);
+          if (targetPane) {
+            targetPane.classList.add('show', 'active');
+          }
+        });
+      });
+    }
+  });
+</script>
+
+{% endblock %}
