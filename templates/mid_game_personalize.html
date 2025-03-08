@@ -465,9 +465,9 @@
                   <option value="">--Select MBTI Type--</option>
                   {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
                     {% if type_code == session.get('npc_mbti_type') %}
-                      <option value="{{ type_code }}" selected>{{ type_code }} - {{ mbtiTypes[type_code].name.split(" - ")[1] if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                      <option value="{{ type_code }}" selected>{{ type_code }} - {{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
                     {% else %}
-                      <option value="{{ type_code }}">{{ type_code }} - {{ mbtiTypes[type_code].name.split(" - ")[1] if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                      <option value="{{ type_code }}">{{ type_code }} - {{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
                     {% endif %}
                   {% endfor %}
                 </select>
