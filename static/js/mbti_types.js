@@ -1,52 +1,51 @@
-
 // Myers-Briggs personality types with descriptions and celebrity examples
 window.mbtiTypes = {
   "INTJ": {
     "name": "INTJ - The Architect",
-    "description": "INTJs are analytical problem-solvers, eager to improve systems and processes with their innovative ideas. They have a talent for seeing possibilities for improvement, whether at work, at home, or in themselves.",
-    "celebrities": "Female: Natalie Portman, Jodie Foster, Gillian Anderson | Male: Christopher Nolan, Elon Musk, Stephen Hawking",
-    "traits": "Strategic, independent, innovative, analytical, determined, perfectionist"
+    "description": "INTJs are analytical problem-solvers, eager to improve systems and processes with their innovative ideas. They have a talent for seeing possibilities for improvement, whether at work, at home, or in themselves. Often intellectual, they value logic, knowledge, and competence.",
+    "celebrities": "Female: Jane Austen, Hillary Clinton, Michelle Obama | Male: Elon Musk, Stephen Hawking, Mark Zuckerberg",
+    "traits": "Strategic, independent, innovative, logical, reserved, insightful"
   },
   "INTP": {
     "name": "INTP - The Logician",
-    "description": "INTPs are philosophical innovators, fascinated by logical analysis, systems, and design. They are preoccupied with theory, and search for the universal law behind everything they see. They want to understand the unifying themes of life, in all their complexity.",
-    "celebrities": "Female: Emma Watson, Marie Curie, Tina Fey | Male: Albert Einstein, Bill Gates, Keanu Reeves",
-    "traits": "Logical, analytical, curious, theoretical, abstract, imaginative"
+    "description": "INTPs are philosophical innovators, fascinated by logical analysis, systems, and design. They value knowledge, seeking patterns and connections that reveal underlying principles. INTPs are deeply theoretical, focusing on possibilities beyond the present.",
+    "celebrities": "Female: Marie Curie, Emma Watson, Clara Bow | Male: Albert Einstein, Socrates, Bill Gates",
+    "traits": "Analytical, objective, conceptual, curious, adaptable, theoretical"
   },
   "ENTJ": {
     "name": "ENTJ - The Commander",
-    "description": "ENTJs are strategic leaders, motivated to organize change. They are quick to see inefficiency and conceptualize new solutions, and enjoy developing long-range plans to accomplish their vision. They excel at logical reasoning and are usually articulate and quick-witted.",
-    "celebrities": "Female: Margaret Thatcher, Whoopi Goldberg, Charlize Theron | Male: Steve Jobs, Harrison Ford, Jim Carrey",
-    "traits": "Decisive, strategic, efficient, planners, ambitious, assertive"
+    "description": "ENTJs are strategic leaders, motivated by challenge and the desire to lead organizations toward logical, efficient results. They're quick to see opportunities for improvement and eager to implement ideas that create systemic, long-term solutions.",
+    "celebrities": "Female: Margaret Thatcher, Whoopi Goldberg, Charlize Theron | Male: Steve Jobs, Franklin D. Roosevelt, Gordon Ramsay",
+    "traits": "Determined, strategic, commanding, efficient, driven, ambitious"
   },
   "ENTP": {
     "name": "ENTP - The Debater",
-    "description": "ENTPs are inspired innovators, motivated to find new solutions to intellectually challenging problems. They are curious and clever, and seek to understand the people, systems, and principles that surround them. Open-minded and unconventional, they're often willing to consider any interesting idea.",
-    "celebrities": "Female: Amy Poehler, Celiné Dion, Catherine Zeta-Jones | Male: Robert Downey Jr., Leonardo DiCaprio, Neil deGrasse Tyson",
-    "traits": "Innovative, entrepreneurial, adaptable, debative, charming, intellectual"
+    "description": "ENTPs are inspired innovators, motivated by new ideas and championing improvement. Quick, clever, and curious, they create solutions to complex problems by connecting seemingly unrelated ideas. They're excited by challenges and thrive on debate.",
+    "celebrities": "Female: Amy Poehler, Celine Dion, Gillian Anderson | Male: Leonardo da Vinci, Thomas Edison, Hugh Laurie",
+    "traits": "Inventive, debating, adaptable, resourceful, outspoken, original"
   },
   "INFJ": {
     "name": "INFJ - The Advocate",
-    "description": "INFJs are idealistic, principled, and sensitive, with a deep concern for personal integrity and the welfare of other people. They often focus on a vision for the future and have mysterious, complex personalities. INFJs can see patterns and possibilities that others miss.",
-    "celebrities": "Female: Nicole Kidman, Cate Blanchett, Carey Mulligan | Male: Morgan Freeman, Al Pacino, Daniel Day-Lewis",
-    "traits": "Compassionate, determined, altruistic, creative, insightful, complex"
+    "description": "INFJs are creative nurturers with a strong sense of personal integrity and a drive to help others realize their potential. Complex and deeply intuitive, they have an uncanny insight into people and situations. INFJs care deeply about causes and people.",
+    "celebrities": "Female: Nicole Kidman, Oprah Winfrey, Lady Gaga | Male: Martin Luther King Jr., Nelson Mandela, Morgan Freeman",
+    "traits": "Insightful, compassionate, principled, complex, determined, idealistic"
   },
   "INFP": {
     "name": "INFP - The Mediator",
-    "description": "INFPs are imaginative idealists, guided by their own core values and beliefs. To a Mediator, possibilities are paramount; the reality of the moment is only of passing concern. They see potential for a better future, and pursue truth and meaning with their own flair.",
-    "celebrities": "Female: Audrey Hepburn, Princess Diana, Alicia Keys | Male: Johnny Depp, Keanu Reeves, Jude Law",
-    "traits": "Idealistic, empathetic, creative, nonconformist, introspective, gentle"
+    "description": "INFPs are imaginative idealists, guided by their own core values and beliefs. To a Mediator, possibilities are paramount; the reality of the moment is only of passing concern. They see potential for a better future and pursue truth and meaning in their own unique way.",
+    "celebrities": "Female: Audrey Hepburn, Winona Ryder, Julia Roberts | Male: William Shakespeare, J.R.R. Tolkien, Johnny Depp",
+    "traits": "Idealistic, empathetic, creative, authentic, curious, compassionate"
   },
   "ENFJ": {
     "name": "ENFJ - The Protagonist",
-    "description": "ENFJs are people-focused organizers, driven to implement their vision of what is best for humanity. They are charismatic and influential, naturally connecting with others, and building up organizations, ideas, and movements that benefit people.",
-    "celebrities": "Female: Oprah Winfrey, Zendaya, Emma Stone | Male: Barack Obama, Michael J. Fox, John Cusack",
-    "traits": "Charismatic, empathetic, reliable, natural leaders, passionate, altruistic"
+    "description": "ENFJs are charismatic and inspiring leaders, able to mesmerize their listeners. They are usually idealistic, with high values and a natural confidence that attracts others. They're at their best while helping others achieve personal growth.",
+    "celebrities": "Female: Oprah Winfrey, Maya Angelou, Jennifer Lawrence | Male: Barack Obama, Dr. Martin Luther King Jr., John Cusack",
+    "traits": "Charismatic, inspiring, empathetic, loyal, persuasive, supportive"
   },
   "ENFP": {
     "name": "ENFP - The Campaigner",
-    "description": "ENFPs are people-centered creators with a focus on possibilities and a contagious enthusiasm for new ideas, people and activities. Energetic, warm, and passionate, they bring a light-hearted, visionary spirit to any situation. If there's a crowd, they're at the center speaking with passion.",
-    "celebrities": "Female: Sandra Bullock, Drew Barrymore, Anne Hathaway | Male: Robin Williams, Robert Downey Jr., Quentin Tarantino",
+    "description": "ENFPs are people-centered creators with a focus on possibilities and a contagious enthusiasm for new ideas, people and activities. Energetic, warm, and passionate, ENFPs love to help others explore their creative potential.",
+    "celebrities": "Female: Ellen DeGeneres, Sandra Bullock, Jennifer Aniston | Male: Robin Williams, Robert Downey Jr., Mark Twain",
     "traits": "Enthusiastic, creative, sociable, free-spirited, energetic, optimistic"
   },
   "ISTJ": {
@@ -76,20 +75,20 @@ window.mbtiTypes = {
   "ISTP": {
     "name": "ISTP - The Virtuoso",
     "description": "ISTPs are observant artisans with an understanding of mechanics and an interest in troubleshooting. They approach their environments with quiet reserve and a sense of unpredictability. Ready to deviate from the rules they feel are irrelevant, they're tactical problem-solvers and hands-on workers.",
-    "celebrities": "Female: Scarlett Johansson, Milla Jovovich, Demi Moore | Male: Tom Cruise, Clint Eastwood, Bruce Lee",
-    "traits": "Adaptable, practical, logical, hands-on, adventurous, independent"
+    "celebrities": "Female: Scarlett Johansson, Milla Jovovich, Ellen Page | Male: Clint Eastwood, Tom Cruise, Bruce Lee",
+    "traits": "Adaptable, practical, logical, analytical, spontaneous, independent"
   },
   "ISFP": {
     "name": "ISFP - The Adventurer",
-    "description": "ISFPs are gentle caretakers who live in the present moment and enjoy their surroundings with cheerful, low-key enthusiasm. They are flexible, spontaneous, and adaptable, and like to observe, listen, and then act. They generally prefer to interact with a few close friends rather than many acquaintances.",
-    "celebrities": "Female: Britney Spears, Marilyn Monroe, Nicole Kidman | Male: Kevin Costner, Michael Jackson, Justin Bieber",
-    "traits": "Artistic, sensitive, authentic, compassionate, harmonious, spontaneous"
+    "description": "ISFPs are gentle caretakers who live in the present moment and enjoy their surroundings with cheerful, low-key enthusiasm. They are flexible and spontaneous, and like to go with the flow to enjoy what life has to offer. ISFPs are quiet and unassuming, and may be hard to get to know.",
+    "celebrities": "Female: Britney Spears, Marilyn Monroe, Frida Kahlo | Male: Michael Jackson, Bob Dylan, David Beckham",
+    "traits": "Sensitive, artistic, gentle, harmonious, spontaneous, loyal"
   },
   "ESTP": {
     "name": "ESTP - The Entrepreneur",
-    "description": "ESTPs are energetic thrill-seekers who are at their best when putting out fires, whether literal or metaphorical. They bring a sense of dynamic energy to their interactions with others and the world around them. They assess situations quickly and move adeptly to respond to immediate problems with practical solutions.",
-    "celebrities": "Female: Madonna, Miley Cyrus, Angelina Jolie | Male: Donald Trump, Jack Nicholson, Bruce Willis",
-    "traits": "Bold, pragmatic, observant, direct, sociable, spontaneous"
+    "description": "ESTPs are energetic thrillseekers who are at their best when putting out fires, whether literal or metaphorical. They bring a sense of dynamic energy to their interactions with others and the world around them. They assess situations quickly and move adeptly to respond to immediate problems.",
+    "celebrities": "Female: Madonna, Miley Cyrus, Angelina Jolie | Male: Donald Trump, Bruce Willis, Eddie Murphy",
+    "traits": "Bold, practical, observant, direct, rational, spontaneous"
   },
   "ESFP": {
     "name": "ESFP - The Entertainer",

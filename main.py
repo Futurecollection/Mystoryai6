@@ -2048,16 +2048,19 @@ def personalize():
         
     # Load MBTI types to make them available in the template
     import json
+    import re
     try:
         with open('static/js/mbti_types.js', 'r') as f:
-            # Extract the JSON part by getting text between first { and last }
             content = f.read()
-            start = content.find('{')
-            end = content.rfind('}') + 1
-            if start > -1 and end > start:
-                mbti_json = content[start:end]
-                mbti_types = json.loads(mbti_json)
+            # Find the JSON object using regex to handle JS variable assignment
+            match = re.search(r'const\s+mbtiTypes\s*=\s*(\{[\s\S]*\})', content)
+            if match:
+                # Extract just the JSON part
+                json_str = match.group(1)
+                # Parse the JSON
+                mbti_types = json.loads(json_str)
             else:
+                print("Could not extract MBTI types JSON from file")
                 mbti_types = {}
     except Exception as e:
         print(f"Error loading MBTI types: {e}")

@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -334,7 +333,7 @@
                         style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                         value="{% if not pers_in_list %}{{ session['npc_personality'] }}{% endif %}">
                 </div>
-                
+
                 <div class="col-md-12 mt-3">
                   <label class="form-label" style="color: #f8d0d0; font-weight: bold;">MBTI Personality Type</label>
                   <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
@@ -342,13 +341,22 @@
                   </div>
                   <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
                     <option value="">--Select MBTI Type--</option>
-                    {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
-                      {% if type_code == session.get('npc_mbti_type', '') %}
-                        <option value="{{ type_code }}" selected>{{ mbtiTypes[type_code].name if mbtiTypes and type_code in mbtiTypes else type_code + " - The " + type_code }}</option>
-                      {% else %}
-                        <option value="{{ type_code }}">{{ mbtiTypes[type_code].name if mbtiTypes and type_code in mbtiTypes else type_code + " - The " + type_code }}</option>
-                      {% endif %}
-                    {% endfor %}
+                    <option value="INTJ" {% if session.get('npc_mbti_type') == 'INTJ' %}selected{% endif %}>INTJ - The Architect</option>
+                    <option value="INTP" {% if session.get('npc_mbti_type') == 'INTP' %}selected{% endif %}>INTP - The Logician</option>
+                    <option value="ENTJ" {% if session.get('npc_mbti_type') == 'ENTJ' %}selected{% endif %}>ENTJ - The Commander</option>
+                    <option value="ENTP" {% if session.get('npc_mbti_type') == 'ENTP' %}selected{% endif %}>ENTP - The Debater</option>
+                    <option value="INFJ" {% if session.get('npc_mbti_type') == 'INFJ' %}selected{% endif %}>INFJ - The Advocate</option>
+                    <option value="INFP" {% if session.get('npc_mbti_type') == 'INFP' %}selected{% endif %}>INFP - The Mediator</option>
+                    <option value="ENFJ" {% if session.get('npc_mbti_type') == 'ENFJ' %}selected{% endif %}>ENFJ - The Protagonist</option>
+                    <option value="ENFP" {% if session.get('npc_mbti_type') == 'ENFP' %}selected{% endif %}>ENFP - The Campaigner</option>
+                    <option value="ISTJ" {% if session.get('npc_mbti_type') == 'ISTJ' %}selected{% endif %}>ISTJ - The Logistician</option>
+                    <option value="ISFJ" {% if session.get('npc_mbti_type') == 'ISFJ' %}selected{% endif %}>ISFJ - The Defender</option>
+                    <option value="ESTJ" {% if session.get('npc_mbti_type') == 'ESTJ' %}selected{% endif %}>ESTJ - The Executive</option>
+                    <option value="ESFJ" {% if session.get('npc_mbti_type') == 'ESFJ' %}selected{% endif %}>ESFJ - The Consul</option>
+                    <option value="ISTP" {% if session.get('npc_mbti_type') == 'ISTP' %}selected{% endif %}>ISTP - The Virtuoso</option>
+                    <option value="ISFP" {% if session.get('npc_mbti_type') == 'ISFP' %}selected{% endif %}>ISFP - The Adventurer</option>
+                    <option value="ESTP" {% if session.get('npc_mbti_type') == 'ESTP' %}selected{% endif %}>ESTP - The Entrepreneur</option>
+                    <option value="ESFP" {% if session.get('npc_mbti_type') == 'ESFP' %}selected{% endif %}>ESFP - The Entertainer</option>
                   </select>
                   <div class="card mt-2" style="background-color: #2a0808; border: 1px solid #6d1d1d;">
                     <div class="card-body">
@@ -427,7 +435,7 @@
                       {% if ec == session['encounter_context'] %}
                         <option value="{{ ec }}" selected>{{ ec }}</option>
                       {% else %}
-                        <option value="{{ ec }}">{{ ec }}</option>
+                                                <option value="{{ ec }}">{{ ec }}</option>
                       {% endif %}
                     {% endfor %}
                   </select>
@@ -549,11 +557,11 @@
     window.handleMbtiSelection = function(mbtiType) {
       const descriptionElement = document.getElementById('mbtiDescription');
       const celebritiesElement = document.getElementById('mbtiCelebrities');
-      
+
       if (mbtiType && window.mbtiTypes && window.mbtiTypes[mbtiType]) {
         const mbtiInfo = window.mbtiTypes[mbtiType];
         descriptionElement.textContent = mbtiInfo.description || 'No description available';
-        
+
         if (mbtiInfo.celebrities) {
           // Handle celebrities as string or array
           if (Array.isArray(mbtiInfo.celebrities)) {
@@ -569,13 +577,13 @@
         celebritiesElement.textContent = '';
       }
     };
-    
+
     // Initialize MBTI description if a type is already selected
     const mbtiSelect = document.getElementById('mbtiTypeSelect');
     if (mbtiSelect && mbtiSelect.value) {
       window.handleMbtiSelection(mbtiSelect.value);
     }
-    
+
     // Make sure tabs work properly
     if (typeof bootstrap !== 'undefined') {
       var triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
