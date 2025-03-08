@@ -624,8 +624,7 @@ def build_initial_npc_memory() -> str:
     encounter_context = session.get('encounter_context', '')
     user_name = session.get('user_name', 'the user')
     
-    # Always use the LLM to generate a complete biography 
-    # regardless of whether fields are filled in or not
+    # Always use the LLM to generate a complete biography
     if GEMINI_API_KEY:
         try:
             return generate_llm_biography(
@@ -636,11 +635,11 @@ def build_initial_npc_memory() -> str:
             )
         except Exception as e:
             print(f"[ERROR] LLM biography generation failed: {e}")
-            # Fall back to a very simple biography if LLM fails
-            return f"# {name}'s Biography\n\nA {age}-year-old {gender} who works as a {occupation}. They have {hair_color} {hair_style} hair and a {body_type} physique. Meeting {user_name} has sparked their interest, and they're looking forward to getting to know them better.\n\n## Relationship Status\nFirst meeting - getting to know each other."
+            # If LLM fails, return an empty string instead of a fallback bio
+            return ""
     else:
-        # Very simple fallback if no API key is available
-        return f"# {name}'s Biography\n\nA {age}-year-old {gender} who works as a {occupation}. They have {hair_color} {hair_style} hair and a {body_type} physique. Meeting {user_name} has sparked their interest, and they're looking forward to getting to know them better.\n\n## Relationship Status\nFirst meeting - getting to know each other."
+        # Return empty string if no API key is available
+        return ""
 
 @retry_with_backoff(retries=2, backoff_in_seconds=1)
 def generate_llm_biography(name, gender, age, ethnicity, orientation, relationship_goal,
