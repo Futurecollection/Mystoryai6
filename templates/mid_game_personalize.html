@@ -436,7 +436,7 @@
                         <option value="{{ ec }}" selected>{{ ec }}</option>
                       {% else %}
                                                 <option value="{{ ec }}">{{ ec }}</option>
-                      {% endif %}
+                                            {% endif %}
                     {% endfor %}
                   </select>
                   {% set ec_in_list = session['encounter_context'] in encounter_context_options %}

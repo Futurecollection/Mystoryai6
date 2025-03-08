@@ -1,3 +1,5 @@
+
+// Define MBTI types with detailed descriptions
 const mbtiTypes = {
   "INTJ": {
     "name": "The Architect",
@@ -16,83 +18,78 @@ const mbtiTypes = {
   },
   "ENTP": {
     "name": "The Debater",
-    "description": "ENTPs are smart, curious thinkers who cannot resist an intellectual challenge. They are typically original, creative, and resourceful in solving new and challenging problems. They enjoy the mental exercise of questioning the established way of doing things and exploring alternatives.",
-    "celebrities": "Leonardo da Vinci, Thomas Edison, Robert Downey Jr., Jon Stewart"
+    "description": "ENTPs are smart and curious thinkers who cannot resist an intellectual challenge. They're quick-witted and resourceful, able to generate conceptual possibilities and then analyze them strategically. They love to debate ideas and may sometimes argue both sides for fun.",
+    "celebrities": "Leonardo da Vinci, Tony Stark, Neil deGrasse Tyson"
   },
   "INFJ": {
     "name": "The Advocate",
-    "description": "INFJs are creative nurturers with a strong sense of personal integrity and a drive to help others realize their potential. They have an intuitive understanding of complex people issues and naturally see things from multiple perspectives. They are generally idealistic and deeply concerned about the state of humanity.",
-    "celebrities": "Martin Luther King Jr., Nelson Mandela, Lady Gaga, Nicole Kidman"
+    "description": "INFJs are quiet, mystical, and creative idealists with a strong sense of vision. They are deeply concerned about personal growth and contributing to the greater good. They are capable of profound insights into human nature and often act as quiet catalysts for positive change.",
+    "celebrities": "Martin Luther King Jr., Taylor Swift, Atticus Finch"
   },
   "INFP": {
     "name": "The Mediator",
-    "description": "INFPs are imaginative idealists guided by their own core values and beliefs. They are sensitive, caring, and compassionate, and deeply concerned with personal growth. They typically strive to discover their place in the world and understand the purpose of their lives.",
-    "celebrities": "William Shakespeare, J.R.R. Tolkien, Johnny Depp, Audrey Hepburn"
+    "description": "INFPs are poetic, kind, and altruistic people, always looking to help a good cause. They see the world as a place of ideals and possibilities. They are deeply empathetic and driven by their values, seeking to understand themselves and those around them on a profound level.",
+    "celebrities": "William Shakespeare, J.R.R. Tolkien, Princess Diana"
   },
   "ENFJ": {
     "name": "The Protagonist",
-    "description": "ENFJs are charismatic and inspiring leaders, able to mesmerize their listeners. They are typically focused on bringing out the best in others, finding ways to help them reach their full potential. They can be powerful motivators, often expressing genuine concern for others.",
-    "celebrities": "Barack Obama, Oprah Winfrey, Ben Affleck, Jennifer Lawrence"
+    "description": "ENFJs are charismatic and inspiring leaders who can mesmerize their listeners. Natural-born leaders full of passion and charisma, they can talk their way in or out of anything. They tend to value harmony and cooperation, often acting as catalysts for change.",
+    "celebrities": "Barack Obama, Oprah Winfrey, Pope John Paul II"
   },
   "ENFP": {
     "name": "The Campaigner",
-    "description": "ENFPs are enthusiastic, creative, and sociable free spirits who can always find a reason to smile. They are warm, passionate people, known for their empathy and ability to inspire others. They are curious about others and enjoy exploring alternative possibilities and ideas.",
-    "celebrities": "Robin Williams, Robert Downey Jr., Sandra Bullock, Will Smith"
+    "description": "ENFPs are enthusiastic, creative, and sociable free spirits who can always find a reason to smile. They're warmly enthusiastic and imaginative, seeing life as full of possibilities. They make connections between events and information very quickly and confidently proceed based on patterns they see.",
+    "celebrities": "Robert Downey Jr., Ellen DeGeneres, Robin Williams"
   },
   "ISTJ": {
     "name": "The Logistician",
-    "description": "ISTJs are practical, fact-minded individuals, whose reliability cannot be doubted. They are dependable, practical, and often traditional, valuing loyalty and hard work. They prefer to be thorough, precise, and operate by the book, with a strong sense of duty.",
-    "celebrities": "Queen Elizabeth II, Natalie Portman, Jeff Bezos, Warren Buffett"
+    "description": "ISTJs are practical and fact-minded individuals whose reliability cannot be doubted. They are responsible, organized, and methodical in their approach to life and work. They value traditions and loyalty, often serving as the quiet backbone of organizations and families.",
+    "celebrities": "Queen Elizabeth II, George Washington, Jeff Bezos"
   },
   "ISFJ": {
     "name": "The Defender",
-    "description": "ISFJs are warm protectors, ready to defend their loved ones. They are supportive, reliable, patient, and devoted, typically putting the needs of others above their own. They value harmony and cooperation and typically work hard to achieve them.",
-    "celebrities": "Mother Teresa, Kate Middleton, Beyoncé, Aretha Franklin"
+    "description": "ISFJs are very dedicated and warm protectors, always ready to defend their loved ones. They're quiet, kind, and conscientious. These individuals take their responsibilities seriously and can be counted on to follow through. They're often the unsung heroes who keep things running smoothly.",
+    "celebrities": "Mother Teresa, Queen Elizabeth II, Kate Middleton"
   },
   "ESTJ": {
     "name": "The Executive",
-    "description": "ESTJs are excellent administrators, unsurpassed at managing things or people. They are conventional, factual, and grounded in reality, preferring traditional hierarchies and doing things by the book. They value predictability and prefer to go about things methodically.",
-    "celebrities": "Judge Judy, Sonia Sotomayor, John D. Rockefeller, Frank Sinatra"
+    "description": "ESTJs are excellent administrators, unsurpassed at managing things or people. They're organized, honest, dedicated, and dignified. Taking their responsibilities seriously, they place high value on traditions and institutions. They believe in following rules and expect others to do the same.",
+    "celebrities": "Michelle Obama, Judge Judy, John D. Rockefeller"
   },
   "ESFJ": {
     "name": "The Consul",
-    "description": "ESFJs are extraordinarily caring, social, and popular people, always eager to help. They are attentive to the needs of others and are often seen as sociable, organized, and dependable. They value harmony and cooperation and work hard to achieve it.",
-    "celebrities": "Taylor Swift, Hugh Jackman, Jennifer Garner, Bill Clinton"
+    "description": "ESFJs are extraordinarily caring, social, and popular people who are always eager to help. They're warm-hearted, conscientious, and cooperative. Valuing tradition and security, they're focused on fulfilling their duties and obligations. They seek to foster harmonious relationships in their lives.",
+    "celebrities": "Jennifer Lopez, Taylor Swift, Bill Clinton"
   },
   "ISTP": {
     "name": "The Virtuoso",
-    "description": "ISTPs are bold and practical experimenters, masters of all kinds of tools. They are typically reserved yet adventurous, loyal to their peers but guarded in expressing emotions. They excel at analyzing situations and implementing practical solutions.",
-    "celebrities": "Michael Jordan, Tom Cruise, Clint Eastwood, Milla Jovovich"
+    "description": "ISTPs are bold and practical experimenters, masters of all kinds of tools. They're quiet observers until a problem appears, then they act quickly to find a workable solution. They're analytical troubleshooters who excel at getting to the heart of practical matters.",
+    "celebrities": "Bear Grylls, Michael Jordan, Clint Eastwood"
   },
   "ISFP": {
     "name": "The Adventurer",
-    "description": "ISFPs are flexible, charming artists, always ready to explore and experience something new. They are sensitive to the needs of others, cooperative, and loyal. They value harmony, beauty, kindness, and experiencing life to its fullest.",
-    "celebrities": "Bob Dylan, Lana Del Rey, Britney Spears, Kevin Costner"
+    "description": "ISFPs are flexible and charming artists, always ready to explore and experience something new. They're quiet, sensitive, kind, and modest about their abilities. They enjoy the present moment and what's going on around them, often having a special affinity for aesthetics and natural harmony.",
+    "celebrities": "Michael Jackson, David Beckham, Kevin Costner"
   },
   "ESTP": {
     "name": "The Entrepreneur",
-    "description": "ESTPs are smart, energetic makers who truly enjoy living on the edge. They are action-oriented, resourceful, and bold. They focus on immediate results, are spontaneous risk-takers, and excel at solving practical problems rather than theoretical ones.",
-    "celebrities": "Donald Trump, Madonna, Jack Nicholson, Bruce Willis"
+    "description": "ESTPs are smart, energetic, and perceptive people who truly enjoy living on the edge. They're adaptable, resourceful, and focused on immediate results. They're risk-takers who live in the present moment, bringing a practical approach to problem-solving.",
+    "celebrities": "Donald Trump, Ernest Hemingway, Madonna"
   },
   "ESFP": {
     "name": "The Entertainer",
-    "description": "ESFPs are spontaneous, energetic entertainers who truly enjoy living in the moment. They are enthusiastic, friendly, and tactful with a strong sense of style. They enjoy being the center of attention and have a playful view of the world.",
-    "celebrities": "Adele, Jamie Foxx, Marilyn Monroe, Elvis Presley"
+    "description": "ESFPs are spontaneous, energetic, and enthusiastic people – life is never boring around them. They're outgoing, friendly, and accepting. They bring a playful, optimistic approach to life, enjoying each moment and making the most of every experience.",
+    "celebrities": "Marilyn Monroe, Jamie Oliver, Miley Cyrus"
   }
 };
 
-// Make the mbtiTypes available to other scripts
-if (typeof module !== 'undefined') {
-  module.exports = { mbtiTypes };
-}
-
 // Function to handle MBTI selection
-window.handleMbtiSelection = function(mbtiType) {
+function handleMbtiSelection(mbtiType) {
   const descriptionElement = document.getElementById('mbtiDescription');
   const celebritiesElement = document.getElementById('mbtiCelebrities');
   
-  if (mbtiType && window.mbtiTypes && window.mbtiTypes[mbtiType]) {
-    const mbtiInfo = window.mbtiTypes[mbtiType];
+  if (mbtiType && mbtiTypes && mbtiTypes[mbtiType]) {
+    const mbtiInfo = mbtiTypes[mbtiType];
     descriptionElement.textContent = mbtiInfo.description || 'No description available';
     
     if (mbtiInfo.celebrities) {
@@ -104,4 +101,13 @@ window.handleMbtiSelection = function(mbtiType) {
     descriptionElement.textContent = 'Select an MBTI type to view the description.';
     celebritiesElement.textContent = '';
   }
-};
+}
+
+// Make mbtiTypes and handleMbtiSelection available globally
+window.mbtiTypes = mbtiTypes;
+window.handleMbtiSelection = handleMbtiSelection;
+
+// If module exports are supported (for Node.js environments)
+if (typeof module !== 'undefined') {
+  module.exports = { mbtiTypes };
+}
