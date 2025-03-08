@@ -89,7 +89,7 @@ def handle_supabase_error(func):
 # --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("models/gemini-2.0-flash-lite")
+model = genai.GenerativeModel("models/gemini-2.0-flash")
 
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
