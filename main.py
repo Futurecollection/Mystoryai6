@@ -2913,12 +2913,15 @@ def manual_npc_update():
                 timestamp = time.strftime("%b %d, %I:%M %p")
                 
                 # Determine if this is a complete replacement or an addition
-                if new_text.startswith("#"):
-                    # Looks like a complete biography replacement
+                if new_text.startswith("#") and len(new_text) > 50:
+                    # Looks like a complete biography replacement (only if substantial)
                     session["npcBehavior"] = new_text
                 else:
                     # Add as an update with timestamp - simpler format without rigid structure
                     session["npcBehavior"] = f"{existing_memories}\n\n### New Information [{timestamp}]\n{new_text}"
+                
+                # Log this manual update to help with debugging
+                log_message(f"[SYSTEM] Manual update to biography. Length before: {len(existing_memories)} chars, new addition: {len(new_text)} chars")
             
             flash("Biography updated successfully!", "success")
         
