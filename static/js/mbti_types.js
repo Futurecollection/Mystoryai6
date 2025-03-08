@@ -126,6 +126,10 @@ window.handleMbtiSelection = function(selectedType) {
   if (mbtiDescription && mbtiCelebrities && window.mbtiTypes[selectedType]) {
     const personality = window.mbtiTypes[selectedType];
     mbtiDescription.textContent = personality.description;
-    mbtiCelebrities.textContent = "Notable examples: " + personality.celebrities;
+    mbtiCelebrities.textContent = "Famous examples: " + personality.celebrities;
+  } else {
+    console.log("Could not find MBTI data for type:", selectedType);
+    if (mbtiDescription) mbtiDescription.textContent = "No description available for this type";
+    if (mbtiCelebrities) mbtiCelebrities.textContent = "";
   }
 }
