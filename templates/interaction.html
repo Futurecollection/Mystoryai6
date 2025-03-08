@@ -78,41 +78,12 @@
   </div>
 </div>
 
-<!-- Mode Toggle Panel -->
-<div class="card mb-4" style="background-color: #4a0d0d; border: 2px solid #ff5789; border-radius: 10px; box-shadow: 0 0 15px rgba(255, 87, 137, 0.3);">
-  <div class="card-body py-3">
-    <div class="d-flex justify-content-center align-items-center">
-      <form method="POST" style="width: 100%;">
-        <div class="row">
-          <div class="col-12 text-center">
-            <p style="color: #ffd0d0; font-size: 2.2rem; margin-bottom: 10px;">Current Display Mode:</p>
-            <button type="submit" name="toggle_mode" class="btn btn-lg py-3 px-5" style="background-color: {% if interaction_mode == 'dialogue' %}#ff5789{% else %}#5f1c1c{% endif %}; color: white; font-size: 3.0rem !important; border: 2px solid #ff9fa3; width: 100%; max-width: 600px; border-radius: 15px;">
-              {% if interaction_mode == 'dialogue' %}
-                <i class="bi bi-chat-quote me-2"></i> <strong>Dialogue Mode</strong>
-                <div style="font-size: 2.0rem; margin-top: 5px;">Just the character's words and actions</div>
-              {% else %}
-                <i class="bi bi-book me-2"></i> <strong>Narrative Mode</strong>
-                <div style="font-size: 2.0rem; margin-top: 5px;">Full story with descriptions and scene details</div>
-              {% endif %}
-            </button>
-            <p style="color: #ffd0d0; font-size: 1.8rem; margin-top: 10px; opacity: 0.8;">
-              Click to switch to {% if interaction_mode == 'dialogue' %}Narrative{% else %}Dialogue{% endif %} Mode
-            </p>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <!-- Top Controls Bar -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789; border-radius: 10px;">
   <div class="card-body">
     <div class="row align-items-center">
       <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-          <!-- Main Controls -->
-
           <!-- Main Controls -->
           <div>
             <div class="btn-group">
@@ -129,7 +100,12 @@
                 onclick="return confirm('Are you sure you want to restart? This will clear your current story.');">
                 <i class="bi bi-arrow-clockwise"></i> Restart
               </a>
-              <!-- Mode toggle button moved to dedicated panel above -->
+              <form method="POST" class="d-inline">
+                <button type="submit" name="toggle_mode" class="btn" style="background-color: {% if interaction_mode == 'dialogue' %}#ff5789{% else %}#5f1c1c{% endif %}; color: white; font-size: 2.3rem !important; border-left: 1px solid #7a2d2d;">
+                  <i class="bi bi-{% if interaction_mode == 'dialogue' %}chat-quote{% else %}book{% endif %}"></i> 
+                  {% if interaction_mode == 'dialogue' %}Dialogue{% else %}Narrative{% endif %} Mode
+                </button>
+              </form>
             </div>
           </div>
         </div>
