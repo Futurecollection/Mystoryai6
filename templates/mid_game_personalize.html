@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -333,7 +334,7 @@
                         style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;"
                         value="{% if not pers_in_list %}{{ session['npc_personality'] }}{% endif %}">
                 </div>
-
+                
                 <div class="col-md-12 mt-3">
                   <label class="form-label" style="color: #f8d0d0; font-weight: bold;">MBTI Personality Type</label>
                   <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
@@ -343,9 +344,9 @@
                     <option value="">--Select MBTI Type--</option>
                     {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
                       {% if type_code == session.get('npc_mbti_type', '') %}
-                        <option value="{{ type_code }}" selected>{{ type_code }} - {{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                        <option value="{{ type_code }}" selected>{{ type_code }}</option>
                       {% else %}
-                        <option value="{{ type_code }}">{{ type_code }} - {{ mbtiTypes[type_code].name if mbtiTypes and mbtiTypes[type_code] else type_code }}</option>
+                        <option value="{{ type_code }}">{{ type_code }}</option>
                       {% endif %}
                     {% endfor %}
                   </select>
@@ -454,7 +455,7 @@
                   <select class="form-select mb-1" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" name="time_of_day">
                     <option value="">--Select--</option>
                     <option value="Morning" {% if session.get('time_of_day') == 'Morning' %}selected{% endif %}>Morning</option>
-                    <option value="Afternoon" {% if session.get('time_of_day') == 'Afternoon' %}selected{% endif %}>>Afternoon</option>
+                    <option value="Afternoon" {% if session.get('time_of_day') == 'Afternoon' %}selected{% endif %}>Afternoon</option>
                     <option value="Evening" {% if session.get('time_of_day') == 'Evening' %}selected{% endif %}>Evening</option>
                     <option value="Night" {% if session.get('time_of_day') == 'Night' %}selected{% endif %}>Night</option>
                     <option value="Dawn" {% if session.get('time_of_day') == 'Dawn' %}selected{% endif %}>Dawn</option>
@@ -548,11 +549,11 @@
     window.handleMbtiSelection = function(mbtiType) {
       const descriptionElement = document.getElementById('mbtiDescription');
       const celebritiesElement = document.getElementById('mbtiCelebrities');
-
+      
       if (mbtiType && window.mbtiTypes && window.mbtiTypes[mbtiType]) {
         const mbtiInfo = window.mbtiTypes[mbtiType];
         descriptionElement.textContent = mbtiInfo.description || 'No description available';
-
+        
         if (mbtiInfo.celebrities && mbtiInfo.celebrities.length > 0) {
           celebritiesElement.textContent = 'Famous examples: ' + mbtiInfo.celebrities.join(', ');
         } else {
@@ -563,13 +564,13 @@
         celebritiesElement.textContent = '';
       }
     };
-
+    
     // Initialize MBTI description if a type is already selected
     const mbtiSelect = document.getElementById('mbtiTypeSelect');
     if (mbtiSelect && mbtiSelect.value) {
       window.handleMbtiSelection(mbtiSelect.value);
     }
-
+    
     // Make sure tabs work properly
     if (typeof bootstrap !== 'undefined') {
       var triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
