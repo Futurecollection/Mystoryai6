@@ -2412,7 +2412,7 @@ You can say hello, start a conversation, or set the scene with an action.
             pony_cfg_scale=pony_cfg_scale,
             juggernaut_scheduler=juggernaut_scheduler,
             juggernaut_cfg_scale=juggernaut_cfg_scale,
-            interaction_mode=session.get("interaction_mode", "narrative")
+            interaction_mode=session.get("interaction_mode", "dialogue")
         )
     else:
         if "update_scene" in request.form:
