@@ -3,103 +3,174 @@
 const mbtiTypes = {
   "INTJ": {
     "name": "The Architect",
+    "acronym": "Introverted, Intuitive, Thinking, Judging",
     "description": "INTJs are analytical problem-solvers, eager to improve systems and processes with their innovative ideas. They have a talent for seeing possibilities for improvement, whether at work, at home, or in themselves. Often intellectual, INTJs enjoy logical reasoning and complex problem-solving.",
-    "celebrities": "Elon Musk, Mark Zuckerberg, Christopher Nolan, Jay-Z"
+    "celebrities": "Elon Musk, Mark Zuckerberg, Christopher Nolan, Jay-Z",
+    "female_examples": "Nicole Kidman, Jodie Foster, Jane Austen, Michelle Obama",
+    "male_examples": "Elon Musk, Mark Zuckerberg"
   },
   "INTP": {
     "name": "The Logician",
+    "acronym": "Introverted, Intuitive, Thinking, Perceiving",
     "description": "INTPs are innovative inventors with an unquenchable thirst for knowledge. They are known for their brilliant theories and unrelenting logic. They love patterns and have an eye for spotting logical discrepancies. They often lose themselves in thought, which can make them appear detached or aloof.",
-    "celebrities": "Albert Einstein, Bill Gates, Isaac Newton, Marie Curie"
+    "celebrities": "Albert Einstein, Bill Gates, Isaac Newton, Marie Curie",
+    "female_examples": "Marie Curie, Tina Fey, Gillian Anderson, Emma Watson",
+    "male_examples": "Albert Einstein, Bill Gates"
   },
   "ENTJ": {
     "name": "The Commander",
+    "acronym": "Extraverted, Intuitive, Thinking, Judging",
     "description": "ENTJs are bold, imaginative, and strong-willed leaders, always finding a way or making one. They are natural-born leaders who embody charisma and confidence, projecting authority in a way that draws crowds together. However, they can be intimidating and overly dominant.",
-    "celebrities": "Steve Jobs, Margaret Thatcher, Gordon Ramsay, Jim Carrey"
+    "celebrities": "Steve Jobs, Margaret Thatcher, Gordon Ramsay, Jim Carrey",
+    "female_examples": "Margaret Thatcher, Charlize Theron, Oprah Winfrey, Taylor Swift",
+    "male_examples": "Steve Jobs, Gordon Ramsay"
   },
   "ENTP": {
     "name": "The Debater",
-    "description": "ENTPs are smart and curious thinkers who cannot resist an intellectual challenge. They're quick-witted and resourceful, able to generate conceptual possibilities and then analyze them strategically. They love to debate ideas and may sometimes argue both sides for fun.",
-    "celebrities": "Leonardo da Vinci, Tony Stark, Neil deGrasse Tyson"
+    "acronym": "Extraverted, Intuitive, Thinking, Perceiving",
+    "description": "ENTPs are smart and curious thinkers who cannot resist an intellectual challenge. They are often described as quick-witted, enthusiastic, outspoken, and sometimes even rebellious. They value knowledge and spend much of their time seeking a greater understanding of the world.",
+    "celebrities": "Robert Downey Jr., Leonardo da Vinci, Thomas Edison, Richard Feynman",
+    "female_examples": "Elizabeth Olsen, Amy Poehler, Julia Child, Salma Hayek",
+    "male_examples": "Robert Downey Jr., Leonardo DiCaprio"
   },
   "INFJ": {
     "name": "The Advocate",
-    "description": "INFJs are quiet, mystical, and creative idealists with a strong sense of vision. They are deeply concerned about personal growth and contributing to the greater good. They are capable of profound insights into human nature and often act as quiet catalysts for positive change.",
-    "celebrities": "Martin Luther King Jr., Taylor Swift, Atticus Finch"
+    "acronym": "Introverted, Intuitive, Feeling, Judging",
+    "description": "INFJs are quiet, mystical, and intuitive idealists. They have an uncanny ability to understand people's true feelings and motivations. They are often seen as quiet and reserved but have rich, complex inner lives, with a strong moral compass and desire to help others achieve their potential.",
+    "celebrities": "Martin Luther King Jr., Nelson Mandela, Carl Jung, Plato",
+    "female_examples": "Nicole Kidman, Cate Blanchett, Daisy Ridley, Carrie Fisher",
+    "male_examples": "Martin Luther King Jr., Benedict Cumberbatch"
   },
   "INFP": {
     "name": "The Mediator",
-    "description": "INFPs are poetic, kind, and altruistic people, always looking to help a good cause. They see the world as a place of ideals and possibilities. They are deeply empathetic and driven by their values, seeking to understand themselves and those around them on a profound level.",
-    "celebrities": "William Shakespeare, J.R.R. Tolkien, Princess Diana"
+    "acronym": "Introverted, Intuitive, Feeling, Perceiving",
+    "description": "INFPs are poetic, kind, and altruistic people, always looking to help a good cause. They see the world as a place of ideals and possibilities. They tend to be compassionate, understanding, and accepting, guided by their strong values and desire to contribute to humanity's well-being.",
+    "celebrities": "William Shakespeare, Princess Diana, J.R.R. Tolkien, Johnny Depp",
+    "female_examples": "Audrey Hepburn, Emma Watson, Alicia Keys, Björk",
+    "male_examples": "Johnny Depp, J.R.R. Tolkien"
   },
   "ENFJ": {
     "name": "The Protagonist",
-    "description": "ENFJs are charismatic and inspiring leaders who can mesmerize their listeners. Natural-born leaders full of passion and charisma, they can talk their way in or out of anything. They tend to value harmony and cooperation, often acting as catalysts for change.",
-    "celebrities": "Barack Obama, Oprah Winfrey, Pope John Paul II"
+    "acronym": "Extraverted, Intuitive, Feeling, Judging",
+    "description": "ENFJs are charismatic and inspiring leaders, able to mesmerize their listeners. They are often seen as warm and engaging, with a genuine passion to help others grow and develop. They are natural mentors who find joy in guiding others to their potential.",
+    "celebrities": "Barack Obama, Oprah Winfrey, Nelson Mandela, Malala Yousafzai",
+    "female_examples": "Jennifer Lawrence, Kate Winslet, Charlize Theron, Emma Stone",
+    "male_examples": "Barack Obama, John Cusack"
   },
   "ENFP": {
     "name": "The Campaigner",
-    "description": "ENFPs are enthusiastic, creative, and sociable free spirits who can always find a reason to smile. They're warmly enthusiastic and imaginative, seeing life as full of possibilities. They make connections between events and information very quickly and confidently proceed based on patterns they see.",
-    "celebrities": "Robert Downey Jr., Ellen DeGeneres, Robin Williams"
+    "acronym": "Extraverted, Intuitive, Feeling, Perceiving",
+    "description": "ENFPs are enthusiastic, creative, and sociable free spirits, who can always find a reason to smile. They tend to see life as a big, complex puzzle where everything is connected. They excel at understanding how people and the world works, and they're rarely satisfied with simplistic or standard solutions.",
+    "celebrities": "Robin Williams, Walt Disney, Mark Twain, Robert Downey Jr.",
+    "female_examples": "Jennifer Aniston, Sandra Bullock, Kelly Clarkson, Zooey Deschanel",
+    "male_examples": "Robin Williams, Robert Downey Jr."
   },
   "ISTJ": {
     "name": "The Logistician",
-    "description": "ISTJs are practical and fact-minded individuals whose reliability cannot be doubted. They are responsible, organized, and methodical in their approach to life and work. They value traditions and loyalty, often serving as the quiet backbone of organizations and families.",
-    "celebrities": "Queen Elizabeth II, George Washington, Jeff Bezos"
+    "acronym": "Introverted, Sensing, Thinking, Judging",
+    "description": "ISTJs are practical and fact-minded individuals, whose reliability cannot be doubted. They value tradition, security, and peaceful living. They keep their spaces well-organized and take a methodical approach to their work. They tend to be reserved but will open up and relax with people they know well.",
+    "celebrities": "Warren Buffett, George Washington, Jeff Bezos, Queen Elizabeth II",
+    "female_examples": "Natalie Portman, Kate Middleton, Queen Elizabeth II, Michelle Obama",
+    "male_examples": "Warren Buffett, Jeff Bezos"
   },
   "ISFJ": {
     "name": "The Defender",
-    "description": "ISFJs are very dedicated and warm protectors, always ready to defend their loved ones. They're quiet, kind, and conscientious. These individuals take their responsibilities seriously and can be counted on to follow through. They're often the unsung heroes who keep things running smoothly.",
-    "celebrities": "Mother Teresa, Queen Elizabeth II, Kate Middleton"
+    "acronym": "Introverted, Sensing, Feeling, Judging",
+    "description": "ISFJs are very dedicated, warm protectors, always ready to defend their loved ones. They are often described as quiet, serious, and detail-oriented. They protect those they care about with devoted care and meticulous execution of their duties.",
+    "celebrities": "Mother Teresa, Queen Elizabeth II, Dr. Fauci, Rosa Parks",
+    "female_examples": "Kate Middleton, Anne Hathaway, Jessica Alba, Taylor Swift",
+    "male_examples": "Vin Diesel, Jackie Chan"
   },
   "ESTJ": {
     "name": "The Executive",
-    "description": "ESTJs are excellent administrators, unsurpassed at managing things or people. They're organized, honest, dedicated, and dignified. Taking their responsibilities seriously, they place high value on traditions and institutions. They believe in following rules and expect others to do the same.",
-    "celebrities": "Michelle Obama, Judge Judy, John D. Rockefeller"
+    "acronym": "Extraverted, Sensing, Thinking, Judging",
+    "description": "ESTJs are excellent administrators, unsurpassed at managing things or people. They value tradition and order, applying systematic approaches to their endeavors. They are practical, matter-of-fact individuals who enjoy bringing structure to their surroundings.",
+    "celebrities": "Judge Judy, Lyndon B. Johnson, Mike Pence, Sonia Sotomayor",
+    "female_examples": "Judge Judy, Sonia Sotomayor, Emma Roberts, Lucy Liu",
+    "male_examples": "Frank Sinatra, Billy Graham"
   },
   "ESFJ": {
     "name": "The Consul",
-    "description": "ESFJs are extraordinarily caring, social, and popular people who are always eager to help. They're warm-hearted, conscientious, and cooperative. Valuing tradition and security, they're focused on fulfilling their duties and obligations. They seek to foster harmonious relationships in their lives.",
-    "celebrities": "Jennifer Lopez, Taylor Swift, Bill Clinton"
+    "acronym": "Extraverted, Sensing, Feeling, Judging",
+    "description": "ESFJs are extraordinarily caring, social, and popular people, always eager to help. They are social creatures, seeking close relationships and supporting those they care about. They tend to take on the role of caretaker, ensuring the people in their lives are well looked after.",
+    "celebrities": "Taylor Swift, Jennifer Garner, Hugh Jackman, Bill Clinton",
+    "female_examples": "Jennifer Garner, Jennifer Lopez, Selena Gomez, Beyoncé",
+    "male_examples": "Hugh Jackman, Chris Evans"
   },
   "ISTP": {
     "name": "The Virtuoso",
-    "description": "ISTPs are bold and practical experimenters, masters of all kinds of tools. They're quiet observers until a problem appears, then they act quickly to find a workable solution. They're analytical troubleshooters who excel at getting to the heart of practical matters.",
-    "celebrities": "Bear Grylls, Michael Jordan, Clint Eastwood"
+    "acronym": "Introverted, Sensing, Thinking, Perceiving",
+    "description": "ISTPs are bold, practical experimenters, masters of all kinds of tools. They tend to be quiet and reserved, preferring to focus their energy on active problem-solving rather than abstract theories. They excel at understanding how mechanical things work and are typically reserved but curious observers.",
+    "celebrities": "Tom Cruise, Clint Eastwood, Michael Jordan, Bear Grylls",
+    "female_examples": "Scarlett Johansson, Kristen Stewart, Milla Jovovich, Angelina Jolie",
+    "male_examples": "Tom Cruise, Bruce Lee"
   },
   "ISFP": {
     "name": "The Adventurer",
-    "description": "ISFPs are flexible and charming artists, always ready to explore and experience something new. They're quiet, sensitive, kind, and modest about their abilities. They enjoy the present moment and what's going on around them, often having a special affinity for aesthetics and natural harmony.",
-    "celebrities": "Michael Jackson, David Beckham, Kevin Costner"
+    "acronym": "Introverted, Sensing, Feeling, Perceiving",
+    "description": "ISFPs are flexible, charming artists, always ready to explore and experience something new. They are quiet and reserved but also spontaneous and enthusiastic. They are deeply in touch with their senses and aesthetics, often having an artistic flair and appreciation for beauty.",
+    "celebrities": "Bob Dylan, Britney Spears, Lana Del Rey, Michael Jackson",
+    "female_examples": "Britney Spears, Lana Del Rey, Rihanna, Nicole Scherzinger",
+    "male_examples": "Bob Dylan, Michael Jackson"
   },
   "ESTP": {
     "name": "The Entrepreneur",
-    "description": "ESTPs are smart, energetic, and perceptive people who truly enjoy living on the edge. They're adaptable, resourceful, and focused on immediate results. They're risk-takers who live in the present moment, bringing a practical approach to problem-solving.",
-    "celebrities": "Donald Trump, Ernest Hemingway, Madonna"
+    "acronym": "Extraverted, Sensing, Thinking, Perceiving",
+    "description": "ESTPs are smart, energetic, and very perceptive people, who truly enjoy living on the edge. They are bold, rational, and empirical in their approach to life. They enjoy situations requiring quick action and practical solutions. They tend to be assertive, direct, and spontaneous risk-takers.",
+    "celebrities": "Madonna, Jack Nicholson, Donald Trump, Eddie Murphy",
+    "female_examples": "Madonna, Megan Fox, Miley Cyrus, Margot Robbie",
+    "male_examples": "Jack Nicholson, Donald Trump"
   },
   "ESFP": {
     "name": "The Entertainer",
-    "description": "ESFPs are spontaneous, energetic, and enthusiastic people – life is never boring around them. They're outgoing, friendly, and accepting. They bring a playful, optimistic approach to life, enjoying each moment and making the most of every experience.",
-    "celebrities": "Marilyn Monroe, Jamie Oliver, Miley Cyrus"
+    "acronym": "Extraverted, Sensing, Feeling, Perceiving",
+    "description": "ESFPs are spontaneous, energetic, and enthusiastic. They love life, new experiences, and meeting new people. They're often the life of the party, drawing others to them with their warmth and excitement. They live in the moment and enjoy making themselves and others happy through witty and entertaining conversation.",
+    "celebrities": "Marilyn Monroe, Elvis Presley, Adele, Jamie Foxx",
+    "female_examples": "Marilyn Monroe, Adele, Pink, Katy Perry",
+    "male_examples": "Elvis Presley, Jamie Foxx"
   }
 };
 
-// Function to handle MBTI selection
 function handleMbtiSelection(mbtiType) {
   const descriptionElement = document.getElementById('mbtiDescription');
   const celebritiesElement = document.getElementById('mbtiCelebrities');
+  const acronymElement = document.getElementById('mbtiAcronym');
+  const femaleExamplesElement = document.getElementById('femaleCelebrities');
+  const maleExamplesElement = document.getElementById('maleCelebrities');
   
   if (mbtiType && mbtiTypes && mbtiTypes[mbtiType]) {
     const mbtiInfo = mbtiTypes[mbtiType];
     descriptionElement.textContent = mbtiInfo.description || 'No description available';
+    
+    if (mbtiInfo.acronym) {
+      acronymElement.textContent = 'Stands for: ' + mbtiInfo.acronym;
+    } else {
+      acronymElement.textContent = '';
+    }
     
     if (mbtiInfo.celebrities) {
       celebritiesElement.textContent = 'Famous examples: ' + mbtiInfo.celebrities;
     } else {
       celebritiesElement.textContent = '';
     }
+    
+    if (mbtiInfo.female_examples) {
+      femaleExamplesElement.textContent = 'Beautiful female examples: ' + mbtiInfo.female_examples;
+    } else {
+      femaleExamplesElement.textContent = '';
+    }
+    
+    if (mbtiInfo.male_examples) {
+      maleExamplesElement.textContent = 'Notable male examples: ' + mbtiInfo.male_examples;
+    } else {
+      maleExamplesElement.textContent = '';
+    }
   } else {
     descriptionElement.textContent = 'Select an MBTI type to view the description.';
+    acronymElement.textContent = '';
     celebritiesElement.textContent = '';
+    femaleExamplesElement.textContent = '';
+    maleExamplesElement.textContent = '';
   }
 }
 
