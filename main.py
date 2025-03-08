@@ -2050,6 +2050,26 @@ def personalize():
     import json
     import re
     try:
+        # Define fallback MBTI types in case file reading fails
+        fallback_mbti_types = {
+            "INTJ": {"name": "The Architect", "description": "Strategic, innovative thinkers."},
+            "INTP": {"name": "The Logician", "description": "Innovative inventors with unquenchable thirst for knowledge."},
+            "ENTJ": {"name": "The Commander", "description": "Bold, imaginative leaders."},
+            "ENTP": {"name": "The Debater", "description": "Smart, curious thinkers."},
+            "INFJ": {"name": "The Advocate", "description": "Quiet, mystical, yet inspiring and tireless idealists."},
+            "INFP": {"name": "The Mediator", "description": "Poetic, kind, altruistic, always looking to help a good cause."},
+            "ENFJ": {"name": "The Protagonist", "description": "Charismatic, inspiring leaders."},
+            "ENFP": {"name": "The Campaigner", "description": "Enthusiastic, creative, sociable free spirits."},
+            "ISTJ": {"name": "The Logistician", "description": "Practical, fact-minded individuals."},
+            "ISFJ": {"name": "The Defender", "description": "Very dedicated, warm protectors."},
+            "ESTJ": {"name": "The Executive", "description": "Excellent administrators, unsurpassed managers."},
+            "ESFJ": {"name": "The Consul", "description": "Extraordinarily caring, social and popular."},
+            "ISTP": {"name": "The Virtuoso", "description": "Bold, practical experimenters."},
+            "ISFP": {"name": "The Adventurer", "description": "Flexible, charming artists."},
+            "ESTP": {"name": "The Entrepreneur", "description": "Smart, energetic, perceptive people."},
+            "ESFP": {"name": "The Entertainer", "description": "Spontaneous, energetic, enthusiastic."}
+        }
+
         with open('static/js/mbti_types.js', 'r') as f:
             content = f.read()
             # Find the JSON object using regex to handle JS variable assignment
@@ -2058,13 +2078,18 @@ def personalize():
                 # Extract just the JSON part
                 json_str = match.group(1)
                 # Parse the JSON
-                mbti_types = json.loads(json_str)
+                try:
+                    mbti_types = json.loads(json_str)
+                    print("Successfully loaded MBTI types from file")
+                except json.JSONDecodeError as e:
+                    print(f"JSON parsing error: {e}")
+                    mbti_types = fallback_mbti_types
             else:
                 print("Could not extract MBTI types JSON from file")
-                mbti_types = {}
+                mbti_types = fallback_mbti_types
     except Exception as e:
         print(f"Error loading MBTI types: {e}")
-        mbti_types = {}
+        mbti_types = fallback_mbti_types
     """
     This route renders a form allowing the user to select or input
     personalizations for the NPC and user data.

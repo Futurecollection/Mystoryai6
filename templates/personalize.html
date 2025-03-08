@@ -205,7 +205,7 @@
                     <input type="text" class="form-control" name="npc_gender_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
 
-      <!-- NPC Sexual Orientation & Relationship Goal -->
+                  <!-- NPC Sexual Orientation & Relationship Goal -->
                   <div class="col-md-6 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Age</label>
                     <select class="form-select mb-1" name="npc_age" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
@@ -301,7 +301,7 @@
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_ethnicity_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-      <div class="col-md-6">
+                  <div class="col-md-6">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">Body Type</label>
                     <select class="form-select mb-1" name="npc_body_type" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                       <option value="">--Select--</option>
@@ -441,7 +441,7 @@
                       <option value="Dominant and Assertive">Dominant and Assertive</option>
                       <option value="Sweet and Innocent">Sweet and Innocent</option>
                       <option value="Bad Boy/Girl with Heart of Gold">Bad Boy/Girl with Heart of Gold</option>
-                      <option value="Caring and Supportive">Caring and Supportive</option>
+                      <option value="Caring and Supportivecaring and supportive</option>
                       {% for persopt in npc_personality_options %}
                         <option value="{{ persopt }}">{{ persopt }}</option>
                       {% endfor %}
@@ -449,13 +449,13 @@
                     <label style="color: #f8d0d0;">Or custom:</label>
                     <input type="text" class="form-control" name="npc_personality_custom" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;">
                   </div>
-                  
+
                   <div class="col-md-12 mt-3">
                     <label class="form-label" style="color: #f8d0d0; font-weight: bold;">MBTI Personality Type</label>
                     <div class="alert" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d; margin-bottom: 15px;">
                       <i class="bi bi-info-circle"></i> The Myers-Briggs personality type will influence your character's traits, decision-making process, and interaction style.
                     </div>
-                    <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="window.handleMbtiSelection(this.value)">
+                    <select class="form-select mb-1" name="npc_mbti_type" id="mbtiTypeSelect" style="background-color: #2a0808; color: #ffd0d0; border: 1px solid #6d1d1d;" onchange="handleMbtiSelection(this.value)">
                       <option value="">--Select MBTI Type--</option>
                       {% for type_code in ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] %}
                         <option value="{{ type_code }}">{{ mbtiTypes[type_code].name if mbtiTypes and type_code in mbtiTypes else type_code + " - The " + type_code }}</option>
@@ -609,19 +609,19 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('premadeBioBtn').addEventListener('click', function() {
     document.getElementById('premadeBioSection').style.display = 'block';
     document.getElementById('manualCustomizationSection').style.display = 'none';
-    
+
     // Initialize the bio preview
     const bioPreview = document.getElementById('bioPreview');
     if (bioPreview) {
       bioPreview.textContent = "Select a character to see their biography";
     }
   });
-  
+
   document.getElementById('manualCustomizationBtn').addEventListener('click', function() {
     document.getElementById('premadeBioSection').style.display = 'none';
     document.getElementById('manualCustomizationSection').style.display = 'block';
   });
-  
+
   // Set up the continue button in the premade bio section
   document.getElementById('continueToPersonalizationBtn').addEventListener('click', function() {
     const select = document.getElementById('predefinedBios');
@@ -629,19 +629,19 @@ document.addEventListener('DOMContentLoaded', function() {
       // Transfer the selected bio to the backstory field
       const bioText = window.characterBios[select.value].bio || '';
       document.getElementById('bioText').value = bioText;
-      
+
       // Fill the form with the character's data
       window.fillFormFields(select.value);
       console.log("Filling form fields for character:", select.value);
     } else {
       console.log("No valid character selected or character data not found");
     }
-    
+
     // Show the manual customization section
     document.getElementById('premadeBioSection').style.display = 'none';
     document.getElementById('manualCustomizationSection').style.display = 'block';
   });
-  
+
   // Set up the bio selection dropdown
   const bioDropdown = document.getElementById('predefinedBios');
   bioDropdown.addEventListener('change', function() {
@@ -650,22 +650,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const hiddenInput = document.getElementById('bioText');
     const sampleResponsesPreview = document.getElementById('sampleResponsesPreview');
     const sampleResponsesContent = sampleResponsesPreview ? sampleResponsesPreview.querySelector('.sample-responses-content') : null;
-    
+
     if (window.characterBios && this.value in window.characterBios) {
       const character = window.characterBios[this.value];
       const bioText = character.bio || '';
-      
+
       // Update biography text
       if (bioPreview) bioPreview.textContent = bioText;
       if (textarea) textarea.value = bioText;
       if (hiddenInput) hiddenInput.value = bioText;
-      
+
       // Update sample responses if they exist
       if (sampleResponsesPreview && sampleResponsesContent) {
         if (character.sample_responses) {
           // Clear previous content
           sampleResponsesContent.innerHTML = '';
-          
+
           // Create HTML for sample responses
           for (const [phase, responses] of Object.entries(character.sample_responses)) {
             // Create phase header
@@ -675,21 +675,21 @@ document.addEventListener('DOMContentLoaded', function() {
             phaseTitle.style.marginBottom = '8px';
             phaseTitle.textContent = phase.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             sampleResponsesContent.appendChild(phaseTitle);
-            
+
             // Create response list
             const responseList = document.createElement('ul');
             responseList.style.paddingLeft = '20px';
-            
+
             responses.forEach(response => {
               const responseItem = document.createElement('li');
               responseItem.textContent = response;
               responseItem.style.marginBottom = '5px';
               responseList.appendChild(responseItem);
             });
-            
+
             sampleResponsesContent.appendChild(responseList);
           }
-          
+
           sampleResponsesPreview.style.display = 'block';
         } else {
           sampleResponsesPreview.style.display = 'none';
@@ -702,44 +702,44 @@ document.addEventListener('DOMContentLoaded', function() {
       if (sampleResponsesPreview) sampleResponsesPreview.style.display = 'none';
     }
   });
-    // Ensure Bootstrap is loaded and accessible
-    if (typeof bootstrap !== 'undefined') {
-      const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
-      triggerTabList.forEach(function(triggerEl) {
-        const tabTrigger = new bootstrap.Tab(triggerEl);
+  // Ensure Bootstrap is loaded and accessible
+  if (typeof bootstrap !== 'undefined') {
+    const triggerTabList = [].slice.call(document.querySelectorAll('#npcDetailsTabs button'));
+    triggerTabList.forEach(function(triggerEl) {
+      const tabTrigger = new bootstrap.Tab(triggerEl);
 
-        triggerEl.addEventListener('click', function(event) {
-          event.preventDefault();
-          tabTrigger.show();
-        });
+      triggerEl.addEventListener('click', function(event) {
+        event.preventDefault();
+        tabTrigger.show();
       });
-    } else {
-      console.error('Bootstrap is not available - tabs may not function correctly');
-      // Fallback for when Bootstrap JS is not loaded
-      const tabButtons = document.querySelectorAll('#npcDetailsTabs button');
-      const tabPanes = document.querySelectorAll('.tab-pane');
+    });
+  } else {
+    console.error('Bootstrap is not available - tabs may not function correctly');
+    // Fallback for when Bootstrap JS is not loaded
+    const tabButtons = document.querySelectorAll('#npcDetailsTabs button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
 
-      tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          // Remove active class from all buttons and panes
-          tabButtons.forEach(b => b.classList.remove('active'));
-          tabPanes.forEach(p => {
-            p.classList.remove('show', 'active');
-          });
-
-          // Add active class to clicked button
-          this.classList.add('active');
-
-          // Show the corresponding pane
-          const targetId = this.getAttribute('data-bs-target').substring(1);
-          const targetPane = document.getElementById(targetId);
-          if (targetPane) {
-            targetPane.classList.add('show', 'active');
-          }
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Remove active class from all buttons and panes
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => {
+          p.classList.remove('show', 'active');
         });
+
+        // Add active class to clicked button
+        this.classList.add('active');
+
+        // Show the corresponding pane
+        const targetId = this.getAttribute('data-bs-target').substring(1);
+        const targetPane = document.getElementById(targetId);
+        if (targetPane) {
+          targetPane.classList.add('show', 'active');
+        }
       });
-    }
-  });
+    });
+  }
+});
 </script>
 
 {% endblock %}
