@@ -5,7 +5,6 @@ const mbtiTypes = {
     "name": "The Architect",
     "acronym": "Introverted, Intuitive, Thinking, Judging",
     "description": "INTJs are analytical problem-solvers, eager to improve systems and processes with their innovative ideas. They have a talent for seeing possibilities for improvement, whether at work, at home, or in themselves. Often intellectual, INTJs enjoy logical reasoning and complex problem-solving.",
-    "celebrities": "Elon Musk, Mark Zuckerberg, Christopher Nolan, Jay-Z",
     "female_examples": "Nicole Kidman, Jodie Foster, Jane Austen, Michelle Obama",
     "male_examples": "Elon Musk, Mark Zuckerberg"
   },
@@ -13,7 +12,6 @@ const mbtiTypes = {
     "name": "The Logician",
     "acronym": "Introverted, Intuitive, Thinking, Perceiving",
     "description": "INTPs are innovative inventors with an unquenchable thirst for knowledge. They are known for their brilliant theories and unrelenting logic. They love patterns and have an eye for spotting logical discrepancies. They often lose themselves in thought, which can make them appear detached or aloof.",
-    "celebrities": "Albert Einstein, Bill Gates, Isaac Newton, Marie Curie",
     "female_examples": "Marie Curie, Tina Fey, Gillian Anderson, Emma Watson",
     "male_examples": "Albert Einstein, Bill Gates"
   },
@@ -148,20 +146,17 @@ function handleMbtiSelection(mbtiType) {
       acronymElement.textContent = '';
     }
     
-    if (mbtiInfo.celebrities) {
-      celebritiesElement.textContent = 'Famous examples: ' + mbtiInfo.celebrities;
-    } else {
-      celebritiesElement.textContent = '';
-    }
+    // Hide the general celebrities section
+    celebritiesElement.textContent = '';
     
     if (mbtiInfo.female_examples) {
-      femaleExamplesElement.textContent = 'Beautiful female examples: ' + mbtiInfo.female_examples;
+      femaleExamplesElement.textContent = 'Female examples: ' + mbtiInfo.female_examples;
     } else {
       femaleExamplesElement.textContent = '';
     }
     
     if (mbtiInfo.male_examples) {
-      maleExamplesElement.textContent = 'Notable male examples: ' + mbtiInfo.male_examples;
+      maleExamplesElement.textContent = 'Male examples: ' + mbtiInfo.male_examples;
     } else {
       maleExamplesElement.textContent = '';
     }
