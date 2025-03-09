@@ -2769,11 +2769,15 @@ def manual_npc_update():
                     Rewrite the following character biography into a cohesive, well-organized text.
                     - Consolidate all the separate updates and new information sections
                     - Remove redundancies and organize the information logically
-                    - Keep all important character details
+                    - PRESERVE ALL ORIGINAL INFORMATION - this is the most critical requirement
+                    - Keep all important character details without exception
+                    - Maintain the original personality, traits, background, and characteristics
                     - Maintain a consistent narrative voice
                     - Do not add any new information that isn't present in the original
+                    - Do not remove or alter key biographical details
                     - Retain markdown formatting for headings if present
                     - You may organize the content differently if it improves readability
+                    - If there are conflicting details, preserve the most recent information while noting the change
                     
                     CURRENT BIOGRAPHY WITH ACCUMULATED UPDATES:
                     {existing_memories}
@@ -2814,8 +2818,10 @@ def manual_npc_update():
                 
                 # Determine if this is a complete replacement or an addition
                 if new_text.startswith("#") and len(new_text) > 50:
-                    # Looks like a complete biography replacement (only if substantial)
-                    session["npcBehavior"] = new_text
+                    # Complete biography replacement is now handled with a confirmation step in the UI
+                    # This should never happen directly now, but if it does, preserve existing content
+                    flash("Warning: Complete biography replacement detected. Using append mode instead to preserve existing information.", "warning")
+                    session["npcBehavior"] = f"{existing_memories}\n\n### New Information [{timestamp}]\n{new_text}"
                 else:
                     # Add as an update with timestamp - simpler format without rigid structure
                     session["npcBehavior"] = f"{existing_memories}\n\n### New Information [{timestamp}]\n{new_text}"
