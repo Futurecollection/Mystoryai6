@@ -743,7 +743,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a dedicated LLM call to generate high-quality NPC thoughts and memories.
        This is the primary function for creating the NPC's internal narrative.
-       Keeps thoughts and memory updates concise (200-300 words).
+       Keeps thoughts and memory updates concise (about 50 words each).
        
        Returns:
          - thoughts: First-person stream of consciousness
@@ -863,7 +863,7 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
 
     # THOUGHTS GENERATION
     thoughts_prompt = f"""
-Generate a concise and authentic first-person internal monologue for {npc_name} (200-300 words maximum).
+Generate a very concise first-person internal monologue for {npc_name} (EXACTLY 50 WORDS MAXIMUM).
 
 THE CHARACTER'S CURRENT STATE:
 - Mood: {mood}
@@ -872,33 +872,26 @@ THE CHARACTER'S CURRENT STATE:
 - Relationship Stage: {current_stage} ({stage_desc})
 - Affection Level: {affection}
 - Personality: {personality}
-- Occupation: {occupation}
-- Relationship Goal: {relationship_goal}
 
 FOCUS THIS MONOLOGUE ON: {emotional_focus}
 
-CREATE A CONCISE YET REALISTIC INNER VOICE WITH THESE ELEMENTS:
+CREATE A BRIEF YET AUTHENTIC INNER VOICE WITH THESE ELEMENTS:
 1. Raw, unfiltered stream-of-consciousness
-2. Genuine internal contradictions and emotional complexity
-3. Specific reactions to what just happened
-4. Natural language patterns including incomplete thoughts
-5. References to sensory experiences and bodily sensations
-6. Analysis of {user_name}'s words, actions, or body language
-7. Questions they're asking themselves
+2. Genuine emotional reactions
+3. Natural language patterns including incomplete thoughts
+4. References to sensory experiences or bodily sensations
 
-AVOID:
-- Repetition of the same thoughts or phrases from previous entries
-- Overly formal or structured thinking
-- Generic descriptions instead of specific personal reactions
-- Information dumps that don't feel like natural thoughts
-- Exceeding 300 words - be concise but meaningful
+STRICT REQUIREMENTS:
+- MUST BE EXACTLY 50 WORDS OR LESS - this is critical
+- Authentic rather than formal or structured
+- Specific rather than generic
 
 RECENT INTERACTION CONTEXT:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
 
 PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
-{prev_thoughts[:300] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
+{prev_thoughts[:200] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
 """
 
     # Generate internal thoughts
@@ -908,50 +901,42 @@ PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
             thoughts_prompt,
             generation_config={
                 "temperature": 0.9,  # Higher temperature for more varied thoughts
-                "max_output_tokens": 2048,
+                "max_output_tokens": 512,
                 "top_p": 0.95,
                 "top_k": 50
             },
             safety_settings=safety_settings
         )
         
-        if response and response.text and len(response.text.strip()) > 200:
+        if response and response.text and len(response.text.strip()) > 20:
             thoughts = response.text.strip()
         else:
-            thoughts = f"I wonder what {user_name} is thinking right now... there's something about the way they look at me that makes me feel both excited and nervous at the same time."
+            thoughts = f"I wonder what {user_name} is thinking... something in the way they look at me makes me nervous yet excited."
     except Exception as e:
         print(f"[ERROR] Thought generation failed: {e}")
-        thoughts = f"I wonder what {user_name} is thinking right now... there's something in their expression I can't quite read."
+        thoughts = f"I wonder what {user_name} is thinking right now... something in their expression I can't quite read."
     
     # MEMORY/BIOGRAPHY GENERATION
     # Use a separate memory-focused prompt that incorporates BOTH thoughts and narration
     memory_prompt = f"""
-Create a CONCISE MEMORY UPDATE for {npc_name} based on this interaction (200-300 words maximum).
+Create a VERY BRIEF MEMORY UPDATE for {npc_name} (EXACTLY 50 WORDS MAXIMUM).
 
 IMPORTANT GUIDELINES:
-1. Create a FOCUSED update that captures only the most important:
-   - New biographical facts revealed explicitly
-   - Emotional developments and reactions to the user
-   - Key moments that might influence future interactions
-   - Meaningful developments in the relationship dynamic
+1. Capture ONLY the most important new information:
+   - New biographical facts revealed
+   - Emotional developments or key relationship changes
+   - Critical moments that might influence future interactions
 
-2. Consider THREE sources of information:
-   - The explicit narration of what happened
-   - The character's internal thoughts (showing their true reactions)
-   - The user's actions and what they reveal about the relationship
-
-3. Write in third-person, past tense, biographical style
-4. Be specific but concise - aim for 200-300 words total
-5. Organize into 1-2 short paragraphs
-6. If truly nothing significant happened, respond with "(No meaningful updates to record at this time)"
+2. Write in third-person, past tense, biographical style
+3. MUST BE 50 WORDS OR LESS - this is absolutely critical
 
 SOURCES TO ANALYZE:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
-INTERNAL THOUGHTS: {thoughts[:300] if len(thoughts) > 10 else "No recorded thoughts."}
+INTERNAL THOUGHTS: {thoughts[:50] if len(thoughts) > 10 else "No recorded thoughts."}
 
 EXISTING BIOGRAPHY ELEMENTS (DO NOT REPEAT THESE):
-{memory_summary[:500] if len(memory_summary) > 20 else "Limited existing information."}
+{memory_summary[:300] if len(memory_summary) > 20 else "Limited existing information."}
 
 Current Relationship Stage: {current_stage} ({stage_desc})
 """
@@ -960,14 +945,14 @@ Current Relationship Stage: {current_stage} ({stage_desc})
         memory_chat = model.start_chat()
         memory_resp = memory_chat.send_message(
             memory_prompt,
-            generation_config={"temperature": 0.4, "max_output_tokens": 1024},
+            generation_config={"temperature": 0.4, "max_output_tokens": 512},
             safety_settings=safety_settings
         )
         memory = memory_resp.text.strip() if memory_resp and memory_resp.text else ""
         
-        # Check if the response indicates no new information
-        if "no new biographical" in memory.lower() or len(memory.strip()) < 10:
-            memory = "(No significant new biographical details revealed in this interaction)"
+        # Check if the response indicates no new information or is empty
+        if not memory or "no new" in memory.lower() or len(memory.strip()) < 10:
+            memory = "(No significant new biographical details in this interaction)"
     except Exception as e:
         print(f"[ERROR] Memory generation failed: {e}")
         memory = "(Memory update unavailable)"
@@ -1062,9 +1047,12 @@ Stats: Affection={affection}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 
+LENGTH REQUIREMENTS:
+- Narration must be between 100-200 words exactly - be concise and focused
+
 Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
-Line 2 => NARRATION: ... (must be at least 200 characters describing the NPC's reaction, setting, dialogue, and actions)
+Line 2 => NARRATION: ... (must be between 100-200 words describing the NPC's reaction, setting, dialogue, and actions)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
