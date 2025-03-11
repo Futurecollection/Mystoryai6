@@ -90,9 +90,6 @@
               <a href="{{ url_for('gallery') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important; border-radius: 6px 0 0 6px;">
                 <i class="bi bi-images"></i> Gallery
               </a>
-              <a href="{{ url_for('manual_npc_update') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important; border-left: 1px solid #7a2d2d;">
-                <i class="bi bi-pencil"></i> Edit Memory
-              </a>
               <a href="{{ url_for('mid_game_personalize') }}" class="btn" style="background-color: #5f1c1c; color: #f8d0d0; font-size: 2.3rem !important; border-left: 1px solid #7a2d2d;">
                 <i class="bi bi-person-gear"></i> Update NPC
               </a>
@@ -412,8 +409,8 @@
 <!-- NPC Internal State -->
 <div class="card mb-4" style="background-color: #4a0d0d; border: 1px solid #ff5789;">
   <div class="card-header" style="background-color: #5f1c1c; color: #f8d0d0; border-bottom: 1px solid #ff5789;">
-    <h4 style="margin-bottom: 0; font-size: 2.8rem;"><i class="bi bi-brain"></i> NPC Internal State - Influences Future Interactions</h4>
-    <div style="opacity: 0.9; font-size: 2.2rem;">Thoughts and memories directly shape how the NPC will respond in future scenes</div>
+    <h4 style="margin-bottom: 0; font-size: 2.8rem;"><i class="bi bi-brain"></i> NPC Internal State</h4>
+    <div style="opacity: 0.9; font-size: 2.2rem;">The character's private thoughts and memories (auto-generated based on interactions)</div>
   </div>
   <div class="card-body" style="background-color: #3b0b0b; padding: 25px;">
     <!-- Tabs for switching between thoughts and memories on mobile -->
@@ -497,9 +494,6 @@
   <div>
     <a href="{{ url_for('mid_game_personalize') }}" class="btn btn-sm mb-2" style="background-color: #5f1c1c; color: #f8d0d0;">
       <i class="bi bi-gear"></i> Update NPC
-    </a>
-    <a href="{{ url_for('manual_npc_update') }}" class="btn btn-sm mb-2" style="background-color:#5f1c1c; color: #f8d0d0; border-left: 1px solid #f8d0d0;">
-      <i class="bi bi-journal-text"></i> <span class="d-none d-md-inline">View/Edit</span> Biography & Thoughts
     </a>
   </div>
   <!--Removed View Full Story Button-->
