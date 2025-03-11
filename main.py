@@ -89,7 +89,12 @@ def handle_supabase_error(func):
 # --------------------------------------------------------------------------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
+
+# Regular model for general purpose use
 model = genai.GenerativeModel("models/gemini-2.0-flash")
+
+# Thinking model for narrative content (narration, thoughts, memories)
+thinking_model = genai.GenerativeModel("models/gemini-2.0-flash-thinking-exp")
 
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
@@ -102,6 +107,12 @@ generation_config = {
     "temperature": 0.5,
     "top_p": 0.95,
     "top_k": 40,
+    "max_output_tokens": 8192
+}
+thinking_generation_config = {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 45,
     "max_output_tokens": 8192
 }
 
@@ -646,7 +657,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
                         personality, body_type, hair_color, hair_style, clothing,
                         occupation, current_situation, backstory, environment,
                         encounter_context, user_name) -> str:
-    """Use the LLM to generate a structured, Wikipedia-style biography with available information."""
+    """Use the thinking model to generate a structured, Wikipedia-style biography with available information."""
     
     # Get MBTI personality type if available
     mbti_type = session.get('npc_mbti_type', '')
@@ -720,7 +731,8 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
     """
     
     try:
-        chat = model.start_chat()
+        # Use thinking model for biography generation
+        chat = thinking_model.start_chat()
         response = chat.send_message(
             prompt,
             generation_config={"temperature": 0.8, "max_output_tokens": 4096},
@@ -901,13 +913,13 @@ PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
 {prev_thoughts[:300] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
 """
 
-    # Generate internal thoughts
+    # Generate internal thoughts with thinking model
     try:
-        chat = model.start_chat()
+        chat = thinking_model.start_chat()
         response = chat.send_message(
             thoughts_prompt,
             generation_config={
-                "temperature": 0.9,  # Higher temperature for more varied thoughts
+                "temperature": 0.9,  # Higher temperature for varied thoughts
                 "max_output_tokens": 2048,
                 "top_p": 0.95,
                 "top_k": 50
@@ -957,7 +969,7 @@ Current Relationship Stage: {current_stage} ({stage_desc})
 """
     
     try:
-        memory_chat = model.start_chat()
+        memory_chat = thinking_model.start_chat()
         memory_resp = memory_chat.send_message(
             memory_prompt,
             generation_config={"temperature": 0.4, "max_output_tokens": 1024},
@@ -1072,9 +1084,10 @@ Line 2 => NARRATION: ... (must be at least 200 characters describing the NPC's r
     result_text = ""
     for attempt in range(max_retries):
         try:
-            resp = model.generate_content(
+            # Use thinking model for narration generation
+            resp = thinking_model.generate_content(
                 f"{system_instructions}\n\n{user_text}",
-                generation_config=generation_config,  # max_output_tokens=8192
+                generation_config=thinking_generation_config,  # max_output_tokens=8192
                 safety_settings=safety_settings,
             )
             if resp and resp.text.strip():
@@ -1260,6 +1273,7 @@ Return ONLY this JSON format with no additional text:
 """
 
     try:
+        # Use regular model for settings extraction (factual task)
         chat = model.start_chat()
         response = chat.send_message(
             prompt,
@@ -2703,6 +2717,7 @@ def cleanup_repetitive_biography(bio_text):
             {bio_text}
             """
             
+            # Use regular model for biography cleanup (factual task)
             chat = model.start_chat()
             response = chat.send_message(
                 prompt,
