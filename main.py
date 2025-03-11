@@ -743,7 +743,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a dedicated LLM call to generate high-quality NPC thoughts and memories.
        This is the primary function for creating the NPC's internal narrative.
-       Keeps thoughts and memory updates extremely concise (under 50 words each).
+       Keeps thoughts and memory updates concise (about 50 words each).
        
        Returns:
          - thoughts: First-person stream of consciousness
@@ -757,8 +757,8 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
     if len(prev_thoughts) > 2000:  # Trim if too long
         # Find the last few timestamps (marked by ###)
         thought_sections = prev_thoughts.split("### ")
-        if len(thought_sections) > 2:
-            prev_thoughts = "### " + "### ".join(thought_sections[-2:])
+        if len(thought_sections) > 3:
+            prev_thoughts = "### " + "### ".join(thought_sections[-3:])
     
     # For memories, get a summary if it's long
     prev_memories = session.get("npcBehavior", "(none)")
@@ -768,47 +768,130 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
         if "## " in prev_memories:
             # Find key biography sections
             sections = prev_memories.split("## ")
-            # Take intro + latest update if available
+            # Take intro + latest updates if available
             memory_summary = sections[0]  # Always include intro
-            if len(sections) > 2:
-                memory_summary += "\n\n## " + sections[-1]  # Add latest section
+            if len(sections) > 3:
+                memory_summary += "\n\n## " + "## ".join(sections[-2:])  # Add latest sections
     
-    # Get conversation context from recent history (only most recent)
-    recent_interactions = "\n".join(session.get("interaction_log", [])[-4:])
+    # Get conversation context from recent history (only recent)
+    recent_interactions = "\n".join(session.get("interaction_log", [])[-8:])
     current_stage = session.get("currentStage", 1)
     stage_desc = session.get("stage_unlocks", {}).get(current_stage, "")
 
     # Extract key information for context
     personality = session.get('npc_personality', '?')
     mood = session.get('npc_mood', 'Neutral')
+    occupation = session.get('npc_occupation', '?')
+    relationship_goal = session.get('npc_relationship_goal', '?')
     affection = session.get("affectionScore", 0)
+    trust = session.get("trustScore", 5)
     
     # Add randomization to prevent repetitive patterns
     import random
+    # This is key for preventing repetitive output patterns
     thought_approach = random.choice([
-        "conflicted", "analytical", "emotional", "introspective",
-        "anxious", "confident", "nostalgic", "hopeful", "cautious",
-        "vulnerable", "impulsive", "strategic", "self-doubting",
-        "cynical", "guarded", "inspired", "playful", "confused"
+        "conflicted and uncertain", 
+        "analytical and observant", 
+        "emotional and reactive",
+        "philosophical and introspective",
+        "anxious and overthinking",
+        "confident and determined",
+        "nostalgic and reflective",
+        "hopeful and excited",
+        "cautious but curious",
+        "vulnerable and honest",
+        "impulsive and passionate",
+        "strategic and measured",
+        "self-doubting yet hopeful",
+        "cynical but intrigued",
+        "emotionally guarded yet longing",
+        "inspired and motivated",
+        "playful and flirtatious",
+        "confused but trying to understand",
+        "surprised and processing new information",
+        "sensitive to subtleties in the interaction"
+    ])
+    
+    # Physical state adds realism and prevents repetitive patterns
+    physical_state = random.choice([
+        "feeling a flutter in their chest",
+        "experiencing a pleasant warmth throughout their body",
+        "noticing their heartbeat quicken",
+        "feeling a slight tension in their shoulders",
+        "with heightened awareness of their surroundings",
+        "physically relaxed but mentally alert",
+        "feeling a nervous energy they can't quite contain",
+        "hyper-aware of the physical space between them",
+        "finding it hard to maintain eye contact",
+        "with a slight smile they can't suppress",
+        "feeling unusually attuned to body language",
+        "noticing their own nervous gestures",
+        "feeling particularly present in the moment",
+        "experiencing time moving differently",
+        "slightly light-headed from the intensity of emotions",
+        "with heightened sensory awareness",
+        "feeling their defenses slowly lowering",
+        "experiencing a mix of comfort and excitement",
+        "physically calm but emotionally stirred",
+        "feeling their expression betray their thoughts"
+    ])
+
+    # Choose a specific focus for this thought generation
+    # This rotation helps create varied internal monologues
+    emotional_focus = random.choice([
+        "direct reaction to what just happened",
+        "deeper emotional analysis of their feelings",
+        "conflicting desires and motivations",
+        "past memories triggered by current events",
+        "immediate physical and sensory experiences",
+        "hopes and anxieties about the future",
+        "comparison to past relationships and experiences",
+        "unrelated life concerns intruding on their thoughts",
+        "self-reflection on personal growth and change",
+        "uncertain feelings they're just beginning to recognize",
+        "subconscious motivations driving their behavior",
+        "the gap between their words and true feelings",
+        "assessment of the evolving relationship dynamic",
+        "specific details they've noticed about the user",
+        "an unexpected emotional reaction they didn't anticipate",
+        "wondering about missed opportunities or alternate paths",
+        "connections between current interaction and past patterns",
+        "processing a shift in their perspective",
+        "reflection on their own vulnerability",
+        "questions they're afraid to ask directly"
     ])
 
     # THOUGHTS GENERATION
     thoughts_prompt = f"""
-Generate a VERY BRIEF first-person internal monologue for {npc_name} (MAXIMUM 30 WORDS).
+Generate a very concise first-person internal monologue for {npc_name} (EXACTLY 50 WORDS MAXIMUM).
 
 THE CHARACTER'S CURRENT STATE:
 - Mood: {mood}
 - Emotional Approach: {thought_approach}
-- Relationship Stage: {current_stage}
+- Physical State: {physical_state}
+- Relationship Stage: {current_stage} ({stage_desc})
 - Affection Level: {affection}
+- Personality: {personality}
 
-CREATE A SHORT, AUTHENTIC INNER VOICE that captures immediate reaction to what just happened.
-Focus only on the most important emotional response or key insight.
-MUST BE UNDER 30 WORDS - extremely concise but meaningful.
+FOCUS THIS MONOLOGUE ON: {emotional_focus}
 
-CONTEXT:
+CREATE A BRIEF YET AUTHENTIC INNER VOICE WITH THESE ELEMENTS:
+1. Raw, unfiltered stream-of-consciousness
+2. Genuine emotional reactions
+3. Natural language patterns including incomplete thoughts
+4. References to sensory experiences or bodily sensations
+
+STRICT REQUIREMENTS:
+- MUST BE EXACTLY 50 WORDS OR LESS - this is critical
+- Authentic rather than formal or structured
+- Specific rather than generic
+
+RECENT INTERACTION CONTEXT:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
+
+PREVIOUS THOUGHTS (FOR CONTINUITY - DON'T REPEAT):
+{prev_thoughts[:200] if len(prev_thoughts) > 20 else "No previous thoughts recorded."}
 """
 
     # Generate internal thoughts
@@ -817,37 +900,45 @@ NARRATION: {narration}
         response = chat.send_message(
             thoughts_prompt,
             generation_config={
-                "temperature": 0.9,
-                "max_output_tokens": 1024,
+                "temperature": 0.9,  # Higher temperature for more varied thoughts
+                "max_output_tokens": 512,
                 "top_p": 0.95,
                 "top_k": 50
             },
             safety_settings=safety_settings
         )
         
-        if response and response.text:
+        if response and response.text and len(response.text.strip()) > 20:
             thoughts = response.text.strip()
         else:
-            thoughts = f"I wonder what {user_name} is thinking right now... something in their expression makes me feel both excited and nervous."
+            thoughts = f"I wonder what {user_name} is thinking... something in the way they look at me makes me nervous yet excited."
     except Exception as e:
         print(f"[ERROR] Thought generation failed: {e}")
         thoughts = f"I wonder what {user_name} is thinking right now... something in their expression I can't quite read."
     
     # MEMORY/BIOGRAPHY GENERATION
+    # Use a separate memory-focused prompt that incorporates BOTH thoughts and narration
     memory_prompt = f"""
-Create an EXTREMELY BRIEF MEMORY UPDATE for {npc_name} (MAXIMUM 30 WORDS).
+Create a VERY BRIEF MEMORY UPDATE for {npc_name} (EXACTLY 50 WORDS MAXIMUM).
 
-Capture ONLY the most important:
-- New relationship development or change
-- Key emotional shift
-- Single most significant moment
+IMPORTANT GUIDELINES:
+1. Capture ONLY the most important new information:
+   - New biographical facts revealed
+   - Emotional developments or key relationship changes
+   - Critical moments that might influence future interactions
 
-Be extremely concise and focus on only the most essential information.
-MUST BE UNDER 30 WORDS, single paragraph, third-person style.
+2. Write in third-person, past tense, biographical style
+3. MUST BE 50 WORDS OR LESS - this is absolutely critical
 
-CONTEXT:
+SOURCES TO ANALYZE:
 USER ACTION: {last_user_action}
 NARRATION: {narration}
+INTERNAL THOUGHTS: {thoughts[:50] if len(thoughts) > 10 else "No recorded thoughts."}
+
+EXISTING BIOGRAPHY ELEMENTS (DO NOT REPEAT THESE):
+{memory_summary[:300] if len(memory_summary) > 20 else "Limited existing information."}
+
+Current Relationship Stage: {current_stage} ({stage_desc})
 """
     
     try:
@@ -859,8 +950,9 @@ NARRATION: {narration}
         )
         memory = memory_resp.text.strip() if memory_resp and memory_resp.text else ""
         
-        if not memory or len(memory.strip()) < 10:
-            memory = "(No significant new details in this interaction)"
+        # Check if the response indicates no new information or is empty
+        if not memory or "no new" in memory.lower() or len(memory.strip()) < 10:
+            memory = "(No significant new biographical details in this interaction)"
     except Exception as e:
         print(f"[ERROR] Memory generation failed: {e}")
         memory = "(Memory update unavailable)"
@@ -923,18 +1015,27 @@ SPECIAL INSTRUCTIONS:
 1) Natural Conversation Flow:
    - Responses should feel organic and natural, not following a rigid pattern
    - The NPC can expand on topics without always asking questions back
-   - Questions should arise naturally from genuine interest or context
+   - Questions from the NPC should arise naturally from genuine interest or context
+   - Allow for moments of self-disclosure, observations, or statements
+   - The NPC can return to earlier topics or questions later in natural ways
+   - Vary between questions, statements, observations, and emotional expressions
 
 2) For implicit narrative directions:
    - User may express guidance through natural actions like "*focus on the surroundings*"
    - When user requests more details about something, provide those details naturally
    - If user moves conversation in a particular direction, follow their lead
+   - When user asks character to elaborate on something, have character do so naturally
+   - These shouldn't break immersion - respond in a way that maintains the scene's flow
 
 3) For explicit OOC (Out of Character) interactions:
    - If the user's message starts with "OOC:", this is a meta-interaction
-   - For questions, respond directly as the narrator with relevant information
-   - For instructions, adjust the scene accordingly
+   - For questions (e.g. "OOC: What happened earlier?"), respond directly as the narrator with relevant information
+   - For instructions (e.g. "OOC: Make her more flirty"), adjust the scene accordingly
+   - For clarifications (e.g. "OOC: Can you explain her motivation?"), provide context as the narrator
    - Begin OOC responses with "[Narrator:" and end with "]" to distinguish them
+
+4) If the scene involves phone texting or the NPC sends emojis, use the actual emoji characters 
+   (e.g., 😛) rather than describing them in words.
 
 Special Context Notes:
 - Is Explicit OOC Command: {is_ooc}
@@ -946,9 +1047,12 @@ Stats: Affection={affection}, Mood={npc_mood}
 Background (do not contradict):
 {personalization}
 
+LENGTH REQUIREMENTS:
+- Narration must be between 100-200 words exactly - be concise and focused
+
 Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
-Line 2 => NARRATION: ... (IMPORTANT: keep narration VERY concise, around 150 words maximum, describing the NPC's reaction, setting, dialogue, and actions)
+Line 2 => NARRATION: ... (must be between 100-200 words describing the NPC's reaction, setting, dialogue, and actions)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
