@@ -713,7 +713,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
     - Maintain internal consistency across all sections
     - Use fact-based, encyclopedia-like tone but with engaging details
     - Include specific details that make the character feel real (preferences, habits, quirks)
-    - Total biography should be 1000 characters (not words) - brief but informative
+    - Total biography should be approximately 600 words - thorough and descriptive
     - Use Markdown formatting (# for main title, ## for sections, bullet points where appropriate)
     
     The biography should feel like a professional entry about a real person with depth and complexity.
