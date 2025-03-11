@@ -159,7 +159,18 @@
               {% endfor %}
             </div>
           {% else %}
-            <div style="font-size: 2.1rem; font-weight: 500;">{{ npc_narration|safe }}</div>
+            {% if "ROLLING SUMMARY" in npc_narration or "summary of what's happened" in npc_narration %}
+              {% set narration_parts = npc_narration.split('\n\n', 1) %}
+              <div style="background-color: #3d1010; padding: 15px; border-radius: 8px; border-left: 4px solid #ff5789; margin-bottom: 15px;">
+                <h4 style="color: #ffa7a7; font-size: 2.2rem; margin-bottom: 10px;"><i class="bi bi-journal-text"></i> Story So Far:</h4>
+                <div style="font-size: 2.1rem; font-weight: 500; color: #ffd0d0;">{{ narration_parts[0]|safe }}</div>
+              </div>
+              {% if narration_parts|length > 1 %}
+                <div style="font-size: 2.1rem; font-weight: 500;">{{ narration_parts[1]|safe }}</div>
+              {% endif %}
+            {% else %}
+              <div style="font-size: 2.1rem; font-weight: 500;">{{ npc_narration|safe }}</div>
+            {% endif %}
           {% endif %}
         {% endif %}
     </div>
