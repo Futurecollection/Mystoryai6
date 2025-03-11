@@ -743,7 +743,7 @@ def generate_llm_biography(name, gender, age, ethnicity, orientation, relationsh
 def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, str]:
     """Makes a dedicated LLM call to generate high-quality NPC thoughts and memories.
        This is the primary function for creating the NPC's internal narrative.
-       Keeps thoughts and memory updates concise (around 50 words each).
+       Keeps thoughts and memory updates extremely concise (under 50 words each).
        
        Returns:
          - thoughts: First-person stream of consciousness
@@ -794,7 +794,7 @@ def process_npc_thoughts(last_user_action: str, narration: str) -> tuple[str, st
 
     # THOUGHTS GENERATION
     thoughts_prompt = f"""
-Generate an EXTREMELY BRIEF first-person internal monologue for {npc_name} (MAXIMUM 50 WORDS).
+Generate a VERY BRIEF first-person internal monologue for {npc_name} (MAXIMUM 30 WORDS).
 
 THE CHARACTER'S CURRENT STATE:
 - Mood: {mood}
@@ -804,7 +804,7 @@ THE CHARACTER'S CURRENT STATE:
 
 CREATE A SHORT, AUTHENTIC INNER VOICE that captures immediate reaction to what just happened.
 Focus only on the most important emotional response or key insight.
-MUST BE UNDER 50 WORDS - extremely concise but meaningful.
+MUST BE UNDER 30 WORDS - extremely concise but meaningful.
 
 CONTEXT:
 USER ACTION: {last_user_action}
@@ -835,7 +835,7 @@ NARRATION: {narration}
     
     # MEMORY/BIOGRAPHY GENERATION
     memory_prompt = f"""
-Create an EXTREMELY BRIEF MEMORY UPDATE for {npc_name} (MAXIMUM 50 WORDS).
+Create an EXTREMELY BRIEF MEMORY UPDATE for {npc_name} (MAXIMUM 30 WORDS).
 
 Capture ONLY the most important:
 - New relationship development or change
@@ -843,7 +843,7 @@ Capture ONLY the most important:
 - Single most significant moment
 
 Be extremely concise and focus on only the most essential information.
-MUST BE UNDER 50 WORDS, single paragraph, third-person style.
+MUST BE UNDER 30 WORDS, single paragraph, third-person style.
 
 CONTEXT:
 USER ACTION: {last_user_action}
@@ -924,7 +924,6 @@ SPECIAL INSTRUCTIONS:
    - Responses should feel organic and natural, not following a rigid pattern
    - The NPC can expand on topics without always asking questions back
    - Questions should arise naturally from genuine interest or context
-   - Allow for moments of self-disclosure, observations, or statements
 
 2) For implicit narrative directions:
    - User may express guidance through natural actions like "*focus on the surroundings*"
@@ -949,7 +948,7 @@ Background (do not contradict):
 
 Return EXACTLY two lines:
 Line 1 => AFFECT_CHANGE_FINAL: ... (float between -2.0 and +2.0)
-Line 2 => NARRATION: ... (IMPORTANT: keep narration concise, around 200 words maximum, describing the NPC's reaction, setting, dialogue, and actions)
+Line 2 => NARRATION: ... (IMPORTANT: keep narration VERY concise, around 150 words maximum, describing the NPC's reaction, setting, dialogue, and actions)
 """
 
     user_text = f"USER ACTION: {last_user_action}\nPREVIOUS_LOG:\n{combined_history}"
