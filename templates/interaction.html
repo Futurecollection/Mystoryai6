@@ -297,25 +297,7 @@
           </div>
 
           <!-- Juggernaut XL Settings -->
-          <div id="juggernaut_div" style="display: none;">
-            <label class="form-label" style="color: #f8d0d0;">Scheduler Algorithm:</label>
-            <select name="juggernaut_scheduler" class="form-control mb-2" style="background-color: #2a0a0a; color: #f8d0d0; border: 1px solid #6d1d1d;">
-              <option value="DDIM" {% if juggernaut_scheduler == 'DDIM' %}selected{% endif %}>DDIM</option>
-              <option value="DPMSolverMultistep" {% if juggernaut_scheduler == 'DPMSolverMultistep' %}selected{% endif %}>DPMSolverMultistep</option>
-              <option value="HeunDiscrete" {% if juggernaut_scheduler == 'HeunDiscrete' %}selected{% endif %}>HeunDiscrete</option>
-              <option value="KarrasDPM" {% if juggernaut_scheduler == 'KarrasDPM' %}selected{% endif %}>KarrasDPM</option>
-              <option value="K_EULER_ANCESTRAL" {% if juggernaut_scheduler == 'K_EULER_ANCESTRAL' %}selected{% endif %}>K_EULER_ANCESTRAL</option>
-              <option value="K_EULER" {% if juggernaut_scheduler == 'K_EULER' %}selected{% endif %}>K_EULER</option>
-              <option value="PNDM" {% if juggernaut_scheduler == 'PNDM' %}selected{% endif %}>PNDM</option>
-            </select>
-
-            <label class="form-label" style="color: #f8d0d0;">Guidance Scale (1–20):</label>
-            <div class="d-flex align-items-center gap-2">
-              <input type="range" class="form-range flex-grow-1" min="1" max="20" step="0.5" name="juggernaut_cfg_scale" 
-                     value="{{ juggernaut_cfg_scale|default(7.0) }}" oninput="this.nextElementSibling.textContent = this.value">
-              <span style="min-width: 40px; text-align: center; color: #f8d0d0;">{{ juggernaut_cfg_scale|default(7.0) }}</span>
-            </div>
-          </div>
+          
         </div>
       </div>
 
